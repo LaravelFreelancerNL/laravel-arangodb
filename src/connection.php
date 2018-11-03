@@ -6,6 +6,7 @@ use ArangoDBClient\CollectionHandler as ArangoCollectionHandler;
 use ArangoDBClient\DocumentHandler as ArangoDocumentHandler;
 use ArangoDBClient\GraphHandler as ArangoGraphHandler;
 use Illuminate\Database\Connection as IlluminateConnection;
+use LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar;
 
 
 class Connection extends IlluminateConnection {
@@ -74,7 +75,15 @@ class Connection extends IlluminateConnection {
         $this->useDefaultPostProcessor();
     }
 
-     public function getArangoConnection()
+    public function setSchemaGrammar(Grammar $grammar)
+    {
+        $this->schemaGrammar = $grammar;
+
+        return $this;
+    }
+
+
+    public function getArangoConnection()
     {
         return $this->arangoConnection;
     }

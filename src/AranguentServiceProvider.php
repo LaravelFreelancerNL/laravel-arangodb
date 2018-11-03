@@ -4,9 +4,20 @@ namespace LaravelFreelancerNL\Aranguent;
 
 use Illuminate\Support\ServiceProvider;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
+use LaravelFreelancerNL\Aranguent\Schema\Grammars\AqlGrammar;
 
 class AranguentServiceProvider extends ServiceProvider
 {
+
+    /**
+     * Components to register on the provider.
+     *
+     * @var array
+     */
+    protected $components = array(
+        'Migration'
+    );
+
     /**
      * Bootstrap services.
      *
@@ -30,8 +41,12 @@ class AranguentServiceProvider extends ServiceProvider
         $this->app->resolving('db', function ($db) {
             $db->extend('arangodb', function ($config, $name) {
                 $config['name'] = $name;
-                return new Connection($config);
+                $connection = new Connection($config);
+                $connection->setSchemaGrammar(new AqlGrammar);
+                return $connection ;
             });
         });
+
+        $this->app->register('LaravelFreelancerNL\Aranguent\MigrationServiceProvider');
     }
 }

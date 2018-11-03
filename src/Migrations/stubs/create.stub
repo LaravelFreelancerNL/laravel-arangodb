@@ -1,0 +1,30 @@
+<?php
+
+use LaravelFreelancerNL\Aranguent\Facades\Schema;
+use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
+use LaravelFreelancerNL\Aranguent\Migrations\Migration;
+
+class DummyClass extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('DummyTable', function (Blueprint $collection) {
+            $collection->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('DummyTable');
+    }
+}
