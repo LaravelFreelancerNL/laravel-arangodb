@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Providers;
+namespace LaravelFreelancerNL\Aranguent;
 
 use Illuminate\Support\ServiceProvider;
+use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 
 class AranguentServiceProvider extends ServiceProvider
 {
@@ -13,7 +14,9 @@ class AranguentServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        Model::setConnectionResolver($this->app['db']);
+
+        Model::setEventDispatcher($this->app['events']);
     }
 
     /**
@@ -23,6 +26,12 @@ class AranguentServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        // Add database driver.
+        $this->app->resolving('db', function ($db) {
+            $db->extend('arangodb', function ($config, $name) {
+                $config['name'] = $name;
+                return new Connection($config);
+            });
+        });
     }
 }
