@@ -3,9 +3,9 @@
 namespace LaravelFreelancerNL\Aranguent\Migrations;
 
 use Illuminate\Database\ConnectionResolverInterface as IlluminateResolver;
-use Illuminate\Database\Migrations\MigrationRepositoryInterface as IlluminateMigrationRepositoryInterface;
+use Illuminate\Database\Migrations\DatabaseMigrationRepository as IlluminateDatabaseMigrationRepository;
 
-class DatabaseMigrationRepository implements IlluminateMigrationRepositoryInterface
+class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
 {
     /**
      * The database connection resolver instance.
@@ -167,7 +167,7 @@ class DatabaseMigrationRepository implements IlluminateMigrationRepositoryInterf
     {
         $schema = $this->getConnection()->getSchemaBuilder();
 
-        return $schema->hasTable($this->table);
+        return $schema->hasTable($this->collection);
     }
 
     /**
@@ -177,7 +177,7 @@ class DatabaseMigrationRepository implements IlluminateMigrationRepositoryInterf
      */
     protected function table()
     {
-        return $this->getConnection()->table($this->table)->useWritePdo();
+        return $this->getConnection()->table($this->collection)->useWritePdo();
     }
 
     /**
@@ -193,7 +193,7 @@ class DatabaseMigrationRepository implements IlluminateMigrationRepositoryInterf
     /**
      * Resolve the database connection instance.
      *
-     * @return \Illuminate\Database\Connection
+     * @return \Illuminate\Database\ConnectionInterface
      */
     public function getConnection()
     {

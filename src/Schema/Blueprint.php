@@ -4,13 +4,14 @@ namespace LaravelFreelancerNL\Aranguent\Schema;
 
 use Closure;
 use BadMethodCallException;
+use Illuminate\Database\Schema\Blueprint as IlluminateBlueprint;
 use Illuminate\Support\Fluent;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Traits\Macroable;
 use Illuminate\Database\SQLiteConnection;
 use Illuminate\Database\Schema\Grammars\Grammar;
 
-class Blueprint
+class Blueprint extends IlluminateBlueprint
 {
     use Macroable;
 
@@ -82,8 +83,8 @@ class Blueprint
     /**
      * Execute the blueprint against the database.
      *
-     * @param  \Illuminate\Database\Connection $connection
-     * @param  \Illuminate\Database\Schema\Grammars\Grammar $grammar
+     * @param  \LaravelFreelancerNL\Aranguent\Connection $connection
+     * @param  \LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar $grammar
      * @return void
      */
     public function build(Connection $connection, Grammar $grammar)
@@ -95,14 +96,14 @@ class Blueprint
 
     public function toSql(Connection $connection, Grammar $grammar)
     {
-        $this->toAql(Connection $connection, Grammar $grammar);
+        $this->toAql($connection, $grammar);
     }
 
     /**
      * Get the raw AQL statements for the blueprint.
      *
-     * @param  \Illuminate\Database\Connection  $connection
-     * @param  \Illuminate\Database\Schema\Grammars\Grammar  $grammar
+     * @param  \LaravelFreelancerNL\Aranguent\Connection  $connection
+     * @param  \LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar  $grammar
      * @return array
      */
     public function toAql(Connection $connection, Grammar $grammar)
@@ -132,7 +133,7 @@ class Blueprint
     /**
      * Ensure the commands on the blueprint are valid for the connection type.
      *
-     * @param  \Illuminate\Database\Connection  $connection
+     * @param  \LaravelFreelancerNL\Aranguent\Connection  $connection
      * @return void
      */
     protected function ensureCommandsAreValid(Connection $connection)
@@ -219,7 +220,7 @@ class Blueprint
     /**
      * Add the fluent commands specified on any columns.
      *
-     * @param  \Illuminate\Database\Schema\Grammars\Grammar  $grammar
+     * @param  \LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar  $grammar
      * @return void
      */
     public function addFluentCommands(Grammar $grammar)

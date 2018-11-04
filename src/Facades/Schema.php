@@ -1,12 +1,13 @@
 <?php
 
-namespace Illuminate\Support\Facades;
+namespace LaravelFreelancerNL\Aranguent\Facades;
 
 /**
- * @method static \LaravelFreelancerNL\Aranguent\Schema\Builder create(string $table, \Closure $callback)
- * @method static \LaravelFreelancerNL\Aranguent\Schema\Builder drop(string $table)
- * @method static \LaravelFreelancerNL\Aranguent\Schema\Builder dropIfExists(string $table)
+ * @method static \LaravelFreelancerNL\Aranguent\Schema\Builder create(string $collection, \Closure $callback)
+ * @method static \LaravelFreelancerNL\Aranguent\Schema\Builder drop(string $collection)
+ * @method static \LaravelFreelancerNL\Aranguent\Schema\Builder dropIfExists(string $collection)
  * @method static \LaravelFreelancerNL\Aranguent\Schema\Builder table(string $table, \Closure $callback)
+ * @method static \LaravelFreelancerNL\Aranguent\Schema\Builder collection(string $collection, \Closure $callback)
  * @method static void defaultStringLength(int $length)
  *
  * @see \LaravelFreelancerNL\Aranguent\Schema\Builder

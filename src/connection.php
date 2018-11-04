@@ -75,7 +75,12 @@ class Connection extends IlluminateConnection {
         $this->useDefaultPostProcessor();
     }
 
-    public function setSchemaGrammar(Grammar $grammar)
+
+    /**
+     * @param \LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar $grammar
+     * @return $this
+     */
+    public function setSchemaGrammar($grammar)
     {
         $this->schemaGrammar = $grammar;
 

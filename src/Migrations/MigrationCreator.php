@@ -2,31 +2,22 @@
 
 namespace LaravelFreelancerNL\Aranguent\Migrations;
 
+use Illuminate\Filesystem\Filesystem;
 use Illuminate\Database\Migrations\MigrationCreator as IlluminateMigrationCreator;
 
 class MigrationCreator extends IlluminateMigrationCreator
 {
-
     /**
-     * Populate the place-holders in the migration stub.
+     * Create a new migration creator instance.
      *
-     * @param  string  $name
-     * @param  string  $stub
-     * @param  string  $table
-     * @return string
+     * @param  \Illuminate\Filesystem\Filesystem  $files
+     * @return void
      */
-    protected function populateStub($name, $stub, $collection)
+    public function __construct(Filesystem $files)
     {
-        $stub = str_replace('DummyClass', $this->getClassName($name), $stub);
+        $this->files = $files;
 
-        // Here we will replace the table place-holders with the table specified by
-        // the developer, which is useful for quickly creating a tables creation
-        // or update migration from the console instead of typing it manually.
-        if (! is_null($collection)) {
-            $stub = str_replace('DummyTable', $collection, $stub);
-        }
-
-        return $stub;
+        parent::__construct($files);
     }
 
     /**

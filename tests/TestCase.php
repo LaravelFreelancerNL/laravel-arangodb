@@ -5,6 +5,7 @@ namespace LaravelFreelancerNL\Aranguent\Tests;
 use ArangoDBClient\Database;
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\AranguentServiceProvider;
+use LaravelFreelancerNL\Aranguent\AranguentMigrationServiceProvider;
 
 abstract class TestCase extends \Orchestra\Testbench\TestCase
 {
@@ -34,7 +35,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     protected function getPackageProviders($app)
     {
         return [
-            AranguentServiceProvider::class
+            AranguentServiceProvider::class,
         ];
     }
 
