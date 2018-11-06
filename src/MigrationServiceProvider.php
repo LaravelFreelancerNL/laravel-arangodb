@@ -25,7 +25,6 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
-//                MigrateCommand::class,
                 MigrateMakeCommand::class,
             ]);
         }
@@ -107,18 +106,6 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
 //        $this->commands($commands);
     }
 
-    /**
-     * Register the "migrate" migration command.
-     *
-     * @return void
-     */
-    protected function registerMigrateCommand()
-    {
-        $this->app->extend('command.migrate', function($app) {
-            return new MigrateCommand();
-        });
-    }
-
 
     protected function registerMigrateMakeCommand()
     {
@@ -136,7 +123,6 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
             'migrator',
             'migration.creator',
             'migration.repository',
-//            'command.migrate',
             'command.migrate.make'
         ];
     }

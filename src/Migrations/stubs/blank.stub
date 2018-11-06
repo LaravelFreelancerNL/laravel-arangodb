@@ -2,7 +2,7 @@
 
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
-use LaravelFreelancerNL\Aranguent\Migrations\Migration;
+use Illuminate\Database\Migrations\Migration;
 
 class DummyClass extends Migration
 {

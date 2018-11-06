@@ -2,6 +2,8 @@
 
 namespace LaravelFreelancerNL\Aranguent\Facades;
 
+use Illuminate\Support\Facades\Facade;
+
 /**
  * @method static \LaravelFreelancerNL\Aranguent\Schema\Builder create(string $collection, \Closure $callback)
  * @method static \LaravelFreelancerNL\Aranguent\Schema\Builder drop(string $collection)
