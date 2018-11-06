@@ -2,15 +2,15 @@
 
 namespace LaravelFreelancerNL\Aranguent\Tests;
 
-use ArangoDBClient\Database;
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\AranguentServiceProvider;
-use LaravelFreelancerNL\Aranguent\AranguentMigrationServiceProvider;
 
 abstract class TestCase extends \Orchestra\Testbench\TestCase
 {
 
     protected $connection;
+
+    protected $collectionHandler;
 
     /**
      * Define environment setup.
@@ -20,6 +20,8 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
      */
     protected function getEnvironmentSetUp($app)
     {
+//        $this->withFactories(__DIR__ . '/database/factories');
+
         $config = require 'config/database.php';
 
         $app['config']->set('database.default', 'arangodb');
@@ -30,6 +32,14 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         $app['config']->set('cache.driver', 'array');
 
         $this->connection = DB::connection('arangodb');
+
+        $this->collectionHandler = $this->connection->getCollectionHandler();
+
+        //Remove all collections
+        $collections = $this->collectionHandler->getAllCollections(['excludeSystem' => true]);
+        foreach ($collections as $collection) {
+            $this->collectionHandler->drop($collection['id']);
+        }
     }
 
     protected function getPackageProviders($app)
@@ -45,4 +55,5 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
             'Aranguent' => 'LaravelFreelancerNL\Aranguent'
         ];
     }
+
 }
