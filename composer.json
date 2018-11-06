@@ -1,5 +1,5 @@
 {
-  "name": "LaravelFreelancerNL/Aranguent",
+  "name": "laravel-freelancer-nl/aranguent",
   "description": "Laravel bridge for the ArangoDB Multi-model database",
   "keywords": [
     "laravel",
@@ -31,7 +31,7 @@
   "repositories": [ ],
   "autoload": {
     "psr-4": {
-      "LaravelFreelancerNL\\Aranguent\\": "src"
+      "laravel-freelancer-nl\\aranguent\\": "src"
     }
   },
   "autoload-dev": {
@@ -43,7 +43,7 @@
   "extra": {
     "laravel": {
       "providers": [
-        "LaravelFreelancerNL\\Aranguent\\AranguentServiceProvider"
+        "laravel-freelancer-nl\\aranguent\\AranguentServiceProvider"
       ]
     }
   }
