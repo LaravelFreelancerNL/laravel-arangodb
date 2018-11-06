@@ -1,12 +1,14 @@
 <?php namespace LaravelFreelancerNL\Aranguent;
 
+use Illuminate\Database\Connection as IlluminateConnection;
 use ArangoDBClient\Connection as ArangoConnection;
 use ArangoDBClient\ConnectionOptions as ArangoConnectionOptions;
 use ArangoDBClient\CollectionHandler as ArangoCollectionHandler;
 use ArangoDBClient\DocumentHandler as ArangoDocumentHandler;
 use ArangoDBClient\GraphHandler as ArangoGraphHandler;
-use Illuminate\Database\Connection as IlluminateConnection;
-use LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar;
+use ArangoDBClient\Statement;
+use LaravelFreelancerNL\Aranguent\Schema\Builder as SchemaBuilder;
+use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 
 
 class Connection extends IlluminateConnection {
@@ -87,6 +89,54 @@ class Connection extends IlluminateConnection {
         return $this;
     }
 
+    /**
+     * @return SchemaBuilder
+     */
+    public function getSchemaBuilder()
+    {
+        if (is_null($this->schemaGrammar)) {
+            $this->useDefaultSchemaGrammar();
+        }
+
+        return new SchemaBuilder($this);
+    }
+
+
+    /**
+     * Begin a fluent query against a database collection.
+     *
+     * @param  string  $table
+     * @return \LaravelFreelancerNL\Aranguent\Query\Builder
+     */
+    public function collection($collection)
+    {
+        return $this->query()->from($collection);
+    }
+
+    /**
+     * Begin a fluent query against a database collection.
+     *
+     * @param  string  $table
+     * @return \LaravelFreelancerNL\Aranguent\Query\Builder
+     */
+    public function table($table)
+    {
+        return $this->collection($table);
+    }
+
+    /**
+     * Get a new query builder instance.
+     *
+     * @return \LaravelFreelancerNL\Aranguent\Query\Builder
+     */
+    public function query()
+    {
+        return new QueryBuilder(
+            $this, $this->getQueryGrammar(), $this->getPostProcessor()
+        );
+    }
+
+    //ArangoDB functions
 
     public function getArangoConnection()
     {
@@ -115,6 +165,22 @@ class Connection extends IlluminateConnection {
     public function getGraphHandler()
     {
         return $this->graphHandler;
+    }
+
+    /**
+     * FIXME: remove this after query builder is done
+     *
+     * @param $data
+     * @return array|\Illuminate\Support\Collection
+     */
+    public function executeRawAql($data)
+    {
+        $statement = new Statement($this->arangoConnection, $data);
+
+        $cursor = $statement->execute();
+        $results = $cursor->getAll();
+
+        return $results;
     }
 
 }
