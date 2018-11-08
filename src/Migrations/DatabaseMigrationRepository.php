@@ -53,7 +53,6 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
                 SORT m.batch, m.migration
                 RETURN m.migration
         ";
-
         return $this->getConnection()->executeRawAql($data);
 
 
@@ -76,7 +75,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
                 FILTER m.batch >= 1
                 SORT m.batch DESC, m.migration DESC
                 LIMIT @steps
-                RETURN m
+                RETURN { 'migration' : m.migration, 'batch' : m.batch }
         ";
         $data['bindVars']['steps'] = $steps;
 

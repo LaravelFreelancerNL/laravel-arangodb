@@ -1,32 +1,10 @@
 <?php
 
 use ArangoDBClient\Document as ArangoDocument;
-use LaravelFreelancerNL\Aranguent\Migrations\DatabaseMigrationRepository;
 use LaravelFreelancerNL\Aranguent\Tests\TestCase;
-use Mockery as M;
 
 class DatabaseMigrationRepositoryTest extends TestCase
 {
-
-    protected $databaseMigrationRepository;
-
-    protected $collection = 'migrations';
-
-    public function setUp()
-    {
-        parent::setUp();
-
-        $this->artisan('migrate:install', [])->run();
-
-        $this->databaseMigrationRepository = new DatabaseMigrationRepository($this->app['db'], $this->collection);
-    }
-
-    public function tearDown()
-    {
-        M::close();
-
-        parent::tearDown();
-    }
 
     /**
      * migrations collection is created
