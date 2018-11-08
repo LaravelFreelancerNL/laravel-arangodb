@@ -7,11 +7,18 @@ use ArangoDBClient\CollectionHandler as ArangoCollectionHandler;
 use ArangoDBClient\DocumentHandler as ArangoDocumentHandler;
 use ArangoDBClient\GraphHandler as ArangoGraphHandler;
 use ArangoDBClient\Statement;
+use LaravelFreelancerNL\Aranguent\Concerns\DetectsDeadlocks;
+use LaravelFreelancerNL\Aranguent\Concerns\DetectsLostConnections;
+use LaravelFreelancerNL\Aranguent\Concerns\ManagesTransactions;
 use LaravelFreelancerNL\Aranguent\Schema\Builder as SchemaBuilder;
 use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 
 
 class Connection extends IlluminateConnection {
+
+    use DetectsDeadlocks,
+        DetectsLostConnections,
+        ManagesTransactions;
 
     protected $arangoConnection;
 

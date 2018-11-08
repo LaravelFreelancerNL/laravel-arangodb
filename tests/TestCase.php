@@ -4,13 +4,19 @@ namespace LaravelFreelancerNL\Aranguent\Tests;
 
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\AranguentServiceProvider;
+use LaravelFreelancerNL\Aranguent\Migrations\DatabaseMigrationRepository;
 
 abstract class TestCase extends \Orchestra\Testbench\TestCase
 {
 
+    protected $collection = 'migrations';
+
     protected $connection;
 
     protected $collectionHandler;
+
+    protected $databaseMigrationRepository;
+
 
     /**
      * Define environment setup.
@@ -40,6 +46,18 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         foreach ($collections as $collection) {
             $this->collectionHandler->drop($collection['id']);
         }
+
+
+    }
+
+    protected function setUp()
+    {
+        parent::setUp();
+
+        $this->artisan('migrate:install', [])->run();
+
+        $this->databaseMigrationRepository = new DatabaseMigrationRepository($this->app['db'], $this->collection);
+
     }
 
     protected function getPackageProviders($app)
