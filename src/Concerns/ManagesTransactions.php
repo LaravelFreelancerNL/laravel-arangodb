@@ -6,6 +6,7 @@ use ArangoDBClient\Transaction;
 use Closure;
 use Exception;
 use Illuminate\Support\Fluent;
+use PHPUnit\Framework\Constraint\ExceptionMessage;
 use Throwable;
 
 trait ManagesTransactions
@@ -59,6 +60,20 @@ trait ManagesTransactions
      */
     public function addCommandToTransaction($name, array $parameters = [])
     {
+        $illegalCommands = [
+            'createDatabase',
+            'dropDatabase',
+            'createCollection',
+            'renameCollection',
+            'dropCollection',
+            'createIndex',
+            'dropIndex'
+        ];
+
+        if (in_array($name, $illegalCommands)) {
+            throw new ExceptionMessage("$name ({$parameters['command']}) cannot be used in an ArangoDB transaction.");
+        }
+
         $this->transactionCommands[$this->transactions][] = new Fluent(array_merge(compact('name'), $parameters));
     }
 
