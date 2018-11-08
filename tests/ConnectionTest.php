@@ -40,11 +40,17 @@ class ConnectionTest extends TestCase
      * add a command to the transaction
      * @test
      */
-    function add_command_to_transaction()
+    function add_transaction_command()
     {
+        $command = new IlluminateFluent([
+            'name' => 'testCommandQuery',
+            'command' => "db._query('INSERT {\"name\": \"Robert\", \"surname\": \"Baratheon\", \"alive\": @value, \"traits\": [\"A\",\"H\",\"C\"] } INTO migrations', {'value' : true});",
+            'collections' => ['write' => 'migrations']
+        ]);
+
         $this->connection->beginTransaction();
 
-        $this->connection->addCommandToTransaction('testCommand', ['command' => 'db._create("collection_created_by_transaction")']);
+        $this->connection->addTransactionCommand($command);
 
         $commands = collect($this->connection->getTransactionCommands()[$this->connection->transactionLevel()]);
         $command = $commands->first();
@@ -61,16 +67,20 @@ class ConnectionTest extends TestCase
      */
     function compile_action()
     {
+        $command = new IlluminateFluent([
+            'name' => 'testCommandQuery',
+            'command' => "db._query('INSERT {\"name\": \"Robert\", \"surname\": \"Baratheon\", \"alive\": false, \"traits\": [\"A\",\"H\",\"C\"] } INTO Characters', {'value' : 1});",
+            'collections' => ['write' => 'Characters']
+        ]);
         $this->connection->beginTransaction();
         $action = $this->connection->compileTransactionAction();
 
         $this->assertEquals("function () { var db = require('@arangodb').db;  }", $action);
 
-        $this->connection->addCommandToTransaction('testCommandCreate', ['command' => "db._create('characters');"]);
-        $this->connection->addCommandToTransaction('testCommandQuery', ['command' => "db._query('INSERT {\"name\": \"Robert\", \"surname\": \"Baratheon\", \"alive\": false, \"traits\": [\"A\",\"H\",\"C\"] } INTO Characters', {'value' : 1});"]);
+        $this->connection->addTransactionCommand($command);
         $action = $this->connection->compileTransactionAction();
 
-        $this->assertEquals("function () { var db = require('@arangodb').db; db._create('characters'); db._query('INSERT {\"name\": \"Robert\", \"surname\": \"Baratheon\", \"alive\": false, \"traits\": [\"A\",\"H\",\"C\"] } INTO Characters', {'value' : 1}); }", $action);
+        $this->assertEquals("function () { var db = require('@arangodb').db; db._query('INSERT {\"name\": \"Robert\", \"surname\": \"Baratheon\", \"alive\": false, \"traits\": [\"A\",\"H\",\"C\"] } INTO Characters', {'value' : 1}); }", $action);
     }
 
     /**
@@ -95,10 +105,21 @@ class ConnectionTest extends TestCase
      */
     function commit_a_transaction()
     {
+        $command1 = new IlluminateFluent([
+            'name' => 'testCommandQuery',
+            'command' => "db._query('INSERT {\"name\": \"Robert\", \"surname\": \"Baratheon\", \"alive\": @value, \"traits\": [\"A\",\"H\",\"C\"] } INTO migrations', {'value' : true});",
+            'collections' => ['write' => 'migrations']
+        ]);
+        $command2 = new IlluminateFluent([
+            'name' => 'testCommandQuery',
+            'command' => "db._query('FOR c IN migrations RETURN c');",
+            'collections' => ['read' => 'migrations']
+        ]);
+
         $this->connection->beginTransaction();
 
-        $this->connection->addCommandToTransaction('testCommandQuery', ['command' => "db._query('INSERT {\"name\": \"Robert\", \"surname\": \"Baratheon\", \"alive\": @value, \"traits\": [\"A\",\"H\",\"C\"] } INTO migrations', {'value' : true});", 'collections' => ['write' => 'migrations']]);
-        $this->connection->addCommandToTransaction('testCommandQuery', ['command' => "db._query('FOR c IN migrations RETURN c');", 'collections' => ['read' => 'migrations']]);
+        $this->connection->addTransactionCommand($command1);
+        $this->connection->addTransactionCommand($command2);
 
         $results = $this->connection->commit();
 

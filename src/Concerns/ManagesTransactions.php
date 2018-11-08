@@ -2,18 +2,18 @@
 
 namespace LaravelFreelancerNL\Aranguent\Concerns;
 
-use ArangoDBClient\Transaction;
+use ArangoDBClient\Transaction as ArangoTransaction;
 use Closure;
 use Exception;
 use Illuminate\Support\Fluent;
-use PHPUnit\Framework\Constraint\ExceptionMessage;
-use Throwable;
 
 trait ManagesTransactions
 {
     protected $transactions = 0;
 
     protected $transactionCommands = [];
+
+    protected $arangoTransaction;
 
     /**
      * Execute a Closure within a transaction.
@@ -55,26 +55,11 @@ trait ManagesTransactions
      * collections['read'][]: collections that are read from
      * command: the db command to execute.
      *
-     * @param $name
-     * @param array $parameters
+     * @param Fluent $command
      */
-    public function addCommandToTransaction($name, array $parameters = [])
+    public function addTransactionCommand(Fluent $command)
     {
-        $illegalCommands = [
-            'createDatabase',
-            'dropDatabase',
-            'createCollection',
-            'renameCollection',
-            'dropCollection',
-            'createIndex',
-            'dropIndex'
-        ];
-
-        if (in_array($name, $illegalCommands)) {
-            throw new ExceptionMessage("$name ({$parameters['command']}) cannot be used in an ArangoDB transaction.");
-        }
-
-        $this->transactionCommands[$this->transactions][] = new Fluent(array_merge(compact('name'), $parameters));
+        $this->transactionCommands[$this->transactions][] = $command;
     }
 
     /**
@@ -106,16 +91,18 @@ trait ManagesTransactions
 
     public function executeTransaction($options, $attempts = 1)
     {
-        $transaction = new Transaction($this->arangoConnection, $options);
+        $results = null;
+
+        $this->arangoTransaction = new ArangoTransaction($this->arangoConnection, $options);
 
         for ($currentAttempt = 1; $currentAttempt <= $attempts; $currentAttempt++) {
             try {
-                $results = $transaction->execute();
+                $results = $this->arangoTransaction->execute();
 
                 $this->transactions--;
 
             } catch (Exception $e) {
-                $results = $this->handleTransactionException($e, $currentAttempt, $attempts, $transaction);
+                $results = $this->handleTransactionException($e, $currentAttempt, $attempts);
             }
         }
 
@@ -131,7 +118,7 @@ trait ManagesTransactions
      * @param $attempts
      * @return mixed
      */
-    protected function handleTransactionException($e, $currentAttempt, $attempts, $transaction = null)
+    protected function handleTransactionException($e, $currentAttempt, $attempts)
     {
         $retry = false;
         // If the failure was due to a lost connection we can just try again.
@@ -150,7 +137,7 @@ trait ManagesTransactions
         }
 
         if ($retry) {
-            return $transaction->execute();
+            return $this->arangoTransaction->execute();
         }
 
         throw $e;
@@ -198,6 +185,7 @@ trait ManagesTransactions
         $action = "function () { var db = require('@arangodb').db; ";
         $action .= $commands->implode('command'," ");
         $action .= " }";
+
         return $action;
     }
 

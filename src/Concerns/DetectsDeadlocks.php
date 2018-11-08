@@ -18,6 +18,7 @@ trait DetectsDeadlocks
         // 18 ERROR_LOCK_TIMEOUT
         // 28 ERROR_LOCKED
         // 29 ERROR_DEADLOCK
+        // 1200 - ERROR_ARANGO_CONFLICT (write-write conflict)
         // 1302 - ERROR_ARANGO_TRY_AGAIN
         // 1303 - ERROR_ARANGO_BUSY
 
