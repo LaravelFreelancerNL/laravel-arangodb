@@ -3,11 +3,9 @@
 namespace LaravelFreelancerNL\Aranguent;
 
 use Illuminate\Database\MigrationServiceProvider as IlluminateMigrationServiceProvider;
-use LaravelFreelancerNL\Aranguent\Migrations\Migrator;
+use Illuminate\Database\Migrations\Migrator;
 use LaravelFreelancerNL\Aranguent\Migrations\MigrationCreator;
 use LaravelFreelancerNL\Aranguent\Migrations\DatabaseMigrationRepository;
-
-use LaravelFreelancerNL\Aranguent\Console\Migrations\MigrateCommand;
 use LaravelFreelancerNL\Aranguent\Console\Migrations\MigrateMakeCommand;
 
 class MigrationServiceProvider extends IlluminateMigrationServiceProvider

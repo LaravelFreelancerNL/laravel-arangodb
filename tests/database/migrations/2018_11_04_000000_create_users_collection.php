@@ -1,11 +1,8 @@
 <?php
-namespace LaravelFreelancerNL\Aranguent\Tests\database\migrations;
 
-use \Exception;
-use Illuminate\Database\Migrations\Migration;
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
-
+use Illuminate\Database\Migrations\Migration;
 
 class CreateUsersCollection extends Migration
 {
@@ -16,17 +13,9 @@ class CreateUsersCollection extends Migration
      */
     public function up()
     {
-        try {
-            Schema::create('users', function (Blueprint $collection) {
-                $collection->primary('id');
-                $collection->string('name')->index();
-                $collection->string('email')->unique();
-                $collection->timestamps();
-            });
-        } catch (Exception $e) {
-            dd($e->getMessage());
-        }
-
+dd('CreateUsersCollection migration file');
+        Schema::create('users', function (Blueprint $collection) {
+        });
     }
 
     /**

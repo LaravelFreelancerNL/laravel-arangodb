@@ -3,14 +3,16 @@
 namespace LaravelFreelancerNL\Aranguent\Schema\Grammars;
 
 use Illuminate\Support\Fluent;
-use Illuminate\Database\Query\Expression;
-use Illuminate\Database\Grammar as IlluminateGrammar;
+use Illuminate\Database\Schema\Grammars\Grammar as IlluminateSchemaGrammar;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
 
-abstract class Grammar extends IlluminateGrammar
+/*
+ * Provides AQL syntax functions
+ */
+class Grammar
 {
     /**
-     * If this Grammar supports schema changes wrapped in a transaction.
+     * ArangoDB handles transactions itself.
      *
      * @var bool
      */
@@ -22,8 +24,6 @@ abstract class Grammar extends IlluminateGrammar
      * @var array
      */
     protected $fluentCommands = [];
-
-
 
     /**
      * Get the SQL for the column data type.
@@ -40,7 +40,7 @@ abstract class Grammar extends IlluminateGrammar
     /**
      * Get all of the commands with a given name.
      *
-     * @param  \Illuminate\Database\Schema\Blueprint  $blueprint
+     * @param  \LaravelFreelancerNL\Aranguent\Schema\Blueprint  $blueprint
      * @param  string  $name
      * @return array
      */
@@ -63,50 +63,6 @@ abstract class Grammar extends IlluminateGrammar
         return array_map(function ($value) use ($prefix) {
             return $prefix.' '.$value;
         }, $values);
-    }
-
-    /**
-     * Wrap a table in keyword identifiers.
-     *
-     * @param  mixed   $table
-     * @return string
-     */
-    public function wrapTable($table)
-    {
-        return parent::wrapTable(
-            $table instanceof Blueprint ? $table->getTable() : $table
-        );
-    }
-
-    /**
-     * Wrap a value in keyword identifiers.
-     *
-     * @param  \Illuminate\Database\Query\Expression|string  $value
-     * @param  bool    $prefixAlias
-     * @return string
-     */
-    public function wrap($value, $prefixAlias = false)
-    {
-        return parent::wrap(
-            $value instanceof Fluent ? $value->name : $value, $prefixAlias
-        );
-    }
-
-    /**
-     * Format a value so that it can be used in "default" clauses.
-     *
-     * @param  mixed   $value
-     * @return string
-     */
-    protected function getDefaultValue($value)
-    {
-        if ($value instanceof Expression) {
-            return $value;
-        }
-
-        return is_bool($value)
-                    ? "'".(int) $value."'"
-                    : "'".(string) $value."'";
     }
 
     /**

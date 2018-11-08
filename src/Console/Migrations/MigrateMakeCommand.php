@@ -18,7 +18,7 @@ class MigrateMakeCommand extends IlluminateMigrateMakeCommand
     protected $signature = 'make:migration {name : The name of the migration}
         {--create= : The collection to be created}
         {--collection= : The collection to migrate}
-        {--table= : The collection to migrate}
+        {--table= : (Same as collection)}
         {--path= : The location where the migration file should be created}
         {--realpath : Indicate any provided migration file paths are pre-resolved absolute paths}';
 

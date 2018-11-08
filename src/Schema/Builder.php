@@ -3,11 +3,12 @@
 namespace LaravelFreelancerNL\Aranguent\Schema;
 
 use Closure;
+use Exception;
 use Illuminate\Database\Schema\Builder as IlluminateBuilder;
 use LogicException;
 use LaravelFreelancerNL\Aranguent\Connection;
 
-class Builder extends IlluminateBuilder
+class Builder
 {
     /**
      * The database connection instance.
@@ -35,18 +36,20 @@ class Builder extends IlluminateBuilder
     /**
      * Create a new database Schema manager.
      *
-     * @param  \LaravelFreelancerNL\Aranguent\Connection  $connection
-     * @return void
+     * Builder constructor.
+     * @param Connection $connection
      */
     public function __construct(Connection $connection)
     {
         $this->connection = $connection;
+
         $this->grammar = $connection->getSchemaGrammar();
+
         $this->collectionHandler = $connection->getCollectionHandler();
     }
 
     /**
-     * Modify a collection on the schema.
+     * Modify a collection's schema.
      *
      * @param  string    $collection
      * @param  \Closure  $callback
@@ -56,9 +59,8 @@ class Builder extends IlluminateBuilder
     {
         $this->build($this->createBlueprint($collection, $callback));
     }
-
     /**
-     * Modify a table on the schema.
+     * Alias for collection.
      *
      * @param  string    $collection
      * @param  \Closure  $callback
@@ -70,71 +72,26 @@ class Builder extends IlluminateBuilder
     }
 
     /**
-     * Create a new table on the schema.
-     *
-     * @param  string    $collection
-     * @param  \Closure  $callback
-     * @return void
-     */
-    public function create($collection, Closure $callback)
-    {
-        $this->build(tap($this->createBlueprint($collection), function ($blueprint) use ($callback) {
-            $blueprint->create();
-
-            $callback($blueprint);
-        }));
-    }
-
-    /**
-     * Determine if the given collection exists.
-     *
-     * @param  string  $collection
-     * @return bool
-     */
-    public function hasCollection($collection)
-    {
-        return $this->collectionHandler->has($collection);
-    }
-
-    /**
-     * Determine if the given table exists.
-     *
-     * @param  string  $table
-     * @return bool
-     */
-    public function hasTable($table)
-    {
-        return $this->hasCollection($table);
-    }
-
-    /**
      * Drop a collection from the schema.
      *
-     * @param  string  $table
+     * @param  string  $collection
      * @return void
      */
     public function drop($collection)
     {
-        $this->build(tap($this->createBlueprint($collection), function ($blueprint) {
-            $blueprint->drop();
-        }));
+        $this->collectionHandler->drop($collection);
     }
 
     public function dropAllCollections()
     {
         $collections = $this->getAllCollections();
 
-        if (empty($collections)) {
-            return;
-        }
-
         foreach ($collections as $key => $name) {
             $this->collectionHandler->drop($name);
         }
     }
-
     /**
-     * Drop all tables from the database.
+     * Alias for dropAllCollections.
      *
      * @return void
      */
@@ -145,60 +102,132 @@ class Builder extends IlluminateBuilder
     }
 
     /**
+     * @param $collection
+     */
+    public function dropIfExists($collection)
+    {
+        if ($collections = $this->hasCollection($collection)) {
+            $this->drop($collection);
+        }
+    }
+
+    /**
      * Get all of the collection names for the database.
      *
+     * @param array $options
      * @return array
      */
-    protected function getAllCollections()
+    protected function getAllCollections(array $options = [])
     {
-        return $this->collectionHandler->getAllCollections(['excludeSystem' => true]);
+        if (!isset($options['excludeSystem'])) {
+            $options['excludeSystem'] = true;
+        }
+        return $this->collectionHandler->getAllCollections($options);
+    }
+
+    /**
+     * @param string $collection
+     * @return \ArangoDBClient\Collection
+     */
+    protected function getCollection(string $collection)
+    {
+        return $this->collectionHandler->get($collection);
     }
 
     /**
      * Get all of the table names for the database.
+     * Alias for getAllCollections()
      *
      * @return array
      */
-    protected function getAllTables()
+    protected function getAllTables(array $options = [])
     {
-        return $this->getAllCollections();
+        return $this->getAllCollections($options);
     }
 
     /**
-     * Drop all views from the database.
+     * Rename a collection.
      *
-     * @return void
-     *
-     * @throws \LogicException
+     * @param $from
+     * @param $to
+     * @return bool
      */
-    public function dropAllViews()
+    public function rename(string $from, string $to)
     {
-        throw new LogicException('This database driver does not support dropping all views.');
+        return $this->collectionHandler->rename($from, $to);
+
     }
 
     /**
-     * Rename a table on the schema.
+     * Determine if the given collection exists.
      *
-     * @param  string  $from
-     * @param  string  $to
-     * @return void
+     * @param  string  $collection
+     * @return bool
      */
-    public function rename($from, $to)
+    public function hasCollection(string $collection)
     {
-        $this->build(tap($this->createBlueprint($from), function ($blueprint) use ($to) {
-            $blueprint->rename($to);
+        return $this->collectionHandler->has($collection);
+    }
+    /**
+     * Alias for hasCollection
+     *
+     * @param  string  $table
+     * @return bool
+     */
+    public function hasTable(string $table)
+    {
+        return $this->hasCollection($table);
+    }
+
+    /**
+     * Check if any document in the collection has the attribute
+     *
+     * @param string $collection
+     * @param string $attribute
+     * @return bool
+     */
+    public function hasAttribute(string $collection, string $attribute)
+    {
+        $this->build(tap($this->createBlueprint($collection), function ($blueprint) use ($attribute) {
+            return $blueprint->hasAttribute($attribute);
         }));
     }
-
-     /**
-     * Execute the blueprint to build / modify the table.
+    /**
+     * Alias for hasAttribute
      *
-     * @param  \LaravelFreelancerNL\Aranguent\Schema\Blueprint  $blueprint
+     * @param  string  $table
+     * @param  string  $column
+     * @return bool
+     */
+    public function hasColumn(string $table, string $column)
+    {
+        return $this->hasAttribute($table, $column);
+    }
+
+    /**
+     * get information about the collection
+     *
+     * @param $collection
+     * @return mixed
+     */
+    public function getCollectionInfo($collection)
+    {
+        return $this->figures($collection);
+    }
+    /**
+     * Create a new collection on the schema.
+     *
+     * @param  string    $collection
+     * @param  \Closure  $callback
      * @return void
      */
-    protected function build(Blueprint $blueprint)
+    public function create(string $collection, Closure $callback)
     {
-        $blueprint->build($this->connection, $this->grammar);
+        $this->build(tap($this->createBlueprint($collection), function ($blueprint) use ($callback) {
+            $blueprint->create();
+
+            $callback($blueprint);
+        }));
     }
 
     /**
@@ -208,7 +237,7 @@ class Builder extends IlluminateBuilder
      * @param  \Closure|null  $callback
      * @return \LaravelFreelancerNL\Aranguent\Schema\Blueprint
      */
-    protected function createBlueprint($collection, Closure $callback = null)
+    protected function createBlueprint(string $collection, Closure $callback = null)
     {
         $prefix = $this->connection->getConfig('prefix_indexes')
             ? $this->connection->getConfig('prefix')
@@ -222,26 +251,14 @@ class Builder extends IlluminateBuilder
     }
 
     /**
-     * Get the database connection instance.
+     * Execute the blueprint to build / modify the table.
      *
-     * @return \LaravelFreelancerNL\Aranguent\Connection
+     * @param  \LaravelFreelancerNL\Aranguent\Schema\Blueprint  $blueprint
+     * @return void
      */
-    public function getConnection()
+    protected function build(Blueprint $blueprint)
     {
-        return $this->connection;
-    }
-
-    /**
-     * Set the database connection instance.
-     *
-     * @param  \LaravelFreelancerNL\Aranguent\Connection  $connection
-     * @return $this
-     */
-    public function setConnection(Connection $connection)
-    {
-        $this->connection = $connection;
-
-        return $this;
+        $blueprint->build($this->connection, $this->grammar);
     }
 
     /**
@@ -256,75 +273,26 @@ class Builder extends IlluminateBuilder
     }
 
     /**
-     * Irrelevant placeholders as ArangoDB is schemaless.
-     * These functions return the most appropriate response for a smooth transition.
-     */
-
-    /**
-     * Determine if the given table has a given column.
+     * Get the database connection instance.
      *
-     * @param  string  $table
-     * @param  string  $column
-     * @return bool
+     * @return \LaravelFreelancerNL\Aranguent\Connection
      */
-    public function hasColumn($table, $column)
+    public function getConnection()
     {
-        return true;
+        return $this->connection;
     }
 
     /**
-     * Get the data type for the given column name.
+     * Silently catch the use of unsupported builder methods.
      *
-     * @param  string  $table
-     * @param  string  $column
-     * @return string
+     * @param $method
+     * @param $args
+     * @return null
      */
-    public function getColumnType($table, $column)
+    public function __call($method, $args)
     {
-        return '';
-    }
+        error_log("The Aranguent Schema Builder doesn't support method '$method'\n");
 
-    /**
-     * Get the column listing for a given table.
-     *
-     * @param  string  $table
-     * @return array
-     */
-    public function getColumnListing($table)
-    {
-        return [];
+        return null;
     }
-
-    /**
-     * Enable foreign key constraints.
-     *
-     * @return bool
-     */
-    public function enableForeignKeyConstraints()
-    {
-        return true;
-    }
-
-    /**
-     * Disable foreign key constraints.
-     *
-     * @return bool
-     */
-    public function disableForeignKeyConstraints()
-    {
-        return true;
-    }
-
-    /**
-     * Determine if the given table has given columns.
-     *
-     * @param  string  $table
-     * @param  array   $columns
-     * @return bool
-     */
-    public function hasColumns($table, array $columns)
-    {
-        return true;
-    }
-
 }
