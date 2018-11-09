@@ -1,5 +1,5 @@
 {
-  "name": "LaravelFreelancerNL/Aranguent",
+  "name": "laravel-freelancer-nl/aranguent",
   "description": "Laravel bridge for the ArangoDB Multi-model database",
   "keywords": [
     "laravel",
