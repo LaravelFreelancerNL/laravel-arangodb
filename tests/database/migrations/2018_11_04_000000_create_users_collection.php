@@ -13,7 +13,6 @@ class CreateUsersCollection extends Migration
      */
     public function up()
     {
-dd('CreateUsersCollection migration file');
         Schema::create('users', function (Blueprint $collection) {
         });
     }

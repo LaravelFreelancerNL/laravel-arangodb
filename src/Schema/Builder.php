@@ -124,16 +124,6 @@ class Builder
         }
         return $this->collectionHandler->getAllCollections($options);
     }
-
-    /**
-     * @param string $collection
-     * @return \ArangoDBClient\Collection
-     */
-    protected function getCollection(string $collection)
-    {
-        return $this->collectionHandler->get($collection);
-    }
-
     /**
      * Get all of the table names for the database.
      * Alias for getAllCollections()
@@ -146,6 +136,15 @@ class Builder
     }
 
     /**
+     * @param string $collection
+     * @return \ArangoDBClient\Collection
+     */
+    protected function getCollection(string $collection)
+    {
+        return $this->collectionHandler->get($collection);
+    }
+
+    /**
      * Rename a collection.
      *
      * @param $from
@@ -155,7 +154,6 @@ class Builder
     public function rename(string $from, string $to)
     {
         return $this->collectionHandler->rename($from, $to);
-
     }
 
     /**
@@ -181,6 +179,7 @@ class Builder
 
     /**
      * Check if any document in the collection has the attribute
+     * TODO: Should we keep this?
      *
      * @param string $collection
      * @param string $attribute
@@ -247,7 +246,7 @@ class Builder
             return call_user_func($this->resolver, $collection, $callback, $prefix);
         }
 
-        return new Blueprint($collection, $callback, $prefix);
+        return new Blueprint($collection, $this->collectionHandler, $callback, $prefix);
     }
 
     /**

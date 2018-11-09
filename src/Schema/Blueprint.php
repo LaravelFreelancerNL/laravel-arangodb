@@ -3,15 +3,27 @@
 namespace LaravelFreelancerNL\Aranguent\Schema;
 
 use Closure;
-use BadMethodCallException;
 use Illuminate\Database\Schema\Blueprint as IlluminateBlueprint;
-use Illuminate\Database\Schema\AttributeDefinition;
 use Illuminate\Support\Fluent;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Traits\Macroable;
-use Illuminate\Database\SQLiteConnection;
-use LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar;
 
+
+/**
+ * Class Blueprint
+ *
+ * The Schema blueprint works differently from the standard Illuminate version:
+ * 1) ArangoDB is schemaless: we don't need to create columns
+ * 2) ArangoDB doesn't allow DB schema actions within AQL nor within a transaction.
+ * 3) ArangoDB transactions aren't optimized for large scale data handling as the entire transaction has to fit in main memory.
+ *
+ * This means that:
+ * 1) We catch column related methods silently for backwards compatibility and ease of migrating from one DB type to another
+ * 2) We don't need to compile AQL for transactions within the accompanying schema grammar. (for now)
+ * 3) We can just execute each command on order. We will gather them first for possible future optimisations.
+ *
+ * @package LaravelFreelancerNL\Aranguent\Schema
+ */
 class Blueprint
 {
     use Macroable;
@@ -33,33 +45,11 @@ class Blueprint
     protected $prefix;
 
     /**
-     * The attributes that should be added to the collection.
-     */
-    protected $attributes = [];
-
-    /**
      * The commands that should be run for the collection.
      *
      * @var \Illuminate\Support\Fluent[]
      */
     protected $commands = [];
-
-    /**
-     * The storage engine that should be used for the collection.
-     *
-     * @var string
-     */
-    public $engine;
-
-    /**
-     * The default character set that should be used for the collection.
-     */
-    public $charset;
-
-    /**
-     * The collation that should be used for the collection.
-     */
-    public $collation;
 
     /**
      * Whether to make the collection temporary.
@@ -73,6 +63,7 @@ class Blueprint
      *
      * Blueprint constructor.
      * @param string $collection
+     * @param \ArangoDBClient\CollectionHandler $collectionHandler
      * @param Closure|null $callback
      * @param string $prefix
      */
@@ -97,72 +88,20 @@ class Blueprint
      */
     public function build(Connection $connection, $grammar)
     {
-        foreach ($this->toAql($connection,  $grammar) as $statement) {
-            $connection->statement($statement);
-        }
+        //Gather commands
+        // Execute commands
     }
 
-    /**
-     * Get the raw AQL statements for the blueprint.
-     *
-     * @param  \LaravelFreelancerNL\Aranguent\Connection  $connection
-     * @param  \LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar  $grammar
-     * @return array
-     */
-    public function toAql(Connection $connection, $grammar)
-    {
-        $this->addImpliedCommands($grammar);
-
-        $statements = [];
-
-        // Each type of command has a corresponding compiler function on the schema
-        // grammar which is used to build the necessary SQL statements to build
-        // the blueprint element, so we'll just call that compilers function.
-        $this->ensureCommandsAreValid($connection);
-
-        foreach ($this->commands as $command) {
-            $method = 'compile'.ucfirst($command->name);
-
-            if (method_exists($grammar, $method)) {
-                if (! is_null($sql = $grammar->$method($this, $command, $connection))) {
-                    $statements = array_merge($statements, (array) $sql);
-                }
-            }
-        }
-        return $statements;
-    }
     /**
      * Alias for toAql
+     * Only used now for the pretend migration option to show a list of commands to run.
      *
      * @param Connection $connection
      * @param $grammar
      */
     public function toSql(Connection $connection, $grammar)
     {
-        $this->toAql($connection, $grammar);
-    }
-
-    /**
-     * Ensure the commands on the blueprint are valid for the connection type.
-     *
-     * @param  \LaravelFreelancerNL\Aranguent\Connection  $connection
-     * @return void
-     */
-    protected function ensureCommandsAreValid(Connection $connection)
-    {
-        if ($connection instanceof SQLiteConnection) {
-            if ($this->commandsNamed(['dropAttribute', 'renameAttribute'])->count() > 1) {
-                throw new BadMethodCallException(
-                    "SQLite doesn't support multiple calls to dropAttribute / renameAttribute in a single modification."
-                );
-            }
-
-            if ($this->commandsNamed(['dropForeign'])->count() > 0) {
-                throw new BadMethodCallException(
-                    "SQLite doesn't support dropping foreign keys (you would need to re-create the collection)."
-                );
-            }
-        }
+        //Call some kind of commandList method
     }
 
     /**
@@ -176,82 +115,6 @@ class Blueprint
         return collect($this->commands)->filter(function ($command) use ($names) {
             return in_array($command->name, $names);
         });
-    }
-
-    /**
-     * Add the commands that are implied by the blueprint's state.
-     *
-     * @param  \Illuminate\Database\Schema\Grammars\Grammar  $grammar
-     * @return void
-     */
-    protected function addImpliedCommands($grammar)
-    {
-        if (count($this->getAddedAttributes()) > 0 && ! $this->creating()) {
-            array_unshift($this->commands, $this->createCommand('add'));
-        }
-
-        if (count($this->getChangedAttributes()) > 0 && ! $this->creating()) {
-            array_unshift($this->commands, $this->createCommand('change'));
-        }
-
-        $this->addFluentIndexes();
-
-        $this->addFluentCommands($grammar);
-    }
-
-    /**
-     * Add the index commands fluently specified on attributes.
-     *
-     * @return void
-     */
-    protected function addFluentIndexes()
-    {
-        foreach ($this->attributes as $attribute) {
-            foreach (['primary', 'unique', 'index', 'spatialIndex'] as $index) {
-                // If the index has been specified on the given attribute, but is simply equal
-                // to "true" (boolean), no name has been specified for this index so the
-                // index method can be called without a name and it will generate one.
-                if ($attribute->{$index} === true) {
-                    $this->{$index}($attribute->name);
-
-                    continue 2;
-                }
-
-                // If the index has been specified on the given attribute, and it has a string
-                // value, we'll go ahead and call the index method and pass the name for
-                // the index since the developer specified the explicit name for this.
-                elseif (isset($attribute->{$index})) {
-                    $this->{$index}($attribute->name, $attribute->{$index});
-
-                    continue 2;
-                }
-            }
-        }
-    }
-
-    /**
-     * Add the fluent commands specified on any attributes.
-     *
-     * @param  \LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar  $grammar
-     * @return void
-     */
-    public function addFluentCommands($grammar)
-    {
-        foreach ($this->attributes as $attribute) {
-            foreach ($grammar->getFluentCommands() as $commandName) {
-                $attributeName = lcfirst($commandName);
-
-                if (! isset($attribute->{$attributeName})) {
-                    continue;
-                }
-
-                $value = $attribute->{$attributeName};
-
-                $this->addCommand(
-                    $commandName, compact('value', 'attribute')
-                );
-            }
-        }
     }
 
     /**
@@ -274,11 +137,6 @@ class Blueprint
     public function create()
     {
         return $this->addCommand('create');
-    }
-
-    public function hasAttribute($attribute)
-    {
-
     }
 
     /**
@@ -521,17 +379,6 @@ class Blueprint
         return $this->indexCommand('spatialIndex', $attributes, $name);
     }
 
-    /**
-     * Specify a foreign key for the collection.
-     *
-     * @param  string|array  $attributes
-     * @param  string  $name
-     * @return \Illuminate\Support\Fluent
-     */
-    public function foreign($attributes, $name = null)
-    {
-        return $this->indexCommand('foreign', $attributes, $name);
-    }
 
     /**
      * Add a new index command to the blueprint.
@@ -593,37 +440,6 @@ class Blueprint
     }
 
     /**
-     * Add a new attribute to the blueprint.
-     *
-     * @param  string  $type
-     * @param  string  $name
-     * @param  array  $parameters
-     */
-    public function addAttribute($type, $name, array $parameters = [])
-    {
-        $this->attributes[] = $attribute = new AttributeDefinition(
-            array_merge(compact('type', 'name'), $parameters)
-        );
-
-        return $attribute;
-    }
-
-    /**
-     * Remove a attribute from the schema blueprint.
-     *
-     * @param  string  $name
-     * @return $this
-     */
-    public function removeAttribute($name)
-    {
-        $this->attributes = array_values(array_filter($this->attributes, function ($c) use ($name) {
-            return $c['attributes']['name'] != $name;
-        }));
-
-        return $this;
-    }
-
-    /**
      * Add a new command to the blueprint.
      *
      * @param  string  $name
@@ -649,7 +465,6 @@ class Blueprint
         return new Fluent(array_merge(compact('name'), $parameters));
     }
 
-
     /**
      * Get the collection the blueprint describes.
      *
@@ -667,16 +482,6 @@ class Blueprint
     public function getTable()
     {
         return $this->getCollection();
-    }
-
-    /**
-     * Get the attributes on the blueprint.
-     *
-     * @return \Illuminate\Database\Schema\AttributeDefinition[]
-     */
-    public function getAttributes()
-    {
-        return $this->attributes;
     }
 
     /**
