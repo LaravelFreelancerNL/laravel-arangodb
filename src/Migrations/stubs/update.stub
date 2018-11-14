@@ -1,0 +1,33 @@
+<?php
+
+use LaravelFreelancerNL\Aranguent\Facades\Schema;
+use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+
+class DummyClass extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::collection('DummyCollection', function (Blueprint $collection) {
+            //
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::collection('DummyCollection', function (Blueprint $collection) {
+            //
+        });
+    }
+}

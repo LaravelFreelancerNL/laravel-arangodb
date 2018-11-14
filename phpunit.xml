@@ -15,5 +15,11 @@
         <testsuite name="all">
             <directory suffix=".php">tests/</directory>
         </testsuite>
+        <testsuite name="console">
+            <directory suffix=".php">tests/Console</directory>
+        </testsuite>
+        <testsuite name="migrations">
+            <directory suffix=".php">tests/Migrations</directory>
+        </testsuite>
     </testsuites>
 </phpunit>
