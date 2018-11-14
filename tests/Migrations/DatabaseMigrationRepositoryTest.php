@@ -5,12 +5,11 @@ use LaravelFreelancerNL\Aranguent\Tests\TestCase;
 
 class DatabaseMigrationRepositoryTest extends TestCase
 {
-
     /**
-     * migrations collection is created
+     * migrations collection is created.
      * @test
      */
-    function migrations_collection_is_created()
+    public function migrations_collection_is_created()
     {
         if ($this->databaseMigrationRepository->repositoryExists()) {
             $this->expectException(ArangoDBClient\ServerException::class);
@@ -24,10 +23,10 @@ class DatabaseMigrationRepositoryTest extends TestCase
     }
 
     /**
-     * log_creates_migration_entry
+     * log_creates_migration_entry.
      * @test
      */
-    function log_creates_migration_entry()
+    public function log_creates_migration_entry()
     {
         $filename = 'logtest.php';
         $batch = 40;
@@ -35,13 +34,13 @@ class DatabaseMigrationRepositoryTest extends TestCase
         $cursor = $this->collectionHandler->byExample('migrations', ['migration' => $filename, 'batch' => $batch]);
         $documents = collect($cursor->getAll());
         $this->assertInstanceOf(ArangoDocument::class, $documents->first());
-   }
+    }
 
     /**
-     * get the highest batch value
+     * get the highest batch value.
      * @test
      */
-    function get_the_last_batch_number()
+    public function get_the_last_batch_number()
     {
         $this->databaseMigrationRepository->log('getLastBatchNumberTest', 2);
         $this->databaseMigrationRepository->log('getLastBatchNumberTest', 2);
@@ -53,10 +52,10 @@ class DatabaseMigrationRepositoryTest extends TestCase
     }
 
     /**
-     * get all ran migration files
+     * get all ran migration files.
      * @test
      */
-    function get_all_ran_migration_files()
+    public function get_all_ran_migration_files()
     {
         $this->databaseMigrationRepository->log('getRanMigration1', 50);
         $this->databaseMigrationRepository->log('getRanMigration2', 53);
@@ -68,10 +67,10 @@ class DatabaseMigrationRepositoryTest extends TestCase
     }
 
     /**
-     * Delete migration
+     * Delete migration.
      * @test
      */
-    function delete_migration()
+    public function delete_migration()
     {
         $filename = 'deletetest.php';
         $batch = 39;
@@ -90,10 +89,10 @@ class DatabaseMigrationRepositoryTest extends TestCase
     }
 
     /**
-     * get all migrations within the last batch
+     * get all migrations within the last batch.
      * @test
      */
-    function get_last_migration()
+    public function get_last_migration()
     {
         $this->databaseMigrationRepository->log('getLastMigration1', 60000);
         $this->databaseMigrationRepository->log('getLastMigration2', 60001);
@@ -106,10 +105,10 @@ class DatabaseMigrationRepositoryTest extends TestCase
     }
 
     /**
-     * get migration batches
+     * get migration batches.
      * @test
      */
-    function get_migration_batches()
+    public function get_migration_batches()
     {
         $this->databaseMigrationRepository->log('getMigrationBatches1', 32);
         $this->databaseMigrationRepository->log('getMigrationBatches2', 33);
@@ -122,10 +121,10 @@ class DatabaseMigrationRepositoryTest extends TestCase
     }
 
     /**
-     * get migration batches
+     * get migration batches.
      * @test
      */
-    function get_migrations()
+    public function get_migrations()
     {
         $this->databaseMigrationRepository->log('getMigrationBatches1', 42);
         $this->databaseMigrationRepository->log('getMigrationBatches2', 43);
@@ -136,6 +135,4 @@ class DatabaseMigrationRepositoryTest extends TestCase
         $this->assertIsArray($migrations);
         $this->assertEquals(2, count($migrations));
     }
-
-
 }

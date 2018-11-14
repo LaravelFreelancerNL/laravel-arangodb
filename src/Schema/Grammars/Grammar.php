@@ -2,9 +2,8 @@
 
 namespace LaravelFreelancerNL\Aranguent\Schema\Grammars;
 
-use Illuminate\Database\Schema\Grammars\Grammar as IlluminateGrammar;
 use Illuminate\Support\Fluent;
-use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
+use Illuminate\Database\Schema\Grammars\Grammar as IlluminateGrammar;
 
 class Grammar extends IlluminateGrammar
 {
@@ -30,10 +29,10 @@ class Grammar extends IlluminateGrammar
         $filter = [];
 
         $i = 1;
-        foreach($command->attributes as $attribute) {
-            $bindVar = 'attribute_' . $i;
+        foreach ($command->attributes as $attribute) {
+            $bindVar = 'attribute_'.$i;
             $bindings[$bindVar] = $attribute;
-            $filter[] = '@' . $bindVar . ' != null';
+            $filter[] = '@'.$bindVar.' != null';
             $i++;
         }
         $filter = implode(' && ', $filter);
@@ -52,7 +51,7 @@ class Grammar extends IlluminateGrammar
     }
 
     /**
-     * Compile AQL to rename an attribute, if the new name isn't already in use
+     * Compile AQL to rename an attribute, if the new name isn't already in use.
      *
      * @param string $collection
      * @param Fluent $command
@@ -72,7 +71,7 @@ class Grammar extends IlluminateGrammar
             $query .= "     @from: null,\n";
             $query .= "     @to: document.@from\n";
         }
-        $query .= "} IN @@collection OPTIONS { keepNull: false }";
+        $query .= '} IN @@collection OPTIONS { keepNull: false }';
 
         $command->aql['query'] = $query;
         $command->aql['bindings'] = $bindings;
@@ -83,7 +82,7 @@ class Grammar extends IlluminateGrammar
     }
 
     /**
-     * Compile AQL to drop one or more attributes
+     * Compile AQL to drop one or more attributes.
      *
      * @param string $collection
      * @param Fluent $command
@@ -98,10 +97,10 @@ class Grammar extends IlluminateGrammar
         }
 
         $i = 1;
-        foreach($command->attributes as $attribute) {
-            $bindVar = '@attribute_' . $i;
+        foreach ($command->attributes as $attribute) {
+            $bindVar = '@attribute_'.$i;
             $bindings[$bindVar] = $attribute;
-            $filter[] = $bindVar . " != null";
+            $filter[] = $bindVar.' != null';
             $i++;
         }
         $filter = implode(' || ', $filter);
@@ -112,7 +111,7 @@ class Grammar extends IlluminateGrammar
         foreach ($bindings as $bindVar => $value) {
             $query .= "     $bindVar: null,\n";
         }
-        $query .= "} IN @@collection OPTIONS { keepNull: false }";
+        $query .= '} IN @@collection OPTIONS { keepNull: false }';
 
         $command->aql['query'] = $query;
         $command->aql['bindings'] = $bindings;
@@ -122,7 +121,7 @@ class Grammar extends IlluminateGrammar
     }
 
     /**
-     * Prepare a bindVar for inclusion in an AQL query
+     * Prepare a bindVar for inclusion in an AQL query.
      *
      * @param $attribute
      * @return string
@@ -136,5 +135,4 @@ class Grammar extends IlluminateGrammar
 
         return $attribute;
     }
-
 }

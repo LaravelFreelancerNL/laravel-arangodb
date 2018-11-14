@@ -4,7 +4,6 @@ use LaravelFreelancerNL\Aranguent\Tests\TestCase;
 
 class MigrationCommandsTest extends TestCase
 {
-
     protected $packageMigrationPath;
 
     protected $aranguentMigrationStubPath;
@@ -17,25 +16,23 @@ class MigrationCommandsTest extends TestCase
     {
         parent::setUp();
 
-        $this->packageMigrationPath = __DIR__ . '/database/migrations';
-        $this->aranguentMigrationStubPath = __DIR__ . '/../src/Migrations/stubs';
-        $this->laravelMigrationPath = base_path() . '/database/migrations';
+        $this->packageMigrationPath = __DIR__.'/database/migrations';
+        $this->aranguentMigrationStubPath = __DIR__.'/../src/Migrations/stubs';
+        $this->laravelMigrationPath = base_path().'/database/migrations';
 
         // Clear the make migration test stubs
-        array_map('unlink', array_filter((array) glob( $this->laravelMigrationPath . '/*')));
-
+        array_map('unlink', array_filter((array) glob($this->laravelMigrationPath.'/*')));
     }
 
     /**
-     * migrate
+     * migrate.
      * @test
      */
-    function migrate()
+    public function migrate()
     {
-        $path =  'migrations';
+        $path = 'migrations';
 
         $this->artisan('migrate', ['--force' => true, '--path' => $path])->run();
-
     }
 
 //    /**
@@ -98,5 +95,4 @@ class MigrationCommandsTest extends TestCase
 //
 //        $this->artisan('migrate:rollback', ['--force' => true, '--step' => 2])->run();
 //    }
-
 }

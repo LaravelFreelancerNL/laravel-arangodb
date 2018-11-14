@@ -4,8 +4,6 @@ namespace LaravelFreelancerNL\Aranguent\Schema;
 
 use Closure;
 use LaravelFreelancerNL\Aranguent\Connection;
-use Illuminate\Database\Schema\Builder as IlluminateBuilder;
-use Illuminate\Database\Schema\Blueprint as IlluminateBlueprint;
 
 class Builder
 {
@@ -84,8 +82,6 @@ class Builder
         return new Blueprint($collection, $this->collectionHandler, $callback, $prefix);
     }
 
-    /**
-     */
     protected function build(Blueprint $blueprint)
     {
         $blueprint->build($this->connection, $this->grammar);
@@ -145,6 +141,7 @@ class Builder
             $this->collectionHandler->drop($name);
         }
     }
+
     /**
      * Alias for dropAllCollections.
      *
@@ -153,7 +150,6 @@ class Builder
     public function dropAllTables()
     {
         $this->dropAllCollections();
-
     }
 
     /**
@@ -174,14 +170,16 @@ class Builder
      */
     protected function getAllCollections(array $options = [])
     {
-        if (!isset($options['excludeSystem'])) {
+        if (! isset($options['excludeSystem'])) {
             $options['excludeSystem'] = true;
         }
+
         return $this->collectionHandler->getAllCollections($options);
     }
+
     /**
      * Get all of the table names for the database.
-     * Alias for getAllCollections()
+     * Alias for getAllCollections().
      *
      * @param array $options
      * @return array
@@ -222,8 +220,9 @@ class Builder
     {
         return $this->collectionHandler->has($collection);
     }
+
     /**
-     * Alias for hasCollection
+     * Alias for hasCollection.
      *
      * @param  string  $table
      * @return bool
@@ -247,8 +246,9 @@ class Builder
             return $blueprint->hasAttribute($attribute);
         }));
     }
+
     /**
-     * Alias for hasAttribute
+     * Alias for hasAttribute.
      *
      * @param  string  $table
      * @param  string  $column
@@ -260,7 +260,7 @@ class Builder
     }
 
     /**
-     * get information about the collection
+     * get information about the collection.
      *
      * @param $collection
      * @return mixed
@@ -269,7 +269,6 @@ class Builder
     {
         return $this->figures($collection);
     }
-
 
     /**
      * Get the database connection instance.
@@ -291,7 +290,5 @@ class Builder
     public function __call($method, $args)
     {
         error_log("The Aranguent Schema Builder doesn't support method '$method'\n");
-
-        return null;
     }
 }
