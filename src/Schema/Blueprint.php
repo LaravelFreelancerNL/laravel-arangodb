@@ -6,12 +6,10 @@ use Closure;
 use Illuminate\Support\Fluent;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Traits\Macroable;
-use Illuminate\Database\Schema\Blueprint as IlluminateBlueprint;
 use Illuminate\Database\Schema\Grammars\Grammar as IlluminateGrammar;
 
-
 /**
- * Class Blueprint
+ * Class Blueprint.
  *
  * The Schema blueprint works differently from the standard Illuminate version:
  * 1) ArangoDB is schemaless: we don't need to create columns
@@ -22,8 +20,6 @@ use Illuminate\Database\Schema\Grammars\Grammar as IlluminateGrammar;
  * 1) We catch column related methods silently for backwards compatibility and ease of migrating from one DB type to another
  * 2) We don't need to compile AQL for transactions within the accompanying schema grammar. (for now)
  * 3) We can just execute each command on order. We will gather them first for possible future optimisations.
- *
- * @package LaravelFreelancerNL\Aranguent\Schema
  */
 class Blueprint
 {
@@ -32,14 +28,14 @@ class Blueprint
     /**
      * The connection that is used by the blueprint.
      *
-     * @var \Illuminate\Database\Connection  $connection
+     * @var \Illuminate\Database\Connection 
      */
     protected $connection;
 
     /**
      * The grammar that is used by the blueprint.
      *
-     * @var \LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar  $grammar
+     * @var \LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar 
      */
     protected $grammar;
 
@@ -52,7 +48,6 @@ class Blueprint
 
     /**
      * The handler for collection manipulation.
-     *
      */
     protected $collectionHandler;
 
@@ -71,7 +66,7 @@ class Blueprint
     protected $commands = [];
 
     /**
-     * Catching attributes to be able to add fluent indexes
+     * Catching attributes to be able to add fluent indexes.
      *
      * @var array
      */
@@ -85,7 +80,7 @@ class Blueprint
     public $temporary = false;
 
     /**
-     * Detect if _key (and thus proxy _id) should autoincrement
+     * Detect if _key (and thus proxy _id) should autoincrement.
      *
      * @var bool
      */
@@ -108,7 +103,7 @@ class Blueprint
 
         $this->prefix = $prefix;
 
-        if (!is_null($callback)) {
+        if (! is_null($callback)) {
             $callback($this);
         }
     }
@@ -142,7 +137,7 @@ class Blueprint
      */
     public function compileAqlCommand($command)
     {
-        $compileMethod = 'compile' . ucfirst($command->name);
+        $compileMethod = 'compile'.ucfirst($command->name);
         if (method_exists($this->grammar, $compileMethod)) {
             return $this->grammar->$compileMethod($command);
         }
@@ -155,17 +150,17 @@ class Blueprint
      */
     public function executeCommand($command)
     {
-        $executeNamedMethod = 'execute' . ucfirst($command->name) . 'Command';
-        $executeHandlerMethod = 'execute' . ucfirst($command->handler) . 'Command';
+        $executeNamedMethod = 'execute'.ucfirst($command->name).'Command';
+        $executeHandlerMethod = 'execute'.ucfirst($command->handler).'Command';
         if (method_exists($this, $executeNamedMethod)) {
             $this->$executeNamedMethod($command);
-        } else if (method_exists($this, $executeHandlerMethod)) {
+        } elseif (method_exists($this, $executeHandlerMethod)) {
             $this->$executeHandlerMethod($command);
         }
     }
 
     /**
-     * Execute an AQL statement
+     * Execute an AQL statement.
      *
      * @param $command
      */
@@ -174,12 +169,12 @@ class Blueprint
         $this->connection->statement($command->aql['query'], $command->aql['bindings']);
     }
 
-
     public function executeCollectionCommand($command)
     {
         if ($this->connection->pretending()) {
-            $this->connection->logQuery("/* " . $command->explanation . " */\n", []);
-            return null;
+            $this->connection->logQuery('/* '.$command->explanation." */\n", []);
+
+            return;
         }
 
         if (method_exists($this->collectionHandler, $command->method)) {
@@ -190,11 +185,12 @@ class Blueprint
     public function executeIndexCommand($command)
     {
         if ($this->connection->pretending()) {
-            $this->connection->logQuery("/* " . $command->explanation . " */\n", []);
-            return null;
+            $this->connection->logQuery('/* '.$command->explanation." */\n", []);
+
+            return;
         }
 
-        $this->collectionHandler->index($this->collection, $command->type, $command->attributes, $command->unique,$command->indexOptions);
+        $this->collectionHandler->index($this->collection, $command->type, $command->attributes, $command->unique, $command->indexOptions);
     }
 
     /**
@@ -206,8 +202,9 @@ class Blueprint
     public function executeIgnoreCommand($command)
     {
         if ($this->connection->pretending()) {
-            $this->connection->logQuery("/* " . $command->explanation . " */\n", []);
-            return null;
+            $this->connection->logQuery('/* '.$command->explanation." */\n", []);
+
+            return;
         }
     }
 
@@ -241,8 +238,9 @@ class Blueprint
     public function executeCreateCommand($command)
     {
         if ($this->connection->pretending()) {
-            $this->connection->logQuery("/* " . $command->explanation . " */\n", []);
-            return null;
+            $this->connection->logQuery('/* '.$command->explanation." */\n", []);
+
+            return;
         }
         $config = $command->config;
         if ($this->temporary === true) {
@@ -254,7 +252,6 @@ class Blueprint
         $this->collectionHandler->create($this->collection, $config);
     }
 
-
     /**
      * Indicate that the collection should be dropped.
      *
@@ -264,6 +261,7 @@ class Blueprint
     {
         $parameters['explanation'] = "Drop the '{$this->collection}' collection.";
         $parameters['handler'] = 'collection';
+
         return $this->addCommand('drop', $parameters);
     }
 
@@ -276,6 +274,7 @@ class Blueprint
     {
         $parameters['explanation'] = "Drop the '{$this->collection}' collection.";
         $parameters['handler'] = 'collection';
+
         return $this->addCommand('dropIfExists');
     }
 
@@ -291,7 +290,8 @@ class Blueprint
 
         $parameters['handler'] = 'aql';
         $parameters['attributes'] = $attributes;
-        $parameters['explanation'] = "Drop the following attribute(s): " . implode(',', $attributes) . ".";
+        $parameters['explanation'] = 'Drop the following attribute(s): '.implode(',', $attributes).'.';
+
         return $this->addCommand('dropAttribute', compact('parameters'));
     }
 
@@ -323,6 +323,7 @@ class Blueprint
         $parameters['explanation'] = "Rename the attribute '$from' to '$to'.";
         $parameters['from'] = $from;
         $parameters['to'] = $to;
+
         return $this->addCommand('renameAttribute', $parameters);
     }
 
@@ -337,7 +338,7 @@ class Blueprint
 //        return $this->dropIndexCommand('dropIndex', $type, $attributes);
     }
 
-     /**
+    /**
      * Rename the collection to a given name.
      *
      * @param  string  $to
@@ -347,7 +348,6 @@ class Blueprint
     {
         return $this->addCommand('rename', compact('to'));
     }
-
 
     /**
      * Specify an index for the collection. Creates a skiplist index by default.
@@ -385,7 +385,7 @@ class Blueprint
     }
 
     /**
-     * Alias for the geoIndex
+     * Alias for the geoIndex.
      *
      * @param  string|array  $attributes
      * @param  array  $indexOptions
@@ -483,6 +483,7 @@ class Blueprint
     {
         return $this->collection;
     }
+
     /**
      * Alias for getCollection.
      *
@@ -520,7 +521,7 @@ class Blueprint
             'polygon', 'polygon',  'smallIncrements', 'smallInteger',  'string', 'text', 'time',
             'timeTz', 'timestamp', 'timestampTz', 'tinyIncrements', 'tinyInteger',
             'unsignedBigInteger', 'unsignedDecimal', 'unsignedInteger', 'unsignedMediumInteger', 'unsignedSmallInteger',
-            'unsignedTinyInteger', 'uuid', 'year'
+            'unsignedTinyInteger', 'uuid', 'year',
         ];
 
         if (in_array($method, $columnMethods)) {

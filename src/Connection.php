@@ -1,36 +1,38 @@
-<?php namespace LaravelFreelancerNL\Aranguent;
+<?php
 
-use Illuminate\Database\Connection as IlluminateConnection;
+namespace LaravelFreelancerNL\Aranguent;
+
 use ArangoDBClient\Statement;
 use ArangoDBClient\Connection as ArangoConnection;
 use ArangoDBClient\GraphHandler as ArangoGraphHandler;
+use Illuminate\Database\Connection as IlluminateConnection;
 use ArangoDBClient\DocumentHandler as ArangoDocumentHandler;
-use ArangoDBClient\CollectionHandler as ArangoCollectionHandler;
-use ArangoDBClient\ConnectionOptions as ArangoConnectionOptions;
 use LaravelFreelancerNL\Aranguent\Concerns\DetectsDeadlocks;
 use LaravelFreelancerNL\Aranguent\Concerns\ManagesTransactions;
+use ArangoDBClient\CollectionHandler as ArangoCollectionHandler;
+use ArangoDBClient\ConnectionOptions as ArangoConnectionOptions;
 use LaravelFreelancerNL\Aranguent\Concerns\DetectsLostConnections;
 use LaravelFreelancerNL\Aranguent\Schema\Builder as SchemaBuilder;
 
-class Connection extends IlluminateConnection {
-
+class Connection extends IlluminateConnection
+{
     use DetectsDeadlocks,
         DetectsLostConnections,
         ManagesTransactions;
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      *
      * @var array
      */
-    protected $defaultConfig = array(
+    protected $defaultConfig = [
         ArangoConnectionOptions::OPTION_ENDPOINT => 'tcp://localhost:8529',
         ArangoConnectionOptions::OPTION_CONNECTION  => 'Keep-Alive',
         ArangoConnectionOptions::OPTION_DATABASE => null,
         ArangoConnectionOptions::OPTION_AUTH_USER => null,
         ArangoConnectionOptions::OPTION_AUTH_PASSWD => null,
-        'tablePrefix' => ''
-    );
+        'tablePrefix' => '',
+    ];
 
     protected $config;
 
@@ -63,7 +65,7 @@ class Connection extends IlluminateConnection {
     protected $userHandler;
 
     /**
-     * The ArangoDB driver name
+     * The ArangoDB driver name.
      *
      * @var string
      */
@@ -77,7 +79,7 @@ class Connection extends IlluminateConnection {
      */
     public function __construct(array $config = [])
     {
-            // First we will setup the default properties. We keep track of the DB
+        // First we will setup the default properties. We keep track of the DB
         // name we are connected to since it is needed when some reflective
         // type commands are run such as checking whether a table exists.
         $this->config = array_merge($this->defaultConfig, $config);
@@ -104,12 +106,13 @@ class Connection extends IlluminateConnection {
         if (is_null($this->schemaGrammar)) {
             $this->useDefaultSchemaGrammar();
         }
+
         return new SchemaBuilder($this);
     }
 
     /**
      * Run a select statement against the database and returns a generator.
-     * ($useReadPdo is a dummy to adhere to the interface)
+     * ($useReadPdo is a dummy to adhere to the interface).
      *
      * @param  string  $query
      * @param  array  $bindings
@@ -201,21 +204,21 @@ class Connection extends IlluminateConnection {
     {
         $arangoConnection = $this->arangoConnection;
 
-    return $this->run($query, [], function ($query) use ($arangoConnection) {
-    if ($this->pretending()) {
-    return true;
-    }
+        return $this->run($query, [], function ($query) use ($arangoConnection) {
+            if ($this->pretending()) {
+                return true;
+            }
 
-    $statement = new Statement($arangoConnection, ['query' => $query, 'bindVars' => []]);
+            $statement = new Statement($arangoConnection, ['query' => $query, 'bindVars' => []]);
 
-    $cursor = $statement->execute();
+            $cursor = $statement->execute();
 
-    $affectedDocumentCount = $cursor->getWritesExecuted();
+            $affectedDocumentCount = $cursor->getWritesExecuted();
 
-    $this->recordsHaveBeenModified($change = $affectedDocumentCount > 0);
+            $this->recordsHaveBeenModified($change = $affectedDocumentCount > 0);
 
-    return $change;
-    });
+            return $change;
+        });
     }
 
     /**
@@ -229,6 +232,7 @@ class Connection extends IlluminateConnection {
     public function select($query, $bindings = [], $useReadPdo = true)
     {
         $arangoConnection = $this->arangoConnection;
+
         return $this->run($query, $bindings, function ($query, $bindings) use ($arangoConnection) {
             if ($this->pretending()) {
                 return [];
@@ -240,7 +244,6 @@ class Connection extends IlluminateConnection {
             return $cursor->getAll();
         });
     }
-
 
     /**
      * Begin a fluent query against a database collection.
@@ -254,7 +257,7 @@ class Connection extends IlluminateConnection {
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function table($table)
     {
@@ -304,6 +307,7 @@ class Connection extends IlluminateConnection {
             $this->reconnect();
         }
     }
+
     //ArangoDB functions
 
     public function getArangoConnection()
@@ -325,6 +329,7 @@ class Connection extends IlluminateConnection {
     {
         $this->userHandler = $userHandler;
     }
+
     public function getUserHandler()
     {
         return $this->userHandler;

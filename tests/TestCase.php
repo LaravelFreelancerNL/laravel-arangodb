@@ -8,7 +8,6 @@ use LaravelFreelancerNL\Aranguent\Migrations\DatabaseMigrationRepository;
 
 abstract class TestCase extends \Orchestra\Testbench\TestCase
 {
-
     protected $collection = 'migrations';
 
     protected $connection;
@@ -16,7 +15,6 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     protected $collectionHandler;
 
     protected $databaseMigrationRepository;
-
 
     /**
      * Define environment setup.
@@ -46,8 +44,6 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         foreach ($collections as $collection) {
             $this->collectionHandler->drop($collection['id']);
         }
-
-
     }
 
     protected function setUp()
@@ -57,7 +53,6 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         $this->artisan('migrate:install', [])->run();
 
         $this->databaseMigrationRepository = new DatabaseMigrationRepository($this->app['db'], $this->collection);
-
     }
 
     protected function getPackageProviders($app)
@@ -70,8 +65,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     protected function getPackageAliases($app)
     {
         return [
-            'Aranguent' => 'LaravelFreelancerNL\Aranguent'
+            'Aranguent' => 'LaravelFreelancerNL\Aranguent',
         ];
     }
-
 }

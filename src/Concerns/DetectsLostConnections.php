@@ -42,7 +42,7 @@ trait DetectsLostConnections
             503,
             504,
             1464,
-            1465
+            1465,
         ]);
     }
 }

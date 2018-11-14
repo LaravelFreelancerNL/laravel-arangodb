@@ -29,7 +29,7 @@ trait DetectsDeadlocks
             28,
             29,
             1302,
-            1303
+            1303,
         ]);
     }
 }

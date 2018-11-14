@@ -2,10 +2,10 @@
 
 namespace LaravelFreelancerNL\Aranguent\Concerns;
 
-use ArangoDBClient\Transaction as ArangoTransaction;
 use Closure;
 use Exception;
 use Illuminate\Support\Fluent;
+use ArangoDBClient\Transaction as ArangoTransaction;
 
 trait ManagesTransactions
 {
@@ -24,7 +24,7 @@ trait ManagesTransactions
      *
      * @throws \Exception|\Throwable
      */
-    public function transaction(Closure $callback, $options = [],  $attempts = 1)
+    public function transaction(Closure $callback, $options = [], $attempts = 1)
     {
         $this->beginTransaction();
 
@@ -72,10 +72,10 @@ trait ManagesTransactions
     public function commit($options = [], $attempts = 1)
     {
         if (! $this->transactions > 0) {
-            throw new Exception("Transaction committed before starting one.");
+            throw new Exception('Transaction committed before starting one.');
         }
         if (! isset($this->transactionCommands[$this->transactions]) || empty($this->transactionCommands[$this->transactions])) {
-            throw new Exception("Cannot commit an empty transaction.");
+            throw new Exception('Cannot commit an empty transaction.');
         }
 
         $options['collections'] = $this->compileTransactionCollections();
@@ -100,7 +100,6 @@ trait ManagesTransactions
                 $results = $this->arangoTransaction->execute();
 
                 $this->transactions--;
-
             } catch (Exception $e) {
                 $results = $this->handleTransactionException($e, $currentAttempt, $attempts);
             }
@@ -144,7 +143,7 @@ trait ManagesTransactions
     }
 
     /**
-     * compile an array of unique collections that are used to read from and/or write to
+     * compile an array of unique collections that are used to read from and/or write to.
      *
      * @return array
      */
@@ -183,13 +182,11 @@ trait ManagesTransactions
         $commands = collect($this->transactionCommands[$this->transactions]);
 
         $action = "function () { var db = require('@arangodb').db; ";
-        $action .= $commands->implode('command'," ");
-        $action .= " }";
+        $action .= $commands->implode('command', ' ');
+        $action .= ' }';
 
         return $action;
     }
-
-
 
     /**
      * Handle an exception from a rollback.
@@ -225,7 +222,7 @@ trait ManagesTransactions
     //Override unused trait transaction functions with dummy methods
 
     /**
-     * Dummy
+     * Dummy.
      *
      * @param $e
      */
@@ -233,7 +230,6 @@ trait ManagesTransactions
     {
         //
     }
-
 
     /**
      * Rollback the active database transaction.
@@ -263,7 +259,7 @@ trait ManagesTransactions
 
     /**
      * Create a save point within the database.
-     * Not supported by ArangoDB
+     * Not supported by ArangoDB.
      *
      * @return void
      */

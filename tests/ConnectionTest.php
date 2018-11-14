@@ -1,31 +1,25 @@
 <?php
 
-use Illuminate\Database\Events\TransactionBeginning;
-use Illuminate\Events\Dispatcher;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Fluent as IlluminateFluent;
-use Illuminate\Support\Testing\Fakes\EventFake;
 use LaravelFreelancerNL\Aranguent\Tests\TestCase;
+use Illuminate\Support\Fluent as IlluminateFluent;
 
 class ConnectionTest extends TestCase
 {
-
     /**
-     * test connection
+     * test connection.
      * @test
      */
-    function connection()
+    public function connection()
     {
         $this->assertInstanceOf('LaravelFreelancerNL\Aranguent\Connection', $this->connection);
     }
 
     /**
-     * begin transaction
+     * begin transaction.
      * @test
      */
-    function begin_transaction()
+    public function begin_transaction()
     {
-
         $this->assertEquals(0, $this->connection->transactionLevel());
         $this->assertEmpty($this->connection->getTransactionCommands());
 
@@ -37,15 +31,15 @@ class ConnectionTest extends TestCase
     }
 
     /**
-     * add a command to the transaction
+     * add a command to the transaction.
      * @test
      */
-    function add_transaction_command()
+    public function add_transaction_command()
     {
         $command = new IlluminateFluent([
             'name' => 'testCommandQuery',
             'command' => "db._query('INSERT {\"name\": \"Robert\", \"surname\": \"Baratheon\", \"alive\": @value, \"traits\": [\"A\",\"H\",\"C\"] } INTO migrations', {'value' : true});",
-            'collections' => ['write' => 'migrations']
+            'collections' => ['write' => 'migrations'],
         ]);
 
         $this->connection->beginTransaction();
@@ -62,15 +56,15 @@ class ConnectionTest extends TestCase
     }
 
     /**
-     * compile action
+     * compile action.
      * @test
      */
-    function compile_action()
+    public function compile_action()
     {
         $command = new IlluminateFluent([
             'name' => 'testCommandQuery',
             'command' => "db._query('INSERT {\"name\": \"Robert\", \"surname\": \"Baratheon\", \"alive\": false, \"traits\": [\"A\",\"H\",\"C\"] } INTO Characters', {'value' : 1});",
-            'collections' => ['write' => 'Characters']
+            'collections' => ['write' => 'Characters'],
         ]);
         $this->connection->beginTransaction();
         $action = $this->connection->compileTransactionAction();
@@ -84,36 +78,35 @@ class ConnectionTest extends TestCase
     }
 
     /**
-     * commit fails if committed too soon
+     * commit fails if committed too soon.
      * @test
      */
-    function commit_fails_if_committed_too_soon()
+    public function commit_fails_if_committed_too_soon()
     {
-        $this->expectExceptionMessage("Transaction committed before starting one.");
+        $this->expectExceptionMessage('Transaction committed before starting one.');
         $this->connection->commit();
 
         $this->connection->beginTransaction();
 
-        $this->expectExceptionMessage("Cannot commit an empty transaction.");
+        $this->expectExceptionMessage('Cannot commit an empty transaction.');
         $this->connection->commit();
-
     }
 
     /**
-     * commit a transaction
+     * commit a transaction.
      * @test
      */
-    function commit_a_transaction()
+    public function commit_a_transaction()
     {
         $command1 = new IlluminateFluent([
             'name' => 'testCommandQuery',
             'command' => "db._query('INSERT {\"name\": \"Robert\", \"surname\": \"Baratheon\", \"alive\": @value, \"traits\": [\"A\",\"H\",\"C\"] } INTO migrations', {'value' : true});",
-            'collections' => ['write' => 'migrations']
+            'collections' => ['write' => 'migrations'],
         ]);
         $command2 = new IlluminateFluent([
             'name' => 'testCommandQuery',
             'command' => "db._query('FOR c IN migrations RETURN c');",
-            'collections' => ['read' => 'migrations']
+            'collections' => ['read' => 'migrations'],
         ]);
 
         $this->connection->beginTransaction();

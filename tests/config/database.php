@@ -1,4 +1,5 @@
 <?php
+
 namespace LaravelFreelancerNL\Aranguent\test;
 
 use ArangoDBClient\ConnectionOptions as ArangoConnectionOptions;
@@ -29,6 +30,6 @@ return [
             'driver'    => 'sqlite',
             'database'  => ':memory:',
             'prefix'    => '',
-        ]
+        ],
     ],
 ];

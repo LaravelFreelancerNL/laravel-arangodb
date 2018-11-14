@@ -2,22 +2,21 @@
 
 namespace LaravelFreelancerNL\Aranguent;
 
-use Illuminate\Database\MigrationServiceProvider as IlluminateMigrationServiceProvider;
 use Illuminate\Database\Migrations\Migrator;
 use LaravelFreelancerNL\Aranguent\Migrations\MigrationCreator;
-use LaravelFreelancerNL\Aranguent\Migrations\DatabaseMigrationRepository;
 use LaravelFreelancerNL\Aranguent\Console\Migrations\MigrateMakeCommand;
+use LaravelFreelancerNL\Aranguent\Migrations\DatabaseMigrationRepository;
+use Illuminate\Database\MigrationServiceProvider as IlluminateMigrationServiceProvider;
 
 class MigrationServiceProvider extends IlluminateMigrationServiceProvider
 {
-
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     protected $defer = true;
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function boot()
     {
@@ -83,7 +82,7 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
      */
     protected function registerCommands()
     {
-        $commands = array(
+        $commands = [
 //            'MigrateCommand' => 'command.migrate',
             'MigrateMakeCommand' => 'command.make.migrate',
 //            'MigrateFresh' => 'command.migrate.fresh',
@@ -92,7 +91,7 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
 //            'MigrateReset' => 'command.migrate.reset',
 //            'MigrateRollback' => 'command.migrate.rollback',
 //            'MigrateStatus' => 'command.migrate.status',
-        );
+        ];
 
         foreach (array_keys($commands) as $command) {
             call_user_func_array([$this, "register{$command}"], []);
@@ -100,11 +99,10 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
 
         $commands = array_keys($commands);
         foreach ($commands as $key => $command) {
-            $commands[$key] = "\LaravelFreelancerNL\Aranguent\Console\Migrations\\" . $command;
+            $commands[$key] = "\LaravelFreelancerNL\Aranguent\Console\Migrations\\".$command;
         }
 //        $this->commands($commands);
     }
-
 
     protected function registerMigrateMakeCommand()
     {
@@ -122,7 +120,7 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
             'migrator',
             'migration.creator',
             'migration.repository',
-            'command.migrate.make'
+            'command.migrate.make',
         ];
     }
 }
