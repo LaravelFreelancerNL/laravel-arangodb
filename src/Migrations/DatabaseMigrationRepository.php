@@ -34,11 +34,11 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
     /**
      * Resolve the database connection instance.
      *
-     * @return \LaravelFreelancerNL\Aranguent\Connection
+     * @return \Illuminate\Database\ConnectionInterface
      */
     public function getConnection()
     {
-        return $this->resolver->connection($this->connection);
+       return $this->resolver->connection($this->connection);
     }
 
     /**
@@ -48,12 +48,12 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     public function getRan()
     {
-        $data['query'] = "
+        $query = "
             FOR m IN migrations
                 SORT m.batch, m.migration
                 RETURN m.migration
         ";
-        return $this->getConnection()->executeRawAql($data);
+        return $this->getConnection()->select($query, []);
 
 
 //        return $this->collection()
@@ -70,16 +70,16 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     public function getMigrations($steps)
     {
-        $data['query'] = "
+        $query = "
             FOR m IN migrations
                 FILTER m.batch >= 1
                 SORT m.batch DESC, m.migration DESC
                 LIMIT @steps
                 RETURN { 'migration' : m.migration, 'batch' : m.batch }
         ";
-        $data['bindVars']['steps'] = $steps;
+        $bindings['steps'] = $steps;
 
-        return $this->getConnection()->executeRawAql($data);
+        return $this->getConnection()->select($query, $bindings);
 
 //        $query = $this->collection()->where('batch', '>=', '1');
 //
@@ -91,15 +91,15 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
     public function getLast()
     {
         $batch = $this->getLastBatchNumber();
-        $data['query'] = "
+        $query = "
             FOR m IN migrations
                 FILTER m.batch == @batch
                 SORT m.migration DESC
                 RETURN m
         ";
-        $data['bindVars']['batch'] = $batch;
+        $bindings['batch'] = $batch;
 
-        return $this->getConnection()->executeRawAql($data);
+        return $this->getConnection()->select($query, $bindings);
 
 //        $query = $this->collection()->where('batch', );
 //
@@ -113,12 +113,12 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     public function getMigrationBatches()
     {
-        $data['query'] = "
+        $query = "
             FOR m IN migrations
                 SORT m.batch, m.migration
                 RETURN { 'batch' : m.batch, 'migration' : m.migration }
         ";
-        return $this->getConnection()->executeRawAql($data);
+        return $this->getConnection()->select($query, []);
 
 
 //        return $this->collection()
@@ -135,13 +135,13 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     public function log($file, $batch)
     {
-        $data['query'] = "
+        $query = "
             INSERT { migration: @file, batch: @batch } 
               INTO migrations
         ";
-        $data['bindVars']['file'] = $file;
-        $data['bindVars']['batch'] = $batch;
-        $this->getConnection()->executeRawAql($data);
+        $bindings['file'] = $file;
+        $bindings['batch'] = $batch;
+        $this->getConnection()->insert($query, $bindings);
 
 //        $record = ['migration' => $file, 'batch' => $batch];
 //
@@ -156,14 +156,14 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     public function delete($migration)
     {
-        $data['query'] = "
+        $query = "
             FOR m IN migrations
                 FILTER m.migration == @migration
                 REMOVE m IN migrations
         ";
-        $data['bindVars']['migration'] = $migration->migration;
+        $bindings['migration'] = $migration->migration;
 
-        $this->getConnection()->executeRawAql($data);
+        $this->getConnection()->delete($query, $bindings);
 
         //        $this->collection()->where('migration', $migration->migration)->delete();
     }
@@ -185,13 +185,13 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     public function getLastBatchNumber()
     {
-        $data['query'] = "
+        $query = "
             FOR m IN migrations
                 COLLECT AGGREGATE 
                     maxBatch = MAX(m.batch)
                     RETURN maxBatch
         ";
-        $results = current($this->getConnection()->executeRawAql($data));
+        $results = current($this->getConnection()->select($query, []));
         if ($results === null) {
             $results = 0;
         }

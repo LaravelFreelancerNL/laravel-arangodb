@@ -24,6 +24,7 @@ class Schema extends Facade
      */
     public static function connection($name)
     {
+        dd(static::$app['db']->connection($name)->getSchemaBuilder());
         return static::$app['db']->connection($name)->getSchemaBuilder();
     }
 

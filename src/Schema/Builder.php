@@ -3,10 +3,9 @@
 namespace LaravelFreelancerNL\Aranguent\Schema;
 
 use Closure;
-use Exception;
-use Illuminate\Database\Schema\Builder as IlluminateBuilder;
-use LogicException;
 use LaravelFreelancerNL\Aranguent\Connection;
+use Illuminate\Database\Schema\Builder as IlluminateBuilder;
+use Illuminate\Database\Schema\Blueprint as IlluminateBlueprint;
 
 class Builder
 {
@@ -49,6 +48,61 @@ class Builder
     }
 
     /**
+     * Create a new collection on the schema.
+     *
+     * @param  string    $collection
+     * @param  \Closure  $callback
+     * @param  array $config
+     * @return void
+     */
+    public function create($collection, Closure $callback, $config = [])
+    {
+        $this->build(tap($this->createBlueprint($collection), function ($blueprint) use ($callback, $config) {
+            $blueprint->create($config);
+
+            $callback($blueprint);
+        }));
+    }
+
+    /**
+     * Create a new command set with a Closure.
+     *
+     * @param  string  $collection
+     * @param  \Closure|null  $callback
+     * @return \LaravelFreelancerNL\Aranguent\Schema\Blueprint
+     */
+    protected function createBlueprint($collection, Closure $callback = null)
+    {
+        $prefix = $this->connection->getConfig('prefix_indexes')
+            ? $this->connection->getConfig('prefix')
+            : '';
+
+        if (isset($this->resolver)) {
+            return call_user_func($this->resolver, $collection, $callback, $prefix);
+        }
+
+        return new Blueprint($collection, $this->collectionHandler, $callback, $prefix);
+    }
+
+    /**
+     */
+    protected function build(Blueprint $blueprint)
+    {
+        $blueprint->build($this->connection, $this->grammar);
+    }
+
+    /**
+     * Set the Schema Blueprint resolver callback.
+     *
+     * @param  \Closure  $resolver
+     * @return void
+     */
+    public function blueprintResolver(Closure $resolver)
+    {
+        $this->resolver = $resolver;
+    }
+
+    /**
      * Modify a collection's schema.
      *
      * @param  string    $collection
@@ -59,10 +113,11 @@ class Builder
     {
         $this->build($this->createBlueprint($collection, $callback));
     }
+
     /**
      * Alias for collection.
      *
-     * @param  string    $collection
+     * @param  string    $table
      * @param  \Closure  $callback
      * @return void
      */
@@ -128,6 +183,7 @@ class Builder
      * Get all of the table names for the database.
      * Alias for getAllCollections()
      *
+     * @param array $options
      * @return array
      */
     protected function getAllTables(array $options = [])
@@ -139,7 +195,7 @@ class Builder
      * @param string $collection
      * @return \ArangoDBClient\Collection
      */
-    protected function getCollection(string $collection)
+    protected function getCollection($collection)
     {
         return $this->collectionHandler->get($collection);
     }
@@ -151,7 +207,7 @@ class Builder
      * @param $to
      * @return bool
      */
-    public function rename(string $from, string $to)
+    public function rename($from, $to)
     {
         return $this->collectionHandler->rename($from, $to);
     }
@@ -172,7 +228,7 @@ class Builder
      * @param  string  $table
      * @return bool
      */
-    public function hasTable(string $table)
+    public function hasTable($table)
     {
         return $this->hasCollection($table);
     }
@@ -185,7 +241,7 @@ class Builder
      * @param string $attribute
      * @return bool
      */
-    public function hasAttribute(string $collection, string $attribute)
+    public function hasAttribute($collection, $attribute)
     {
         $this->build(tap($this->createBlueprint($collection), function ($blueprint) use ($attribute) {
             return $blueprint->hasAttribute($attribute);
@@ -198,7 +254,7 @@ class Builder
      * @param  string  $column
      * @return bool
      */
-    public function hasColumn(string $table, string $column)
+    public function hasColumn($table, $column)
     {
         return $this->hasAttribute($table, $column);
     }
@@ -213,63 +269,7 @@ class Builder
     {
         return $this->figures($collection);
     }
-    /**
-     * Create a new collection on the schema.
-     *
-     * @param  string    $collection
-     * @param  \Closure  $callback
-     * @return void
-     */
-    public function create(string $collection, Closure $callback)
-    {
-        $this->build(tap($this->createBlueprint($collection), function ($blueprint) use ($callback) {
-            $blueprint->create();
 
-            $callback($blueprint);
-        }));
-    }
-
-    /**
-     * Create a new command set with a Closure.
-     *
-     * @param  string  $collection
-     * @param  \Closure|null  $callback
-     * @return \LaravelFreelancerNL\Aranguent\Schema\Blueprint
-     */
-    protected function createBlueprint(string $collection, Closure $callback = null)
-    {
-        $prefix = $this->connection->getConfig('prefix_indexes')
-            ? $this->connection->getConfig('prefix')
-            : '';
-
-        if (isset($this->resolver)) {
-            return call_user_func($this->resolver, $collection, $callback, $prefix);
-        }
-
-        return new Blueprint($collection, $this->collectionHandler, $callback, $prefix);
-    }
-
-    /**
-     * Execute the blueprint to build / modify the table.
-     *
-     * @param  \LaravelFreelancerNL\Aranguent\Schema\Blueprint  $blueprint
-     * @return void
-     */
-    protected function build(Blueprint $blueprint)
-    {
-        $blueprint->build($this->connection, $this->grammar);
-    }
-
-    /**
-     * Set the Schema Blueprint resolver callback.
-     *
-     * @param  \Closure  $resolver
-     * @return void
-     */
-    public function blueprintResolver(Closure $resolver)
-    {
-        $this->resolver = $resolver;
-    }
 
     /**
      * Get the database connection instance.

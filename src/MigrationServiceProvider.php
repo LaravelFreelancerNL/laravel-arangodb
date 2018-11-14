@@ -64,6 +64,7 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
         // so the migrator can resolve any of these connections when it needs to.
         $this->app->singleton('migrator', function ($app) {
             $repository = $app['migration.repository'];
+
             return new Migrator($repository, $app['db'], $app['files']);
         });
     }

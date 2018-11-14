@@ -2,86 +2,139 @@
 
 namespace LaravelFreelancerNL\Aranguent\Schema\Grammars;
 
+use Illuminate\Database\Schema\Grammars\Grammar as IlluminateGrammar;
 use Illuminate\Support\Fluent;
-use Illuminate\Database\Schema\Grammars\Grammar as IlluminateSchemaGrammar;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
 
-/*
- * Provides AQL syntax functions
- */
-class Grammar
+class Grammar extends IlluminateGrammar
 {
     /**
-     * ArangoDB handles transactions itself.
+     * ArangoDB handles transactions itself. However most schema actions
+     * are not done through queries but rather through commands.
+     * So we just run schema actions sequentially.
      *
      * @var bool
      */
     protected $transactions = false;
 
     /**
-     * The commands to be executed outside of create or alter command.
+     * Compile AQL to check if an attribute is in use within a document in the collection.
      *
-     * @var array
+     * @param string $collection
+     * @param Fluent $command
+     * @return Fluent
      */
-    protected $fluentCommands = [];
+    public function compileHasAttribute($collection, Fluent $command)
+    {
+        $bindings['@collection'] = $collection;
+        $filter = [];
+
+        $i = 1;
+        foreach($command->attributes as $attribute) {
+            $bindVar = 'attribute_' . $i;
+            $bindings[$bindVar] = $attribute;
+            $filter[] = '@' . $bindVar . ' != null';
+            $i++;
+        }
+        $filter = implode(' && ', $filter);
+
+        $query = "FOR document IN @@collection\n";
+        $query .= " FILTER $filter\n";
+        $query .= " LIMIT 1\n";
+        $query .= " RETURN true\n";
+
+        $command->aql['query'] = $query;
+        $command->aql['bindings'] = $bindings;
+        $command->collections['write'] = $collection;
+        $command->collections['read'] = $collection;
+
+        return $command;
+    }
 
     /**
-     * Get the SQL for the column data type.
+     * Compile AQL to rename an attribute, if the new name isn't already in use
      *
-     * @param  \Illuminate\Support\Fluent  $column
+     * @param string $collection
+     * @param Fluent $command
+     * @return Fluent
+     */
+    public function compileRenameAttribute($collection, Fluent $command)
+    {
+        $bindings['@collection'] = $collection;
+
+        $bindings['from'] = $command->attributes['to'];
+        $bindings['to'] = $command->attributes['from'];
+
+        $query = "FOR document IN @@collection\n";
+        $query .= " FILTER @from != null && @to == null\n";
+        $query .= " UPDATE document WITH {\n";
+        foreach ($bindings as $bindVar => $value) {
+            $query .= "     @from: null,\n";
+            $query .= "     @to: document.@from\n";
+        }
+        $query .= "} IN @@collection OPTIONS { keepNull: false }";
+
+        $command->aql['query'] = $query;
+        $command->aql['bindings'] = $bindings;
+        $command->collections['write'] = $collection;
+        $command->collections['read'] = $collection;
+
+        return $command;
+    }
+
+    /**
+     * Compile AQL to drop one or more attributes
+     *
+     * @param string $collection
+     * @param Fluent $command
+     * @return Fluent
+     */
+    public function compileDropAttribute($collection, Fluent $command)
+    {
+        $bindings['@collection'] = $collection;
+        $filter = [];
+        if (is_string($command->attributes)) {
+            $command->attributes = [$command->attributes];
+        }
+
+        $i = 1;
+        foreach($command->attributes as $attribute) {
+            $bindVar = '@attribute_' . $i;
+            $bindings[$bindVar] = $attribute;
+            $filter[] = $bindVar . " != null";
+            $i++;
+        }
+        $filter = implode(' || ', $filter);
+
+        $query = "FOR document IN @@collection\n";
+        $query .= " FILTER $filter\n";
+        $query .= " UPDATE document WITH {\n";
+        foreach ($bindings as $bindVar => $value) {
+            $query .= "     $bindVar: null,\n";
+        }
+        $query .= "} IN @@collection OPTIONS { keepNull: false }";
+
+        $command->aql['query'] = $query;
+        $command->aql['bindings'] = $bindings;
+        $command->collections['read'] = $collection;
+
+        return $command;
+    }
+
+    /**
+     * Prepare a bindVar for inclusion in an AQL query
+     *
+     * @param $attribute
      * @return string
      */
-    protected function getType(Fluent $column)
+    public function wrapBindVar($attribute)
     {
-        return $this->{'type'.ucfirst($column->type)}($column);
+        $attribute = trim($attribute);
+        if (strpos($attribute, '@') === 0) {
+            $attribute = "`$attribute`";
+        }
+
+        return $attribute;
     }
 
-
-    /**
-     * Get all of the commands with a given name.
-     *
-     * @param  \LaravelFreelancerNL\Aranguent\Schema\Blueprint  $blueprint
-     * @param  string  $name
-     * @return array
-     */
-    protected function getCommandsByName(Blueprint $blueprint, $name)
-    {
-        return array_filter($blueprint->getCommands(), function ($value) use ($name) {
-            return $value->name == $name;
-        });
-    }
-
-    /**
-     * Add a prefix to an array of values.
-     *
-     * @param  string  $prefix
-     * @param  array   $values
-     * @return array
-     */
-    public function prefixArray($prefix, array $values)
-    {
-        return array_map(function ($value) use ($prefix) {
-            return $prefix.' '.$value;
-        }, $values);
-    }
-
-    /**
-     * Get the fluent commands for the grammar.
-     *
-     * @return array
-     */
-    public function getFluentCommands()
-    {
-        return $this->fluentCommands;
-    }
-
-    /**
-     * Check if this Grammar supports schema changes wrapped in a transaction.
-     *
-     * @return bool
-     */
-    public function supportsSchemaTransactions()
-    {
-        return $this->transactions;
-    }
 }

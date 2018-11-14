@@ -3,10 +3,11 @@
 namespace LaravelFreelancerNL\Aranguent\Schema;
 
 use Closure;
-use Illuminate\Database\Schema\Blueprint as IlluminateBlueprint;
 use Illuminate\Support\Fluent;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Traits\Macroable;
+use Illuminate\Database\Schema\Blueprint as IlluminateBlueprint;
+use Illuminate\Database\Schema\Grammars\Grammar as IlluminateGrammar;
 
 
 /**
@@ -29,12 +30,30 @@ class Blueprint
     use Macroable;
 
     /**
+     * The connection that is used by the blueprint.
+     *
+     * @var \Illuminate\Database\Connection  $connection
+     */
+    protected $connection;
+
+    /**
+     * The grammar that is used by the blueprint.
+     *
+     * @var \LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar  $grammar
+     */
+    protected $grammar;
+
+    /**
      * The collection the blueprint describes.
      *
      * @var string
      */
     protected $collection;
 
+    /**
+     * The handler for collection manipulation.
+     *
+     */
     protected $collectionHandler;
 
     /**
@@ -52,11 +71,25 @@ class Blueprint
     protected $commands = [];
 
     /**
+     * Catching attributes to be able to add fluent indexes
+     *
+     * @var array
+     */
+    protected $attributes = [];
+
+    /**
      * Whether to make the collection temporary.
      *
      * @var bool
      */
     public $temporary = false;
+
+    /**
+     * Detect if _key (and thus proxy _id) should autoincrement
+     *
+     * @var bool
+     */
+    protected $autoIncrement = false;
 
     /**
      * Create a new schema blueprint.
@@ -83,38 +116,99 @@ class Blueprint
     /**
      * Execute the blueprint against the database.
      *
-     * @param Connection $connection
-     * @param $grammar
+     * @param  \Illuminate\Database\Connection  $connection
+     * @param  \Illuminate\Database\Schema\Grammars\Grammar  $grammar
+     * @return void
      */
-    public function build(Connection $connection, $grammar)
+    public function build(Connection $connection, IlluminateGrammar $grammar)
     {
-        //Gather commands
-        // Execute commands
+        $this->connection = $connection;
+        $this->grammar = $connection->getSchemaGrammar();
+
+        foreach ($this->commands as $command) {
+            if ($command->handler == 'aql') {
+                $command = $this->compileAqlCommand($command);
+            }
+
+            $this->executeCommand($command);
+        }
     }
 
     /**
-     * Alias for toAql
-     * Only used now for the pretend migration option to show a list of commands to run.
+     * Generate the compilation method name and call it if method exists in the Grammar object.
      *
-     * @param Connection $connection
-     * @param $grammar
+     * @param $command
+     * @return mixed
      */
-    public function toSql(Connection $connection, $grammar)
+    public function compileAqlCommand($command)
     {
-        //Call some kind of commandList method
+        $compileMethod = 'compile' . ucfirst($command->name);
+        if (method_exists($this->grammar, $compileMethod)) {
+            return $this->grammar->$compileMethod($command);
+        }
     }
 
     /**
-     * Get all of the commands matching the given names.
+     * Generate the execution method name and call it if the method exists.
      *
-     * @param  array  $names
-     * @return \Illuminate\Support\Collection
+     * @param $command
      */
-    protected function commandsNamed(array $names)
+    public function executeCommand($command)
     {
-        return collect($this->commands)->filter(function ($command) use ($names) {
-            return in_array($command->name, $names);
-        });
+        $executeNamedMethod = 'execute' . ucfirst($command->name) . 'Command';
+        $executeHandlerMethod = 'execute' . ucfirst($command->handler) . 'Command';
+        if (method_exists($this, $executeNamedMethod)) {
+            $this->$executeNamedMethod($command);
+        } else if (method_exists($this, $executeHandlerMethod)) {
+            $this->$executeHandlerMethod($command);
+        }
+    }
+
+    /**
+     * Execute an AQL statement
+     *
+     * @param $command
+     */
+    public function executeAqlCommand($command)
+    {
+        $this->connection->statement($command->aql['query'], $command->aql['bindings']);
+    }
+
+
+    public function executeCollectionCommand($command)
+    {
+        if ($this->connection->pretending()) {
+            $this->connection->logQuery("/* " . $command->explanation . " */\n", []);
+            return null;
+        }
+
+        if (method_exists($this->collectionHandler, $command->method)) {
+            $this->collectionHandler->{$command->method}($command->parameters);
+        }
+    }
+
+    public function executeIndexCommand($command)
+    {
+        if ($this->connection->pretending()) {
+            $this->connection->logQuery("/* " . $command->explanation . " */\n", []);
+            return null;
+        }
+
+        $this->collectionHandler->index($this->collection, $command->type, $command->attributes, $command->unique,$command->indexOptions);
+    }
+
+    /**
+     * Solely provides feedback to the developer in pretend mode.
+     *
+     * @param $command
+     * @return null
+     */
+    public function executeIgnoreCommand($command)
+    {
+        if ($this->connection->pretending()) {
+            $this->connection->logQuery("/* " . $command->explanation . " */\n", []);
+            return null;
+        }
     }
 
     /**
@@ -132,22 +226,34 @@ class Blueprint
     /**
      * Indicate that the collection needs to be created.
      *
+     * @param array $config
      * @return \Illuminate\Support\Fluent
      */
-    public function create()
+    public function create($config = [])
     {
-        return $this->addCommand('create');
+        $parameters['config'] = $config;
+        $parameters['explanation'] = "Create '{$this->collection}' collection.";
+        $parameters['handler'] = 'collection';
+
+        return $this->addCommand('create', $parameters);
     }
 
-    /**
-     * Indicate that the collection needs to be temporary.
-     *
-     * @return void
-     */
-    public function temporary()
+    public function executeCreateCommand($command)
     {
-        $this->temporary = true;
+        if ($this->connection->pretending()) {
+            $this->connection->logQuery("/* " . $command->explanation . " */\n", []);
+            return null;
+        }
+        $config = $command->config;
+        if ($this->temporary === true) {
+            $config['isVolatile'] = true;
+        }
+        if ($this->autoIncrement === true) {
+            $config['keyOptions']['autoincrement'] = true;
+        }
+        $this->collectionHandler->create($this->collection, $config);
     }
+
 
     /**
      * Indicate that the collection should be dropped.
@@ -156,7 +262,9 @@ class Blueprint
      */
     public function drop()
     {
-        return $this->addCommand('drop');
+        $parameters['explanation'] = "Drop the '{$this->collection}' collection.";
+        $parameters['handler'] = 'collection';
+        return $this->addCommand('drop', $parameters);
     }
 
     /**
@@ -166,11 +274,13 @@ class Blueprint
      */
     public function dropIfExists()
     {
+        $parameters['explanation'] = "Drop the '{$this->collection}' collection.";
+        $parameters['handler'] = 'collection';
         return $this->addCommand('dropIfExists');
     }
 
     /**
-     * Indicate that the given attributes should be dropped.
+     * Indicate that the given attribute(s) should be dropped.
      *
      * @param  array|mixed  $attributes
      * @return \Illuminate\Support\Fluent
@@ -179,7 +289,25 @@ class Blueprint
     {
         $attributes = is_array($attributes) ? $attributes : func_get_args();
 
-        return $this->addCommand('dropAttribute', compact('attributes'));
+        $parameters['handler'] = 'aql';
+        $parameters['attributes'] = $attributes;
+        $parameters['explanation'] = "Drop the following attribute(s): " . implode(',', $attributes) . ".";
+        return $this->addCommand('dropAttribute', compact('parameters'));
+    }
+
+    /**
+     * Check if any document within the collection has the attribute.
+     *
+     * @param string $attribute
+     * @return Fluent
+     */
+    public function hasAttribute($attribute)
+    {
+        $parameters['handler'] = 'aql';
+        $parameters['explanation'] = "Checking if any document within the collection has the '$attribute' attribute.";
+        $parameters['attribute'] = $attribute;
+
+        return $this->addCommand('hasAttribute', $parameters);
     }
 
     /**
@@ -191,29 +319,11 @@ class Blueprint
      */
     public function renameAttribute($from, $to)
     {
-        return $this->addCommand('renameAttribute', compact('from', 'to'));
-    }
-
-    /**
-     * Indicate that the given primary key should be dropped.
-     *
-     * @param  string|array  $index
-     * @return \Illuminate\Support\Fluent
-     */
-    public function dropPrimary($index = null)
-    {
-        return $this->dropIndexCommand('dropPrimary', 'primary', $index);
-    }
-
-    /**
-     * Indicate that the given unique key should be dropped.
-     *
-     * @param  string|array  $index
-     * @return \Illuminate\Support\Fluent
-     */
-    public function dropUnique($index)
-    {
-        return $this->dropIndexCommand('dropUnique', 'unique', $index);
+        $parameters['handler'] = 'aql';
+        $parameters['explanation'] = "Rename the attribute '$from' to '$to'.";
+        $parameters['from'] = $from;
+        $parameters['to'] = $to;
+        return $this->addCommand('renameAttribute', $parameters);
     }
 
     /**
@@ -222,102 +332,12 @@ class Blueprint
      * @param  string|array  $index
      * @return \Illuminate\Support\Fluent
      */
-    public function dropIndex($index)
+    public function dropIndex($type, $attributes)
     {
-        return $this->dropIndexCommand('dropIndex', 'index', $index);
+//        return $this->dropIndexCommand('dropIndex', $type, $attributes);
     }
 
-    /**
-     * Indicate that the given spatial index should be dropped.
-     *
-     * @param  string|array  $index
-     * @return \Illuminate\Support\Fluent
-     */
-    public function dropSpatialIndex($index)
-    {
-        return $this->dropIndexCommand('dropSpatialIndex', 'spatialIndex', $index);
-    }
-
-
-    /**
-     * Indicate that the given indexes should be renamed.
-     *
-     * @param  string  $from
-     * @param  string  $to
-     * @return \Illuminate\Support\Fluent
-     */
-    public function renameIndex($from, $to)
-    {
-        return $this->addCommand('renameIndex', compact('from', 'to'));
-    }
-
-    /**
-     * Indicate that the timestamp attributes should be dropped.
-     *
-     * @return void
-     */
-    public function dropTimestamps()
-    {
-        $this->dropAttribute('created_at', 'updated_at');
-    }
-
-    /**
-     * Indicate that the timestamp attributes should be dropped.
-     *
-     * @return void
-     */
-    public function dropTimestampsTz()
-    {
-        $this->dropTimestamps();
-    }
-
-    /**
-     * Indicate that the soft delete attribute should be dropped.
-     *
-     * @param  string  $attribute
-     * @return void
-     */
-    public function dropSoftDeletes($attribute = 'deleted_at')
-    {
-        $this->dropAttribute($attribute);
-    }
-
-    /**
-     * Indicate that the soft delete attribute should be dropped.
-     *
-     * @param  string  $attribute
-     * @return void
-     */
-    public function dropSoftDeletesTz($attribute = 'deleted_at')
-    {
-        $this->dropSoftDeletes($attribute);
-    }
-
-    /**
-     * Indicate that the remember token attribute should be dropped.
-     *
-     * @return void
-     */
-    public function dropRememberToken()
-    {
-        $this->dropAttribute('remember_token');
-    }
-
-    /**
-     * Indicate that the polymorphic attributes should be dropped.
-     *
-     * @param  string  $name
-     * @param  string|null  $indexName
-     * @return void
-     */
-    public function dropMorphs($name, $indexName = null)
-    {
-        $this->dropIndex($indexName ?: $this->createIndexName('index', ["{$name}_type", "{$name}_id"]));
-
-        $this->dropAttribute("{$name}_type", "{$name}_id");
-    }
-
-    /**
+     /**
      * Rename the collection to a given name.
      *
      * @param  string  $to
@@ -328,115 +348,104 @@ class Blueprint
         return $this->addCommand('rename', compact('to'));
     }
 
+
     /**
-     * Specify the primary key(s) for the collection.
+     * Specify an index for the collection. Creates a skiplist index by default.
      *
+     * @param string $type         - index type: hash, fulltext, geo, persistent, skiplist,
      * @param  string|array  $attributes
-     * @param  string  $name
-     * @param  string|null  $algorithm
+     * @param  array  $indexOptions
      * @return \Illuminate\Support\Fluent
      */
-    public function primary($attributes, $name = null, $algorithm = null)
+    public function index($attributes = null, $type = null, $indexOptions = [])
     {
-        return $this->indexCommand('primary', $attributes, $name, $algorithm);
+        return $this->indexCommand($type, $attributes, $indexOptions);
+    }
+
+    public function hashIndex($attributes = null, $indexOptions = [])
+    {
+        return $this->indexCommand('hash', $attributes, $indexOptions);
+    }
+
+    public function fulltextIndex($attributes = null, $indexOptions = [])
+    {
+        return $this->indexCommand('fulltext', $attributes, $indexOptions);
+    }
+
+    /**
+     *  Specify a spatial index for the collection.
+     *
+     * @param $attributes
+     * @param array $indexOptions
+     * @return Fluent
+     */
+    public function geoIndex($attributes, $indexOptions = [])
+    {
+        return $this->indexCommand('geo', $attributes, $indexOptions);
+    }
+
+    /**
+     * Alias for the geoIndex
+     *
+     * @param  string|array  $attributes
+     * @param  array  $indexOptions
+     * @return \Illuminate\Support\Fluent
+     */
+    public function spatialIndex($attributes, $indexOptions = [])
+    {
+        return $this->geoIndex($attributes, $indexOptions);
+    }
+
+    public function persistentIndex($attributes, $indexOptions = [])
+    {
+        return $this->indexCommand('persistent', $attributes, $indexOptions);
+    }
+
+    public function skiplistIndex($attributes, $indexOptions = [])
+    {
+        return $this->indexCommand('skiplist', $attributes, $indexOptions);
     }
 
     /**
      * Specify a unique index for the collection.
      *
      * @param  string|array  $attributes
-     * @param  string  $name
-     * @param  string|null  $algorithm
+     * @param  array  $indexOptions
      * @return \Illuminate\Support\Fluent
      */
-    public function unique($attributes, $name = null, $algorithm = null)
+    public function unique($attributes = null, $indexOptions = [])
     {
-        return $this->indexCommand('unique', $attributes, $name, $algorithm);
-    }
+        $indexOptions['unique'] = true;
 
-    /**
-     * Specify an index for the collection.
-     *
-     * @param  string|array  $attributes
-     * @param  string  $name
-     * @param  string|null  $algorithm
-     * @return \Illuminate\Support\Fluent
-     */
-    public function index($attributes, $name = null, $algorithm = null)
-    {
-        return $this->indexCommand('index', $attributes, $name, $algorithm);
+        return $this->indexCommand('skiplist', $attributes, $indexOptions);
     }
-
-    /**
-     * Specify a spatial index for the collection.
-     *
-     * @param  string|array  $attributes
-     * @param  string  $name
-     * @return \Illuminate\Support\Fluent
-     */
-    public function spatialIndex($attributes, $name = null)
-    {
-        return $this->indexCommand('spatialIndex', $attributes, $name);
-    }
-
 
     /**
      * Add a new index command to the blueprint.
      *
      * @param  string  $type
      * @param  string|array  $attributes
-     * @param  string  $index
-     * @param  string|null  $algorithm
+     * @param  array $indexOptions
      * @return \Illuminate\Support\Fluent
      */
-    protected function indexCommand($type, $attributes, $index, $algorithm = null)
+    protected function indexCommand($type = '', $attributes = [], $indexOptions = [])
     {
-        $attributes = (array) $attributes;
-
-        // If no name was specified for this index, we will create one using a basic
-        // convention of the collection name, followed by the attributes, followed by an
-        // index type, such as primary or index, which makes the index unique.
-        $index = $index ?: $this->createIndexName($type, $attributes);
-
-        return $this->addCommand(
-            $type, compact('index', 'attributes', 'algorithm')
-        );
-    }
-
-    /**
-     * Create a new drop index command on the blueprint.
-     *
-     * @param  string  $command
-     * @param  string  $type
-     * @param  string|array  $index
-     * @return \Illuminate\Support\Fluent
-     */
-    protected function dropIndexCommand($command, $type, $index)
-    {
-        $attributes = [];
-
-        // If the given "index" is actually an array of attributes, the developer means
-        // to drop an index merely by specifying the attributes involved without the
-        // conventional name, so we will build the index name from the attributes.
-        if (is_array($index)) {
-            $index = $this->createIndexName($type, $attributes = $index);
+        if ($type == '') {
+            $type = 'skiplist';
         }
 
-        return $this->indexCommand($command, $attributes, $index);
-    }
+        if ($attributes === null) {
+            $attributes = end($this->attributes);
+        }
+        $attributes = (array) $attributes;
 
-    /**
-     * Create a default index name for the collection.
-     *
-     * @param  string  $type
-     * @param  array  $attributes
-     * @return string
-     */
-    protected function createIndexName($type, array $attributes)
-    {
-        $index = strtolower($this->prefix.$this->collection.'_'.implode('_', $attributes).'_'.$type);
+        $unique = false;
+        if (isset($indexOptions['unique'])) {
+            $unique = $indexOptions['unique'];
+            unset($indexOptions['unique']);
+        }
 
-        return str_replace(['-', '.'], '_', $index);
+        return $this->addCommand('index', compact('type', 'attributes', 'unique', 'indexOptions'));
     }
 
     /**
@@ -495,19 +504,7 @@ class Blueprint
     }
 
     /**
-     * Get the attributes on the blueprint that should be added.
-     *
-     * @return \Illuminate\Database\Schema\AttributeDefinition[]
-     */
-    public function getAddedAttributes()
-    {
-        return array_filter($this->attributes, function ($attribute) {
-            return ! $attribute->change;
-        });
-    }
-
-    /**
-     * Silently catch unsupported schema methods
+     * Silently catch unsupported schema methods. Store attributes for backwards compatible fluent index creation.
      *
      * @param $method
      * @param $args
@@ -515,8 +512,30 @@ class Blueprint
      */
     public function __call($method, $args)
     {
-        // Dummy.
-        error_log("Aranguent Schema Blueprint doesn't support method '$method'\n");
+        $columnMethods = [
+            'bigIncrements', 'bigInteger', 'binary', 'boolean', 'char', 'date', 'dateTime', 'dateTimeTz', 'decimal',
+            'double', 'enum', 'float', 'geometry', 'geometryCollection', 'increments', 'integer', 'ipAddress', 'json',
+            'jsonb', 'lineString', 'longText', 'macAddress', 'mediumIncrements', 'mediumInteger', 'mediumText',
+            'multiLineString', 'multiPoint', 'multiPolygon', 'nullableTimestamps', 'point',
+            'polygon', 'polygon',  'smallIncrements', 'smallInteger',  'string', 'text', 'time',
+            'timeTz', 'timestamp', 'timestampTz', 'tinyIncrements', 'tinyInteger',
+            'unsignedBigInteger', 'unsignedDecimal', 'unsignedInteger', 'unsignedMediumInteger', 'unsignedSmallInteger',
+            'unsignedTinyInteger', 'uuid', 'year'
+        ];
+
+        if (in_array($method, $columnMethods)) {
+            $this->attributes[] = $args[0];
+        }
+
+        $autoIncrementMethods = ['increments', 'autoIncrement'];
+        if (in_array($method, $autoIncrementMethods)) {
+            $this->autoIncrement = true;
+        }
+
+        $info['method'] = $method;
+        $info['explanation'] = "'$method' is ignored; Aranguent Schema Blueprint doesn't support it.";
+        $this->addCommand('ignore', $info);
+
         return $this;
     }
 }
