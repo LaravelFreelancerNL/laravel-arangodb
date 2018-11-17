@@ -3,6 +3,7 @@
 namespace LaravelFreelancerNL\Aranguent;
 
 use Illuminate\Database\Migrations\Migrator;
+use LaravelFreelancerNL\Aranguent\Console\Migrations\AranguentConvertMigrationsCommand;
 use LaravelFreelancerNL\Aranguent\Migrations\MigrationCreator;
 use LaravelFreelancerNL\Aranguent\Console\Migrations\MigrateMakeCommand;
 use LaravelFreelancerNL\Aranguent\Migrations\DatabaseMigrationRepository;
@@ -83,14 +84,8 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
     protected function registerCommands()
     {
         $commands = [
-//            'MigrateCommand' => 'command.migrate',
             'MigrateMakeCommand' => 'command.make.migrate',
-//            'MigrateFresh' => 'command.migrate.fresh',
-//            'MigrateInstall' => 'command.migrate.install',
-//            'MigrateRefresh' => 'command.migrate.refresh',
-//            'MigrateReset' => 'command.migrate.reset',
-//            'MigrateRollback' => 'command.migrate.rollback',
-//            'MigrateStatus' => 'command.migrate.status',
+            'AranguentConvertMigrationsCommand' => 'command.aranguent.convert-migrations',
         ];
 
         foreach (array_keys($commands) as $command) {
@@ -101,7 +96,9 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
         foreach ($commands as $key => $command) {
             $commands[$key] = "\LaravelFreelancerNL\Aranguent\Console\Migrations\\".$command;
         }
-//        $this->commands($commands);
+        $this->commands([
+            'command.aranguent.convert-migrations',
+        ]);
     }
 
     protected function registerMigrateMakeCommand()
@@ -114,6 +111,13 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
         });
     }
 
+    protected function registerAranguentConvertMigrationsCommand()
+    {
+        $this->app->singleton('command.aranguent.convert-migrations', function($app) {
+            return new AranguentConvertMigrationsCommand($app['migrator']);
+        });
+    }
+
     public function provides()
     {
         return [
@@ -121,6 +125,7 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
             'migration.creator',
             'migration.repository',
             'command.migrate.make',
+            'command.aranguent.convert-migrations',
         ];
     }
 }
