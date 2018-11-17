@@ -73,11 +73,10 @@ class Connection extends IlluminateConnection
 
     /**
      * Connection constructor.
-     * @param string $database
-     * @param string $tablePrefix
+     *
      * @param array $config
      */
-    public function __construct(array $config = [])
+    public function __construct($config = [])
     {
         // First we will setup the default properties. We keep track of the DB
         // name we are connected to since it is needed when some reflective
@@ -248,7 +247,7 @@ class Connection extends IlluminateConnection
     /**
      * Begin a fluent query against a database collection.
      *
-     * @param  string  $table
+     * @param  string  $collection
      * @return \LaravelFreelancerNL\Aranguent\Query\Builder
      */
     public function collection($collection)

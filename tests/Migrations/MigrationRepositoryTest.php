@@ -3,7 +3,7 @@
 use ArangoDBClient\Document as ArangoDocument;
 use LaravelFreelancerNL\Aranguent\Tests\TestCase;
 
-class DatabaseMigrationRepositoryTest extends TestCase
+class MigrationRepositoryTest extends TestCase
 {
     /**
      * migrations collection is created.

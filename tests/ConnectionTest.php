@@ -1,10 +1,18 @@
 <?php
 
+use Mockery as M;
+use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Tests\TestCase;
 use Illuminate\Support\Fluent as IlluminateFluent;
 
 class ConnectionTest extends TestCase
 {
+
+    public function tearDown()
+    {
+        M::close();
+    }
+
     /**
      * test connection.
      * @test
@@ -117,5 +125,24 @@ class ConnectionTest extends TestCase
         $results = $this->connection->commit();
 
         $this->assertTrue($results);
+    }
+
+    protected function getMockConnection($methods = [], $arangoConnection = null)
+    {
+        $arangoConnection = $arangoConnection ?: new DatabaseConnectionTestMockArangoConnection;
+        $defaults = ['getDefaultQueryGrammar', 'getDefaultPostProcessor', 'getDefaultSchemaGrammar'];
+        $connection = $this->getMockBuilder(Connection::class)->setMethods(array_merge($defaults, $methods))->setConstructorArgs([$arangoConnection])->getMock();
+        $connection->enableQueryLog();
+
+        return $connection;
+    }
+}
+
+class DatabaseConnectionTestMockArangoConnection extends ArangoDBClient\Connection
+
+{
+    public function __construct(array $options = [])
+    {
+        //
     }
 }

@@ -18,34 +18,39 @@ class Grammar extends IlluminateGrammar
 
     /**
      * Compile AQL to check if an attribute is in use within a document in the collection.
-     *
+     * If multiple attributes are given then all must be set in one document.
      * @param string $collection
      * @param Fluent $command
      * @return Fluent
      */
     public function compileHasAttribute($collection, Fluent $command)
     {
-        $bindings['@collection'] = $collection;
         $filter = [];
-
-        $i = 1;
-        foreach ($command->attributes as $attribute) {
-            $bindVar = 'attribute_'.$i;
-            $bindings[$bindVar] = $attribute;
-            $filter[] = '@'.$bindVar.' != null';
-            $i++;
+        if (is_string($command->attribute)) {
+            $command->attribute = [$command->attribute];
         }
+
+        foreach ($command->attribute as $attribute) {
+            $bindVar = $this->wrapBindVar($attribute);
+            $bindings[] = $bindVar;
+            $filter[] = '@' . $bindVar . ' != null';
+        }
+
         $filter = implode(' && ', $filter);
 
         $query = "FOR document IN @@collection\n";
-        $query .= " FILTER $filter\n";
-        $query .= " LIMIT 1\n";
-        $query .= " RETURN true\n";
+        $query .= "    FILTER $filter\n";
+        $query .= "    LIMIT 1\n";
+        $query .= "    RETURN true";
 
-        $command->aql['query'] = $query;
-        $command->aql['bindings'] = $bindings;
-        $command->collections['write'] = $collection;
-        $command->collections['read'] = $collection;
+        $bindings['@collection'] = $collection;
+
+        $aql['query'] = $query;
+        $aql['bindings'] = $bindings;
+        $collections['read'] = $collection;
+
+        $command->aql = $aql;
+        $command->collections = $collections;
 
         return $command;
     }
@@ -61,22 +66,25 @@ class Grammar extends IlluminateGrammar
     {
         $bindings['@collection'] = $collection;
 
-        $bindings['from'] = $command->attributes['to'];
-        $bindings['to'] = $command->attributes['from'];
+        $bindings['from'] = $this->wrapBindVar($command->to);
+        $bindings['to'] = $this->wrapBindVar($command->from);
 
-        $query = "FOR document IN @@collection\n";
-        $query .= " FILTER @from != null && @to == null\n";
-        $query .= " UPDATE document WITH {\n";
-        foreach ($bindings as $bindVar => $value) {
-            $query .= "     @from: null,\n";
-            $query .= "     @to: document.@from\n";
-        }
-        $query .= '} IN @@collection OPTIONS { keepNull: false }';
+        $query  = "
+FOR document IN @@collection
+    FILTER @from != null && @to == null
+    UPDATE document WITH {
+        @from: null,
+        @to: document.@from
+} IN @@collection OPTIONS { keepNull: false }
+";
 
-        $command->aql['query'] = $query;
-        $command->aql['bindings'] = $bindings;
-        $command->collections['write'] = $collection;
-        $command->collections['read'] = $collection;
+        $aql['query'] = $query;
+        $aql['bindings'] = $bindings;
+        $collections['write'] = $collection;
+        $collections['read'] = $collection;
+
+        $command->aql = $aql;
+        $command->collections = $collections;
 
         return $command;
     }
@@ -90,32 +98,35 @@ class Grammar extends IlluminateGrammar
      */
     public function compileDropAttribute($collection, Fluent $command)
     {
-        $bindings['@collection'] = $collection;
         $filter = [];
         if (is_string($command->attributes)) {
             $command->attributes = [$command->attributes];
         }
 
-        $i = 1;
         foreach ($command->attributes as $attribute) {
-            $bindVar = '@attribute_'.$i;
-            $bindings[$bindVar] = $attribute;
-            $filter[] = $bindVar.' != null';
-            $i++;
+            $bindVar = $this->wrapBindVar($attribute);
+            $bindings[] = $bindVar;
+            $filter[] = '@' . $bindVar . ' != null';
         }
         $filter = implode(' || ', $filter);
 
         $query = "FOR document IN @@collection\n";
         $query .= " FILTER $filter\n";
         $query .= " UPDATE document WITH {\n";
-        foreach ($bindings as $bindVar => $value) {
-            $query .= "     $bindVar: null,\n";
+        foreach ($bindings as $bindVar) {
+            $query .= "     @$bindVar: null,\n";
         }
         $query .= '} IN @@collection OPTIONS { keepNull: false }';
+        $bindings['@collection'] = $collection;
 
-        $command->aql['query'] = $query;
-        $command->aql['bindings'] = $bindings;
-        $command->collections['read'] = $collection;
+
+        $aql['query'] = $query;
+        $aql['bindings'] = $bindings;
+        $collections['read'] = $collection;
+        $collections['write'] = $collection;
+
+        $command->aql = $aql;
+        $command->collections = $collections;
 
         return $command;
     }

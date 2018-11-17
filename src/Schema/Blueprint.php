@@ -12,7 +12,7 @@ use Illuminate\Database\Schema\Grammars\Grammar as IlluminateGrammar;
  * Class Blueprint.
  *
  * The Schema blueprint works differently from the standard Illuminate version:
- * 1) ArangoDB is schemaless: we don't need to create columns
+ * 1) ArangoDB is schemaless: we don't need to (and can't) create columns
  * 2) ArangoDB doesn't allow DB schema actions within AQL nor within a transaction.
  * 3) ArangoDB transactions aren't optimized for large scale data handling as the entire transaction has to fit in main memory.
  *
@@ -182,6 +182,36 @@ class Blueprint
         }
     }
 
+
+    /**
+     * Drop the index by first getting all the indexes on the collection; then selecting the matching one
+     * by type and attributes
+     * @param $command
+     */
+    public function executeDropIndexCommand($command)
+    {
+        if ($this->connection->pretending()) {
+            $this->connection->logQuery('/* '.$command->explanation." */\n", []);
+
+            return;
+        }
+        $attributes = $command->attributes;
+        if (is_string($attributes)) {
+            $attributes = [$attributes];
+        }
+        $indexId = null;
+        $indexData = $this->collectionHandler->getIndexes($this->collection);
+        foreach ($indexData['indexes'] as $key => $index) {
+            if (
+                $index['type'] === $command->type
+                && empty(array_diff($index['fields'], $attributes))
+                && empty(array_diff($attributes, $index['fields']))
+            ) {
+                $this->collectionHandler->dropIndex($index['id']);
+            }
+        }
+    }
+
     public function executeIndexCommand($command)
     {
         if ($this->connection->pretending()) {
@@ -304,7 +334,7 @@ class Blueprint
     public function hasAttribute($attribute)
     {
         $parameters['handler'] = 'aql';
-        $parameters['explanation'] = "Checking if any document within the collection has the '$attribute' attribute.";
+        $parameters['explanation'] = "Checking if any document within the collection has the '" . (array) $attribute . "' attribute(s).";
         $parameters['attribute'] = $attribute;
 
         return $this->addCommand('hasAttribute', $parameters);
@@ -330,12 +360,18 @@ class Blueprint
     /**
      * Indicate that the given index should be dropped.
      *
-     * @param  string|array  $index
+     * @param  string|array  $attributes
+     * @param  string  $type
      * @return \Illuminate\Support\Fluent
      */
-    public function dropIndex($type, $attributes)
+    public function dropIndex($attributes, $type)
     {
-//        return $this->dropIndexCommand('dropIndex', $type, $attributes);
+        $parameters['attributes'] = $attributes;
+        $parameters['type'] = $type;
+        $parameters['explanation'] = "Drop the '" . $type . "' index on [" . implode(', ', (array) $attributes) . "].";
+        $parameters['handler'] = 'collection';
+
+        return $this->addCommand('dropIndex', $parameters);
     }
 
     /**
@@ -362,6 +398,14 @@ class Blueprint
         return $this->indexCommand($type, $attributes, $indexOptions);
     }
 
+    /**
+     * Create a hash index for fast exact matching.
+     * Hash ! has ;)
+     *
+     * @param null $attributes
+     * @param array $indexOptions
+     * @return Fluent
+     */
     public function hashIndex($attributes = null, $indexOptions = [])
     {
         return $this->indexCommand('hash', $attributes, $indexOptions);

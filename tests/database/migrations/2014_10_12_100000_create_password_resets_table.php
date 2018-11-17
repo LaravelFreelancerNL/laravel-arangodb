@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
 
-class CreateUsersCollection extends Migration
+class CreatePasswordResetsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,10 @@ class CreateUsersCollection extends Migration
      */
     public function up()
     {
-        Schema::create('users', function (Blueprint $collection) {
+        Schema::create('password_resets', function (Blueprint $table) {
+            $table->string('email')->index();
+            $table->string('token');
+            $table->timestamp('created_at')->nullable();
         });
     }
 
@@ -24,6 +27,6 @@ class CreateUsersCollection extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('users');
+        Schema::drop('password_resets');
     }
 }

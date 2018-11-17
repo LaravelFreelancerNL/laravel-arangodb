@@ -1,8 +1,9 @@
 <?php
 
+use Mockery as M;
 use LaravelFreelancerNL\Aranguent\Tests\TestCase;
 
-class MigrationCommandsTest extends TestCase
+class ConsoleMigrationCommandsTest extends TestCase
 {
     protected $packageMigrationPath;
 
@@ -24,6 +25,11 @@ class MigrationCommandsTest extends TestCase
         array_map('unlink', array_filter((array) glob($this->laravelMigrationPath.'/*')));
     }
 
+    public function tearDown()
+    {
+        M::close();
+    }
+
     /**
      * migrate.
      * @test
@@ -34,6 +40,8 @@ class MigrationCommandsTest extends TestCase
 
         $this->artisan('migrate', ['--force' => true, '--path' => $path])->run();
     }
+
+
 
 //    /**
 //     * migrate install command
