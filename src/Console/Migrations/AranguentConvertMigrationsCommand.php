@@ -52,7 +52,7 @@ class AranguentConvertMigrationsCommand extends BaseCommand
      */
     public function handle()
     {
-        if (!$this->confirmToProceed()) {
+        if (! $this->confirmToProceed()) {
             return;
         }
 
@@ -76,5 +76,4 @@ class AranguentConvertMigrationsCommand extends BaseCommand
         $content = str_replace(array_keys($replacements), $replacements, $content);
         file_put_contents($filePath, $content);
     }
-
 }

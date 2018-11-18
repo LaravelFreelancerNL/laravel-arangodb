@@ -3,11 +3,11 @@
 namespace LaravelFreelancerNL\Aranguent;
 
 use Illuminate\Database\Migrations\Migrator;
-use LaravelFreelancerNL\Aranguent\Console\Migrations\AranguentConvertMigrationsCommand;
 use LaravelFreelancerNL\Aranguent\Migrations\MigrationCreator;
 use LaravelFreelancerNL\Aranguent\Console\Migrations\MigrateMakeCommand;
 use LaravelFreelancerNL\Aranguent\Migrations\DatabaseMigrationRepository;
 use Illuminate\Database\MigrationServiceProvider as IlluminateMigrationServiceProvider;
+use LaravelFreelancerNL\Aranguent\Console\Migrations\AranguentConvertMigrationsCommand;
 
 class MigrationServiceProvider extends IlluminateMigrationServiceProvider
 {
@@ -113,7 +113,7 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
 
     protected function registerAranguentConvertMigrationsCommand()
     {
-        $this->app->singleton('command.aranguent.convert-migrations', function($app) {
+        $this->app->singleton('command.aranguent.convert-migrations', function ($app) {
             return new AranguentConvertMigrationsCommand($app['migrator']);
         });
     }
