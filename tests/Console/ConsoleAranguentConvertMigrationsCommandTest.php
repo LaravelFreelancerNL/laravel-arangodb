@@ -25,8 +25,8 @@ class AranguentConvertMigrationsCommandTest extends TestCase
         parent::setUp();
 
         //Copy a stub with Illuminate usage to migrations directory
-        $stub = __DIR__ . '/../database/stubs/test_stub_for_migration_conversion.php';
-        $this->conversionMigration = __DIR__ . '/../database/migrations/test_migration_conversion.php';
+        $stub = __DIR__.'/../database/stubs/test_stub_for_migration_conversion.php';
+        $this->conversionMigration = __DIR__.'/../database/migrations/test_migration_conversion.php';
         copy($stub, $this->conversionMigration);
     }
 
@@ -38,10 +38,10 @@ class AranguentConvertMigrationsCommandTest extends TestCase
     }
 
     /**
-     * Illuminate usage is replaced by Aranguent in migration files
+     * Illuminate usage is replaced by Aranguent in migration files.
      * @test
      */
-    function illuminate_usage_is_replaced_by_aranguent_in_migration_files()
+    public function illuminate_usage_is_replaced_by_aranguent_in_migration_files()
     {
         $command = new AranguentConvertMigrationsCommand($migrator = M::mock(Migrator::class));
         $app = new ApplicationDatabaseMigrationStub(['path.database' => __DIR__]);

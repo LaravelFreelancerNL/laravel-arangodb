@@ -7,7 +7,6 @@ use Illuminate\Support\Fluent as IlluminateFluent;
 
 class ConnectionTest extends TestCase
 {
-
     public function tearDown()
     {
         M::close();
@@ -139,7 +138,6 @@ class ConnectionTest extends TestCase
 }
 
 class DatabaseConnectionTestMockArangoConnection extends ArangoDBClient\Connection
-
 {
     public function __construct(array $options = [])
     {

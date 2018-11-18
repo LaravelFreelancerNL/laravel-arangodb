@@ -28,14 +28,14 @@ class Blueprint
     /**
      * The connection that is used by the blueprint.
      *
-     * @var \Illuminate\Database\Connection 
+     * @var \Illuminate\Database\Connection
      */
     protected $connection;
 
     /**
      * The grammar that is used by the blueprint.
      *
-     * @var \LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar 
+     * @var \LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar
      */
     protected $grammar;
 
@@ -182,10 +182,9 @@ class Blueprint
         }
     }
 
-
     /**
      * Drop the index by first getting all the indexes on the collection; then selecting the matching one
-     * by type and attributes
+     * by type and attributes.
      * @param $command
      */
     public function executeDropIndexCommand($command)
@@ -334,7 +333,7 @@ class Blueprint
     public function hasAttribute($attribute)
     {
         $parameters['handler'] = 'aql';
-        $parameters['explanation'] = "Checking if any document within the collection has the '" . (array) $attribute . "' attribute(s).";
+        $parameters['explanation'] = "Checking if any document within the collection has the '".(array) $attribute."' attribute(s).";
         $parameters['attribute'] = $attribute;
 
         return $this->addCommand('hasAttribute', $parameters);
@@ -368,7 +367,7 @@ class Blueprint
     {
         $parameters['attributes'] = $attributes;
         $parameters['type'] = $type;
-        $parameters['explanation'] = "Drop the '" . $type . "' index on [" . implode(', ', (array) $attributes) . "].";
+        $parameters['explanation'] = "Drop the '".$type."' index on [".implode(', ', (array) $attributes).'].';
         $parameters['handler'] = 'collection';
 
         return $this->addCommand('dropIndex', $parameters);
@@ -400,7 +399,7 @@ class Blueprint
 
     /**
      * Create a hash index for fast exact matching.
-     * Hash ! has ;)
+     * Hash ! has ;).
      *
      * @param null $attributes
      * @param array $indexOptions
