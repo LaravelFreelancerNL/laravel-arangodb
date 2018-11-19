@@ -22,7 +22,6 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 
     protected $laravelMigrationPath;
 
-
     /**
      * Define environment setup.
      *
@@ -51,15 +50,13 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         foreach ($collections as $collection) {
             $this->collectionHandler->drop($collection['id']);
         }
-
-
     }
 
     protected function setUp()
     {
         parent::setUp();
 
-        $this->artisan('aranguent:convert-migrations', ['--realpath' => true, '--path' => __DIR__  . '/../vendor/orchestra/testbench-core/laravel/migrations/'])->run();
+        $this->artisan('aranguent:convert-migrations', ['--realpath' => true, '--path' => __DIR__.'/../vendor/orchestra/testbench-core/laravel/migrations/'])->run();
 
         $this->artisan('migrate:install', [])->run();
 

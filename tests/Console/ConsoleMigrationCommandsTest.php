@@ -41,8 +41,6 @@ class ConsoleMigrationCommandsTest extends TestCase
         $this->artisan('migrate', ['--force' => true, '--path' => $path])->run();
     }
 
-
-
 //    /**
 //     * migrate install command
 //     * @test
