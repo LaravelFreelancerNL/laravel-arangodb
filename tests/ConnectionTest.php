@@ -18,6 +18,8 @@ class ConnectionTest extends TestCase
      */
     public function connection()
     {
+        $this->createDatabase();
+
         $this->assertInstanceOf('LaravelFreelancerNL\Aranguent\Connection', $this->connection);
     }
 

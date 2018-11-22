@@ -26,9 +26,8 @@ class Connection extends IlluminateConnection
      * @var array
      */
     protected $defaultConfig = [
-        ArangoConnectionOptions::OPTION_ENDPOINT => 'tcp://localhost:8529',
+        ArangoConnectionOptions::OPTION_ENDPOINT => 'tcp://arangodb:8529',
         ArangoConnectionOptions::OPTION_CONNECTION  => 'Keep-Alive',
-        ArangoConnectionOptions::OPTION_DATABASE => null,
         ArangoConnectionOptions::OPTION_AUTH_USER => null,
         ArangoConnectionOptions::OPTION_AUTH_PASSWD => null,
         'tablePrefix' => '',
@@ -83,7 +82,9 @@ class Connection extends IlluminateConnection
         // type commands are run such as checking whether a table exists.
         $this->config = array_merge($this->defaultConfig, $config);
 
-        $this->database = $this->config ['database'];
+        if (isset($this->config ['database'])) {
+            $this->database = $this->config ['database'];
+        }
 
         $this->tablePrefix = $this->config['tablePrefix'];
 
@@ -337,5 +338,10 @@ class Connection extends IlluminateConnection
     public function getGraphHandler()
     {
         return $this->graphHandler;
+    }
+
+    public function getDatabase()
+    {
+        return $this->database;
     }
 }

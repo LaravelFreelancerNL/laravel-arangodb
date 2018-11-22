@@ -20,7 +20,8 @@
   "require": {
     "php": ">=7.1.3",
     "triagens/arangodb": "^3",
-    "nesbot/carbon": "^1"
+    "nesbot/carbon": "^1",
+    "mockery/mockery": "^1.2"
   },
   "require-dev": {
     "orchestra/testbench": "^3"

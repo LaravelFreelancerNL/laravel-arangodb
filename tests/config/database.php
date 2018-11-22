@@ -11,7 +11,6 @@ return [
         'arangodb' => [
             'name'       => 'arangodb',
             'driver'     => 'arangodb',
-            ArangoConnectionOptions::OPTION_DATABASE => 'aranguent',
             ArangoConnectionOptions::OPTION_AUTH_USER => 'root',
             ArangoConnectionOptions::OPTION_AUTH_PASSWD => '',
         ],

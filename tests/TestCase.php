@@ -2,6 +2,7 @@
 
 namespace LaravelFreelancerNL\Aranguent\Tests;
 
+use ArangoDBClient\Database;
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\AranguentServiceProvider;
 use LaravelFreelancerNL\Aranguent\Migrations\DatabaseMigrationRepository;
@@ -43,6 +44,8 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 
         $this->connection = DB::connection('arangodb');
 
+        $this->createDatabase();
+
         $this->collectionHandler = $this->connection->getCollectionHandler();
 
         //Remove all collections
@@ -76,4 +79,18 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
             'Aranguent' => 'LaravelFreelancerNL\Aranguent',
         ];
     }
+
+    protected function createDatabase($database = 'aranguent_testing')
+    {
+        $databaseHandler = new Database();
+        $response = $databaseHandler->listUserDatabases($this->connection->getArangoConnection());
+
+        if (!in_array($database, $response['result'])) {
+            $databaseHandler->create($this->connection->getArangoConnection(), $database);
+            return true;
+        }
+
+        return false;
+    }
+
 }
