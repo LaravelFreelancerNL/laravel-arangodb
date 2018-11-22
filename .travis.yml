@@ -1,0 +1,42 @@
+sudo: required
+
+language: php
+
+services:
+  - docker
+
+php:
+  - 7.1
+  - 7.2
+  - 7.3
+
+env:
+  - LARAVEL_VERSION=5.5.*
+  - LARAVEL_VERSION=5.6.*
+  - LARAVEL_VERSION=5.7.*
+  - ARANGODB_VERSION=3.3.*
+  - ARANGODB_VERSION=3.4.*
+
+matrix:
+  fast_finish: true
+
+addons:
+  hosts:
+    - arangodb
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+    - $HOME/.local
+
+before_script:
+  - travis_retry composer self-update
+  - travis_retry composer install --prefer-source --no-interaction
+  - if [ "$LARAVEL_VERSION" != "" ]; then composer require --dev "laravel/laravel:${LARAVEL_VERSION}" --no-update; fi;
+  - composer update
+  - docker pull arangodb/arangodb:${ARANGODB_VERSION}
+  - docker run -d -e ARANGO_NO_AUTH=1 -p 8529:8529 arangodb/arangodb:${ARANGODB_VERSION}
+  - sleep 60
+
+script:
+  - phpunit
