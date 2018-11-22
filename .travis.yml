@@ -11,9 +11,12 @@ php:
   - 7.3
 
 env:
-  - ORCHESTRA_VERSION=3.5 ARANGODB_VERSION=3.3.19
-  - ORCHESTRA_VERSION=3.6 ARANGODB_VERSION=3.3.19
-  - ORCHESTRA_VERSION=3.7 ARANGODB_VERSION=3.3.19
+  - ORCHESTRA_VERSION=3.7 ARANGODB_VERSION=":3.3.19"
+  - ORCHESTRA_VERSION=3.7 ARANGODB_VERSION="-preview:3.4.0-rc.4"
+  - ORCHESTRA_VERSION=3.6 ARANGODB_VERSION=":3.3.19"
+  - ORCHESTRA_VERSION=3.6 ARANGODB_VERSION="-preview:3.4.0-rc.4"
+  - ORCHESTRA_VERSION=3.5 ARANGODB_VERSION=":3.3.19"
+  - ORCHESTRA_VERSION=3.5 ARANGODB_VERSION="-preview:3.4.0-rc.4"
 
 addons:
   hosts:
@@ -26,7 +29,7 @@ cache:
 
 before_script:
   - docker pull arangodb/arangodb:${ARANGODB_VERSION}
-  - docker run -d -e ARANGO_NO_AUTH=1 -p 8529:8529 arangodb/arangodb:${ARANGODB_VERSION}
+  - docker run -d -e ARANGO_NO_AUTH=1 -p 8529:8529 arangodb/arangodb${ARANGODB_VERSION}
   - travis_retry composer self-update
   - travis_retry composer install --prefer-source --no-interaction
   - composer require --dev "orchestra/testbench:${ORCHESTRA_VERSION}" --no-update;
