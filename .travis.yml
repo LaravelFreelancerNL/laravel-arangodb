@@ -11,12 +11,9 @@ php:
   - 7.3
 
 env:
+# Note: The version includes the colon (:), that way we can test pre-releases
   - ORCHESTRA_VERSION=3.7 ARANGODB_VERSION=":3.3.19"
   - ORCHESTRA_VERSION=3.7 ARANGODB_VERSION="-preview:3.4.0-rc.4"
-  - ORCHESTRA_VERSION=3.6 ARANGODB_VERSION=":3.3.19"
-  - ORCHESTRA_VERSION=3.6 ARANGODB_VERSION="-preview:3.4.0-rc.4"
-  - ORCHESTRA_VERSION=3.5 ARANGODB_VERSION=":3.3.19"
-  - ORCHESTRA_VERSION=3.5 ARANGODB_VERSION="-preview:3.4.0-rc.4"
 
 addons:
   hosts:
@@ -34,6 +31,7 @@ before_script:
   - travis_retry composer install --prefer-source --no-interaction
   - composer require --dev "orchestra/testbench:${ORCHESTRA_VERSION}" --no-update;
   - composer update
+  - alias phpunit=vendor/bin/phpunit
 
 script:
   - phpunit
