@@ -139,7 +139,7 @@ class Blueprint
     {
         $compileMethod = 'compile'.ucfirst($command->name);
         if (method_exists($this->grammar, $compileMethod)) {
-            return $this->grammar->$compileMethod($command);
+            return $this->grammar->$compileMethod($this->collection, $command);
         }
     }
 
@@ -333,7 +333,7 @@ class Blueprint
     public function hasAttribute($attribute)
     {
         $parameters['handler'] = 'aql';
-        $parameters['explanation'] = "Checking if any document within the collection has the '".(array) $attribute."' attribute(s).";
+        $parameters['explanation'] = "Checking if any document within the collection has the '".implode(', ',(array) $attribute)."' attribute(s).";
         $parameters['attribute'] = $attribute;
 
         return $this->addCommand('hasAttribute', $parameters);

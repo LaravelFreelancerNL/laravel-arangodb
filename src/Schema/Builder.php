@@ -3,6 +3,7 @@
 namespace LaravelFreelancerNL\Aranguent\Schema;
 
 use Closure;
+use Illuminate\Support\Fluent;
 use LaravelFreelancerNL\Aranguent\Connection;
 
 class Builder
@@ -71,9 +72,8 @@ class Builder
      */
     protected function createBlueprint($collection, Closure $callback = null)
     {
-        $prefix = $this->connection->getConfig('prefix_indexes')
-            ? $this->connection->getConfig('prefix')
-            : '';
+        //Prefixes are unnamed in ArangoDB
+        $prefix = null;
 
         if (isset($this->resolver)) {
             return call_user_func($this->resolver, $collection, $callback, $prefix);
@@ -234,7 +234,6 @@ class Builder
 
     /**
      * Check if any document in the collection has the attribute
-     * TODO: Should we keep this?
      *
      * @param string $collection
      * @param string $attribute
@@ -242,9 +241,27 @@ class Builder
      */
     public function hasAttribute($collection, $attribute)
     {
-        $this->build(tap($this->createBlueprint($collection), function ($blueprint) use ($attribute) {
-            return $blueprint->hasAttribute($attribute);
-        }));
+        if (is_string($attribute)) {
+            $attribute = [$attribute];
+        }
+        return $this->hasAttributes($collection, $attribute);
+    }
+    /**
+     * Check if any document in the collection has the attribute
+     *
+     * @param string $collection
+     * @param array $attributes
+     * @return bool
+     */
+    public function hasAttributes($collection, $attributes)
+    {
+        $parameters['name'] = 'hasAttribute';
+        $parameters['handler'] = 'aql';
+        $parameters['attribute'] = $attributes;
+
+        $command = new Fluent($parameters);
+        $compilation = $this->grammar->compileHasAttribute($collection, $command);
+        return $this->connection->statement($compilation['aql']);
     }
 
     /**
@@ -257,6 +274,18 @@ class Builder
     public function hasColumn($table, $column)
     {
         return $this->hasAttribute($table, $column);
+    }
+
+    /**
+     * Alias for hasAttributes.
+     *
+     * @param  string  $table
+     * @param  array  $columns
+     * @return bool
+     */
+    public function hasColumns($table, $columns)
+    {
+        return $this->hasAttributes($table, $columns);
     }
 
     /**
