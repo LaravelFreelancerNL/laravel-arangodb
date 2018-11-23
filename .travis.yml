@@ -31,7 +31,6 @@ before_script:
   - travis_retry composer install --prefer-source --no-interaction
   - composer require --dev "orchestra/testbench:${ORCHESTRA_VERSION}" --no-update;
   - composer update
-  - alias phpunit=vendor/bin/phpunit
 
 script:
-  - phpunit
+  - ./vendor/bin/phpunit
