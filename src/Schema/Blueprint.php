@@ -385,16 +385,18 @@ class Blueprint
     }
 
     /**
-     * Specify an index for the collection. Creates a skiplist index by default.
+     * Specify an index for the table.
      *
-     * @param string $type         - index type: hash, fulltext, geo, persistent, skiplist,
-     * @param  string|array  $attributes
-     * @param  array  $indexOptions
+     * @param  string|array  $columns
+     * @param  string  $name
+     * @param  string|null  $algorithm
      * @return \Illuminate\Support\Fluent
      */
-    public function index($attributes = null, $type = null, $indexOptions = [])
+    public function index($columns = null, $name = null, $algorithm = null)
     {
-        return $this->indexCommand($type, $attributes, $indexOptions);
+        $type = $this->mapIndexType($algorithm);
+
+        return $this->indexCommand($type, $columns);
     }
 
     /**
@@ -428,15 +430,15 @@ class Blueprint
     }
 
     /**
-     * Alias for the geoIndex.
-     *
-     * @param  string|array  $attributes
-     * @param  array  $indexOptions
+     * Specify a spatial index for the table.
+     * Alias for geoIndex()
+     * @param  string|array  $columns
+     * @param  string  $name
      * @return \Illuminate\Support\Fluent
      */
-    public function spatialIndex($attributes, $indexOptions = [])
+    public function spatialIndex($columns, $name = null)
     {
-        return $this->geoIndex($attributes, $indexOptions);
+        return $this->geoIndex($columns);
     }
 
     public function persistentIndex($attributes, $indexOptions = [])
@@ -450,17 +452,20 @@ class Blueprint
     }
 
     /**
-     * Specify a unique index for the collection.
+     * Specify a unique index for the table.
      *
-     * @param  string|array  $attributes
-     * @param  array  $indexOptions
+     * @param  string|array  $columns
+     * @param  string  $name
+     * @param  string|null  $algorithm
      * @return \Illuminate\Support\Fluent
      */
-    public function unique($attributes = null, $indexOptions = [])
+    public function unique($columns = null, $name = null, $algorithm = null)
     {
+        $type = $this->mapIndexType($algorithm);
+
         $indexOptions['unique'] = true;
 
-        return $this->indexCommand('skiplist', $attributes, $indexOptions);
+        return $this->indexCommand($type, $columns, $indexOptions);
     }
 
     /**
@@ -581,5 +586,17 @@ class Blueprint
         $this->addCommand('ignore', $info);
 
         return $this;
+    }
+
+    public function mapIndexType($algorithm)
+    {
+        $typeConversion = [
+            'HASH' => 'hash',
+            'BTREE' => 'skiplist',
+            'RTREE' => 'geo',
+        ];
+        $algorithm = strtoupper($algorithm);
+
+        return (isset($typeConversion[$algorithm])) ? $typeConversion[$algorithm] : 'skiplist';
     }
 }
