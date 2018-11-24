@@ -77,8 +77,6 @@ class Connection extends IlluminateConnection
      */
     public function __construct($config = [])
     {
-
-
         $this->config = array_merge($this->defaultConfig, $config);
 
         if (isset($this->config ['database'])) {
