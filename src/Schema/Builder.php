@@ -233,7 +233,7 @@ class Builder
     }
 
     /**
-     * Check if any document in the collection has the attribute
+     * Check if any document in the collection has the attribute.
      *
      * @param string $collection
      * @param string $attribute
@@ -244,10 +244,12 @@ class Builder
         if (is_string($attribute)) {
             $attribute = [$attribute];
         }
+
         return $this->hasAttributes($collection, $attribute);
     }
+
     /**
-     * Check if any document in the collection has the attribute
+     * Check if any document in the collection has the attribute.
      *
      * @param string $collection
      * @param array $attributes
@@ -261,6 +263,7 @@ class Builder
 
         $command = new Fluent($parameters);
         $compilation = $this->grammar->compileHasAttribute($collection, $command);
+
         return $this->connection->statement($compilation['aql']);
     }
 
