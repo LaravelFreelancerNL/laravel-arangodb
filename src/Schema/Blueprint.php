@@ -327,7 +327,7 @@ class Blueprint
     /**
      * Check if any document within the collection has the attribute.
      *
-     * @param string $attribute
+     * @param string|array $attribute
      * @return Fluent
      */
     public function hasAttribute($attribute)

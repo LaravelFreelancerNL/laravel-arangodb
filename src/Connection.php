@@ -26,7 +26,7 @@ class Connection extends IlluminateConnection
      * @var array
      */
     protected $defaultConfig = [
-        ArangoConnectionOptions::OPTION_ENDPOINT => 'tcp://arangodb:8529',
+        ArangoConnectionOptions::OPTION_ENDPOINT => 'tcp://localhost:8529',
         ArangoConnectionOptions::OPTION_CONNECTION  => 'Keep-Alive',
         ArangoConnectionOptions::OPTION_AUTH_USER => null,
         ArangoConnectionOptions::OPTION_AUTH_PASSWD => null,
@@ -77,9 +77,8 @@ class Connection extends IlluminateConnection
      */
     public function __construct($config = [])
     {
-        // First we will setup the default properties. We keep track of the DB
-        // name we are connected to since it is needed when some reflective
-        // type commands are run such as checking whether a table exists.
+
+
         $this->config = array_merge($this->defaultConfig, $config);
 
         if (isset($this->config ['database'])) {
