@@ -1,10 +1,20 @@
-# Aranguent
-[ArangoDB](https://www.arangodb.com) Eloquent driver for [Laravel](https://laravel.com)  
-<sub>The unguent between the ArangoDB PHP ODM and Eloquent.</sub>
+Aranguent
+---------
+<p align="center">
+<a href="https://travis-ci.org/LaravelFreelancerNL/aranguent"><img src="https://travis-ci.org/LaravelFreelancerNL/aranguent.svg?branch=master" alt="Build Status"></a>
+<a href="https://github.styleci.io/repos/127011133"><img src="https://github.styleci.io/repos/127011133/shield?branch=master" alt="Code style"></a>
+<a href="https://packagist.org/packages/laravel-freelancer-nl/aranguent"><img src="https://poser.pugx.org/laravel-freelancer-nl/aranguent/v/stable" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel-freelancer-nl/aranguent"><img src="https://poser.pugx.org/laravel-freelancer-nl/aranguent/downloads" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel-freelancer-nl/aranguent"><img src="https://poser.pugx.org/laravel-freelancer-nl/aranguent/license" alt="License"></a>
 
-The goal is to create a drop-in ArangoDB replacement for SQL Eloquent.
+[ArangoDB](https://www.arangodb.com) driver for [Laravel](https://laravel.com)  
+<sub>The unguent between the ArangoDB and Laravel</sub>
+</p>
 
-## This package is development; DO NOT use in production.
+## About Aranguent
+The goal is to create a drop-in ArangoDB replacement for Laravel's database, migrations and model handling.
+
+## This package is in development; DO NOT use in production.
 
 ## Table Of Contents
 **[Installation](#installation)**<br>
@@ -71,7 +81,7 @@ ArangoDB knows the following types:
 
 Type       | Purpose                 | Blueprint Method 
 ---------- | ----------------------- | ----------------
-Hash       | Exact matching          | `$collection->hashIndex($attributes = null, $indexOptions = [])`
+Hash       | Exact matching          | `$collection->hashIndex($attributes, $indexOptions = [])`
 Skip List  | Ranged matching         | `$collection->skiplistIndex($attributes, $indexOptions = [])`
 Persistent | Ranged matching         | `$collection->persistentIndex($attributes, $indexOptions = [])`
 Geo        | Location matching       | `$collection->geoIndex($attributes, $indexOptions = [])`
@@ -111,11 +121,10 @@ The `->autoIncrement()` column modifier and `$table->increments('id');` column d
 collections _key if used during collection creation. This is solely for developer expectations management.  
 
 #### Indexes
-Index creation defaults to skiplist indexes. If you solely need exact matching you may want to change your indexes 
+Index creation defaults to skiplist indexes. If you solely need exact matching you may want to change your index 
 to a hash index as these provide better performance.
 
-Note that each document in ArangoDB has two primary keys bij default: _key and _id ({collection}/{_key})
-These both have hash indexes by default.
+Note that each document in ArangoDB has two primary keys with hash indexes bij default: _key and _id ({collection}/{_key})
 
 `renameIndex()` is ignored as indexes are unnamed in ArangoDB.
 
