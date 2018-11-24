@@ -431,7 +431,7 @@ class Blueprint
 
     /**
      * Specify a spatial index for the table.
-     * Alias for geoIndex()
+     * Alias for geoIndex().
      * @param  string|array  $columns
      * @param  string  $name
      * @return \Illuminate\Support\Fluent

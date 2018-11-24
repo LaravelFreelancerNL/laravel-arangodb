@@ -76,10 +76,10 @@ class SchemaBlueprintTest extends TestCase
     }
 
     /**
-     * getIndexType gives correct type based on the algorithm given
+     * getIndexType gives correct type based on the algorithm given.
      * @test
      */
-    function get_index_type_gives_correct_type_based_on_the_algorithm_given()
+    public function get_index_type_gives_correct_type_based_on_the_algorithm_given()
     {
         $collectionHandler = M::mock(CollectionHandler::class);
         $blueprint = new Blueprint('SchemaBlueprintTestCollection', $collectionHandler);
@@ -98,6 +98,5 @@ class SchemaBlueprintTest extends TestCase
 
         $type = $blueprint->mapIndexType('whatever');
         $this->assertEquals('skiplist', $type);
-
     }
 }
