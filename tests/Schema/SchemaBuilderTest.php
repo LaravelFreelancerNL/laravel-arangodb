@@ -2,14 +2,12 @@
 
 namespace Illuminate\Tests\Database;
 
+use Mockery as M;
 use Illuminate\Support\Collection;
 use LaravelFreelancerNL\Aranguent\Connection;
-use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
 use LaravelFreelancerNL\Aranguent\Schema\Builder;
-use LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar;
-use Mockery as M;
 use LaravelFreelancerNL\Aranguent\Tests\TestCase;
-use stdClass;
+use LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar;
 
 class SchemaBuilderTest extends TestCase
 {
@@ -19,10 +17,10 @@ class SchemaBuilderTest extends TestCase
     }
 
     /**
-     * collection has attributes
+     * collection has attributes.
      * @test
      */
-    function collection_has_attributes()
+    public function collection_has_attributes()
     {
         $connection = M::mock(Connection::class);
         $collectionHandler = M::mock(Collection::class);
@@ -37,6 +35,5 @@ class SchemaBuilderTest extends TestCase
 
         $this->assertTrue($builder->hasAttribute('users', ['_id', 'firstname']));
         $this->assertFalse($builder->hasAttribute('users', ['_id', 'not_an_attribute']));
-
     }
 }

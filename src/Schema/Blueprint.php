@@ -333,7 +333,7 @@ class Blueprint
     public function hasAttribute($attribute)
     {
         $parameters['handler'] = 'aql';
-        $parameters['explanation'] = "Checking if any document within the collection has the '".implode(', ',(array) $attribute)."' attribute(s).";
+        $parameters['explanation'] = "Checking if any document within the collection has the '".implode(', ', (array) $attribute)."' attribute(s).";
         $parameters['attribute'] = $attribute;
 
         return $this->addCommand('hasAttribute', $parameters);

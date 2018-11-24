@@ -85,12 +85,12 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         $databaseHandler = new Database();
         $response = $databaseHandler->listUserDatabases($this->connection->getArangoConnection());
 
-        if (!in_array($database, $response['result'])) {
+        if (! in_array($database, $response['result'])) {
             $databaseHandler->create($this->connection->getArangoConnection(), $database);
+
             return true;
         }
 
         return false;
     }
-
 }
