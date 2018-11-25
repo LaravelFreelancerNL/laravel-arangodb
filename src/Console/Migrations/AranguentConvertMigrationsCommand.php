@@ -67,9 +67,15 @@ class AranguentConvertMigrationsCommand extends BaseCommand
 
     public function convertMigrationFile($filePath)
     {
+        # Check for additional information to make sure we
+        # partial matches aren't accidentally replaced.
         $replacements = [
             'Illuminate\Support\Facades\Schema' => 'LaravelFreelancerNL\Aranguent\Facades\Schema',
             'Illuminate\Database\Schema\Blueprint' => 'LaravelFreelancerNL\Aranguent\Schema\Blueprint',
+            '$table ' => '$collection ',
+            '$table,' => '$collection,',
+            '$table->' => '$collection->',
+            '$table)' => '$collection)',
         ];
 
         $content = file_get_contents($filePath);
