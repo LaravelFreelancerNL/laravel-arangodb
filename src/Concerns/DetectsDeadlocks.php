@@ -22,7 +22,7 @@ trait DetectsDeadlocks
         // 1302 - ERROR_ARANGO_TRY_AGAIN
         // 1303 - ERROR_ARANGO_BUSY
 
-        $code = $e->getCode();
+        $code = $e->getServerCode();
 
         return in_array($code, [
             18,

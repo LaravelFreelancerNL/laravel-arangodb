@@ -11,8 +11,11 @@ use LaravelFreelancerNL\Aranguent\Concerns\DetectsDeadlocks;
 use LaravelFreelancerNL\Aranguent\Concerns\ManagesTransactions;
 use ArangoDBClient\CollectionHandler as ArangoCollectionHandler;
 use ArangoDBClient\ConnectionOptions as ArangoConnectionOptions;
+use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 use LaravelFreelancerNL\Aranguent\Concerns\DetectsLostConnections;
+use LaravelFreelancerNL\Aranguent\Query\Processors\Processor;
 use LaravelFreelancerNL\Aranguent\Schema\Builder as SchemaBuilder;
+use LaravelFreelancerNL\Aranguent\Query\Grammars\Grammar as QueryGrammar;
 
 class Connection extends IlluminateConnection
 {
@@ -36,6 +39,8 @@ class Connection extends IlluminateConnection
     protected $config;
 
     protected $arangoConnection;
+
+    protected $readArangoConnection;
 
     protected $reconnector;
 
@@ -91,6 +96,13 @@ class Connection extends IlluminateConnection
         $this->collectionHandler = new ArangoCollectionHandler($this->arangoConnection);
         $this->documentHandler = new ArangoDocumentHandler($this->arangoConnection);
         $this->graphHandler = new ArangoGraphHandler($this->arangoConnection);
+
+        // We need to initialize a query grammar and the query post processors
+        // which are both very important parts of the database abstractions
+        // so we initialize these to their default values while starting.
+        $this->useDefaultQueryGrammar();
+
+        $this->useDefaultPostProcessor();
     }
 
     /**
@@ -108,20 +120,45 @@ class Connection extends IlluminateConnection
     }
 
     /**
+     * Get the default query grammar instance.
+     *
+     * @return \LaravelFreelancerNL\Aranguent\Query\Grammars\Grammar
+     */
+    protected function getDefaultQueryGrammar()
+    {
+        return new QueryGrammar;
+    }
+
+    /**
+     * Get the default post processor instance.
+     *
+     * @return \LaravelFreelancerNL\Aranguent\Query\Processors\Processor
+     */
+    protected function getDefaultPostProcessor()
+    {
+        return new Processor;
+    }
+
+    /**
      * Run a select statement against the database and returns a generator.
      * ($useReadPdo is a dummy to adhere to the interface).
      *
      * @param  string  $query
      * @param  array  $bindings
      * @param  bool  $useReadPdo
-     * @return \Iterator
+     * @param  array|null  $transactionCollections
+     * @return \Iterator|null
      */
-    public function cursor($query, $bindings = [], $useReadPdo = null)
+    public function cursor($query, $bindings = [], $useReadPdo = null, $transactionCollections = null)
     {
         $arangoConnection = $this->arangoConnection;
 
-        return $this->run($query, $bindings, function ($query, $bindings) use ($arangoConnection) {
+        return $this->run($query, $bindings, function ($query, $bindings) use ($arangoConnection, $transactionCollections) {
             if ($this->pretending()) {
+                return [];
+            }
+            if ($this->transactionLevel() > 0) {
+                $this->addQueryToTransaction($query, $bindings, $transactionCollections);
                 return [];
             }
 
@@ -138,14 +175,19 @@ class Connection extends IlluminateConnection
      *
      * @param  string  $query
      * @param  array   $bindings
+     * @param  array|null   $transactionCollections
      * @return bool
      */
-    public function statement($query, $bindings = [])
+    public function statement($query, $bindings = [], $transactionCollections = null)
     {
         $arangoConnection = $this->arangoConnection;
 
-        return $this->run($query, $bindings, function ($query, $bindings) use ($arangoConnection) {
+        return $this->run($query, $bindings, function ($query, $bindings) use ($arangoConnection, $transactionCollections) {
             if ($this->pretending()) {
+                return true;
+            }
+            if ($this->transactionLevel() > 0) {
+                $this->addQueryToTransaction($query, $bindings, $transactionCollections);
                 return true;
             }
 
@@ -165,14 +207,19 @@ class Connection extends IlluminateConnection
      *
      * @param  string  $query
      * @param  array   $bindings
+     * @param  array|null   $transactionCollections
      * @return int
      */
-    public function affectingStatement($query, $bindings = [])
+    public function affectingStatement($query, $bindings = [], $transactionCollections = null)
     {
         $arangoConnection = $this->arangoConnection;
 
-        return $this->run($query, $bindings, function ($query, $bindings) use ($arangoConnection) {
+        return $this->run($query, $bindings, function ($query, $bindings) use ($arangoConnection, $transactionCollections) {
             if ($this->pretending()) {
+                return 0;
+            }
+            if ($this->transactionLevel() > 0) {
+                $this->addQueryToTransaction($query, $bindings, $transactionCollections);
                 return 0;
             }
 
@@ -195,6 +242,7 @@ class Connection extends IlluminateConnection
      * Run a raw, unprepared query against the connection.
      *
      * @param  string  $query
+     * @param  array|null $collections
      * @return bool
      */
     public function unprepared($query)
@@ -204,6 +252,10 @@ class Connection extends IlluminateConnection
         return $this->run($query, [], function ($query) use ($arangoConnection) {
             if ($this->pretending()) {
                 return true;
+            }
+            if ($this->transactionLevel() > 0) {
+                $this->addQueryToTransaction($query);
+                return [];
             }
 
             $statement = new Statement($arangoConnection, ['query' => $query, 'bindVars' => []]);
@@ -219,27 +271,101 @@ class Connection extends IlluminateConnection
     }
 
     /**
+     * Returns the query execution plan. The query will not be executed.
+     *
+     * @param  string  $query
+     * @param  array $bindings
+     * @return array
+     */
+    public function explain($query, $bindings = [])
+    {
+        $statement = new Statement($this->arangoConnection, ['query' => $query, 'bindVars' => $bindings]);
+
+        $explanation = $statement->explain();
+
+        return $explanation;
+    }
+
+    /**
      * Run a select statement against the database.
      *
      * @param  string  $query
      * @param  array  $bindings
      * @param  bool  $useReadPdo
+     * @param  null|array  $transactionCollections
      * @return array
      */
-    public function select($query, $bindings = [], $useReadPdo = true)
+    public function select($query, $bindings = [], $useReadPdo = true, $transactionCollections = null)
     {
         $arangoConnection = $this->arangoConnection;
 
-        return $this->run($query, $bindings, function ($query, $bindings) use ($arangoConnection) {
+        return $this->run($query, $bindings, function ($query, $bindings) use ($arangoConnection, $transactionCollections) {
             if ($this->pretending()) {
                 return [];
             }
+            if ($this->transactionLevel() > 0) {
+                $this->addQueryToTransaction($query, $bindings);
+
+                return [];
+            }
+
             $statement = new Statement($arangoConnection, ['query' => $query, 'bindVars' => $bindings]);
 
             $cursor = $statement->execute();
 
             return $cursor->getAll();
         });
+    }
+
+    /**
+     * Run an insert statement against the database.
+     *
+     * @param  string  $query
+     * @param  array   $bindings
+     * @param  array|null   $transactionCollections
+     * @return bool
+     */
+    public function insert($query, $bindings = [], $transactionCollections = null)
+    {
+        return $this->statement($query, $bindings, $transactionCollections);
+    }
+
+    /**
+     * Run an update statement against the database.
+     *
+     * @param  string  $query
+     * @param  array   $bindings
+     * @param  array|null   $transactionCollections
+     * @return int
+     */
+    public function update($query, $bindings = [], $transactionCollections = null)
+    {
+        return $this->affectingStatement($query, $bindings, $transactionCollections);
+    }
+
+    /**
+     * Run a delete statement against the database.
+     *
+     * @param  string  $query
+     * @param  array   $bindings
+     * @param  array|null   $transactionCollections
+     * @return int
+     */
+    public function delete($query, $bindings = [], $transactionCollections = null)
+    {
+        return $this->affectingStatement($query, $bindings, $transactionCollections);
+    }
+
+    /**
+     * Get a new query builder instance.
+     *
+     * @return \LaravelFreelancerNL\Aranguent\Query\Builder
+     */
+    public function query()
+    {
+        return new QueryBuilder(
+            $this, $this->getQueryGrammar(), $this->getPostProcessor()
+        );
     }
 
     /**
@@ -260,6 +386,8 @@ class Connection extends IlluminateConnection
     {
         return $this->collection($table);
     }
+
+
 
     /**
      * Get the collection prefix for the connection.
@@ -305,8 +433,6 @@ class Connection extends IlluminateConnection
         }
     }
 
-    //ArangoDB functions
-
     public function getArangoConnection()
     {
         return $this->arangoConnection;
@@ -332,9 +458,19 @@ class Connection extends IlluminateConnection
         return $this->userHandler;
     }
 
+    public function setGraphHandler($graphHandler)
+    {
+        $this->graphHandler = $graphHandler;
+    }
+
     public function getGraphHandler()
     {
         return $this->graphHandler;
+    }
+
+    public function setDatabase($database)
+    {
+        $this->database = $database;
     }
 
     public function getDatabase()

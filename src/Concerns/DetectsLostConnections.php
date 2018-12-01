@@ -28,7 +28,7 @@ trait DetectsLostConnections
         // 1464 - ERROR_CLUSTER_SHARD_GONE
         // 1465 - ERROR_CLUSTER_CONNECTION_LOST
 
-        $code = $e->code();
+        $code = $e->getServerCode();
 
         return in_array($code, [
             30,
