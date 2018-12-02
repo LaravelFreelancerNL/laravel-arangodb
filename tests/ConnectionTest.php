@@ -167,7 +167,9 @@ class ConnectionTest extends TestCase
         // However the goal is to see if the collections are extracted properly.
         $query = "
             FOR u IN users
-                FOR p IN @@readCollection
+                FOR p 
+                IN
+                 @@readCollection
                     FILTER u._key == p.recommendedBy
                     INSERT { 
                         _from: u._id,

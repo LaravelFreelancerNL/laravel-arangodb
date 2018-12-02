@@ -79,7 +79,7 @@ trait ManagesTransactions
         }
 
 //        $query = addslashes($query);
-        $jsCommand  = "db._query('".$query."'";
+        $jsCommand  = "db._query(aql`".$query."`";
         if (! empty($bindings)) {
             $bindings = json_encode($bindings);
             $jsCommand .= ", ".$bindings;
@@ -126,18 +126,18 @@ trait ManagesTransactions
     {
         $extractedCollections = [];
         //WITH statement at the start of the query
-        preg_match_all('/^WITH([\S\s]*?)FOR/im', $query, $rawWithCollections);
+        preg_match_all('/^(?:\s+?)WITH(?:\s+?)([\S\s]*?)(?:\s+?)FOR/mis', $query, $rawWithCollections);
         foreach ($rawWithCollections[1] as $key => $value) {
             $splits = preg_split("/\s*,\s*/", $value);
             $extractedCollections = array_merge($extractedCollections, $splits);
         }
 
         //FOR statements
-        preg_match_all('/FOR (?:\w+) (?:IN|INTO) (?!OUTBOUND|INBOUND|ANY)(@?@?\w+(?!\.))/im', $query, $rawForCollections);
+        preg_match_all('/FOR(?:\s+?)(?:\w+)(?:\s+?)(?:IN|INTO)(?:\s+?)(?!OUTBOUND|INBOUND|ANY)(@?@?\w+(?!\.))/mis', $query, $rawForCollections);
         $extractedCollections = array_merge($extractedCollections, $rawForCollections[1]);
 
         //Document functions which require a document as their first argument
-        preg_match_all('/(?:DOCUMENT\(|ATTRIBUTES\(|HAS\(|KEEP\(|LENGTH\(|MATCHES\(|PARSE_IDENTIFIER\(|UNSET\(|UNSET_RECURSIVE\(|VALUES\(|OUTBOUND|INBOUND|ANY)\s?(?!\{)(?:\"|\'|\`)(@?@?\w+)\/(?:\w+)(?:\"|\'|\`)/im', $query, $rawDocCollections);
+        preg_match_all('/(?:DOCUMENT\(|ATTRIBUTES\(|HAS\(|KEEP\(|LENGTH\(|MATCHES\(|PARSE_IDENTIFIER\(|UNSET\(|UNSET_RECURSIVE\(|VALUES\(|OUTBOUND|INBOUND|ANY)(?:\s+?)(?!\{)(?:\"|\'|\`)(@?@?\w+)\/(?:\w+)(?:\"|\'|\`)/mis', $query, $rawDocCollections);
         $extractedCollections = array_merge($extractedCollections, $rawDocCollections[1]);
 
         $extractedCollections = array_map('trim',$extractedCollections);
@@ -165,7 +165,7 @@ trait ManagesTransactions
      */
     public function extractWriteCollections($query, $bindings, $collections)
     {
-        preg_match_all('/(?:INSERT|UPSERT|UPDATE|REPLACE|REMOVE)(?:[\S\s]{.*}?)(?:IN|INTO) (@?@?\w+)/im', $query, $extractedCollections);
+        preg_match_all('/(?:\s+?)(?:INSERT|REPLACE|UPDATE|REMOVE)(?:\s+?)(?:{(?:.*?)}|@?@?\w+?)(?:\s+?)(?:IN|INTO)(?:\s+?)(@?@?\w+)/mis', $query, $extractedCollections);
         $extractedCollections = array_map('trim',$extractedCollections[1]);
 
         $extractedCollections = $this->getCollectionByBinding($extractedCollections, $bindings);
