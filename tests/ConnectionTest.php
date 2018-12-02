@@ -129,10 +129,10 @@ class ConnectionTest extends TestCase
     }
 
     /**
-     * add query to transaction
+     * add query to transaction.
      * @test
      */
-    function add_query_to_transaction()
+    public function add_query_to_transaction()
     {
         $query = '
             FOR u IN users
@@ -158,10 +158,10 @@ class ConnectionTest extends TestCase
     }
 
     /**
-     * collection extraction from transactional queries
+     * collection extraction from transactional queries.
      * @test
      */
-    function collection_extraction_from_transactional_queries()
+    public function collection_extraction_from_transactional_queries()
     {
         // We're combining multiple queries in one statement which would normally fail when executed.
         // However the goal is to see if the collections are extracted properly.
@@ -207,10 +207,10 @@ class ConnectionTest extends TestCase
     }
 
     /**
-     * explain a query
+     * explain a query.
      * @test
      */
-    function explain_a_query()
+    public function explain_a_query()
     {
         $query = '
             FOR i IN 1..1000
