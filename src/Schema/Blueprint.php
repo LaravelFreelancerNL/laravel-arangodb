@@ -412,9 +412,14 @@ class Blueprint
         return $this->indexCommand('hash', $attributes, $indexOptions);
     }
 
-    public function fulltextIndex($attributes = null, $indexOptions = [])
+    /**
+     * @param null|string $attribute
+     * @param array $indexOptions
+     * @return Fluent
+     */
+    public function fulltextIndex($attribute = null, $indexOptions = [])
     {
-        return $this->indexCommand('fulltext', $attributes, $indexOptions);
+        return $this->indexCommand('fulltext', $attribute, $indexOptions);
     }
 
     /**
@@ -485,7 +490,10 @@ class Blueprint
         if ($attributes === null) {
             $attributes = end($this->attributes);
         }
-        $attributes = (array) $attributes;
+
+        if (is_string($attributes)) {
+            $attributes = [$attributes];
+        }
 
         $unique = false;
         if (isset($indexOptions['unique'])) {
