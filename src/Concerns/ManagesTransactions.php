@@ -79,12 +79,12 @@ trait ManagesTransactions
         }
 
 //        $query = addslashes($query);
-        $jsCommand  = "db._query(aql`".$query."`";
+        $jsCommand = 'db._query(aql`'.$query.'`';
         if (! empty($bindings)) {
             $bindings = json_encode($bindings);
-            $jsCommand .= ", ".$bindings;
+            $jsCommand .= ', '.$bindings;
         }
-        $jsCommand .= ");";
+        $jsCommand .= ');';
         $command = new IlluminateFluent([
             'name' => 'aqlQuery',
             'command' => $jsCommand,
@@ -115,7 +115,7 @@ trait ManagesTransactions
     }
 
     /**
-     * Extract collections that are read from in a query. Not required but can prevent deadlocks
+     * Extract collections that are read from in a query. Not required but can prevent deadlocks.
      *
      * @param $query
      * @param $bindings
@@ -140,7 +140,7 @@ trait ManagesTransactions
         preg_match_all('/(?:DOCUMENT\(|ATTRIBUTES\(|HAS\(|KEEP\(|LENGTH\(|MATCHES\(|PARSE_IDENTIFIER\(|UNSET\(|UNSET_RECURSIVE\(|VALUES\(|OUTBOUND|INBOUND|ANY)(?:\s+?)(?!\{)(?:\"|\'|\`)(@?@?\w+)\/(?:\w+)(?:\"|\'|\`)/mis', $query, $rawDocCollections);
         $extractedCollections = array_merge($extractedCollections, $rawDocCollections[1]);
 
-        $extractedCollections = array_map('trim',$extractedCollections);
+        $extractedCollections = array_map('trim', $extractedCollections);
 
         $extractedCollections = $this->getCollectionByBinding($extractedCollections, $bindings);
 
@@ -156,7 +156,7 @@ trait ManagesTransactions
     }
 
     /**
-     * Extract collections that are written to in a query
+     * Extract collections that are written to in a query.
      *
      * @param $query
      * @param $bindings
@@ -166,7 +166,7 @@ trait ManagesTransactions
     public function extractWriteCollections($query, $bindings, $collections)
     {
         preg_match_all('/(?:\s+?)(?:INSERT|REPLACE|UPDATE|REMOVE)(?:\s+?)(?:{(?:.*?)}|@?@?\w+?)(?:\s+?)(?:IN|INTO)(?:\s+?)(@?@?\w+)/mis', $query, $extractedCollections);
-        $extractedCollections = array_map('trim',$extractedCollections[1]);
+        $extractedCollections = array_map('trim', $extractedCollections[1]);
 
         $extractedCollections = $this->getCollectionByBinding($extractedCollections, $bindings);
 
@@ -203,7 +203,7 @@ trait ManagesTransactions
      * Commit the current transaction.
      *
      * @param array $options
-     * @param integer $attempts
+     * @param int $attempts
      * @return mixed
      * @throws Exception
      */
@@ -312,12 +312,12 @@ trait ManagesTransactions
         $result['read'] = array_merge($result['read'], $result['write']);
 
         $result['write'] = array_filter(array_unique($result['write']));
-        if (empty($result['write'] )) {
+        if (empty($result['write'])) {
             unset($result['write']);
         }
 
         $result['read'] = array_filter(array_unique($result['read']));
-        if (empty($result['read'] )) {
+        if (empty($result['read'])) {
             unset($result['read']);
         }
 

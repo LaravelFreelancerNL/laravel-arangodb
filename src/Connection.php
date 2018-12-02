@@ -8,12 +8,12 @@ use ArangoDBClient\GraphHandler as ArangoGraphHandler;
 use Illuminate\Database\Connection as IlluminateConnection;
 use ArangoDBClient\DocumentHandler as ArangoDocumentHandler;
 use LaravelFreelancerNL\Aranguent\Concerns\DetectsDeadlocks;
+use LaravelFreelancerNL\Aranguent\Query\Processors\Processor;
 use LaravelFreelancerNL\Aranguent\Concerns\ManagesTransactions;
 use ArangoDBClient\CollectionHandler as ArangoCollectionHandler;
 use ArangoDBClient\ConnectionOptions as ArangoConnectionOptions;
 use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 use LaravelFreelancerNL\Aranguent\Concerns\DetectsLostConnections;
-use LaravelFreelancerNL\Aranguent\Query\Processors\Processor;
 use LaravelFreelancerNL\Aranguent\Schema\Builder as SchemaBuilder;
 use LaravelFreelancerNL\Aranguent\Query\Grammars\Grammar as QueryGrammar;
 
@@ -159,6 +159,7 @@ class Connection extends IlluminateConnection
             }
             if ($this->transactionLevel() > 0) {
                 $this->addQueryToTransaction($query, $bindings, $transactionCollections);
+
                 return [];
             }
 
@@ -188,6 +189,7 @@ class Connection extends IlluminateConnection
             }
             if ($this->transactionLevel() > 0) {
                 $this->addQueryToTransaction($query, $bindings, $transactionCollections);
+
                 return true;
             }
 
@@ -220,6 +222,7 @@ class Connection extends IlluminateConnection
             }
             if ($this->transactionLevel() > 0) {
                 $this->addQueryToTransaction($query, $bindings, $transactionCollections);
+
                 return 0;
             }
 
@@ -255,6 +258,7 @@ class Connection extends IlluminateConnection
             }
             if ($this->transactionLevel() > 0) {
                 $this->addQueryToTransaction($query);
+
                 return [];
             }
 
@@ -386,8 +390,6 @@ class Connection extends IlluminateConnection
     {
         return $this->collection($table);
     }
-
-
 
     /**
      * Get the collection prefix for the connection.
