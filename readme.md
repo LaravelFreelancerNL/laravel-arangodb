@@ -11,7 +11,6 @@ Aranguent
 <sub>The unguent between the ArangoDB and Laravel</sub>
 </p>
 
-## About Aranguent
 The goal is to create a drop-in ArangoDB replacement for Laravel's database, migrations and model handling.
 
 ## This package is in development; DO NOT use in production.
