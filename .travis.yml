@@ -12,8 +12,8 @@ php:
 
 # Note: The ArangoDB version includes the colon (:), that way we can test pre-releases (i.e. '-preview:3.4.0-rc.4a').
 env:
-  - ORCHESTRA_VERSION=3.7 ARANGODB_VERSION=":3.3.19"
-  - ORCHESTRA_VERSION=3.7 ARANGODB_VERSION=":3.4.0"
+  - ORCHESTRA_VERSION=3.8 ARANGODB_VERSION=":3.3.19"
+  - ORCHESTRA_VERSION=3.8 ARANGODB_VERSION=":3.4.4"
 
 addons:
   hosts:

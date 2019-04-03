@@ -7,7 +7,7 @@ use Illuminate\Support\Fluent as IlluminateFluent;
 
 class ConnectionTest extends TestCase
 {
-    public function tearDown()
+    public function tearDown() : void
     {
         M::close();
     }
@@ -152,7 +152,7 @@ class ConnectionTest extends TestCase
 
         $this->assertInstanceOf(IlluminateFluent::class, $result);
         $this->assertEquals('aqlQuery', $result->name);
-        $this->assertContains('db._query', $result->command);
+        $this->assertStringContainsString('db._query', $result->command);
         $this->assertIsArray($result->collections['read']);
         $this->assertIsArray($result->collections['write']);
     }

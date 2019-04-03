@@ -14,14 +14,14 @@ class SchemaGrammarTest extends TestCase
      */
     protected $grammar;
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
 
         $this->grammar = new Grammar();
     }
 
-    public function tearDown()
+    public function tearDown() : void
     {
         M::close();
     }

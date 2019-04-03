@@ -2,8 +2,8 @@
 
 namespace LaravelFreelancerNL\Aranguent\Query;
 
-use Illuminate\Database\Query\Builder as IlluminateBuilder;
+use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 
-class Builder extends IlluminateBuilder
+class Builder extends IlluminateQueryBuilder
 {
 }

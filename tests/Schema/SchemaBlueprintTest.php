@@ -11,7 +11,7 @@ use LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar;
 
 class SchemaBlueprintTest extends TestCase
 {
-    public function tearDown()
+    public function tearDown() : void
     {
         M::close();
     }
