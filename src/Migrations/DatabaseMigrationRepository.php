@@ -4,11 +4,12 @@ namespace LaravelFreelancerNL\Aranguent\Migrations;
 
 use Illuminate\Database\ConnectionResolverInterface as IlluminateResolver;
 use Illuminate\Database\Migrations\DatabaseMigrationRepository as IlluminateDatabaseMigrationRepository;
+use LaravelFreelancerNL\Aranguent\Query\Builder;
+use LaravelFreelancerNL\FluentAQL\Facades\AQB;
+use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
 class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
 {
-    // TODO: Revert the direct use of the collectionHandler to the Schema & Query builder after those is finished.
-
     /**
      * The name of the migration collection.
      *
@@ -19,7 +20,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
     /**
      * Create a new database migration repository instance.
      *
-     * @param  \Illuminate\Database\ConnectionResolverInterface  $resolver
+     * @param IlluminateResolver $resolver
      * @param  string  $collection
      * @return void
      */
@@ -47,13 +48,13 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     public function getRan()
     {
-        $query = '
-            FOR m IN migrations
-                SORT m.batch, m.migration
-                RETURN m.migration
-        ';
+        $qb = AQB::for('m', 'migrations')
+            ->sort(['m.batch', 'm.migrations'])
+            ->return('m.migration')
+            ->get();
 
-        return $this->getConnection()->select($query, []);
+
+        return $this->getConnection()->select($qb->query);
 
 //        return $this->collection()
 //                ->orderBy('batch', 'asc')
@@ -69,36 +70,30 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     public function getMigrations($steps)
     {
-        $query = "
-            FOR m IN migrations
-                FILTER m.batch >= 1
-                SORT m.batch DESC, m.migration DESC
-                LIMIT @steps
-                RETURN { 'migration' : m.migration, 'batch' : m.batch }
-        ";
         $bindings['steps'] = $steps;
 
-        return $this->getConnection()->select($query, $bindings);
+        $qb = AQB::for('m', 'migrations')
+            ->filter('m.batch', '>=', 1)
+            ->sort([['m.batch', 'DESC'], ['m.migration', 'DESC']])
+            ->limit($steps)
+            ->return(['migration' => 'm.migration', 'batch' => 'm.batch'])
+            ->get();
 
-//        $query = $this->collection()->where('batch', '>=', '1');
-//
-//        return $query->orderBy('batch', 'desc')
-//                     ->orderBy('migration', 'desc')
-//                     ->take($steps)->get()->all();
+        return $this->getConnection()->select($qb->query);
+
     }
 
     public function getLast()
     {
         $batch = $this->getLastBatchNumber();
-        $query = '
-            FOR m IN migrations
-                FILTER m.batch == @batch
-                SORT m.migration DESC
-                RETURN m
-        ';
-        $bindings['batch'] = $batch;
 
-        return $this->getConnection()->select($query, $bindings);
+        $qb = AQB::for('m', 'migrations')
+            ->filter('m.batch', $batch)
+            ->sort('m.migration', 'desc')
+            ->return('m')
+            ->get();
+
+        return $this->getConnection()->select($qb->query);
 
 //        $query = $this->collection()->where('batch', );
 //
@@ -112,13 +107,12 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     public function getMigrationBatches()
     {
-        $query = "
-            FOR m IN migrations
-                SORT m.batch, m.migration
-                RETURN { 'batch' : m.batch, 'migration' : m.migration }
-        ";
+        $qb = AQB::for('m', 'migrations')
+            ->sort([['m.batch'], ['m.migration']])
+            ->return(['batch' => 'm.batch', 'migration' => 'm.migration'])
+            ->get();
 
-        return $this->getConnection()->select($query, []);
+        return $this->getConnection()->select($qb->query);
 
 //        return $this->collection()
 //                ->orderBy('batch', 'asc')
@@ -134,13 +128,9 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     public function log($file, $batch)
     {
-        $query = '
-            INSERT { migration: @file, batch: @batch } 
-              INTO migrations
-        ';
-        $bindings['file'] = $file;
-        $bindings['batch'] = $batch;
-        $this->getConnection()->insert($query, $bindings);
+        $qb = AQB::insert(['migration' => $file, 'batch' => $batch], 'migrations')->get();
+
+        $this->getConnection()->insert($qb->query, $qb->binds);
 
 //        $record = ['migration' => $file, 'batch' => $batch];
 //
@@ -155,14 +145,12 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     public function delete($migration)
     {
-        $query = '
-            FOR m IN migrations
-                FILTER m.migration == @migration
-                REMOVE m IN migrations
-        ';
-        $bindings['migration'] = $migration->migration;
+        $qb = AQB::for('m', 'migrations')
+                ->filter('m.migration', $migration->migration)
+                ->remove('m', 'migrations')
+                ->get();
 
-        $this->getConnection()->delete($query, $bindings);
+        $this->getConnection()->delete($qb->query, $qb->binds);
 
         //        $this->collection()->where('migration', $migration->migration)->delete();
     }
@@ -184,13 +172,14 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     public function getLastBatchNumber()
     {
-        $query = '
-            FOR m IN migrations
-                COLLECT AGGREGATE 
-                    maxBatch = MAX(m.batch)
-                    RETURN maxBatch
-        ';
-        $results = current($this->getConnection()->select($query, []));
+        $qb = new QueryBuilder();
+        $qb = $qb->for('m', 'migrations')
+            ->collect()
+            ->aggregate('maxBatch', $qb->max('m.batch'))
+            ->return('maxBatch')
+            ->get();
+
+        $results = current($this->getConnection()->select($qb->query));
         if ($results === null) {
             $results = 0;
         }
@@ -240,7 +229,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
     /**
      * Get a query builder for the migration collection.
      *
-     * @return \LaravelFreelancerNL\Aranguent\Query\Builder
+     * @return Builder
      */
     protected function collection()
     {
@@ -249,7 +238,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
 
     /**
      * {@inheritdoc}
-     * @return \LaravelFreelancerNL\Aranguent\Query\Builder
+     * @return Builder
      */
     protected function table()
     {

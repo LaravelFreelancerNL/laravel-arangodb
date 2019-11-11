@@ -2,7 +2,6 @@
 
 namespace LaravelFreelancerNL\Aranguent;
 
-use Illuminate\Database\Migrations\Migrator;
 use LaravelFreelancerNL\Aranguent\Migrations\MigrationCreator;
 use LaravelFreelancerNL\Aranguent\Console\Migrations\MigrateMakeCommand;
 use LaravelFreelancerNL\Aranguent\Migrations\DatabaseMigrationRepository;
@@ -11,6 +10,7 @@ use LaravelFreelancerNL\Aranguent\Console\Migrations\AranguentConvertMigrationsC
 
 class MigrationServiceProvider extends IlluminateMigrationServiceProvider
 {
+
     /**
      * {@inheritdoc}
      */
@@ -39,7 +39,13 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
 
         $this->registerCreator();
 
-        $this->registerCommands();
+        $commands = array_merge($this->commands,
+            [
+                'MigrateMake' => 'command.migrate.make',
+                'AranguentConvertMigrations' => 'command.aranguent.convert-migrations',
+            ]
+        );
+        $this->registerCommands($commands);
     }
 
     /**
@@ -54,21 +60,6 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
         });
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function registerMigrator()
-    {
-        // The migrator is responsible for actually running and rollback the migration
-        // files in the application. We'll pass in our database connection resolver
-        // so the migrator can resolve any of these connections when it needs to.
-        $this->app->singleton('migrator', function ($app) {
-            $repository = $app['migration.repository'];
-
-            return new Migrator($repository, $app['db'], $app['files']);
-        });
-    }
-
     protected function registerCreator()
     {
         $this->app->singleton('migration.creator', function ($app) {
@@ -76,36 +67,38 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
         });
     }
 
+//    /**
+//     * Register all of the migration commands.
+//     *
+//     * @param array $commands
+//     * @return void
+//     */
+//    protected function registerCommands(array $commands)
+//    {
+//        $commands = array_keys($commands);
+//        foreach ($commands as $key => $command) {
+//            $commands[$key] = "\LaravelFreelancerNL\Aranguent\Console\Migrations\\".$command;
+//        }
+//        $this->commands([
+//            'command.aranguent.convert-migrations',
+//        ]);
+//    }
+
+
     /**
-     * Register all of the migration commands.
+     * Register the command.
      *
      * @return void
      */
-    protected function registerCommands()
-    {
-        $commands = [
-            'MigrateMakeCommand' => 'command.make.migrate',
-            'AranguentConvertMigrationsCommand' => 'command.aranguent.convert-migrations',
-        ];
-
-        foreach (array_keys($commands) as $command) {
-            call_user_func_array([$this, "register{$command}"], []);
-        }
-
-        $commands = array_keys($commands);
-        foreach ($commands as $key => $command) {
-            $commands[$key] = "\LaravelFreelancerNL\Aranguent\Console\Migrations\\".$command;
-        }
-        $this->commands([
-            'command.aranguent.convert-migrations',
-        ]);
-    }
-
     protected function registerMigrateMakeCommand()
     {
-        $this->app->extend('command.migrate.make', function () {
-            $creator = $this->app['migration.creator'];
-            $composer = $this->app->make('Illuminate\Support\Composer');
+        $this->app->singleton('command.migrate.make', function ($app) {
+            // Once we have the migration creator registered, we will create the command
+            // and inject the creator. The creator is responsible for the actual file
+            // creation of the migrations, and may be extended by these developers.
+            $creator = $app['migration.creator'];
+
+            $composer = $app['composer'];
 
             return new MigrateMakeCommand($creator, $composer);
         });

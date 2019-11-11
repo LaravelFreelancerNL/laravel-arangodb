@@ -14,7 +14,6 @@ use Illuminate\Database\Schema\Grammars\Grammar as IlluminateGrammar;
  * The Schema blueprint works differently from the standard Illuminate version:
  * 1) ArangoDB is schemaless: we don't need to (and can't) create columns
  * 2) ArangoDB doesn't allow DB schema actions within AQL nor within a transaction.
- * 3) ArangoDB transactions aren't optimized for large scale data handling as the entire transaction has to fit in main memory.
  *
  * This means that:
  * 1) We catch column related methods silently for backwards compatibility and ease of migrating from one DB type to another
@@ -166,7 +165,7 @@ class Blueprint
      */
     public function executeAqlCommand($command)
     {
-        $this->connection->statement($command->aql['query'], $command->aql['bindings']);
+        $this->connection->statement($command->aqb->query, $command->aqb->binds);
     }
 
     public function executeCollectionCommand($command)
@@ -186,6 +185,7 @@ class Blueprint
      * Drop the index by first getting all the indexes on the collection; then selecting the matching one
      * by type and attributes.
      * @param $command
+     * @throws \ArangoDBClient\Exception
      */
     public function executeDropIndexCommand($command)
     {
@@ -313,7 +313,7 @@ class Blueprint
      * @param  array|mixed  $attributes
      * @return \Illuminate\Support\Fluent
      */
-    public function dropAttribute($attributes)
+    public function dropColumn($attributes)
     {
         $attributes = is_array($attributes) ? $attributes : func_get_args();
 
@@ -346,7 +346,7 @@ class Blueprint
      * @param  string  $to
      * @return \Illuminate\Support\Fluent
      */
-    public function renameAttribute($from, $to)
+    public function renameColumn($from, $to)
     {
         $parameters['handler'] = 'aql';
         $parameters['explanation'] = "Rename the attribute '$from' to '$to'.";
@@ -444,11 +444,6 @@ class Blueprint
     public function spatialIndex($columns, $name = null)
     {
         return $this->geoIndex($columns);
-    }
-
-    public function persistentIndex($attributes, $indexOptions = [])
-    {
-        return $this->indexCommand('persistent', $attributes, $indexOptions);
     }
 
     public function skiplistIndex($attributes, $indexOptions = [])
@@ -573,15 +568,18 @@ class Blueprint
             'bigIncrements', 'bigInteger', 'binary', 'boolean', 'char', 'date', 'dateTime', 'dateTimeTz', 'decimal',
             'double', 'enum', 'float', 'geometry', 'geometryCollection', 'increments', 'integer', 'ipAddress', 'json',
             'jsonb', 'lineString', 'longText', 'macAddress', 'mediumIncrements', 'mediumInteger', 'mediumText',
-            'multiLineString', 'multiPoint', 'multiPolygon', 'nullableTimestamps', 'point',
-            'polygon', 'polygon',  'smallIncrements', 'smallInteger',  'string', 'text', 'time',
-            'timeTz', 'timestamp', 'timestampTz', 'tinyIncrements', 'tinyInteger',
+            'morphs', 'uuidMorphs', 'multiLineString', 'multiPoint', 'multiPolygon',
+            'nullableMorphs', 'nullableUuidMorphs', 'nullableTimestamps', 'point', 'polygon', 'rememberToken',
+            'set', 'smallIncrements', 'smallInteger', 'softDeletes', 'softDeletesTz', 'string',
+            'text', 'time', 'timeTz', 'timestamp', 'timestampTz', 'timestamps', 'tinyIncrements', 'tinyInteger',
             'unsignedBigInteger', 'unsignedDecimal', 'unsignedInteger', 'unsignedMediumInteger', 'unsignedSmallInteger',
             'unsignedTinyInteger', 'uuid', 'year',
         ];
 
         if (in_array($method, $columnMethods)) {
-            $this->attributes[] = $args[0];
+            if (isset($args)) {
+                $this->attributes[] = $args;
+            }
         }
 
         $autoIncrementMethods = ['increments', 'autoIncrement'];

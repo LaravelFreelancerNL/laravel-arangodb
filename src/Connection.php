@@ -2,11 +2,13 @@
 
 namespace LaravelFreelancerNL\Aranguent;
 
+use ArangoDBClient\Exception;
 use ArangoDBClient\Statement;
 use ArangoDBClient\Connection as ArangoConnection;
 use ArangoDBClient\GraphHandler as ArangoGraphHandler;
 use Illuminate\Database\Connection as IlluminateConnection;
 use ArangoDBClient\DocumentHandler as ArangoDocumentHandler;
+use Iterator;
 use LaravelFreelancerNL\Aranguent\Concerns\DetectsDeadlocks;
 use LaravelFreelancerNL\Aranguent\Query\Processors\Processor;
 use LaravelFreelancerNL\Aranguent\Concerns\ManagesTransactions;
@@ -79,6 +81,7 @@ class Connection extends IlluminateConnection
      * Connection constructor.
      *
      * @param array $config
+     * @throws Exception
      */
     public function __construct($config = [])
     {
@@ -143,17 +146,16 @@ class Connection extends IlluminateConnection
      * Run a select statement against the database and returns a generator.
      * ($useReadPdo is a dummy to adhere to the interface).
      *
-     * @param  string  $query
-     * @param  array  $bindings
-     * @param  bool  $useReadPdo
-     * @param  array|null  $transactionCollections
-     * @return \Iterator|null
+     * @param string $query
+     * @param array $bindings
+     * @param bool $useReadPdo
+     * @param array|null $transactionCollections
+     * @return Iterator|null
+     * @throws Exception
      */
     public function cursor($query, $bindings = [], $useReadPdo = null, $transactionCollections = null)
     {
-        $arangoConnection = $this->arangoConnection;
-
-        return $this->run($query, $bindings, function ($query, $bindings) use ($arangoConnection, $transactionCollections) {
+        return $this->run($query, $bindings, function ($query, $bindings) use ($transactionCollections) {
             if ($this->pretending()) {
                 return [];
             }
@@ -163,11 +165,10 @@ class Connection extends IlluminateConnection
                 return [];
             }
 
-            $statement = new Statement($arangoConnection, ['query' => $query, 'bindVars' => $bindings]);
+            $statement = new Statement($this->arangoConnection, ['query' => $query, 'bindVars' => $bindings]);
 
-            $cursor = $statement->execute();
+            return $statement->execute();
 
-            return $cursor;
         });
     }
 
@@ -181,9 +182,7 @@ class Connection extends IlluminateConnection
      */
     public function statement($query, $bindings = [], $transactionCollections = null)
     {
-        $arangoConnection = $this->arangoConnection;
-
-        return $this->run($query, $bindings, function ($query, $bindings) use ($arangoConnection, $transactionCollections) {
+        return $this->run($query, $bindings, function ($query, $bindings) use ($transactionCollections) {
             if ($this->pretending()) {
                 return true;
             }
@@ -193,7 +192,7 @@ class Connection extends IlluminateConnection
                 return true;
             }
 
-            $statement = new Statement($arangoConnection, ['query' => $query, 'bindVars' => $bindings]);
+            $statement = new Statement($this->arangoConnection, ['query' => $query, 'bindVars' => $bindings]);
 
             $cursor = $statement->execute();
 
@@ -214,9 +213,7 @@ class Connection extends IlluminateConnection
      */
     public function affectingStatement($query, $bindings = [], $transactionCollections = null)
     {
-        $arangoConnection = $this->arangoConnection;
-
-        return $this->run($query, $bindings, function ($query, $bindings) use ($arangoConnection, $transactionCollections) {
+        return $this->run($query, $bindings, function ($query, $bindings) use ($transactionCollections) {
             if ($this->pretending()) {
                 return 0;
             }
@@ -229,7 +226,7 @@ class Connection extends IlluminateConnection
             // For update or delete statements, we want to get the number of rows affected
             // by the statement and return that back to the developer. We'll first need
             // to execute the statement and get the executed writes from the extra.
-            $statement = new Statement($arangoConnection, ['query' => $query, 'bindVars' => $bindings]);
+            $statement = new Statement($this->arangoConnection, ['query' => $query, 'bindVars' => $bindings]);
 
             $cursor = $statement->execute();
 
@@ -244,15 +241,14 @@ class Connection extends IlluminateConnection
     /**
      * Run a raw, unprepared query against the connection.
      *
-     * @param  string  $query
-     * @param  array|null $collections
+     * @param string $query
+     * @param array|null $collections
      * @return bool
+     * @throws Exception
      */
     public function unprepared($query)
     {
-        $arangoConnection = $this->arangoConnection;
-
-        return $this->run($query, [], function ($query) use ($arangoConnection) {
+        return $this->run($query, [], function ($query) {
             if ($this->pretending()) {
                 return true;
             }
@@ -262,13 +258,15 @@ class Connection extends IlluminateConnection
                 return [];
             }
 
-            $statement = new Statement($arangoConnection, ['query' => $query, 'bindVars' => []]);
+            $statement = new Statement($this->arangoConnection, ['query' => $query, 'bindVars' => []]);
 
             $cursor = $statement->execute();
 
             $affectedDocumentCount = $cursor->getWritesExecuted();
 
-            $this->recordsHaveBeenModified($change = $affectedDocumentCount > 0);
+            $change = $affectedDocumentCount > 0;
+
+            $this->recordsHaveBeenModified($change);
 
             return $change;
         });
@@ -277,33 +275,30 @@ class Connection extends IlluminateConnection
     /**
      * Returns the query execution plan. The query will not be executed.
      *
-     * @param  string  $query
-     * @param  array $bindings
+     * @param string $query
+     * @param array $bindings
      * @return array
+     * @throws Exception
      */
     public function explain($query, $bindings = [])
     {
         $statement = new Statement($this->arangoConnection, ['query' => $query, 'bindVars' => $bindings]);
 
-        $explanation = $statement->explain();
-
-        return $explanation;
+        return $statement->explain();
     }
 
     /**
      * Run a select statement against the database.
      *
-     * @param  string  $query
-     * @param  array  $bindings
-     * @param  bool  $useReadPdo
-     * @param  null|array  $transactionCollections
+     * @param string $query
+     * @param array $bindings
+     * @param bool $useReadPdo
+     * @param null|array $transactionCollections
      * @return array
      */
     public function select($query, $bindings = [], $useReadPdo = true, $transactionCollections = null)
     {
-        $arangoConnection = $this->arangoConnection;
-
-        return $this->run($query, $bindings, function ($query, $bindings) use ($arangoConnection, $transactionCollections) {
+        return $this->run($query, $bindings, function ($query, $bindings) {
             if ($this->pretending()) {
                 return [];
             }
@@ -313,7 +308,7 @@ class Connection extends IlluminateConnection
                 return [];
             }
 
-            $statement = new Statement($arangoConnection, ['query' => $query, 'bindVars' => $bindings]);
+            $statement = new Statement($this->arangoConnection, ['query' => $query, 'bindVars' => $bindings]);
 
             $cursor = $statement->execute();
 
@@ -363,7 +358,7 @@ class Connection extends IlluminateConnection
     /**
      * Get a new query builder instance.
      *
-     * @return \LaravelFreelancerNL\Aranguent\Query\Builder
+     * @return QueryBuilder
      */
     public function query()
     {
@@ -375,20 +370,21 @@ class Connection extends IlluminateConnection
     /**
      * Begin a fluent query against a database collection.
      *
-     * @param  string  $collection
-     * @return \LaravelFreelancerNL\Aranguent\Query\Builder
+     * @param string $collection
+     * @param null $as
+     * @return QueryBuilder
      */
-    public function collection($collection)
+    public function collection($collection, $as = null)
     {
-        return $this->query()->from($collection);
+        return $this->query()->from($collection, $as);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function table($table)
+    public function table($table, $as = null)
     {
-        return $this->collection($table);
+        return $this->collection($table, $as = null);
     }
 
     /**

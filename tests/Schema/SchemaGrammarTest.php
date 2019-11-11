@@ -10,7 +10,7 @@ use LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar;
 class SchemaGrammarTest extends TestCase
 {
     /**
-     * @var \LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar
+     * @var Grammar
      */
     protected $grammar;
 
@@ -46,10 +46,7 @@ class SchemaGrammarTest extends TestCase
         $command = new Fluent($parameters);
         $results = $this->grammar->compileHasAttribute($collection, $command);
 
-        $this->assertEquals('FOR document IN @@collection
-    FILTER @firstAttribute != null && @SecondAttribute != null && @`@theThirdAttribute` != null
-    LIMIT 1
-    RETURN true', $results->aql['query']);
+        $this->assertEquals('FOR doc IN GrammarTestCollection FILTER doc.firstAttribute != null AND doc.SecondAttribute != null AND doc.@theThirdAttribute != null LIMIT 1 RETURN true', $results->aqb->query);
     }
 
     /**
@@ -71,17 +68,9 @@ class SchemaGrammarTest extends TestCase
         $parameters['explanation'] = 'Drop the following attribute(s): '.implode(',', $attributes).'.';
         $command = new Fluent($parameters);
         $results = $this->grammar->compileDropAttribute($collection, $command);
-
-        $this->assertEquals('FOR document IN @@collection
- FILTER @firstAttribute != null || @SecondAttribute != null || @`@theThirdAttribute` != null
- UPDATE document WITH {
-     @firstAttribute: null,
-     @SecondAttribute: null,
-     @`@theThirdAttribute`: null,
-} IN @@collection OPTIONS { keepNull: false }', $results->aql['query']);
-        $this->assertEquals('`@theThirdAttribute`', $results->aql['bindings'][2]);
-        $this->assertEquals($collection, $results->collections['write']);
-        $this->assertEquals($collection, $results->collections['read']);
+        $this->assertEquals('FOR doc IN GrammarTestCollection FILTER doc.firstAttribute != null OR doc.SecondAttribute != null OR doc.@theThirdAttribute != null UPDATE doc WITH {"firstAttribute":null,"SecondAttribute":null,"@theThirdAttribute":null} IN GrammarTestCollection OPTIONS {"keepNull":false}',
+            $results->aqb->query);
+        $this->assertEquals([$collection], $results->aqb->collections['write']);
     }
 
     /**
@@ -92,7 +81,7 @@ class SchemaGrammarTest extends TestCase
     {
         $collection = 'GrammarTestCollection';
         $from = 'oldAttributeName';
-        $to = '@newAttributeName';
+        $to = 'newAttributeName';
 
         $parameters['name'] = 'renameAttribute';
         $parameters['handler'] = 'aql';
@@ -101,10 +90,9 @@ class SchemaGrammarTest extends TestCase
         $parameters['to'] = $to;
         $command = new Fluent($parameters);
         $results = $this->grammar->compileRenameAttribute($collection, $command);
-
-        $this->assertEquals('`@newAttributeName`', $results->aql['bindings']['from']);
-        $this->assertEquals($collection, $results->collections['write']);
-        $this->assertEquals($collection, $results->collections['read']);
+        self::assertEquals('FOR doc IN GrammarTestCollection FILTER doc.oldAttributeName != null AND doc.newAttributeName == null UPDATE doc WITH {"oldAttributeName":null,"newAttributeName":doc.oldAttributeName} IN GrammarTestCollection OPTIONS {"keepNull":true}',
+            $results->aqb->query);
+        $this->assertEquals($collection, $results->aqb->collections['write'][0]);
     }
 
     /**

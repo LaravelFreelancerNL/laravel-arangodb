@@ -4,6 +4,7 @@ namespace LaravelFreelancerNL\Aranguent\Schema\Grammars;
 
 use Illuminate\Support\Fluent;
 use Illuminate\Database\Schema\Grammars\Grammar as IlluminateGrammar;
+use LaravelFreelancerNL\FluentAQL\Facades\AQB;
 
 class Grammar extends IlluminateGrammar
 {
@@ -18,39 +19,29 @@ class Grammar extends IlluminateGrammar
 
     /**
      * Compile AQL to check if an attribute is in use within a document in the collection.
-     * If multiple attributes are given then all must be set in one document.
+     * If multiple attributes are set then all must be set in one document.
      * @param string $collection
      * @param Fluent $command
      * @return Fluent
      */
     public function compileHasAttribute($collection, Fluent $command)
     {
-        $filter = [];
         if (is_string($command->attribute)) {
             $command->attribute = [$command->attribute];
         }
 
+        $filter = [];
         foreach ($command->attribute as $attribute) {
-            $bindVar = $this->wrapBindVar($attribute);
-            $bindings[] = $bindVar;
-            $filter[] = '@'.$bindVar.' != null';
+            $filter[] = ['doc.'.$attribute, '!=', 'null'];
         }
 
-        $filter = implode(' && ', $filter);
+        $qb = AQB::for('doc', $collection)
+            ->filter($filter)
+            ->limit(1)
+            ->return('true')
+            ->get();
 
-        $query = "FOR document IN @@collection\n";
-        $query .= "    FILTER $filter\n";
-        $query .= "    LIMIT 1\n";
-        $query .= '    RETURN true';
-
-        $bindings['@collection'] = $collection;
-
-        $aql['query'] = $query;
-        $aql['bindings'] = $bindings;
-        $collections['read'] = $collection;
-
-        $command->aql = $aql;
-        $command->collections = $collections;
+        $command->aqb = $qb;
 
         return $command;
     }
@@ -69,22 +60,24 @@ class Grammar extends IlluminateGrammar
         $bindings['from'] = $this->wrapBindVar($command->to);
         $bindings['to'] = $this->wrapBindVar($command->from);
 
-        $query = '
-FOR document IN @@collection
-    FILTER @from != null && @to == null
-    UPDATE document WITH {
-        @from: null,
-        @to: document.@from
-} IN @@collection OPTIONS { keepNull: false }
-';
+        $filter = [
+            ['doc.'.$command->from, '!=', 'null'],
+            ['doc.'.$command->to],
+        ];
 
-        $aql['query'] = $query;
-        $aql['bindings'] = $bindings;
-        $collections['write'] = $collection;
-        $collections['read'] = $collection;
+        $qb = AQB::for('doc', $collection)
+            ->filter($filter)
+            ->update(
+                'doc',
+                [
+                    $command->from => 'null',
+                    $command->to => 'doc.'.$command->from,
+                ],
+                $collection)
+            ->options( ['keepNull' => true])
+            ->get();
 
-        $command->aql = $aql;
-        $command->collections = $collections;
+        $command->aqb = $qb;
 
         return $command;
     }
@@ -103,29 +96,18 @@ FOR document IN @@collection
             $command->attributes = [$command->attributes];
         }
 
+        $data = [];
         foreach ($command->attributes as $attribute) {
-            $bindVar = $this->wrapBindVar($attribute);
-            $bindings[] = $bindVar;
-            $filter[] = '@'.$bindVar.' != null';
+            $filter[] = ['doc.'.$attribute, '!=', 'null', 'OR'];
+            $data[$attribute] = 'null';
         }
-        $filter = implode(' || ', $filter);
+        $qb = AQB::for('doc', $collection)
+            ->filter($filter )
+            ->update('doc', $data, $collection)
+            ->options(['keepNull' => false])
+            ->get();
 
-        $query = "FOR document IN @@collection\n";
-        $query .= " FILTER $filter\n";
-        $query .= " UPDATE document WITH {\n";
-        foreach ($bindings as $bindVar) {
-            $query .= "     @$bindVar: null,\n";
-        }
-        $query .= '} IN @@collection OPTIONS { keepNull: false }';
-        $bindings['@collection'] = $collection;
-
-        $aql['query'] = $query;
-        $aql['bindings'] = $bindings;
-        $collections['read'] = $collection;
-        $collections['write'] = $collection;
-
-        $command->aql = $aql;
-        $command->collections = $collections;
+        $command->aqb = $qb;
 
         return $command;
     }
