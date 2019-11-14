@@ -6,6 +6,7 @@ use ArangoDBClient\Exception;
 use ArangoDBClient\Statement;
 use ArangoDBClient\Connection as ArangoConnection;
 use ArangoDBClient\GraphHandler as ArangoGraphHandler;
+use ArangoDBClient\UserHandler as ArangoUserHandler;
 use Illuminate\Database\Connection as IlluminateConnection;
 use ArangoDBClient\DocumentHandler as ArangoDocumentHandler;
 use Iterator;
@@ -18,6 +19,8 @@ use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 use LaravelFreelancerNL\Aranguent\Concerns\DetectsLostConnections;
 use LaravelFreelancerNL\Aranguent\Schema\Builder as SchemaBuilder;
 use LaravelFreelancerNL\Aranguent\Query\Grammars\Grammar as QueryGrammar;
+use LaravelFreelancerNL\FluentAQL\QueryBuilder as FluentAQL;
+use triagens\ArangoDb\ViewHandler as ArangoViewHandler;
 
 class Connection extends IlluminateConnection
 {
@@ -48,8 +51,6 @@ class Connection extends IlluminateConnection
 
     protected $database;
 
-    protected $collectionPrefix;
-
     protected $schemaGrammar;
 
     protected $queryGrammar;
@@ -63,6 +64,8 @@ class Connection extends IlluminateConnection
     protected $queryLog;
 
     protected $collectionHandler;
+
+    protected $viewHandler;
 
     protected $documentHandler;
 
@@ -95,10 +98,6 @@ class Connection extends IlluminateConnection
 
         // activate and set the database client connection
         $this->arangoConnection = new ArangoConnection($this->config);
-
-        $this->collectionHandler = new ArangoCollectionHandler($this->arangoConnection);
-        $this->documentHandler = new ArangoDocumentHandler($this->arangoConnection);
-        $this->graphHandler = new ArangoGraphHandler($this->arangoConnection);
 
         // We need to initialize a query grammar and the query post processors
         // which are both very important parts of the database abstractions
@@ -175,13 +174,19 @@ class Connection extends IlluminateConnection
     /**
      * Execute an AQL statement and return the boolean result.
      *
-     * @param  string  $query
+     * @param  string|FluentAQL  $query
      * @param  array   $bindings
      * @param  array|null   $transactionCollections
      * @return bool
      */
     public function statement($query, $bindings = [], $transactionCollections = null)
     {
+        if ($query instanceof FluentAQL) {
+            $bindings = $query->binds;
+            $transactionCollections = $query->collections;
+            $query = $query->query;
+        }
+
         return $this->run($query, $bindings, function ($query, $bindings) use ($transactionCollections) {
             if ($this->pretending()) {
                 return true;
@@ -206,13 +211,19 @@ class Connection extends IlluminateConnection
     /**
      * Run an AQL statement and get the number of rows affected.
      *
-     * @param  string  $query
+     * @param  string|FluentAQL  $query
      * @param  array   $bindings
      * @param  array|null   $transactionCollections
      * @return int
      */
     public function affectingStatement($query, $bindings = [], $transactionCollections = null)
     {
+        if ($query instanceof FluentAQL) {
+            $bindings = $query->binds;
+            $transactionCollections = $query->collections;
+            $query = $query->query;
+        }
+
         return $this->run($query, $bindings, function ($query, $bindings) use ($transactionCollections) {
             if ($this->pretending()) {
                 return 0;
@@ -290,7 +301,7 @@ class Connection extends IlluminateConnection
     /**
      * Run a select statement against the database.
      *
-     * @param string $query
+     * @param string|FluentAQL $query
      * @param array $bindings
      * @param bool $useReadPdo
      * @param null|array $transactionCollections
@@ -298,12 +309,32 @@ class Connection extends IlluminateConnection
      */
     public function select($query, $bindings = [], $useReadPdo = true, $transactionCollections = null)
     {
-        return $this->run($query, $bindings, function ($query, $bindings) {
+        return $this->execute($query, $bindings, $useReadPdo, $transactionCollections);
+    }
+
+    /**
+     * Run an AQL query against the database and return the results.
+     *
+     * @param string|FluentAQL $query
+     * @param array $bindings
+     * @param bool $useReadPdo
+     * @param null|array $transactionCollections
+     * @return array
+     */
+    public function execute($query, $bindings = [], $useReadPdo = true, $transactionCollections = null)
+    {
+        if ($query instanceof FluentAQL) {
+            $bindings = $query->binds;
+            $transactionCollections = $query->collections;
+            $query = $query->query;
+        }
+
+        return $this->run($query, $bindings, function ($query, $bindings, $transactionCollections= null) {
             if ($this->pretending()) {
                 return [];
             }
             if ($this->transactionLevel() > 0) {
-                $this->addQueryToTransaction($query, $bindings);
+                $this->addQueryToTransaction($query, $bindings, $transactionCollections);
 
                 return [];
             }
@@ -319,7 +350,7 @@ class Connection extends IlluminateConnection
     /**
      * Run an insert statement against the database.
      *
-     * @param  string  $query
+     * @param  string|FluentAQL  $query
      * @param  array   $bindings
      * @param  array|null   $transactionCollections
      * @return bool
@@ -332,13 +363,14 @@ class Connection extends IlluminateConnection
     /**
      * Run an update statement against the database.
      *
-     * @param  string  $query
+     * @param  string|FluentAQL  $query
      * @param  array   $bindings
      * @param  array|null   $transactionCollections
      * @return int
      */
     public function update($query, $bindings = [], $transactionCollections = null)
     {
+
         return $this->affectingStatement($query, $bindings, $transactionCollections);
     }
 
@@ -368,43 +400,13 @@ class Connection extends IlluminateConnection
     }
 
     /**
-     * Begin a fluent query against a database collection.
-     *
-     * @param string $collection
-     * @param null $as
-     * @return QueryBuilder
-     */
-    public function collection($collection, $as = null)
-    {
-        return $this->query()->from($collection, $as);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function table($table, $as = null)
-    {
-        return $this->collection($table, $as = null);
-    }
-
-    /**
-     * Get the collection prefix for the connection.
-     *
-     * @return string
-     */
-    public function getCollectionPrefix()
-    {
-        return $this->collectionPrefix;
-    }
-
-    /**
      * Get the collection prefix for the connection.
      *
      * @return string
      */
     public function getTablePrefix()
     {
-        return $this->getCollectionPrefix();
+        return $this->tablePrefix;
     }
 
     /**
@@ -438,32 +440,43 @@ class Connection extends IlluminateConnection
 
     public function getCollectionHandler()
     {
+        if (!isset($this->collectionHandler)) {
+            $this->collectionHandler = new ArangoCollectionHandler($this->arangoConnection);
+        }
+
         return $this->collectionHandler;
     }
 
     public function getDocumentHandler()
     {
+        if (!isset($this->documentHandler)) {
+            $this->documentHandler = new ArangoDocumentHandler($this->arangoConnection);
+        }
         return $this->documentHandler;
-    }
-
-    public function setUserHandler($userHandler)
-    {
-        $this->userHandler = $userHandler;
     }
 
     public function getUserHandler()
     {
+        if (!isset($this->userHandler)) {
+            $this->userHandler = new ArangoUserHandler($this->arangoConnection);
+        }
         return $this->userHandler;
-    }
-
-    public function setGraphHandler($graphHandler)
-    {
-        $this->graphHandler = $graphHandler;
     }
 
     public function getGraphHandler()
     {
+        if (!isset($this->graphHandler)) {
+            $this->graphHandler = new ArangoGraphHandler($this->arangoConnection);
+        }
         return $this->graphHandler;
+    }
+
+    public function getViewHandler()
+    {
+        if (!isset($this->viewHandler)) {
+            $this->viewHandler = new ArangoViewHandler($this->arangoConnection);
+        }
+        return $this->viewHandler;
     }
 
     public function setDatabase($database)

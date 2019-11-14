@@ -15,18 +15,17 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      *
      * @var string
      */
-    protected $collection;
+    protected $table;
 
     /**
      * Create a new database migration repository instance.
      *
      * @param IlluminateResolver $resolver
-     * @param  string  $collection
-     * @return void
+     * @param table $
      */
-    public function __construct(IlluminateResolver $resolver, $collection)
+    public function __construct(IlluminateResolver $resolver, $table)
     {
-        $this->collection = $collection;
+        $this->table = $table;
 
         $this->resolver = $resolver;
     }
@@ -56,7 +55,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
 
         return $this->getConnection()->select($qb->query);
 
-//        return $this->collection()
+//        return $this->table()
 //                ->orderBy('batch', 'asc')
 //                ->orderBy('migration', 'asc')
 //                ->pluck('migration')->all();
@@ -95,7 +94,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
 
         return $this->getConnection()->select($qb->query);
 
-//        $query = $this->collection()->where('batch', );
+//        $query = $this->table()->where('batch', );
 //
 //        return $query->orderBy('migration', 'desc')->get()->all();
     }
@@ -114,7 +113,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
 
         return $this->getConnection()->select($qb->query);
 
-//        return $this->collection()
+//        return $this->table()
 //                ->orderBy('batch', 'asc')
 //                ->orderBy('migration', 'asc')
 //                ->pluck('batch', 'migration')->all();
@@ -134,7 +133,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
 
 //        $record = ['migration' => $file, 'batch' => $batch];
 //
-//        $this->collection()->insert($record);
+//        $this->table()->insert($record);
     }
 
     /**
@@ -152,7 +151,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
 
         $this->getConnection()->delete($qb->query, $qb->binds);
 
-        //        $this->collection()->where('migration', $migration->migration)->delete();
+//        $this->table()->where('migration', $migration->migration)->delete();
     }
 
     /**
@@ -185,7 +184,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
         }
 
         return $results;
-//        return $this->collection()->max('batch');
+//        return $this->table()->max('batch');
     }
 
     /**
@@ -196,11 +195,11 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
     {
         $collectionHandler = $this->getConnection()->getCollectionHandler();
 
-        $collectionHandler->create($this->collection);
+        $collectionHandler->create($this->table);
 
 //        $schema = $this->getConnection()->getSchemaBuilder();
 //
-//        $schema->create($this->collection, function ($collection) {
+//        $schema->create($this->table, function ($table) {
 //            // The migrations collection is responsible for keeping track of which of the
 //            // migrations have actually run for the application. We'll create the
 //            // collection to hold the migration file's path as well as the batch ID.
@@ -219,11 +218,11 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
     {
         $collectionHandler = $this->getConnection()->getCollectionHandler();
 
-        return $collectionHandler->has($this->collection);
+        return $collectionHandler->has($this->table);
 
 //        $schema = $this->getConnection()->getSchemaBuilder();
 //
-//        return $schema->hasCollection($this->collection);
+//        return $schema->hasCollection($this->table);
     }
 
     /**
@@ -233,7 +232,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     protected function collection()
     {
-        return $this->getConnection()->collection($this->collection);
+        return $this->getConnection()->collection($this->table);
     }
 
     /**
