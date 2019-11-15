@@ -104,7 +104,6 @@ class Builder extends IlluminateQueryBuilder
             $this->where($this->from.'._key', '=', $_key);
         }
         $aqb = $this->grammar->compileDelete($this, $_key);
-var_dump($aqb->query);
         return $this->connection->delete($aqb);
     }
 

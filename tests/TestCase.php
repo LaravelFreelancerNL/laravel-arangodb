@@ -34,12 +34,8 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 //        $this->withFactories(__DIR__ . '/database/factories');
 
         $config = require 'config/database.php';
-
-        $app['config']->set('database.default', 'arangodb');
         $app['config']->set('database.connections.arangodb', $config['connections']['arangodb']);
-        $app['config']->set('database.connections.mysql', $config['connections']['mysql']);
-        $app['config']->set('database.connections.sqlite', $config['connections']['sqlite']);
-
+        $app['config']->set('database.default', 'arangodb');
         $app['config']->set('cache.driver', 'array');
 
         $this->connection = DB::connection('arangodb');
@@ -47,12 +43,11 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         $this->createDatabase();
 
         $this->collectionHandler = $this->connection->getCollectionHandler();
-
         //Remove all collections
-        $collections = $this->collectionHandler->getAllCollections(['excludeSystem' => true]);
-        foreach ($collections as $collection) {
-            $this->collectionHandler->drop($collection['id']);
-        }
+            $collections = $this->collectionHandler->getAllCollections(['excludeSystem' => true]);
+            foreach ($collections as $collection) {
+                $this->collectionHandler->truncate($collection['id']);
+            }
     }
 
     protected function setUp() : void
@@ -61,7 +56,13 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 
         $this->artisan('aranguent:convert-migrations', ['--realpath' => true, '--path' => __DIR__.'/../vendor/orchestra/testbench-core/laravel/migrations/'])->run();
 
-        $this->artisan('migrate:install', [])->run();
+        //Running migrations without loading them through testbench as it does something weird which doesn't save the new collections
+        $this->installMigrateIfNotExists();
+
+        $this->artisan('migrate', [
+            '--path' => realpath(__DIR__.'/database/migrations'),
+            '--realpath' => true
+        ])->run();
 
         $this->databaseMigrationRepository = new DatabaseMigrationRepository($this->app['db'], $this->collection);
     }
@@ -80,11 +81,10 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         ];
     }
 
-    protected function createDatabase($database = 'aranguent_testing')
+    protected function createDatabase($database = 'aranguent__test')
     {
         $databaseHandler = new Database();
         $response = $databaseHandler->listUserDatabases($this->connection->getArangoConnection());
-
         if (! in_array($database, $response['result'])) {
             $databaseHandler->create($this->connection->getArangoConnection(), $database);
 
@@ -92,5 +92,13 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         }
 
         return false;
+    }
+
+    private function installMigrateIfNotExists()
+    {
+        $collections = $this->collectionHandler->getAllCollections(['excludeSystem' => true]);
+        if (! isset($collections['migrations'])) {
+            $this->artisan('migrate:install', [])->run();
+        }
     }
 }

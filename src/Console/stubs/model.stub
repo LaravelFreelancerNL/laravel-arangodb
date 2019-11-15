@@ -1,0 +1,10 @@
+<?php
+
+namespace DummyNamespace;
+
+use LaravelFreelancerNL\Aranguent\Eloquent\Model;
+
+class DummyClass extends Model
+{
+    //
+}

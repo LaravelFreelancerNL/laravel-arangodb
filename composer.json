@@ -21,7 +21,8 @@
     "php": ">=7.2",
     "laravel/framework": "6.*",
     "triagens/arangodb": "^3.5",
-    "laravel-freelancer-nl/aql-query-builder": "dev-master"
+    "laravel-freelancer-nl/aql-query-builder": "dev-master",
+    "ext-json": "*"
   },
   "require-dev": {
     "orchestra/testbench": "4.*",

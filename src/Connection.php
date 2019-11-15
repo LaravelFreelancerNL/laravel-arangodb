@@ -15,12 +15,12 @@ use LaravelFreelancerNL\Aranguent\Query\Processors\Processor;
 use LaravelFreelancerNL\Aranguent\Concerns\ManagesTransactions;
 use ArangoDBClient\CollectionHandler as ArangoCollectionHandler;
 use ArangoDBClient\ConnectionOptions as ArangoConnectionOptions;
+use ArangoDBClient\ViewHandler as ArangoViewHandler;
 use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 use LaravelFreelancerNL\Aranguent\Concerns\DetectsLostConnections;
 use LaravelFreelancerNL\Aranguent\Schema\Builder as SchemaBuilder;
 use LaravelFreelancerNL\Aranguent\Query\Grammars\Grammar as QueryGrammar;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder as FluentAQL;
-use triagens\ArangoDb\ViewHandler as ArangoViewHandler;
 
 class Connection extends IlluminateConnection
 {

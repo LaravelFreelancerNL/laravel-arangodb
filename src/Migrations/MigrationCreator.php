@@ -2,6 +2,7 @@
 
 namespace LaravelFreelancerNL\Aranguent\Migrations;
 
+use Exception;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Database\Migrations\MigrationCreator as IlluminateMigrationCreator;
 
@@ -10,7 +11,7 @@ class MigrationCreator extends IlluminateMigrationCreator
     /**
      * Create a new migration creator instance.
      *
-     * @param  \Illuminate\Filesystem\Filesystem  $files
+     * @param Filesystem $files
      * @return void
      */
     public function __construct(Filesystem $files)
@@ -29,7 +30,7 @@ class MigrationCreator extends IlluminateMigrationCreator
      * @param  bool    $create
      * @return string
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function create($name, $path, $collection = null, $create = false)
     {

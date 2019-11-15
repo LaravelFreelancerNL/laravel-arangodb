@@ -60,7 +60,7 @@ class Blueprint
     /**
      * The commands that should be run for the collection.
      *
-     * @var \Illuminate\Support\Fluent[]
+     * @var Fluent[]
      */
     protected $commands = [];
 
@@ -211,6 +211,10 @@ class Blueprint
         }
     }
 
+    /**
+     * @param $command
+     * @throws \ArangoDBClient\Exception
+     */
     public function executeIndexCommand($command)
     {
         if ($this->connection->pretending()) {
@@ -252,12 +256,12 @@ class Blueprint
     /**
      * Indicate that the collection needs to be created.
      *
-     * @param array $config
-     * @return \Illuminate\Support\Fluent
+     * @param array $options
+     * @return Fluent
      */
-    public function create($config = [])
+    public function create($options = [])
     {
-        $parameters['config'] = $config;
+        $parameters['options'] = $options;
         $parameters['explanation'] = "Create '{$this->collection}' collection.";
         $parameters['handler'] = 'collection';
 
@@ -271,20 +275,24 @@ class Blueprint
 
             return;
         }
-        $config = $command->config;
+        $options = $command->options;
         if ($this->temporary === true) {
-            $config['isVolatile'] = true;
+            $options['isVolatile'] = true;
         }
         if ($this->autoIncrement === true) {
-            $config['keyOptions']['autoincrement'] = true;
+            $options['keyOptions']['autoincrement'] = true;
         }
-        $this->collectionHandler->create($this->collection, $config);
+
+        $collections = $this->collectionHandler->getAllCollections(['excludeSystem' => true]);
+        if (! isset($collections[$this->collection])) {
+            $this->collectionHandler->create($this->collection, $options);
+        }
     }
 
     /**
      * Indicate that the collection should be dropped.
      *
-     * @return \Illuminate\Support\Fluent
+     * @return Fluent
      */
     public function drop()
     {
@@ -297,7 +305,7 @@ class Blueprint
     /**
      * Indicate that the collection should be dropped if it exists.
      *
-     * @return \Illuminate\Support\Fluent
+     * @return Fluent
      */
     public function dropIfExists()
     {
@@ -311,7 +319,7 @@ class Blueprint
      * Indicate that the given attribute(s) should be dropped.
      *
      * @param  array|mixed  $attributes
-     * @return \Illuminate\Support\Fluent
+     * @return Fluent
      */
     public function dropColumn($attributes)
     {
@@ -344,7 +352,7 @@ class Blueprint
      *
      * @param  string  $from
      * @param  string  $to
-     * @return \Illuminate\Support\Fluent
+     * @return Fluent
      */
     public function renameColumn($from, $to)
     {
@@ -361,7 +369,7 @@ class Blueprint
      *
      * @param  string|array  $attributes
      * @param  string  $type
-     * @return \Illuminate\Support\Fluent
+     * @return Fluent
      */
     public function dropIndex($attributes, $type)
     {
@@ -377,7 +385,7 @@ class Blueprint
      * Rename the collection to a given name.
      *
      * @param  string  $to
-     * @return \Illuminate\Support\Fluent
+     * @return Fluent
      */
     public function rename($to)
     {
@@ -390,7 +398,7 @@ class Blueprint
      * @param  string|array  $columns
      * @param  string  $name
      * @param  string|null  $algorithm
-     * @return \Illuminate\Support\Fluent
+     * @return Fluent
      */
     public function index($columns = null, $name = null, $algorithm = null)
     {
@@ -439,7 +447,7 @@ class Blueprint
      * Alias for geoIndex().
      * @param  string|array  $columns
      * @param  string  $name
-     * @return \Illuminate\Support\Fluent
+     * @return Fluent
      */
     public function spatialIndex($columns, $name = null)
     {
@@ -457,7 +465,7 @@ class Blueprint
      * @param  string|array  $columns
      * @param  string  $name
      * @param  string|null  $algorithm
-     * @return \Illuminate\Support\Fluent
+     * @return Fluent
      */
     public function unique($columns = null, $name = null, $algorithm = null)
     {
@@ -474,7 +482,7 @@ class Blueprint
      * @param  string  $type
      * @param  string|array  $attributes
      * @param  array $indexOptions
-     * @return \Illuminate\Support\Fluent
+     * @return Fluent
      */
     protected function indexCommand($type = '', $attributes = [], $indexOptions = [])
     {
@@ -504,7 +512,7 @@ class Blueprint
      *
      * @param  string  $name
      * @param  array  $parameters
-     * @return \Illuminate\Support\Fluent
+     * @return Fluent
      */
     protected function addCommand($name, array $parameters = [])
     {
@@ -518,7 +526,7 @@ class Blueprint
      *
      * @param  string  $name
      * @param  array  $parameters
-     * @return \Illuminate\Support\Fluent
+     * @return Fluent
      */
     protected function createCommand($name, array $parameters = [])
     {
@@ -548,7 +556,7 @@ class Blueprint
     /**
      * Get the commands on the blueprint.
      *
-     * @return \Illuminate\Support\Fluent[]
+     * @return Fluent[]
      */
     public function getCommands()
     {

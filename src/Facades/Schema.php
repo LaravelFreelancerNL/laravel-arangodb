@@ -2,10 +2,11 @@
 
 namespace LaravelFreelancerNL\Aranguent\Facades;
 
+use Closure;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static \LaravelFreelancerNL\Aranguent\Schema\Builder create(string $collection, \Closure $callback)
+ * @method static \LaravelFreelancerNL\Aranguent\Schema\Builder create($collection, Closure $callback, $options = [])
  * @method static \LaravelFreelancerNL\Aranguent\Schema\Builder drop(string $collection)
  * @method static \LaravelFreelancerNL\Aranguent\Schema\Builder dropIfExists(string $collection)
  * @method static \LaravelFreelancerNL\Aranguent\Schema\Builder table(string $table, \Closure $callback)

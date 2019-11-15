@@ -11,5 +11,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        $this->call(CharactersSeeder::class);
+        $this->call(ChildOfSeeder::class);
+        $this->call(LocationsSeeder::class);
+        $this->call(CharacteristicsSeeder::class);
+
     }
 }

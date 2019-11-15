@@ -1,0 +1,10 @@
+<?php
+
+namespace DummyNamespace;
+
+use LaravelFreelancerNL\Aranguent\Eloquent\Pivot;
+
+class DummyClass extends Pivot
+{
+    //
+}

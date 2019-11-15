@@ -81,9 +81,12 @@ class Grammar extends FluentAqlGrammar
         }
 
         $qb = new FluentAQL();
-        return $qb->insert($qb->bind($values), $table)
+        $qb = $qb->let('docs', $qb->bind($values))
+            ->for('doc', 'docs')
+            ->insert('doc', $table)
             ->return('NEW._key')
             ->get();
+        return $qb;
     }
 
     /**
@@ -122,9 +125,8 @@ class Grammar extends FluentAqlGrammar
 //        if ($query->unions) {
 //            $sql = $this->wrapUnion($sql).' '.$this->compileUnions($query);
 //        }
-
-
-        return $aqb->get();
+        $aqb = $aqb->get();
+        return $aqb;
     }
 
     /**

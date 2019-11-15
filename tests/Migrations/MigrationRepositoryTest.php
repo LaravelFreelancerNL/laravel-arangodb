@@ -63,7 +63,7 @@ class MigrationRepositoryTest extends TestCase
 
         $result = $this->databaseMigrationRepository->getRan();
 
-        $this->assertEquals(3, count($result));
+        $this->assertEquals(7, count($result));
     }
 
     /**
@@ -117,7 +117,7 @@ class MigrationRepositoryTest extends TestCase
         $batches = $this->databaseMigrationRepository->getMigrationBatches();
 
         $this->assertIsArray($batches);
-        $this->assertEquals(3, count($batches));
+        $this->assertEquals(7, count($batches));
     }
 
     /**

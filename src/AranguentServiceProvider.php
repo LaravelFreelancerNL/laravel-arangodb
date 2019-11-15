@@ -3,6 +3,7 @@
 namespace LaravelFreelancerNL\Aranguent;
 
 use Illuminate\Support\ServiceProvider;
+use LaravelFreelancerNL\Aranguent\Console\ModelAranguentCommand;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar as SchemaGrammar;
 
@@ -54,6 +55,6 @@ class AranguentServiceProvider extends ServiceProvider
                 $loader->alias('Schema', 'LaravelFreelancerNL\Aranguent\Facade\Schema');
             }
         });
-        $this->app->register('LaravelFreelancerNL\Aranguent\MigrationServiceProvider');
+        $this->app->register('LaravelFreelancerNL\Aranguent\Providers\CommandServiceProvider');
     }
 }

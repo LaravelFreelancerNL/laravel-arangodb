@@ -24,7 +24,7 @@ class MigrateMakeCommand extends IlluminateMigrateMakeCommand
 
     /**
      * Create a new migration install command instance.
-     * @param \LaravelFreelancerNL\Aranguent\Migrations\MigrationCreator $creator
+     * @param MigrationCreator $creator
      * @param Composer $composer
      */
     public function __construct(MigrationCreator $creator, Composer $composer)
@@ -39,6 +39,7 @@ class MigrateMakeCommand extends IlluminateMigrateMakeCommand
      * Execute the console command.
      *
      * @return void
+     * @throws \Exception
      */
     public function handle()
     {
@@ -85,6 +86,7 @@ class MigrateMakeCommand extends IlluminateMigrateMakeCommand
      * @param string $collection
      * @param bool $create
      * @return void
+     * @throws \Exception
      */
     protected function writeMigration($name, $collection, $create)
     {

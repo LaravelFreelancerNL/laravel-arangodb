@@ -13,5 +13,10 @@ abstract class Model extends IlluminateModel
      */
     protected $primaryKey = '_key';
 
+    /**
+     * The primary key type.
+     * @var string
+     */
+    protected $keyType = 'string';
 
 }

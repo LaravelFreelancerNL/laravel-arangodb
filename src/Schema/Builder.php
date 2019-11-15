@@ -125,8 +125,9 @@ class Builder
     /**
      * Drop a collection from the schema.
      *
-     * @param  string  $collection
+     * @param string $collection
      * @return void
+     * @throws \ArangoDBClient\Exception
      */
     public function drop($collection)
     {
@@ -154,6 +155,7 @@ class Builder
 
     /**
      * @param $collection
+     * @throws \ArangoDBClient\Exception
      */
     public function dropIfExists($collection)
     {
@@ -167,6 +169,8 @@ class Builder
      *
      * @param array $options
      * @return array
+     * @throws \ArangoDBClient\ClientException
+     * @throws \ArangoDBClient\Exception
      */
     protected function getAllCollections(array $options = [])
     {
@@ -183,6 +187,8 @@ class Builder
      *
      * @param array $options
      * @return array
+     * @throws \ArangoDBClient\ClientException
+     * @throws \ArangoDBClient\Exception
      */
     protected function getAllTables(array $options = [])
     {
@@ -192,6 +198,7 @@ class Builder
     /**
      * @param string $collection
      * @return \ArangoDBClient\Collection
+     * @throws \ArangoDBClient\Exception
      */
     protected function getCollection($collection)
     {
@@ -204,6 +211,7 @@ class Builder
      * @param $from
      * @param $to
      * @return bool
+     * @throws \ArangoDBClient\Exception
      */
     public function rename($from, $to)
     {
@@ -213,8 +221,9 @@ class Builder
     /**
      * Determine if the given collection exists.
      *
-     * @param  string  $collection
+     * @param string $collection
      * @return bool
+     * @throws \ArangoDBClient\Exception
      */
     public function hasCollection(string $collection)
     {
@@ -224,8 +233,9 @@ class Builder
     /**
      * Alias for hasCollection.
      *
-     * @param  string  $table
+     * @param string $table
      * @return bool
+     * @throws \ArangoDBClient\Exception
      */
     public function hasTable($table)
     {
@@ -305,7 +315,7 @@ class Builder
     /**
      * Get the database connection instance.
      *
-     * @return \LaravelFreelancerNL\Aranguent\Connection
+     * @return Connection
      */
     public function getConnection()
     {

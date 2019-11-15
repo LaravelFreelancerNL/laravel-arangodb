@@ -1,14 +1,15 @@
 <?php
 
-namespace LaravelFreelancerNL\Aranguent;
+namespace LaravelFreelancerNL\Aranguent\Providers;
 
+use LaravelFreelancerNL\Aranguent\Console\ModelAranguentCommand;
 use LaravelFreelancerNL\Aranguent\Migrations\MigrationCreator;
 use LaravelFreelancerNL\Aranguent\Console\Migrations\MigrateMakeCommand;
 use LaravelFreelancerNL\Aranguent\Migrations\DatabaseMigrationRepository;
 use Illuminate\Database\MigrationServiceProvider as IlluminateMigrationServiceProvider;
 use LaravelFreelancerNL\Aranguent\Console\Migrations\AranguentConvertMigrationsCommand;
 
-class MigrationServiceProvider extends IlluminateMigrationServiceProvider
+class CommandServiceProvider extends IlluminateMigrationServiceProvider
 {
 
     /**
@@ -24,6 +25,7 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 MigrateMakeCommand::class,
+                ModelAranguentCommand::class
             ]);
         }
     }
@@ -43,6 +45,7 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
             [
                 'MigrateMake' => 'command.migrate.make',
                 'AranguentConvertMigrations' => 'command.aranguent.convert-migrations',
+                'MakeModel' => 'command.model.make',
             ]
         );
         $this->registerCommands($commands);
@@ -67,24 +70,6 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
         });
     }
 
-//    /**
-//     * Register all of the migration commands.
-//     *
-//     * @param array $commands
-//     * @return void
-//     */
-//    protected function registerCommands(array $commands)
-//    {
-//        $commands = array_keys($commands);
-//        foreach ($commands as $key => $command) {
-//            $commands[$key] = "\LaravelFreelancerNL\Aranguent\Console\Migrations\\".$command;
-//        }
-//        $this->commands([
-//            'command.aranguent.convert-migrations',
-//        ]);
-//    }
-
-
     /**
      * Register the command.
      *
@@ -93,9 +78,6 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
     protected function registerMigrateMakeCommand()
     {
         $this->app->singleton('command.migrate.make', function ($app) {
-            // Once we have the migration creator registered, we will create the command
-            // and inject the creator. The creator is responsible for the actual file
-            // creation of the migrations, and may be extended by these developers.
             $creator = $app['migration.creator'];
 
             $composer = $app['composer'];
@@ -111,14 +93,22 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
         });
     }
 
+    protected function registerMakeModelCommand()
+    {
+        $this->app->singleton('command.model.make', function ($app) {
+            return new ModelAranguentCommand($app['files']);
+        });
+    }
+
     public function provides()
     {
         return [
             'migrator',
             'migration.creator',
             'migration.repository',
-            'command.migrate.make',
             'command.aranguent.convert-migrations',
+            'command.migrate.make',
+            'command.model.make',
         ];
     }
 }
