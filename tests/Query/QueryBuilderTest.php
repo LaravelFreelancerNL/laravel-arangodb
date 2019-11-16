@@ -1,10 +1,9 @@
 <?php
 
-use Illuminate\Database\ConnectionInterface;
 use LaravelFreelancerNL\Aranguent\Connection as Connection;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
-use LaravelFreelancerNL\Aranguent\Query\Grammars\Grammar;
-use LaravelFreelancerNL\Aranguent\Query\Processors\Processor;
+use LaravelFreelancerNL\Aranguent\Query\Grammar;
+use LaravelFreelancerNL\Aranguent\Query\Processor;
 use LaravelFreelancerNL\Aranguent\Tests\TestCase;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder as FluentAQL;
 use Mockery as m;

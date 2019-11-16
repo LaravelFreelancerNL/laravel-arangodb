@@ -1,5 +1,6 @@
 <?php
 
+
 use tests\models\Characteristic;
 use Illuminate\Database\Seeder;
 
@@ -34,6 +35,6 @@ class CharacteristicsSeeder extends Seeder
         ]`;
 
         $traits = json_decode($traits);
-
+        Characteristic::insert($traits);
     }
 }

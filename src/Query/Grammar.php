@@ -1,14 +1,10 @@
 <?php
 
-namespace LaravelFreelancerNL\Aranguent\Query\Grammars;
+namespace LaravelFreelancerNL\Aranguent\Query;
 
-use Illuminate\Database\Grammar as IlluminateBaseGrammar;
-use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
-use LaravelFreelancerNL\Aranguent\Query\Builder;
 use LaravelFreelancerNL\FluentAQL\Exceptions\BindException as BindException;
-use LaravelFreelancerNL\FluentAQL\Facades\AQB;
 use LaravelFreelancerNL\FluentAQL\Grammar as FluentAqlGrammar;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder as FluentAQL;
 
@@ -54,9 +50,16 @@ class Grammar extends FluentAqlGrammar
         'columns',
     ];
 
-    protected function generateVariable($table, $postfix = 'Doc')
+    /**
+     * @param Builder $builder
+     * @param $table
+     * @param string $postfix
+     * @return mixed
+     */
+    protected function generateTableAlias($builder, $table, $postfix = 'Doc')
     {
-        return Str::singular($table).$postfix;
+        $builder->registerAlias($table, Str::singular($table).$postfix);
+        return $builder;
     }
 
     protected function prefixTable($table)
@@ -67,143 +70,148 @@ class Grammar extends FluentAqlGrammar
     /**
      * Compile an insert statement into AQL.
      *
-     * @param Builder $query
+     * @param Builder $builder
      * @param array $values
      * @return string
      * @throws BindException
      */
-    public function compileInsert(Builder $query, array $values)
+    public function compileInsert(Builder $builder, array $values)
     {
-        $table = $this->prefixTable($query->from);
+        $table = $this->prefixTable($builder->from);
 
         if (empty($values)) {
-            return AQB::insert('{}', $table);
+            $builder->aqb = $builder->aqb->insert('{}', $table)->get();
+            return $builder;
         }
 
-        $qb = new FluentAQL();
-        $qb = $qb->let('docs', $qb->bind($values))
+        $builder->aqb = $builder->aqb->let('docs', $builder->aqb->bind($values))
             ->for('doc', 'docs')
             ->insert('doc', $table)
             ->return('NEW._key')
             ->get();
-        return $qb;
+        return $builder;
     }
 
     /**
      * Compile an insert and get ID statement into SQL.
      *
-     * @param Builder $query
+     * @param Builder $builder
      * @param array $values
      * @return string
      * @throws BindException
      */
-    public function compileInsertGetId(Builder $query, $values)
+    public function compileInsertGetId(Builder $builder, $values)
     {
-        return $this->compileInsert($query, $values);
+        return $this->compileInsert($builder, $values);
     }
 
     /**
      * Compile a select query into AQL.
      *
-     * @param  Builder  $query
+     * @param  Builder  $builder
      * @return string
      */
-    public function compileSelect(Builder $query)
+    public function compileSelect(Builder $builder)
     {
-//        if ($query->unions && $query->aggregate) {
-//            return $this->compileUnionAggregate($query);
+//        if ($builder->unions && $builder->aggregate) {
+//            return $this->compileUnionAggregate($builder);
 //        }
 
         // To compile the query, we'll spin through each component of the query and
         // see if that component exists. If it does we'll just call the compiler
         // function for the component which is responsible for making the SQL.
 
-        $aqb = new FluentAQL();
-        $aqb = $this->compileComponents($query, $aqb);
+        $builder = $this->compileComponents($builder);
 
 
-//        if ($query->unions) {
-//            $sql = $this->wrapUnion($sql).' '.$this->compileUnions($query);
+//        if ($builder->unions) {
+//            $sql = $this->wrapUnion($sql).' '.$this->compileUnions($builder);
 //        }
-        $aqb = $aqb->get();
-        return $aqb;
+
+        $builder->aqb = $builder->aqb->get();
+        return $builder;
     }
 
     /**
      * Compile the components necessary for a select clause.
      *
-     * @param Builder $query
-     * @param FluentAQL $aqb
+     * @param Builder $builder
      * @return array
      */
-    protected function compileComponents(Builder $query, FluentAQL $aqb)
+    protected function compileComponents(Builder $builder)
     {
         foreach ($this->selectComponents as $component) {
             // To compile the query, we'll spin through each component of the query and
             // see if that component exists. If it does we'll just call the compiler
             // function for the component which is responsible for making the SQL.
 
-            if (isset($query->$component) && ! is_null($query->$component)) {
+            if (isset($builder->$component) && ! is_null($builder->$component)) {
                 $method = 'compile'.ucfirst($component);
 
-                $aqb = $this->$method($query, $aqb, $query->$component);
+                $builder = $this->$method($builder, $builder->$component);
             }
         }
 
-        return $aqb;
+        return $builder;
     }
 
 
     /**
      * Compile the "from" portion of the query -> FOR in AQL.
      *
-     * @param \Illuminate\Database\Query\Builder $query
-     * @param FluentAQL $aqb
+     * @param Builder $builder
      * @param string $table
      * @return FluentAQL
      */
-    protected function compileFrom(\Illuminate\Database\Query\Builder $query, FluentAQL $aqb, $table)
+    protected function compileFrom(Builder $builder, $table)
     {
-         return $aqb->for($this->generateVariable($table), $this->prefixTable($table));
+        $table = $this->prefixTable($table);
+        $builder = $this->generateTableAlias($builder, $table);
+        $tableAlias = $builder->getAlias($table);
+
+        $builder->aqb = $builder->aqb->for($tableAlias, $table);
+         return $builder;
     }
 
     /**
      * Compile the "where" portions of the query.
      *
-     * @param Builder $query
-     * @param FluentAQL $aqb
-     * @param $table
+     * @param Builder $builder
      * @return string
      */
-    protected function compileWheres(Builder $query, FluentAQL $aqb)
+    protected function compileWheres(Builder $builder)
     {
         // Each type of where clauses has its own compiler function which is responsible
         // for actually creating the where clauses SQL. This helps keep the code nice
         // and maintainable since each clause has a very small method that it uses.
-        if (is_null($query->wheres)) {
-            return $aqb;
+        if (is_null($builder->wheres)) {
+            return $builder;
         }
 
-        if (count($predicates = $this->compileWheresToArray($query)) > 0) {
-            return $aqb->filter($predicates);
+        if (count($predicates = $this->compileWheresToArray($builder)) > 0) {
+            $builder->aqb = $builder->aqb->filter($predicates);
+            return $builder;
         }
 
-        return $aqb;
+        return $builder;
     }
 
     /**
      * Get an array of all the where clauses for the query.
      *
-     * @param  \Illuminate\Database\Query\Builder  $query
+     * @param  \Illuminate\Database\Query\Builder  $builder
      * @return array
      */
-    protected function compileWheresToArray($query)
+    protected function compileWheresToArray($builder)
     {
-        $result = collect($query->wheres)->map(function ($where) use ($query) {
+        $result = collect($builder->wheres)->map(function ($where) use ($builder) {
             // ArangoDB uses a double '=' for comparison
             if ($where['operator'] == '=') {
                 $where['operator'] = '==';
             }
+            //Prefix table alias on the column
+            $where['column'] = $this->prefixAlias($builder, $builder->from, $where['column'] );
+
             return [
                 $where['column'],
                 $where['operator'],
@@ -217,28 +225,28 @@ class Grammar extends FluentAqlGrammar
     /**
      * Compile the "order by" portions of the query.
      *
-     * @param Builder $query
-     * @param FluentAQL $aqb
+     * @param Builder $builder
      * @param array $orders
      * @return string
      */
-    protected function compileOrders(Builder $query, FluentAQL $aqb, $orders)
+    protected function compileOrders(Builder $builder, $orders)
     {
         if (! empty($orders)) {
-            return $aqb->sort($this->compileOrdersToArray($query, $orders));
+            $builder->aqb = $builder->aqb->sort($this->compileOrdersToArray($builder, $orders));
+            return $builder;
         }
 
-        return $aqb;
+        return $builder;
     }
 
     /**
      * Compile the query orders to an array.
      *
-     * @param  Builder  $query
+     * @param  Builder  $builder
      * @param  array  $orders
      * @return FluentAQL
      */
-    protected function compileOrdersToArray(Builder $query, $orders)
+    protected function compileOrdersToArray(Builder $builder, $orders)
     {
         return array_map(function ($order) {
             return $order['sql'] ?? $this->prefixTable($order['column']).' '.$order['direction'];
@@ -249,54 +257,54 @@ class Grammar extends FluentAqlGrammar
      * Compile the "offset" portions of the query.
      * We are handling this first by saving the offset which will be used by the FluentAQL's limit function
      *
-     * @param Builder $query
-     * @param FluentAQL $aqb
+     * @param Builder $builder
      * @param int $offset
      * @return string
      */
-    protected function compileOffset(Builder $query, FluentAQL $aqb, $offset)
+    protected function compileOffset(Builder $builder, $offset)
     {
         $this->offset = (int) $offset;
 
-        return $aqb;
+        return $builder;
     }
 
     /**
      * Compile the "limit" portions of the query.
      *
-     * @param Builder $query
-     * @param FluentAQL $aqb
+     * @param Builder $builder
      * @param int $limit
      * @return string
      */
-    protected function compileLimit(Builder $query, FluentAQL $aqb, $limit)
+    protected function compileLimit(Builder $builder, $limit)
     {
         if ($this->offset !== null) {
-            return $aqb->limit((int)$this->offset, (int)$limit);
+            $builder->aqb = $builder->aqb->limit((int)$this->offset, (int)$limit);
+            return $builder;
         }
-        return $aqb->limit((int) $limit);
+        $builder->aqb = $builder->aqb->limit((int) $limit);
+        return $builder;
     }
 
 
     /**
-     * Compile the "select *" portion of the query.
+     * Compile the "RETURN" portion of the query.
      *
-     * @param \Illuminate\Database\Query\Builder $query
-     * @param FluentAQL $aqb
+     * @param Builder $builder
      * @param array $columns
-     * @return string|null
+     * @return Builder
      */
-    protected function compileColumns(\Illuminate\Database\Query\Builder $query, FluentAQL $aqb, array $columns)
+    protected function compileColumns(Builder $builder, array $columns) : Builder
     {
         // If the query is actually performing an aggregating select, we will let that
         // compiler handle the building of the select clauses, as it will need some
         // more syntax that is best handled by that function to keep things neat.
-//        if (! is_null($query->aggregate)) {
+//        if (! is_null($builder->aggregate)) {
 //            return;
 //        }
 
         $values = [];
-        $doc = $this->generateVariable($query->from);
+
+        $doc = $builder->getAlias($builder->from);
         foreach ($columns as $column) {
             if ($column != null && $column != '*') {
                 $values[$column] = $doc.'.'.$column;
@@ -305,53 +313,61 @@ class Grammar extends FluentAqlGrammar
         if (empty($values)) {
             $values = $doc;
         }
-        return $aqb->return($values, (boolean) $query->distinct);
+        $builder->aqb = $builder->aqb->return($values, (boolean) $builder->distinct);
+        return $builder;
     }
 
     /**
      * Compile an update statement into SQL.
      *
-     * @param Builder $query
-     * @param FluentAQL $aqb
+     * @param Builder $builder
      * @param array $values
      * @return string
      */
-    public function compileUpdate(Builder $query, array $values)
+    public function compileUpdate(Builder $builder, array $values)
     {
-        $aqb =  $query->aqb;
-        $table = $this->prefixTable($query->from);
-        $tableVariable = $this->generateVariable($table);
-        $aqb = $aqb->for($tableVariable, $table);
+        $table = $this->prefixTable($builder->from);
+        $builder = $this->generateTableAlias($builder, $table);
+        $tableAlias = $builder->getAlias($table);
+        $builder->aqb = $builder->aqb->for($tableAlias, $table);
 
         //Fixme: joins?
-        $aqb = $this->compileWheres($query, $aqb);
+        $builder = $this->compileWheres($builder);
 
-        $aqb = $aqb->update($tableVariable, $values, $table)->get();
-        return $aqb;
+        $builder->aqb = $builder->aqb->update($tableAlias, $values, $table)->get();
+        return $builder;
     }
 
     /**
      * Compile a delete statement into SQL.
      *
-     * @param Builder $query
+     * @param Builder $builder
      * @param null $_key
      * @return string
      */
-    public function compileDelete(Builder $query, $_key = null)
+    public function compileDelete(Builder $builder, $_key = null)
     {
-        $aqb =  $query->aqb;
-        $table = $this->prefixTable($query->from);
+        $table = $this->prefixTable($builder->from);
+        $builder = $this->generateTableAlias($builder, $table);
+        $tableAlias = $builder->getAlias($table);
+
         if (! is_null($_key)) {
-            return $aqb->remove((string) $_key, $table)->get();
+            $builder->aqb = $builder->aqb->remove((string) $_key, $table)->get();
+            return $builder;
         }
 
-        $tableVariable = $this->generateVariable($table);
-        $aqb = $aqb->for($tableVariable, $table);
+        $builder->aqb = $builder->aqb->for($tableAlias, $table);
 
         //Fixme: joins?
-        $aqb = $this->compileWheres($query, $aqb);
-        $aqb = $aqb->remove($tableVariable, $table)->get();
-        return $aqb;
+        $builder = $this->compileWheres($builder);
+
+        $builder->aqb = $builder->aqb->remove($tableAlias, $table)->get();
+
+        return $builder;
     }
 
+    protected function prefixAlias(Builder $builder, string $target, string $value) : string
+    {
+        return $builder->getAlias($target).'.'.$value;
+    }
 }

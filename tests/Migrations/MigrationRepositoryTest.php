@@ -1,6 +1,7 @@
 <?php
 
-use ArangoDBClient\Document as ArangoDocument;
+use ArangoDBClient\Document;
+use LaravelFreelancerNL\Aranguent\Document as ArangoDocument;
 use LaravelFreelancerNL\Aranguent\Tests\TestCase;
 
 class MigrationRepositoryTest extends TestCase
@@ -31,6 +32,8 @@ class MigrationRepositoryTest extends TestCase
         $filename = 'logtest.php';
         $batch = 40;
         $this->databaseMigrationRepository->log($filename, $batch);
+
+        $this->collectionHandler->setDocumentClass(Document::class);
         $cursor = $this->collectionHandler->byExample('migrations', ['migration' => $filename, 'batch' => $batch]);
         $documents = collect($cursor->getAll());
         $this->assertInstanceOf(ArangoDocument::class, $documents->first());
@@ -76,6 +79,8 @@ class MigrationRepositoryTest extends TestCase
         $batch = 39;
 
         $this->databaseMigrationRepository->log($filename, $batch);
+
+        $this->collectionHandler->setDocumentClass(Document::class);
         $cursor = $this->collectionHandler->byExample('migrations', ['migration' => $filename, 'batch' => $batch]);
         $documents = collect($cursor->getAll());
         $this->assertInstanceOf(ArangoDocument::class, $documents->first());
@@ -83,6 +88,7 @@ class MigrationRepositoryTest extends TestCase
         $migration = (object) ['migration' => $filename];
         $this->databaseMigrationRepository->delete($migration);
 
+        $this->collectionHandler->setDocumentClass(Document::class);
         $cursor = $this->collectionHandler->byExample('migrations', ['migration' => $filename, 'batch' => $batch]);
         $documents = collect($cursor->getAll());
         $this->assertNull($documents->first());

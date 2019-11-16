@@ -1,6 +1,6 @@
 <?php
 
-namespace LaravelFreelancerNL\Aranguent\Query\Processors;
+namespace LaravelFreelancerNL\Aranguent\Query;
 
 use Illuminate\Database\Query\Processors\Processor as IlluminateProcessor;
 

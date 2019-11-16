@@ -1,6 +1,6 @@
 <?php
 
-namespace LaravelFreelancerNL\Aranguent\Schema\Grammars;
+namespace LaravelFreelancerNL\Aranguent\Schema;
 
 use Illuminate\Support\Fluent;
 use Illuminate\Database\Schema\Grammars\Grammar as IlluminateGrammar;
@@ -35,13 +35,13 @@ class Grammar extends IlluminateGrammar
             $filter[] = ['doc.'.$attribute, '!=', 'null'];
         }
 
-        $qb = AQB::for('doc', $collection)
+        $aqb = AQB::for('doc', $collection)
             ->filter($filter)
             ->limit(1)
             ->return('true')
             ->get();
 
-        $command->aqb = $qb;
+        $command->aqb = $aqb;
 
         return $command;
     }
@@ -65,7 +65,7 @@ class Grammar extends IlluminateGrammar
             ['doc.'.$command->to],
         ];
 
-        $qb = AQB::for('doc', $collection)
+        $aqb = AQB::for('doc', $collection)
             ->filter($filter)
             ->update(
                 'doc',
@@ -77,7 +77,7 @@ class Grammar extends IlluminateGrammar
             ->options( ['keepNull' => true])
             ->get();
 
-        $command->aqb = $qb;
+        $command->aqb = $aqb;
 
         return $command;
     }
@@ -101,13 +101,13 @@ class Grammar extends IlluminateGrammar
             $filter[] = ['doc.'.$attribute, '!=', 'null', 'OR'];
             $data[$attribute] = 'null';
         }
-        $qb = AQB::for('doc', $collection)
+        $aqb = AQB::for('doc', $collection)
             ->filter($filter )
             ->update('doc', $data, $collection)
             ->options(['keepNull' => false])
             ->get();
 
-        $command->aqb = $qb;
+        $command->aqb = $aqb;
 
         return $command;
     }

@@ -31,8 +31,6 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
      */
     protected function getEnvironmentSetUp($app)
     {
-//        $this->withFactories(__DIR__ . '/database/factories');
-
         $config = require 'config/database.php';
         $app['config']->set('database.connections.arangodb', $config['connections']['arangodb']);
         $app['config']->set('database.default', 'arangodb');
@@ -53,6 +51,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     protected function setUp() : void
     {
         parent::setUp();
+        $this->withFactories(realpath(__DIR__ . '/database/factories'));
 
         $this->artisan('aranguent:convert-migrations', ['--realpath' => true, '--path' => __DIR__.'/../vendor/orchestra/testbench-core/laravel/migrations/'])->run();
 
@@ -62,6 +61,10 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         $this->artisan('migrate', [
             '--path' => realpath(__DIR__.'/database/migrations'),
             '--realpath' => true
+        ])->run();
+
+        $this->artisan('aranguent:model', [
+            'name' => 'Character'
         ])->run();
 
         $this->databaseMigrationRepository = new DatabaseMigrationRepository($this->app['db'], $this->collection);

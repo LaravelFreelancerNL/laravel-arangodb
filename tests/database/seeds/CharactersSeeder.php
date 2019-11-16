@@ -1,6 +1,6 @@
 <?php
 
-use tests\models\Character;
+use test\models\Character;
 use Illuminate\Database\Seeder;
 
 class CharactersSeeder extends Seeder
@@ -60,6 +60,6 @@ class CharactersSeeder extends Seeder
             ]`;
 
         $characters = json_decode($characters);
-
+        Character::insert($characters);
     }
 }

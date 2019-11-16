@@ -4,18 +4,38 @@ namespace LaravelFreelancerNL\Aranguent\Query;
 
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use InvalidArgumentException;
-use LaravelFreelancerNL\Aranguent\Query\Grammars\Grammar;
-use LaravelFreelancerNL\Aranguent\Query\Processors\Processor;
+use LaravelFreelancerNL\Aranguent\Connection;
+use LaravelFreelancerNL\Aranguent\Query\Grammar;
+use LaravelFreelancerNL\Aranguent\Query\Processor;
 use LaravelFreelancerNL\FluentAQL\Exceptions\BindException;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
 class Builder extends IlluminateQueryBuilder
 {
     /**
+     * @var Grammar
+     */
+    public $grammar;
+
+    /**
+     * @var Connection
+     */
+    public $connection;
+
+    /**
      * @var QueryBuilder
      */
     public $aqb;
+
+    /**
+     * Alias' are AQL variables
+     * Sticking with the SQL based naming as this is the Laravel driver.
+     * @var QueryBuilder
+     */
+    protected $aliasRegistry = [];
 
     /**
      * @override
@@ -47,7 +67,9 @@ class Builder extends IlluminateQueryBuilder
      */
     protected function runSelect()
     {
-        return $this->connection->select($this->grammar->compileSelect($this));
+        $response = $this->connection->select($this->grammar->compileSelect($this)->aqb);
+        $this->aqb = new QueryBuilder();
+        return $response;
     }
 
     /**
@@ -57,23 +79,50 @@ class Builder extends IlluminateQueryBuilder
      */
     public function toSql()
     {
-        return $this->grammar->compileSelect($this)->query;
+        return $this->grammar->compileSelect($this)->aqb->query;
+    }
+
+    /**
+     * Insert a new record into the database.
+     * @param array $values
+     * @return bool
+     * @throws BindException
+     */
+    public function insert(array $values) : bool
+    {
+        $response = $this->getConnection()->insert($this->grammar->compileInsert($this, $values)->aqb);
+        $this->aqb = new QueryBuilder();
+        return $response;
     }
 
     /**
      * Insert a new record and get the value of the primary key.
      *
-     * @param  array  $values
-     * @param  string|null  $sequence
+     * @param array $values
+     * @param string|null $sequence
      * @return int
+     * @throws BindException
      */
     public function insertGetId(array $values, $sequence = null)
     {
-        $qb = $this->grammar->compileInsertGetId($this, $values, $sequence);
+        $response = $this->getConnection()->execute($this->grammar->compileInsertGetId($this, $values, $sequence)->aqb);
+        $this->aqb = new QueryBuilder();
+        return $response;
+    }
 
-        $result = $this->getConnection()->execute($qb);
-
-        return $result;
+    /**
+     * Execute the query as a "select" statement.
+     *
+     * @param  array|string  $columns
+     * @return Collection
+     */
+    public function get($columns = ['*'])
+    {
+        $results = collect($this->onceWithColumns(Arr::wrap($columns), function () {
+            return $this->runSelect();
+        }));
+        $this->aqb = new QueryBuilder();
+        return $results;
     }
 
     /**
@@ -84,9 +133,9 @@ class Builder extends IlluminateQueryBuilder
      */
     public function update(array $values)
     {
-        $aqb = $this->grammar->compileUpdate($this, $values);
-
-        return $this->connection->update($aqb);
+        $response =  $this->connection->update($this->grammar->compileUpdate($this, $values)->aqb);
+        $this->aqb = new QueryBuilder();
+        return $response;
     }
 
     /**
@@ -97,15 +146,19 @@ class Builder extends IlluminateQueryBuilder
      */
     public function delete($_key = null)
     {
-        // If an ID is passed to the method, we will set the where clause to check the
-        // ID to let developers to simply and quickly remove a single row from this
-        // database without manually specifying the "where" clauses on the query.
-        if (! is_null($_key)) {
-            $this->where($this->from.'._key', '=', $_key);
-        }
-        $aqb = $this->grammar->compileDelete($this, $_key);
-        return $this->connection->delete($aqb);
+        $response = $this->connection->delete($this->grammar->compileDelete($this, $_key)->aqb);
+        $this->aqb = new QueryBuilder();
+        return $response;
     }
 
+    public function registerAlias(string $table, string $alias) : void
+    {
+        $this->aliasRegistry[$table] = $alias;
+    }
+
+    public function getAlias(string $table) : string
+    {
+        return $this->aliasRegistry[$table];
+    }
 
 }

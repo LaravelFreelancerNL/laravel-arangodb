@@ -1,6 +1,6 @@
 <?php
 
-namespace test\models;
+namespace tests\models;
 
 use LaravelFreelancerNL\Aranguent\Eloquent\Pivot;
 

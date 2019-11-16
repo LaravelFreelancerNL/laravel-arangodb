@@ -3,9 +3,8 @@
 namespace LaravelFreelancerNL\Aranguent;
 
 use Illuminate\Support\ServiceProvider;
-use LaravelFreelancerNL\Aranguent\Console\ModelAranguentCommand;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
-use LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar as SchemaGrammar;
+use LaravelFreelancerNL\Aranguent\Schema\Grammar as SchemaGrammar;
 
 class AranguentServiceProvider extends ServiceProvider
 {

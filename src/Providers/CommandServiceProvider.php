@@ -45,7 +45,7 @@ class CommandServiceProvider extends IlluminateMigrationServiceProvider
             [
                 'MigrateMake' => 'command.migrate.make',
                 'AranguentConvertMigrations' => 'command.aranguent.convert-migrations',
-                'MakeModel' => 'command.model.make',
+                'MakeModel' => 'command.model.aranguent',
             ]
         );
         $this->registerCommands($commands);
@@ -95,7 +95,7 @@ class CommandServiceProvider extends IlluminateMigrationServiceProvider
 
     protected function registerMakeModelCommand()
     {
-        $this->app->singleton('command.model.make', function ($app) {
+        $this->app->singleton('command.model.aranguent', function ($app) {
             return new ModelAranguentCommand($app['files']);
         });
     }
@@ -108,7 +108,7 @@ class CommandServiceProvider extends IlluminateMigrationServiceProvider
             'migration.repository',
             'command.aranguent.convert-migrations',
             'command.migrate.make',
-            'command.model.make',
+            'command.model.aranguent',
         ];
     }
 }

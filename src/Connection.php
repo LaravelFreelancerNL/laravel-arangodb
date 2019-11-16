@@ -11,7 +11,7 @@ use Illuminate\Database\Connection as IlluminateConnection;
 use ArangoDBClient\DocumentHandler as ArangoDocumentHandler;
 use Iterator;
 use LaravelFreelancerNL\Aranguent\Concerns\DetectsDeadlocks;
-use LaravelFreelancerNL\Aranguent\Query\Processors\Processor;
+use LaravelFreelancerNL\Aranguent\Query\Processor;
 use LaravelFreelancerNL\Aranguent\Concerns\ManagesTransactions;
 use ArangoDBClient\CollectionHandler as ArangoCollectionHandler;
 use ArangoDBClient\ConnectionOptions as ArangoConnectionOptions;
@@ -19,7 +19,7 @@ use ArangoDBClient\ViewHandler as ArangoViewHandler;
 use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 use LaravelFreelancerNL\Aranguent\Concerns\DetectsLostConnections;
 use LaravelFreelancerNL\Aranguent\Schema\Builder as SchemaBuilder;
-use LaravelFreelancerNL\Aranguent\Query\Grammars\Grammar as QueryGrammar;
+use LaravelFreelancerNL\Aranguent\Query\Grammar as QueryGrammar;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder as FluentAQL;
 
 class Connection extends IlluminateConnection
@@ -124,7 +124,7 @@ class Connection extends IlluminateConnection
     /**
      * Get the default query grammar instance.
      *
-     * @return \LaravelFreelancerNL\Aranguent\Query\Grammars\Grammar
+     * @return QueryGrammar
      */
     protected function getDefaultQueryGrammar()
     {
@@ -134,7 +134,7 @@ class Connection extends IlluminateConnection
     /**
      * Get the default post processor instance.
      *
-     * @return \LaravelFreelancerNL\Aranguent\Query\Processors\Processor
+     * @return Processor
      */
     protected function getDefaultPostProcessor()
     {
@@ -164,8 +164,7 @@ class Connection extends IlluminateConnection
                 return [];
             }
 
-            $statement = new Statement($this->arangoConnection, ['query' => $query, 'bindVars' => $bindings]);
-
+            $statement = $this->newArangoStatement($query, $bindings);
             return $statement->execute();
 
         });
@@ -197,7 +196,7 @@ class Connection extends IlluminateConnection
                 return true;
             }
 
-            $statement = new Statement($this->arangoConnection, ['query' => $query, 'bindVars' => $bindings]);
+            $statement = $this->newArangoStatement($query, $bindings);
 
             $cursor = $statement->execute();
 
@@ -237,7 +236,7 @@ class Connection extends IlluminateConnection
             // For update or delete statements, we want to get the number of rows affected
             // by the statement and return that back to the developer. We'll first need
             // to execute the statement and get the executed writes from the extra.
-            $statement = new Statement($this->arangoConnection, ['query' => $query, 'bindVars' => $bindings]);
+            $statement = $this->newArangoStatement($query, $bindings);
 
             $cursor = $statement->execute();
 
@@ -269,7 +268,7 @@ class Connection extends IlluminateConnection
                 return [];
             }
 
-            $statement = new Statement($this->arangoConnection, ['query' => $query, 'bindVars' => []]);
+            $statement = $this->newArangoStatement($query, []);
 
             $cursor = $statement->execute();
 
@@ -293,7 +292,7 @@ class Connection extends IlluminateConnection
      */
     public function explain($query, $bindings = [])
     {
-        $statement = new Statement($this->arangoConnection, ['query' => $query, 'bindVars' => $bindings]);
+        $statement = $this->newArangoStatement($query, $bindings);
 
         return $statement->explain();
     }
@@ -339,8 +338,7 @@ class Connection extends IlluminateConnection
                 return [];
             }
 
-            $statement = new Statement($this->arangoConnection, ['query' => $query, 'bindVars' => $bindings]);
-
+            $statement = $this->newArangoStatement($query, $bindings);
             $cursor = $statement->execute();
 
             return $cursor->getAll();
@@ -438,10 +436,25 @@ class Connection extends IlluminateConnection
         return $this->arangoConnection;
     }
 
+    /**
+     * @param $query
+     * @param $bindings
+     * @param $connection
+     * @return Statement
+     * @throws Exception
+     */
+    function newArangoStatement($query, $bindings): Statement
+    {
+        $statement = new Statement($this->arangoConnection, ['query' => $query, 'bindVars' => $bindings]);
+        $statement->setDocumentClass(Document::class);
+        return $statement;
+    }
+
     public function getCollectionHandler()
     {
         if (!isset($this->collectionHandler)) {
             $this->collectionHandler = new ArangoCollectionHandler($this->arangoConnection);
+            $this->collectionHandler->setDocumentClass(Document::class);
         }
 
         return $this->collectionHandler;
@@ -451,6 +464,7 @@ class Connection extends IlluminateConnection
     {
         if (!isset($this->documentHandler)) {
             $this->documentHandler = new ArangoDocumentHandler($this->arangoConnection);
+            $this->documentHandler->setDocumentClass(Document::class);
         }
         return $this->documentHandler;
     }
@@ -459,6 +473,7 @@ class Connection extends IlluminateConnection
     {
         if (!isset($this->userHandler)) {
             $this->userHandler = new ArangoUserHandler($this->arangoConnection);
+            $this->userHandler->setDocumentClass(Document::class);
         }
         return $this->userHandler;
     }
@@ -467,6 +482,7 @@ class Connection extends IlluminateConnection
     {
         if (!isset($this->graphHandler)) {
             $this->graphHandler = new ArangoGraphHandler($this->arangoConnection);
+            $this->graphHandler->setDocumentClass(Document::class);
         }
         return $this->graphHandler;
     }
@@ -475,6 +491,8 @@ class Connection extends IlluminateConnection
     {
         if (!isset($this->viewHandler)) {
             $this->viewHandler = new ArangoViewHandler($this->arangoConnection);
+            $this->viewHandler->setDocumentClass(Document::class);
+
         }
         return $this->viewHandler;
     }

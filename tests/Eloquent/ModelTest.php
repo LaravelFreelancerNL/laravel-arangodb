@@ -4,15 +4,33 @@ use Illuminate\Support\Carbon;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use LaravelFreelancerNL\Aranguent\Tests\TestCase;
 use Mockery as M;
-use test\models\Character as Character;
+use LaravelFreelancerNL\Aranguent\Tests\models\Character as Character;
 
 class ModelTest extends TestCase
 {
-
     protected function setUp(): void
     {
         parent::setUp();
         Carbon::setTestNow(Carbon::now());
+
+        Character::insert([
+            [
+                '_key' => 'NedStark',
+                'name' => 'Ned',
+                'surname' => 'Stark',
+                'alive' => false,
+                'age' => 41,
+                'traits' => ["A","H","C","N","P"],
+            ],
+            [
+                "_key" => "RobertBaratheon",
+                "name" => "Robert",
+                "surname" => "Baratheon",
+                "alive" => false,
+                "traits" => ["A","H","C"]
+            ]
+        ]);
+
     }
 
     public function tearDown() : void
@@ -41,56 +59,46 @@ class ModelTest extends TestCase
         $this->assertStringContainsString('use LaravelFreelancerNL\Aranguent\Eloquent\Model;', $content);
     }
 
-    public function testCanInsertModel()
+    public function testInsertModel()
     {
-
-        $character = Character::insert([
-            [
-                '_key' => 'NedStark',
-                'name' => 'Ned',
-                'surname' => 'Stark',
-                'alive' => false,
-                'age' => 41,
-                'traits' => [
-                    "A","H","C","N","P"
-                ],
-            ],
-            [
-                "_key" => "RobertBaratheon", "name" => "Robert", "surname" => "Baratheon", "alive" => false, "traits" => ["A","H","C"]
-            ]
-        ]);
+        $characters = Character::all();
+        $this->assertCount(2, $characters);
     }
 
-    public function testCanGetAllModels()
+    public function testUpdateModel()
     {
-        $insertedCharacter = Character::insert([
-            [
-                '_key' => 'NedStark',
-                'name' => 'Ned',
-                'surname' => 'Stark',
-                'alive' => false,
-                'age' => 41,
-                'traits' => [
-                    "A","H","C","N","P"
-                ],
-            ],
-            [
-                "_key" => "RobertBaratheon", "name" => "Robert", "surname" => "Baratheon", "alive" => false, "traits" => ["A","H","C"]
-            ]
-        ]);
-
-        $selectedCharacters = Character::all();
-
-        $this->assertCount(2, $selectedCharacters);
-        foreach ($selectedCharacters as $char) {
-            $this->assertInstanceOf(Character::class, $char);
+        $characters = Character::all();
+        foreach ($characters as $character) {
+            $results[] = $character->update(["age" => ($character->age+1)]);
         }
+
+        $characters = Character::all();
+        $this->assertCount(2, $characters);
+
     }
+
+    public function testDeleteModel()
+    {
+        $character = Character::first();
+
+        $character->delete();
+    }
+
+    public function testCastDocumentObjectToArrayWithoutBinaryStrings()
+    {
+        $data = [
+            '_key' => 'NedStark',
+            'name' => 'Ned',
+            'surname' => 'Stark',
+            'alive' => false,
+            'age' => 41,
+            'traits' => ["A","H","C","N","P"],
+        ];
+        $doc = new \LaravelFreelancerNL\Aranguent\Document();
+        $doc = $doc->createFromArray($data);
+
+        $this->assertEquals((array)$doc,$data);
+    }
+
 }
 
-class EloquentModelStub extends Model
-{
-    public $connection;
-    protected $table = 'stub';
-    protected $guarded = [];
-}
