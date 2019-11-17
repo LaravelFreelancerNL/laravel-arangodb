@@ -121,7 +121,6 @@ class Builder extends IlluminateQueryBuilder
         $results = collect($this->onceWithColumns(Arr::wrap($columns), function () {
             return $this->runSelect();
         }));
-        $this->aqb = new QueryBuilder();
         return $results;
     }
 
