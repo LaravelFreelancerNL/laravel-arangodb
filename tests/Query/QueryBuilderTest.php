@@ -91,6 +91,30 @@ class QueryBuilderTest extends TestCase
         $this->assertEquals([0 => 1, 1 => 'foo'], $builder->getBindings());
     }
 
+    /**
+     * Compile an aggregated select clause.
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @param  array  $aggregate
+     * @return string
+     */
+    protected function compileAggregate(\Illuminate\Database\Query\Builder $query, $aggregate)
+    {
+        $column = $this->columnize($aggregate['columns']);
+
+        // If the query has a "distinct" constraint and we're not asking for all columns
+        // we need to prepend "distinct" onto the column name so that the query takes
+        // it into account when it performs the aggregating operations on the data.
+        if (is_array($query->distinct)) {
+            $column = 'distinct '.$this->columnize($query->distinct);
+        } elseif ($query->distinct && $column !== '*') {
+            $column = 'distinct '.$column;
+        }
+
+        return 'select '.$aggregate['function'].'('.$column.') as aggregate';
+    }
+
+
     public function testOrderBys()
     {
         $builder = $this->getBuilder();
@@ -136,5 +160,14 @@ class QueryBuilderTest extends TestCase
         $builder->getConnection()->shouldReceive('delete')->once()->with(FluentAQL::class)->andReturn(1);
         $result = $builder->from('users')->delete(1);
         $this->assertEquals(1, $result);
+    }
+
+    public function testAggregates()
+    {
+        $builder = $this->getBuilder();
+        $builder->getConnection()->shouldReceive('select')->once()->with(FluentAQL::class)->andReturn([['aggregate' => 1]]);
+
+        $results = $builder->from('users')->count();
+        $this->assertEquals(1, $results);
     }
 }

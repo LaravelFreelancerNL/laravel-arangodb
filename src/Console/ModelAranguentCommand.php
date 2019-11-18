@@ -1,4 +1,5 @@
-<?
+<?php
+
 namespace LaravelFreelancerNL\Aranguent\Console;
 
 use Illuminate\Foundation\Console\ModelMakeCommand as IlluminateModelMakeCommand;

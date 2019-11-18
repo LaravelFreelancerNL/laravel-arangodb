@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use LaravelFreelancerNL\Aranguent\Tests\TestCase;
 use Mockery as M;
@@ -27,6 +28,7 @@ class ModelTest extends TestCase
                 "name" => "Robert",
                 "surname" => "Baratheon",
                 "alive" => false,
+                'age' => null,
                 "traits" => ["A","H","C"]
             ]
         ]);
@@ -82,6 +84,47 @@ class ModelTest extends TestCase
         $character = Character::first();
 
         $character->delete();
+    }
+
+
+    public function testCount()
+    {
+        $result = Character::count();
+        $this->assertEquals( 2, $result);
+    }
+
+    public function testMax()
+    {
+        $result = Character::max('age');
+        $this->assertEquals( 41, $result);
+    }
+
+    public function testMin()
+    {
+        $result = Character::min('age');
+        $this->assertEquals( 41, $result);
+    }
+
+    public function testAverage()
+    {
+        $result = Character::average('age');
+        $this->assertEquals( 41, $result);
+    }
+
+    public function testSum()
+    {
+        $result = Character::sum('age');
+        $this->assertEquals( 41, $result);
+    }
+
+    public function testOrderByRandom()
+    {
+        $results = DB::table('characters')
+            ->inRandomOrder()
+            ->get();
+
+        $this->assertCount(2, $results);
+
     }
 
     public function testCastDocumentObjectToArrayWithoutBinaryStrings()

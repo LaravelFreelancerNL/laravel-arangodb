@@ -160,4 +160,33 @@ class Builder extends IlluminateQueryBuilder
         return $this->aliasRegistry[$table];
     }
 
+    /**
+     * Execute an aggregate function on the database.
+     *
+     * @param  string  $function
+     * @param  array   $columns
+     * @return mixed
+     */
+    public function aggregate($function, $columns = ['*'])
+    {
+        $results = $this->cloneWithout($this->unions ? [] : ['columns'])
+            ->setAggregate($function, $columns)
+            ->get($columns);
+        if (! $results->isEmpty()) {
+            return $results[0];
+        }
+        return false;
+    }
+
+    /**
+     * Put the query's results in random order.
+     *
+     * @param  string  $seed
+     * @return $this
+     */
+    public function inRandomOrder($seed = '')
+    {
+        return $this->orderByRaw($this->grammar->compileRandom($this));
+    }
+
 }

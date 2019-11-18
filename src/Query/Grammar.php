@@ -37,18 +37,27 @@ class Grammar extends FluentAqlGrammar
      * @var array
      */
     protected $selectComponents = [
-        'lock',
-        'aggregate',
         'from',
         'joins',
         'wheres',
         'groups',
+        'aggregate',
         'havings',
         'orders',
         'offset',
         'limit',
         'columns',
     ];
+
+    /**
+     * Get the format for database stored dates.
+     *
+     * @return string
+     */
+    public function getDateFormat()
+    {
+        return 'Y-m-d\TH:i:s.v\Z';
+    }
 
     /**
      * @param Builder $builder
@@ -72,7 +81,7 @@ class Grammar extends FluentAqlGrammar
      *
      * @param Builder $builder
      * @param array $values
-     * @return string
+     * @return Builder
      * @throws BindException
      */
     public function compileInsert(Builder $builder, array $values)
@@ -97,7 +106,7 @@ class Grammar extends FluentAqlGrammar
      *
      * @param Builder $builder
      * @param array $values
-     * @return string
+     * @return Builder
      * @throws BindException
      */
     public function compileInsertGetId(Builder $builder, $values)
@@ -109,7 +118,7 @@ class Grammar extends FluentAqlGrammar
      * Compile a select query into AQL.
      *
      * @param  Builder  $builder
-     * @return string
+     * @return Builder
      */
     public function compileSelect(Builder $builder)
     {
@@ -129,6 +138,7 @@ class Grammar extends FluentAqlGrammar
 //        }
 
         $builder->aqb = $builder->aqb->get();
+
         return $builder;
     }
 
@@ -136,7 +146,7 @@ class Grammar extends FluentAqlGrammar
      * Compile the components necessary for a select clause.
      *
      * @param Builder $builder
-     * @return array
+     * @return Builder
      */
     protected function compileComponents(Builder $builder)
     {
@@ -161,7 +171,7 @@ class Grammar extends FluentAqlGrammar
      *
      * @param Builder $builder
      * @param string $table
-     * @return FluentAQL
+     * @return Builder
      */
     protected function compileFrom(Builder $builder, $table)
     {
@@ -177,7 +187,7 @@ class Grammar extends FluentAqlGrammar
      * Compile the "where" portions of the query.
      *
      * @param Builder $builder
-     * @return string
+     * @return Builder
      */
     protected function compileWheres(Builder $builder)
     {
@@ -223,11 +233,97 @@ class Grammar extends FluentAqlGrammar
     }
 
     /**
+     * Compile an aggregated select clause.
+     *
+     * @param  Builder  $builder
+     * @param  array  $aggregate
+     * @return Builder
+     */
+    protected function compileAggregate(Builder $builder, $aggregate)
+    {
+        $method = 'compile'.ucfirst($aggregate['function']);
+        return $this->$method($builder, $aggregate);
+
+    }
+
+    /**
+     * Compile AQL for count aggregate
+     * @param Builder $builder
+     * @param $aggregate
+     * @return Builder
+     */
+    protected function compileCount(Builder $builder, $aggregate)
+    {
+        $builder->aqb = $builder->aqb->collect()->withCount('aggregateResult');
+        return $builder;
+    }
+
+    /**
+     * Compile AQL for max aggregate
+     *
+     * @param Builder $builder
+     * @param $aggregate
+     * @return Builder
+     */
+    protected function compileMax(Builder $builder, $aggregate)
+    {
+        $column = $this->prefixAlias($builder, $builder->from, $aggregate['columns'][0]);
+
+        $builder->aqb = $builder->aqb->collect()->aggregate('aggregateResult', $builder->aqb->max($column));
+        return $builder;
+    }
+
+    /**
+     * Compile AQL for min aggregate
+     *
+     * @param Builder $builder
+     * @param $aggregate
+     * @return Builder
+     */
+    protected function compileMin(Builder $builder, $aggregate)
+    {
+        $column = $this->prefixAlias($builder, $builder->from, $aggregate['columns'][0]);
+
+        $builder->aqb = $builder->aqb->collect()->aggregate('aggregateResult', $builder->aqb->min($column));
+        return $builder;
+    }
+
+    /**
+     * Compile AQL for average aggregate
+     *
+     * @param Builder $builder
+     * @param $aggregate
+     * @return Builder
+     */
+    protected function compileAvg(Builder $builder, $aggregate)
+    {
+        $column = $this->prefixAlias($builder, $builder->from, $aggregate['columns'][0]);
+
+        $builder->aqb = $builder->aqb->collect()->aggregate('aggregateResult', $builder->aqb->average($column));
+        return $builder;
+    }
+
+    /**
+     * Compile AQL for sum aggregate
+     *
+     * @param Builder $builder
+     * @param $aggregate
+     * @return Builder
+     */
+    protected function compileSum(Builder $builder, $aggregate)
+    {
+        $column = $this->prefixAlias($builder, $builder->from, $aggregate['columns'][0]);
+
+        $builder->aqb = $builder->aqb->collect()->aggregate('aggregateResult', $builder->aqb->sum($column));
+        return $builder;
+    }
+
+    /**
      * Compile the "order by" portions of the query.
      *
      * @param Builder $builder
      * @param array $orders
-     * @return string
+     * @return Builder
      */
     protected function compileOrders(Builder $builder, $orders)
     {
@@ -244,7 +340,7 @@ class Grammar extends FluentAqlGrammar
      *
      * @param  Builder  $builder
      * @param  array  $orders
-     * @return FluentAQL
+     * @return array
      */
     protected function compileOrdersToArray(Builder $builder, $orders)
     {
@@ -259,7 +355,7 @@ class Grammar extends FluentAqlGrammar
      *
      * @param Builder $builder
      * @param int $offset
-     * @return string
+     * @return Builder
      */
     protected function compileOffset(Builder $builder, $offset)
     {
@@ -273,7 +369,7 @@ class Grammar extends FluentAqlGrammar
      *
      * @param Builder $builder
      * @param int $limit
-     * @return string
+     * @return Builder
      */
     protected function compileLimit(Builder $builder, $limit)
     {
@@ -310,9 +406,14 @@ class Grammar extends FluentAqlGrammar
                 $values[$column] = $doc.'.'.$column;
             }
         }
+        if ($builder->aggregate !== null) {
+            $values = 'aggregateResult';
+        }
         if (empty($values)) {
             $values = $doc;
         }
+
+
         $builder->aqb = $builder->aqb->return($values, (boolean) $builder->distinct);
         return $builder;
     }
@@ -322,7 +423,7 @@ class Grammar extends FluentAqlGrammar
      *
      * @param Builder $builder
      * @param array $values
-     * @return string
+     * @return Builder
      */
     public function compileUpdate(Builder $builder, array $values)
     {
@@ -335,6 +436,7 @@ class Grammar extends FluentAqlGrammar
         $builder = $this->compileWheres($builder);
 
         $builder->aqb = $builder->aqb->update($tableAlias, $values, $table)->get();
+
         return $builder;
     }
 
@@ -343,7 +445,7 @@ class Grammar extends FluentAqlGrammar
      *
      * @param Builder $builder
      * @param null $_key
-     * @return string
+     * @return Builder
      */
     public function compileDelete(Builder $builder, $_key = null)
     {
@@ -366,8 +468,26 @@ class Grammar extends FluentAqlGrammar
         return $builder;
     }
 
+    /**
+     * @param Builder $builder
+     * @param string $target
+     * @param string $value
+     * @return Builder
+     */
     protected function prefixAlias(Builder $builder, string $target, string $value) : string
     {
         return $builder->getAlias($target).'.'.$value;
+    }
+
+
+    /**
+     * Compile the random statement into SQL.
+     *
+     * @param Builder $builder
+     * @return string
+     */
+    public function compileRandom(Builder $builder)
+    {
+        return (string) $builder->aqb->rand();
     }
 }

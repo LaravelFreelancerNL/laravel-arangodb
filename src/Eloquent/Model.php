@@ -2,7 +2,6 @@
 
 namespace LaravelFreelancerNL\Aranguent\Eloquent;
 
-use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Model as IlluminateModel;
 use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 
@@ -43,4 +42,15 @@ abstract class Model extends IlluminateModel
     {
         return $this->getConnection()->query();
     }
+
+//    /**
+//     * Get the format for database stored dates.
+//     *
+//     * @return string
+//     */
+//    public function getDateFormat()
+//    {
+//        return 'Y-m-d H:i:s.u';
+//    }
+
 }
