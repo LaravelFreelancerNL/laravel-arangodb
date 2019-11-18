@@ -84,7 +84,7 @@ class Builder extends IlluminateBuilder
         $updatedAtColumn = $this->model->getUpdatedAtColumn();
         $createdAtColumn = $this->model->getCreatedAtColumn();
         $timestamps[$updatedAtColumn] = $timestamp;
-        if (! isset($values[$createdAtColumn])) {
+        if (! isset($values[$createdAtColumn]) && $this->model->$createdAtColumn == '') {
             $timestamps[$createdAtColumn] = $timestamp;
         }
         $values = array_merge(
