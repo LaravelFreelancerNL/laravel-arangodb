@@ -11,6 +11,7 @@ use LaravelFreelancerNL\FluentAQL\QueryBuilder as FluentAQL;
 /*
  * Provides AQL syntax functions
  */
+
 class Grammar extends FluentAqlGrammar
 {
 
@@ -47,6 +48,17 @@ class Grammar extends FluentAqlGrammar
         'offset',
         'limit',
         'columns',
+    ];
+
+
+    protected $operatorTranslations = [
+        '=' => '==',
+        '<>' => '!=',
+        '<=>' => '==',
+        'rlike' => '=~',
+        'not rlike' => '!~',
+        'regexp' => '=~',
+        'not regexp' => '!~'
     ];
 
     /**
@@ -219,6 +231,8 @@ class Grammar extends FluentAqlGrammar
             if ($where['operator'] == '=') {
                 $where['operator'] = '==';
             }
+            $where['operator'] = $this->translateOperator($where['operator']);
+
             //Prefix table alias on the column
             $where['column'] = $this->prefixAlias($builder, $builder->from, $where['column'] );
 
@@ -229,6 +243,7 @@ class Grammar extends FluentAqlGrammar
                 $where['boolean']
             ];
         })->all();
+
         return $result;
     }
 
@@ -468,17 +483,6 @@ class Grammar extends FluentAqlGrammar
         return $builder;
     }
 
-    /**
-     * @param Builder $builder
-     * @param string $target
-     * @param string $value
-     * @return Builder
-     */
-    protected function prefixAlias(Builder $builder, string $target, string $value) : string
-    {
-        return $builder->getAlias($target).'.'.$value;
-    }
-
 
     /**
      * Compile the random statement into SQL.
@@ -489,5 +493,30 @@ class Grammar extends FluentAqlGrammar
     public function compileRandom(Builder $builder)
     {
         return (string) $builder->aqb->rand();
+    }
+
+    /**
+     * Translate sql operators to their AQL equivalent where possible.
+     *
+     * @param string $operator
+     * @return mixed|string
+     */
+    private function translateOperator(string $operator)
+    {
+        if (isset($this->operatorTranslations[strtolower($operator)])) {
+            $operator = $this->operatorTranslations[$operator];
+        }
+        return $operator;
+    }
+
+    /**
+     * @param Builder $builder
+     * @param string $target
+     * @param string $value
+     * @return Builder
+     */
+    protected function prefixAlias(Builder $builder, string $target, string $value) : string
+    {
+        return $builder->getAlias($target).'.'.$value;
     }
 }

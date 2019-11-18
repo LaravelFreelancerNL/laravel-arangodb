@@ -86,9 +86,21 @@ class QueryBuilderTest extends TestCase
     public function testBasicOrWheres()
     {
         $builder = $this->getBuilder();
-        $builder->select('*')->from('users')->where('userDoc._id', '=', 1)->orWhere('userDoc.email', '=', 'foo');
+        $builder->select('*')->from('users')->where('userDoc._id', '==', 1)->orWhere('userDoc.email', '==', 'foo');
         $this->assertSame('FOR userDoc IN users FILTER userDoc._id == 1 OR userDoc.email == "foo" RETURN userDoc', $builder->toSql());
         $this->assertEquals([0 => 1, 1 => 'foo'], $builder->getBindings());
+    }
+
+    public function testWhereOperatorConversion()
+    {
+        $builder = $this->getBuilder();
+        $builder->select('*')
+            ->from('users')
+            ->where('email', '=', 'email@example.com')
+            ->where('_key', '<>', 'keystring');
+        $this->assertSame('FOR userDoc IN users FILTER userDoc.email == "email@example.com" AND userDoc._key != "keystring" RETURN userDoc', $builder->toSql());
+        $this->assertEquals([0 => 'email@example.com', 1 => 'keystring'], $builder->getBindings());
+
     }
 
     /**
