@@ -461,7 +461,7 @@ class Blueprint
      * 
      * @param $attributes
      * @param array $indexOptions
-     * @return Illuminate\Support\Fluent
+     * @return \Illuminate\Support\Fluent
      */
     public function ttlIndex($attributes, $indexOptions = [])
     {
