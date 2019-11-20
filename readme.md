@@ -84,6 +84,7 @@ Hash       | Exact matching          | `$collection->hashIndex($attributes, $ind
 Skip List  | Ranged matching         | `$collection->skiplistIndex($attributes, $indexOptions = [])`
 Persistent | Ranged matching         | `$collection->persistentIndex($attributes, $indexOptions = [])`
 Geo        | Location matching       | `$collection->geoIndex($attributes, $indexOptions = [])`
+TTL        | Auto-expiring documents | `$collection->ttlIndex($attributes, $indexOptions = [])`
 Fulltext   | (Partial) text matching | `$collection->fulltextIndex($attribute, $indexOptions = [])`
 
 See the [ArangoDB Documentation for more information](https://docs.arangodb.com/3.3/HTTP/Indexes/)

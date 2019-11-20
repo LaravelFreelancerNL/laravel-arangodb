@@ -96,6 +96,9 @@ class SchemaBlueprintTest extends TestCase
         $type = $blueprint->mapIndexType(null);
         $this->assertEquals('skiplist', $type);
 
+        $type = $blueprint->mapIndexType('TTL');
+        $this->assertEquals('ttl', $type);
+
         $type = $blueprint->mapIndexType('whatever');
         $this->assertEquals('skiplist', $type);
     }
