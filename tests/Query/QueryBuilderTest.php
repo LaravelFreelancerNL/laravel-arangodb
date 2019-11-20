@@ -100,7 +100,6 @@ class QueryBuilderTest extends TestCase
             ->where('_key', '<>', 'keystring');
         $this->assertSame('FOR userDoc IN users FILTER userDoc.email == "email@example.com" AND userDoc._key != "keystring" RETURN userDoc', $builder->toSql());
         $this->assertEquals([0 => 'email@example.com', 1 => 'keystring'], $builder->getBindings());
-
     }
 
     /**

@@ -107,7 +107,8 @@ class Builder extends IlluminateQueryBuilder
     {
         $response = $this->getConnection()->execute($this->grammar->compileInsertGetId($this, $values, $sequence)->aqb);
         $this->aqb = new QueryBuilder();
-        return $response;
+
+        return end($response);
     }
 
     /**

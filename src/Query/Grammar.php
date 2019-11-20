@@ -98,6 +98,10 @@ class Grammar extends FluentAqlGrammar
      */
     public function compileInsert(Builder $builder, array $values)
     {
+        if (! is_array(reset($values))) {
+            $values = [$values];
+        }
+
         $table = $this->prefixTable($builder->from);
 
         if (empty($values)) {
