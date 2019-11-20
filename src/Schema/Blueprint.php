@@ -460,6 +460,18 @@ class Blueprint
     }
 
     /**
+     * Create a TTL index for the table.
+     * 
+     * @param $attributes
+     * @param array $indexOptions
+     * @return \Illuminate\Support\Fluent
+     */
+    public function ttlIndex($attributes, $indexOptions = [])
+    {
+        return $this->indexCommand('ttl', $attributes, $indexOptions);
+    }
+
+    /**
      * Specify a unique index for the table.
      *
      * @param  string|array  $columns
@@ -608,6 +620,7 @@ class Blueprint
             'HASH' => 'hash',
             'BTREE' => 'skiplist',
             'RTREE' => 'geo',
+            'TTL' => 'ttl',
         ];
         $algorithm = strtoupper($algorithm);
 
