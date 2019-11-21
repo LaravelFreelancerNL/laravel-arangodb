@@ -1,6 +1,5 @@
 <?php
 
-use tests\models\Location;
 use Illuminate\Database\Seeder;
 
 class LocationsSeeder extends Seeder
@@ -24,6 +23,5 @@ class LocationsSeeder extends Seeder
         ]`;
 
         $locations = json_decode($locations);
-
     }
 }

@@ -2,24 +2,24 @@
 
 namespace LaravelFreelancerNL\Aranguent;
 
-use ArangoDBClient\Exception;
-use ArangoDBClient\Statement;
+use ArangoDBClient\CollectionHandler as ArangoCollectionHandler;
 use ArangoDBClient\Connection as ArangoConnection;
-use ArangoDBClient\GraphHandler as ArangoGraphHandler;
-use ArangoDBClient\UserHandler as ArangoUserHandler;
-use Illuminate\Database\Connection as IlluminateConnection;
+use ArangoDBClient\ConnectionOptions as ArangoConnectionOptions;
 use ArangoDBClient\DocumentHandler as ArangoDocumentHandler;
+use ArangoDBClient\Exception;
+use ArangoDBClient\GraphHandler as ArangoGraphHandler;
+use ArangoDBClient\Statement;
+use ArangoDBClient\UserHandler as ArangoUserHandler;
+use ArangoDBClient\ViewHandler as ArangoViewHandler;
+use Illuminate\Database\Connection as IlluminateConnection;
 use Iterator;
 use LaravelFreelancerNL\Aranguent\Concerns\DetectsDeadlocks;
-use LaravelFreelancerNL\Aranguent\Query\Processor;
-use LaravelFreelancerNL\Aranguent\Concerns\ManagesTransactions;
-use ArangoDBClient\CollectionHandler as ArangoCollectionHandler;
-use ArangoDBClient\ConnectionOptions as ArangoConnectionOptions;
-use ArangoDBClient\ViewHandler as ArangoViewHandler;
-use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 use LaravelFreelancerNL\Aranguent\Concerns\DetectsLostConnections;
-use LaravelFreelancerNL\Aranguent\Schema\Builder as SchemaBuilder;
+use LaravelFreelancerNL\Aranguent\Concerns\ManagesTransactions;
+use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 use LaravelFreelancerNL\Aranguent\Query\Grammar as QueryGrammar;
+use LaravelFreelancerNL\Aranguent\Query\Processor;
+use LaravelFreelancerNL\Aranguent\Schema\Builder as SchemaBuilder;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder as FluentAQL;
 
 class Connection extends IlluminateConnection
@@ -165,8 +165,8 @@ class Connection extends IlluminateConnection
             }
 
             $statement = $this->newArangoStatement($query, $bindings);
-            return $statement->execute();
 
+            return $statement->execute();
         });
     }
 
@@ -328,7 +328,7 @@ class Connection extends IlluminateConnection
             $query = $query->query;
         }
 
-        return $this->run($query, $bindings, function ($query, $bindings, $transactionCollections= null) {
+        return $this->run($query, $bindings, function ($query, $bindings, $transactionCollections = null) {
             if ($this->pretending()) {
                 return [];
             }
@@ -368,7 +368,6 @@ class Connection extends IlluminateConnection
      */
     public function update($query, $bindings = [], $transactionCollections = null)
     {
-
         return $this->affectingStatement($query, $bindings, $transactionCollections);
     }
 
@@ -443,16 +442,17 @@ class Connection extends IlluminateConnection
      * @return Statement
      * @throws Exception
      */
-    function newArangoStatement($query, $bindings): Statement
+    public function newArangoStatement($query, $bindings): Statement
     {
         $statement = new Statement($this->arangoConnection, ['query' => $query, 'bindVars' => $bindings]);
         $statement->setDocumentClass(Document::class);
+
         return $statement;
     }
 
     public function getCollectionHandler()
     {
-        if (!isset($this->collectionHandler)) {
+        if (! isset($this->collectionHandler)) {
             $this->collectionHandler = new ArangoCollectionHandler($this->arangoConnection);
             $this->collectionHandler->setDocumentClass(Document::class);
         }
@@ -462,38 +462,41 @@ class Connection extends IlluminateConnection
 
     public function getDocumentHandler()
     {
-        if (!isset($this->documentHandler)) {
+        if (! isset($this->documentHandler)) {
             $this->documentHandler = new ArangoDocumentHandler($this->arangoConnection);
             $this->documentHandler->setDocumentClass(Document::class);
         }
+
         return $this->documentHandler;
     }
 
     public function getUserHandler()
     {
-        if (!isset($this->userHandler)) {
+        if (! isset($this->userHandler)) {
             $this->userHandler = new ArangoUserHandler($this->arangoConnection);
             $this->userHandler->setDocumentClass(Document::class);
         }
+
         return $this->userHandler;
     }
 
     public function getGraphHandler()
     {
-        if (!isset($this->graphHandler)) {
+        if (! isset($this->graphHandler)) {
             $this->graphHandler = new ArangoGraphHandler($this->arangoConnection);
             $this->graphHandler->setDocumentClass(Document::class);
         }
+
         return $this->graphHandler;
     }
 
     public function getViewHandler()
     {
-        if (!isset($this->viewHandler)) {
+        if (! isset($this->viewHandler)) {
             $this->viewHandler = new ArangoViewHandler($this->arangoConnection);
             $this->viewHandler->setDocumentClass(Document::class);
-
         }
+
         return $this->viewHandler;
     }
 

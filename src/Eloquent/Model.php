@@ -5,7 +5,6 @@ namespace LaravelFreelancerNL\Aranguent\Eloquent;
 use Illuminate\Database\Eloquent\Model as IlluminateModel;
 use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 
-
 abstract class Model extends IlluminateModel
 {
     /**
@@ -52,5 +51,4 @@ abstract class Model extends IlluminateModel
 //    {
 //        return 'Y-m-d H:i:s.u';
 //    }
-
 }

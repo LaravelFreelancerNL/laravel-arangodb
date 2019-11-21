@@ -2,10 +2,10 @@
 
 namespace LaravelFreelancerNL\Aranguent\Tests\Schema;
 
-use Mockery as M;
 use Illuminate\Support\Fluent;
-use LaravelFreelancerNL\Aranguent\Tests\TestCase;
 use LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar;
+use LaravelFreelancerNL\Aranguent\Tests\TestCase;
+use Mockery as M;
 
 class SchemaGrammarTest extends TestCase
 {

@@ -52,7 +52,6 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
             ->return('m.migration')
             ->get();
 
-
         return $this->getConnection()->select($qb->query);
 
 //        return $this->table()
@@ -79,7 +78,6 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
             ->get();
 
         return $this->getConnection()->select($qb->query);
-
     }
 
     public function getLast()

@@ -2,11 +2,11 @@
 
 namespace LaravelFreelancerNL\Aranguent\Console\Migrations;
 
-use Illuminate\Support\Str;
-use Illuminate\Support\Composer;
-use Illuminate\Database\Console\Migrations\TableGuesser;
-use LaravelFreelancerNL\Aranguent\Migrations\MigrationCreator;
 use Illuminate\Database\Console\Migrations\MigrateMakeCommand as IlluminateMigrateMakeCommand;
+use Illuminate\Database\Console\Migrations\TableGuesser;
+use Illuminate\Support\Composer;
+use Illuminate\Support\Str;
+use LaravelFreelancerNL\Aranguent\Migrations\MigrationCreator;
 
 class MigrateMakeCommand extends IlluminateMigrateMakeCommand
 {

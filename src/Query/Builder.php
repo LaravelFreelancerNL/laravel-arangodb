@@ -6,10 +6,7 @@ use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use InvalidArgumentException;
 use LaravelFreelancerNL\Aranguent\Connection;
-use LaravelFreelancerNL\Aranguent\Query\Grammar;
-use LaravelFreelancerNL\Aranguent\Query\Processor;
 use LaravelFreelancerNL\FluentAQL\Exceptions\BindException;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
@@ -54,7 +51,7 @@ class Builder extends IlluminateQueryBuilder
         $this->connection = $connection;
         $this->grammar = $grammar ?: $connection->getQueryGrammar();
         $this->processor = $processor ?: $connection->getPostProcessor();
-        if (!$aqb instanceof QueryBuilder) {
+        if (! $aqb instanceof QueryBuilder) {
             $aqb = new QueryBuilder();
         }
         $this->aqb = $aqb;
@@ -69,6 +66,7 @@ class Builder extends IlluminateQueryBuilder
     {
         $response = $this->connection->select($this->grammar->compileSelect($this)->aqb);
         $this->aqb = new QueryBuilder();
+
         return $response;
     }
 
@@ -92,6 +90,7 @@ class Builder extends IlluminateQueryBuilder
     {
         $response = $this->getConnection()->insert($this->grammar->compileInsert($this, $values)->aqb);
         $this->aqb = new QueryBuilder();
+
         return $response;
     }
 
@@ -122,6 +121,7 @@ class Builder extends IlluminateQueryBuilder
         $results = collect($this->onceWithColumns(Arr::wrap($columns), function () {
             return $this->runSelect();
         }));
+
         return $results;
     }
 
@@ -133,8 +133,9 @@ class Builder extends IlluminateQueryBuilder
      */
     public function update(array $values)
     {
-        $response =  $this->connection->update($this->grammar->compileUpdate($this, $values)->aqb);
+        $response = $this->connection->update($this->grammar->compileUpdate($this, $values)->aqb);
         $this->aqb = new QueryBuilder();
+
         return $response;
     }
 
@@ -148,6 +149,7 @@ class Builder extends IlluminateQueryBuilder
     {
         $response = $this->connection->delete($this->grammar->compileDelete($this, $_key)->aqb);
         $this->aqb = new QueryBuilder();
+
         return $response;
     }
 
@@ -176,6 +178,7 @@ class Builder extends IlluminateQueryBuilder
         if (! $results->isEmpty()) {
             return $results[0];
         }
+
         return false;
     }
 
@@ -189,5 +192,4 @@ class Builder extends IlluminateQueryBuilder
     {
         return $this->orderByRaw($this->grammar->compileRandom($this));
     }
-
 }

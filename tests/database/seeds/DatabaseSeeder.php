@@ -15,6 +15,5 @@ class DatabaseSeeder extends Seeder
         $this->call(ChildOfSeeder::class);
         $this->call(LocationsSeeder::class);
         $this->call(CharacteristicsSeeder::class);
-
     }
 }

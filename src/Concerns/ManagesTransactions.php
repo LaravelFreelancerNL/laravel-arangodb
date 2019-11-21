@@ -2,10 +2,10 @@
 
 namespace LaravelFreelancerNL\Aranguent\Concerns;
 
+use ArangoDBClient\Transaction as ArangoTransaction;
 use Closure;
 use Exception;
 use Illuminate\Support\Fluent as IlluminateFluent;
-use ArangoDBClient\Transaction as ArangoTransaction;
 
 trait ManagesTransactions
 {

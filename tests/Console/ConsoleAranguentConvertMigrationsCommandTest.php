@@ -1,12 +1,12 @@
 <?php
 
-use Mockery as M;
-use Illuminate\Foundation\Application;
 use Illuminate\Database\Migrations\Migrator;
+use Illuminate\Foundation\Application;
+use LaravelFreelancerNL\Aranguent\Console\Migrations\AranguentConvertMigrationsCommand;
+use LaravelFreelancerNL\Aranguent\Tests\TestCase;
+use Mockery as M;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
-use LaravelFreelancerNL\Aranguent\Tests\TestCase;
-use LaravelFreelancerNL\Aranguent\Console\Migrations\AranguentConvertMigrationsCommand;
 
 class AranguentConvertMigrationsCommandTest extends TestCase
 {
