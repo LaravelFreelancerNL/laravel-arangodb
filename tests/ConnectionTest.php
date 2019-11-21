@@ -1,9 +1,9 @@
 <?php
 
-use Mockery as M;
+use Illuminate\Support\Fluent as IlluminateFluent;
 use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Tests\TestCase;
-use Illuminate\Support\Fluent as IlluminateFluent;
+use Mockery as M;
 
 class ConnectionTest extends TestCase
 {

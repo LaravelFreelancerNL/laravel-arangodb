@@ -42,16 +42,16 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 
         $this->collectionHandler = $this->connection->getCollectionHandler();
         //Remove all collections
-            $collections = $this->collectionHandler->getAllCollections(['excludeSystem' => true]);
-            foreach ($collections as $collection) {
-                $this->collectionHandler->truncate($collection['id']);
-            }
+        $collections = $this->collectionHandler->getAllCollections(['excludeSystem' => true]);
+        foreach ($collections as $collection) {
+            $this->collectionHandler->truncate($collection['id']);
+        }
     }
 
     protected function setUp() : void
     {
         parent::setUp();
-        $this->withFactories(realpath(__DIR__ . '/database/factories'));
+        $this->withFactories(realpath(__DIR__.'/database/factories'));
 
         $this->artisan('aranguent:convert-migrations', ['--realpath' => true, '--path' => __DIR__.'/../vendor/orchestra/testbench-core/laravel/migrations/'])->run();
 
@@ -60,11 +60,11 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 
         $this->artisan('migrate', [
             '--path' => realpath(__DIR__.'/database/migrations'),
-            '--realpath' => true
+            '--realpath' => true,
         ])->run();
 
         $this->artisan('aranguent:model', [
-            'name' => 'Character'
+            'name' => 'Character',
         ])->run();
 
         $this->databaseMigrationRepository = new DatabaseMigrationRepository($this->app['db'], $this->collection);

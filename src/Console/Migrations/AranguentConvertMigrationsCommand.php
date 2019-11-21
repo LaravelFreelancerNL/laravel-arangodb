@@ -3,8 +3,8 @@
 namespace LaravelFreelancerNL\Aranguent\Console\Migrations;
 
 use Illuminate\Console\ConfirmableTrait;
-use Illuminate\Database\Migrations\Migrator;
 use Illuminate\Database\Console\Migrations\BaseCommand;
+use Illuminate\Database\Migrations\Migrator;
 
 class AranguentConvertMigrationsCommand extends BaseCommand
 {

@@ -1,8 +1,7 @@
 <?php
 
-
-use tests\models\Characteristic;
 use Illuminate\Database\Seeder;
+use tests\models\Characteristic;
 
 class CharacteristicsSeeder extends Seeder
 {

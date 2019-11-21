@@ -1,7 +1,7 @@
 <?php
 
-use test\models\Character;
 use Illuminate\Database\Seeder;
+use test\models\Character;
 
 class CharactersSeeder extends Seeder
 {
@@ -12,7 +12,6 @@ class CharactersSeeder extends Seeder
      */
     public function run()
     {
-
         $characters = `[
             { "_key": "NedStark", "name": "Ned", "surname": "Stark", "alive": true, "age": 41, "traits": ["A","H","C","N","P"] },
             { "_key": "RobertBaratheon", "name": "Robert", "surname": "Baratheon", "alive": false, "traits": ["A","H","C"] },
