@@ -3,9 +3,9 @@
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
+use LaravelFreelancerNL\Aranguent\Tests\models\Character as Character;
 use LaravelFreelancerNL\Aranguent\Tests\TestCase;
 use Mockery as M;
-use LaravelFreelancerNL\Aranguent\Tests\models\Character as Character;
 
 class ModelTest extends TestCase
 {
@@ -21,18 +21,17 @@ class ModelTest extends TestCase
                 'surname' => 'Stark',
                 'alive' => false,
                 'age' => 41,
-                'traits' => ["A","H","C","N","P"],
+                'traits' => ['A', 'H', 'C', 'N', 'P'],
             ],
             [
-                "_key" => "RobertBaratheon",
-                "name" => "Robert",
-                "surname" => "Baratheon",
-                "alive" => false,
+                '_key' => 'RobertBaratheon',
+                'name' => 'Robert',
+                'surname' => 'Baratheon',
+                'alive' => false,
                 'age' => null,
-                "traits" => ["A","H","C"]
-            ]
+                'traits' => ['A', 'H', 'C'],
+            ],
         ]);
-
     }
 
     public function tearDown() : void
@@ -48,7 +47,7 @@ class ModelTest extends TestCase
     {
         $this->artisan('aranguent:model', [
             'name' => 'Aranguent',
-            '--force' => ''
+            '--force' => '',
         ])->run();
 
         $file = __DIR__.'/../../vendor/orchestra/testbench-core/laravel/app/Aranguent.php';
@@ -71,12 +70,11 @@ class ModelTest extends TestCase
     {
         $characters = Character::all();
         foreach ($characters as $character) {
-            $results[] = $character->update(["age" => ($character->age+1)]);
+            $results[] = $character->update(['age' => ($character->age + 1)]);
         }
 
         $characters = Character::all();
         $this->assertCount(2, $characters);
-
     }
 
     public function testDeleteModel()
@@ -86,35 +84,34 @@ class ModelTest extends TestCase
         $character->delete();
     }
 
-
     public function testCount()
     {
         $result = Character::count();
-        $this->assertEquals( 2, $result);
+        $this->assertEquals(2, $result);
     }
 
     public function testMax()
     {
         $result = Character::max('age');
-        $this->assertEquals( 41, $result);
+        $this->assertEquals(41, $result);
     }
 
     public function testMin()
     {
         $result = Character::min('age');
-        $this->assertEquals( 41, $result);
+        $this->assertEquals(41, $result);
     }
 
     public function testAverage()
     {
         $result = Character::average('age');
-        $this->assertEquals( 41, $result);
+        $this->assertEquals(41, $result);
     }
 
     public function testSum()
     {
         $result = Character::sum('age');
-        $this->assertEquals( 41, $result);
+        $this->assertEquals(41, $result);
     }
 
     public function testOrderByRandom()
@@ -124,7 +121,6 @@ class ModelTest extends TestCase
             ->get();
 
         $this->assertCount(2, $results);
-
     }
 
     public function testCastDocumentObjectToArrayWithoutBinaryStrings()
@@ -135,13 +131,11 @@ class ModelTest extends TestCase
             'surname' => 'Stark',
             'alive' => false,
             'age' => 41,
-            'traits' => ["A","H","C","N","P"],
+            'traits' => ['A', 'H', 'C', 'N', 'P'],
         ];
         $doc = new \LaravelFreelancerNL\Aranguent\Document();
         $doc = $doc->createFromArray($data);
 
-        $this->assertEquals((array)$doc,$data);
+        $this->assertEquals((array) $doc, $data);
     }
-
 }
-

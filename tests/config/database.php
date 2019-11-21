@@ -13,6 +13,6 @@ return [
             ArangoConnectionOptions::OPTION_AUTH_USER => '',
             ArangoConnectionOptions::OPTION_AUTH_PASSWD => '',
             ArangoConnectionOptions::OPTION_CONNECTION => 'Keep-Alive',
-        ]
-    ]
+        ],
+    ],
 ];

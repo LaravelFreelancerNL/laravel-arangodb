@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Builder as IlluminateBuilder;
 
 class Builder extends IlluminateBuilder
 {
-
     /**
      * The methods that should be returned from query builder.
      *
@@ -16,7 +15,6 @@ class Builder extends IlluminateBuilder
         'insert', 'insertOrIgnore', 'insertGetId', 'insertUsing', 'getBindings', 'toSql', 'dump', 'dd',
         'exists', 'doesntExist', 'count', 'min', 'max', 'avg', 'average', 'sum', 'getConnection',
     ];
-
 
     /**
      * Update a record in the database.
@@ -80,7 +78,7 @@ class Builder extends IlluminateBuilder
             is_null($this->model->getCreatedAtColumn())) {
             return $values;
         }
-        $timestamp =  $this->model->freshTimestampString();
+        $timestamp = $this->model->freshTimestampString();
         $updatedAtColumn = $this->model->getUpdatedAtColumn();
         $createdAtColumn = $this->model->getCreatedAtColumn();
         $timestamps[$updatedAtColumn] = $timestamp;
@@ -94,6 +92,4 @@ class Builder extends IlluminateBuilder
 
         return $values;
     }
-
-
 }

@@ -2,12 +2,12 @@
 
 namespace Illuminate\Tests\Database;
 
-use Mockery as M;
 use ArangoDBClient\CollectionHandler;
 use LaravelFreelancerNL\Aranguent\Connection;
-use LaravelFreelancerNL\Aranguent\Tests\TestCase;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
 use LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar;
+use LaravelFreelancerNL\Aranguent\Tests\TestCase;
+use Mockery as M;
 
 class SchemaBlueprintTest extends TestCase
 {

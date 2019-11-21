@@ -1,6 +1,5 @@
 <?php
 
-use tests\models\ChildOf;
 use Illuminate\Database\Seeder;
 
 class ChildOfSeeder extends Seeder
@@ -30,6 +29,5 @@ class ChildOfSeeder extends Seeder
         ]`;
 
         $childOf = json_decode($childOf);
-
     }
 }

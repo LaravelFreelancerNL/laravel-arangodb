@@ -13,7 +13,6 @@ class Character extends Model
         'surname',
         'alive',
         'age',
-        'traits'
+        'traits',
     ];
-
 }

@@ -6,25 +6,22 @@ namespace LaravelFreelancerNL\Aranguent;
  * Class Document
  * Loosely based on ArangoDBClient\Document;
  * Laravel typecasts input data to an array which causes issues with protected variables (\0*\0 is prepended).
- * Thus we are using a very minimum version to gather data from ArangoDB through their PHP driver
- *
- * @package LaravelFreelancerNL\Aranguent
+ * Thus we are using a very minimum version to gather data from ArangoDB through their PHP driver.
  */
-
 class Document
 {
-
     public static function createFromArray($values, array $options = [])
     {
         $document = new static($options);
         foreach ($values as $key => $value) {
             $document->set($key, $value);
         }
+
         return $document;
     }
 
     /**
-     * Set a document attribute
+     * Set a document attribute.
      *
      * The key (attribute name) must be a string.
      * This will validate the value of the attribute and might throw an
@@ -40,5 +37,4 @@ class Document
     {
         $this->$key = $value;
     }
-
 }

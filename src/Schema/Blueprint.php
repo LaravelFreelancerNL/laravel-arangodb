@@ -3,10 +3,10 @@
 namespace LaravelFreelancerNL\Aranguent\Schema;
 
 use Closure;
-use Illuminate\Support\Fluent;
 use Illuminate\Database\Connection;
-use Illuminate\Support\Traits\Macroable;
 use Illuminate\Database\Schema\Grammars\Grammar as IlluminateGrammar;
+use Illuminate\Support\Fluent;
+use Illuminate\Support\Traits\Macroable;
 
 /**
  * Class Blueprint.
@@ -461,7 +461,7 @@ class Blueprint
 
     /**
      * Create a TTL index for the table.
-     * 
+     *
      * @param $attributes
      * @param array $indexOptions
      * @return \Illuminate\Support\Fluent

@@ -3,8 +3,8 @@
 namespace LaravelFreelancerNL\Aranguent\Migrations;
 
 use Exception;
-use Illuminate\Filesystem\Filesystem;
 use Illuminate\Database\Migrations\MigrationCreator as IlluminateMigrationCreator;
+use Illuminate\Filesystem\Filesystem;
 
 class MigrationCreator extends IlluminateMigrationCreator
 {

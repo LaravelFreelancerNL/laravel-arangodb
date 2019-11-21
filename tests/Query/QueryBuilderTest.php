@@ -19,6 +19,7 @@ class QueryBuilderTest extends TestCase
     {
         $grammar = new Grammar;
         $processor = m::mock(Processor::class);
+
         return new Builder(m::mock(Connection::class), $grammar, $processor);
     }
 
@@ -124,7 +125,6 @@ class QueryBuilderTest extends TestCase
 
         return 'select '.$aggregate['function'].'('.$column.') as aggregate';
     }
-
 
     public function testOrderBys()
     {
