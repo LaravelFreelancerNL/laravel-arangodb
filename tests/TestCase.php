@@ -39,6 +39,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         $this->connection = DB::connection('arangodb');
 
         $this->createDatabase();
+        $this->connection->setDatabaseName(($app['config']['database.database']) ? $app['config']['database.database'] : 'aranguent__test');
 
         $this->collectionHandler = $this->connection->getCollectionHandler();
         //Remove all collections

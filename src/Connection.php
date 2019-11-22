@@ -252,9 +252,7 @@ class Connection extends IlluminateConnection
      * Run a raw, unprepared query against the connection.
      *
      * @param string $query
-     * @param array|null $collections
      * @return bool
-     * @throws Exception
      */
     public function unprepared($query)
     {
@@ -500,12 +498,13 @@ class Connection extends IlluminateConnection
         return $this->viewHandler;
     }
 
-    public function setDatabase($database)
+    public function setDatabaseName($database)
     {
         $this->database = $database;
+        $this->arangoConnection->setDatabase($database);
     }
 
-    public function getDatabase()
+    public function getDatabaseName()
     {
         return $this->database;
     }

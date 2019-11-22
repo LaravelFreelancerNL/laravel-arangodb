@@ -20,7 +20,7 @@ class Builder
     /**
      * The schema grammar instance.
      *
-     * @var \LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar
+     * @var Grammar
      */
     protected $grammar;
 

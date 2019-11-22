@@ -5,8 +5,9 @@ namespace LaravelFreelancerNL\Aranguent\Query;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
 use LaravelFreelancerNL\FluentAQL\Exceptions\BindException as BindException;
+use LaravelFreelancerNL\FluentAQL\Expressions\FunctionExpression;
 use LaravelFreelancerNL\FluentAQL\Grammar as FluentAqlGrammar;
-use LaravelFreelancerNL\FluentAQL\QueryBuilder as FluentAQL;
+
 
 /*
  * Provides AQL syntax functions
@@ -15,6 +16,8 @@ use LaravelFreelancerNL\FluentAQL\QueryBuilder as FluentAQL;
 class Grammar extends FluentAqlGrammar
 {
     use Macroable;
+
+    public $name;
 
     /**
      * The grammar table prefix.
@@ -66,6 +69,16 @@ class Grammar extends FluentAqlGrammar
     public function getDateFormat()
     {
         return 'Y-m-d\TH:i:s.v\Z';
+    }
+
+    /**
+     * Get the grammar specific operators.
+     *
+     * @return array
+     */
+    public function getOperators()
+    {
+        return $this->comparisonOperators;
     }
 
     /**
@@ -369,8 +382,14 @@ class Grammar extends FluentAqlGrammar
      */
     protected function compileOrdersToArray(Builder $builder, $orders)
     {
-        return array_map(function ($order) {
-            return $order['sql'] ?? $this->prefixTable($order['column']).' '.$order['direction'];
+
+        return array_map(function ($order) use ($builder) {
+
+            if (! isset($order['type']) || $order['type'] != 'Raw') {
+                $order['column'] = $this->prefixAlias($builder, $builder->from, $order['column']);
+            }
+            unset($order['type']);
+            return array_values($order);
         }, $orders);
     }
 
@@ -499,11 +518,11 @@ class Grammar extends FluentAqlGrammar
      * Compile the random statement into SQL.
      *
      * @param Builder $builder
-     * @return string
+     * @return FunctionExpression;
      */
     public function compileRandom(Builder $builder)
     {
-        return (string) $builder->aqb->rand();
+        return $builder->aqb->rand();
     }
 
     /**

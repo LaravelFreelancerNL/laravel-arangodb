@@ -4,7 +4,6 @@ namespace LaravelFreelancerNL\Aranguent\Schema;
 
 use Closure;
 use Illuminate\Database\Connection;
-use Illuminate\Database\Schema\Grammars\Grammar as IlluminateGrammar;
 use Illuminate\Support\Fluent;
 use Illuminate\Support\Traits\Macroable;
 
@@ -27,7 +26,7 @@ class Blueprint
     /**
      * The connection that is used by the blueprint.
      *
-     * @var \Illuminate\Database\Connection
+     * @var Connection
      */
     protected $connection;
 
@@ -110,11 +109,11 @@ class Blueprint
     /**
      * Execute the blueprint against the database.
      *
-     * @param  \Illuminate\Database\Connection  $connection
-     * @param  \Illuminate\Database\Schema\Grammars\Grammar  $grammar
+     * @param Connection $connection
+     * @param Grammar $grammar
      * @return void
      */
-    public function build(Connection $connection, IlluminateGrammar $grammar)
+    public function build(Connection $connection, Grammar $grammar)
     {
         $this->connection = $connection;
         $this->grammar = $connection->getSchemaGrammar();

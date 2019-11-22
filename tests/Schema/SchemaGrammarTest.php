@@ -3,7 +3,7 @@
 namespace LaravelFreelancerNL\Aranguent\Tests\Schema;
 
 use Illuminate\Support\Fluent;
-use LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar;
+use LaravelFreelancerNL\Aranguent\Schema\Grammar;
 use LaravelFreelancerNL\Aranguent\Tests\TestCase;
 use Mockery as M;
 

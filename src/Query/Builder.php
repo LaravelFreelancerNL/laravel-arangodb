@@ -2,12 +2,17 @@
 
 namespace LaravelFreelancerNL\Aranguent\Query;
 
+use Closure;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
+use InvalidArgumentException;
 use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\FluentAQL\Exceptions\BindException;
+use LaravelFreelancerNL\FluentAQL\Expressions\ExpressionInterface as ExpressionInterface;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
 class Builder extends IlluminateQueryBuilder
@@ -107,7 +112,7 @@ class Builder extends IlluminateQueryBuilder
         $response = $this->getConnection()->execute($this->grammar->compileInsertGetId($this, $values, $sequence)->aqb);
         $this->aqb = new QueryBuilder();
 
-        return end($response);
+        return (is_array($response)) ?  end($response) : $response;
     }
 
     /**
@@ -182,6 +187,148 @@ class Builder extends IlluminateQueryBuilder
         return false;
     }
 
+
+    /**
+     * Add a basic where clause to the query.
+     *
+     * @param Closure|string|array $column
+     * @param mixed $operator
+     * @param mixed $value
+     * @param string $boolean
+     * @return Builder
+     */
+    public function where($column, $operator = null, $value = null, $boolean = 'and')
+    {
+        // If the column is an array, we will assume it is an array of key-value pairs
+        // and can add them each as a where clause. We will maintain the boolean we
+        // received when the method was called and pass it into the nested where.
+        if (is_array($column)) {
+            return $this->addArrayOfWheres($column, $boolean);
+        }
+
+        // Here we will make some assumptions about the operator. If only 2 values are
+        // passed to the method, we will assume that the operator is an equals sign
+        // and keep going. Otherwise, we'll require the operator to be passed in.
+        [$value, $operator] = $this->prepareValueAndOperator(
+            $value, $operator, func_num_args() === 2
+        );
+
+        // If the columns is actually a Closure instance, we will assume the developer
+        // wants to begin a nested where statement which is wrapped in parenthesis.
+        // We'll add that Closure to the query then return back out immediately.
+        if ($column instanceof Closure) {
+            return $this->whereNested($column, $boolean);
+        }
+
+        // If the given operator is not found in the list of valid operators we will
+        // assume that the developer is just short-cutting the '=' operators and
+        // we will set the operators to '=' and set the values appropriately.
+        if ($this->invalidOperator($operator)) {
+            [$value, $operator] = [$operator, '='];
+        }
+
+        // If the value is a Closure, it means the developer is performing an entire
+        // sub-select within the query and we will need to compile the sub-select
+        // within the where clause to get the appropriate query record results.
+        if ($value instanceof Closure) {
+            return $this->whereSub($column, $operator, $value, $boolean);
+        }
+
+        $type = 'Basic';
+
+        // If the column is making a JSON reference we'll check to see if the value
+        // is a boolean. If it is, we'll add the raw boolean string as an actual
+        // value to the query to ensure this is properly handled by the query.
+        if (Str::contains($column, '->') && is_bool($value)) {
+            $value = new Expression($value ? 'true' : 'false');
+
+            if (is_string($column)) {
+                $type = 'JsonBoolean';
+            }
+        }
+
+        // Now that we are working with just a simple query we can put the elements
+        // in our array and add the query binding to our array of bindings that
+        // will be bound to each SQL statements when it is finally executed.
+        $this->wheres[] = compact(
+            'type', 'column', 'operator', 'value', 'boolean'
+        );
+
+        if (! $value instanceof Expression) {
+            $this->addBinding($value, 'where');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Determine if the given operator is supported.
+     *
+     * @param  string  $operator
+     * @return bool
+     */
+    protected function invalidOperator($operator)
+    {
+
+        return ! in_array(strtolower($operator), $this->operators, true) &&
+            ! isset($this->grammar->getOperators()[strtolower($operator)]);
+    }
+
+
+    /**
+     * Add an "or where" clause to the query.
+     *
+     * @param Closure|string|array  $column
+     * @param  mixed  $operator
+     * @param  mixed  $value
+     * @return IlluminateQueryBuilder|static
+     */
+    public function orWhere($column, $operator = null, $value = null)
+    {
+        return $this->where($column, $operator, $value, 'or');
+    }
+
+    /**
+     * Add an "order by" clause to the query.
+     *
+     * @param  Closure|IlluminateQueryBuilder|string  $column
+     * @param  string  $direction
+     * @return $this
+     *
+     * @throws InvalidArgumentException
+     */
+    public function orderBy($column, $direction = 'asc')
+    {
+        if ($this->isQueryable($column)) {
+            [$query, $bindings] = $this->createSub($column);
+
+            $column = new Expression('('.$query.')');
+        }
+
+        $this->{$this->unions ? 'unionOrders' : 'orders'}[] = [
+            'column' => $column,
+            'direction' => $direction,
+        ];
+
+        return $this;
+    }
+
+    /**
+     * Add a raw "order by" clause to the query.
+     *
+     * @param string|ExpressionInterface $aql
+     * @param array $bindings
+     * @return $this
+     */
+    public function orderByRaw($aql, $bindings = [])
+    {
+        $type = 'Raw';
+        $column = $aql;
+        $this->{$this->unions ? 'unionOrders' : 'orders'}[] = compact('type', 'column');
+
+        return $this;
+    }
+
     /**
      * Put the query's results in random order.
      *
@@ -192,4 +339,6 @@ class Builder extends IlluminateQueryBuilder
     {
         return $this->orderByRaw($this->grammar->compileRandom($this));
     }
+
+
 }

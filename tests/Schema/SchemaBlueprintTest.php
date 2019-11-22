@@ -5,7 +5,7 @@ namespace Illuminate\Tests\Database;
 use ArangoDBClient\CollectionHandler;
 use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
-use LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar;
+use LaravelFreelancerNL\Aranguent\Schema\Grammar;
 use LaravelFreelancerNL\Aranguent\Tests\TestCase;
 use Mockery as M;
 

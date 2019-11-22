@@ -72,7 +72,7 @@ class QueryBuilderTest extends TestCase
     public function testBasicWheres()
     {
         $builder = $this->getBuilder();
-        $builder->select('*')->from('users')->where('userDoc._id', '=', 1);
+        $builder->select('*')->from('users')->where('_id', '=', 1);
         $this->assertSame('FOR userDoc IN users FILTER userDoc._id == 1 RETURN userDoc', $builder->toSql());
         $this->assertEquals([0 => 1], $builder->getBindings());
     }
@@ -80,14 +80,14 @@ class QueryBuilderTest extends TestCase
     public function testBasicWheresWithMultiplePredicates()
     {
         $builder = $this->getBuilder();
-        $builder->select('*')->from('users')->where('userDoc._id', '=', 1)->where('userDoc.email', '=', 'foo');
+        $builder->select('*')->from('users')->where('_id', '=', 1)->where('email', '=', 'foo');
         $this->assertSame('FOR userDoc IN users FILTER userDoc._id == 1 AND userDoc.email == "foo" RETURN userDoc', $builder->toSql());
     }
 
     public function testBasicOrWheres()
     {
         $builder = $this->getBuilder();
-        $builder->select('*')->from('users')->where('userDoc._id', '==', 1)->orWhere('userDoc.email', '==', 'foo');
+        $builder->select('*')->from('users')->where('_id', '==', 1)->orWhere('email', '==', 'foo');
         $this->assertSame('FOR userDoc IN users FILTER userDoc._id == 1 OR userDoc.email == "foo" RETURN userDoc', $builder->toSql());
         $this->assertEquals([0 => 1, 1 => 'foo'], $builder->getBindings());
     }
@@ -129,7 +129,7 @@ class QueryBuilderTest extends TestCase
     public function testOrderBys()
     {
         $builder = $this->getBuilder();
-        $builder->select('*')->from('users')->orderBy('userDoc.email')->orderBy('userDoc.age', 'desc');
+        $builder->select('*')->from('users')->orderBy('email')->orderBy('age', 'desc');
         $this->assertSame('FOR userDoc IN users SORT userDoc.email asc, userDoc.age desc RETURN userDoc', $builder->toSql());
     }
 

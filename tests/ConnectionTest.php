@@ -206,6 +206,18 @@ class ConnectionTest extends TestCase
         $this->assertNotContains('1..1000', $result->collections['read']);
     }
 
+    public function testChangeDatabaseName()
+    {
+        $initialName = $this->connection->getDatabaseName();
+        $newName = $initialName.'New';
+        $this->connection->setDatabaseName($newName);
+        $currentName = $this->connection->getDatabaseName();
+
+        $this->assertNotEquals($initialName, $currentName);
+        $this->assertEquals($newName, $currentName);
+    }
+
+
     /**
      * explain a query.
      * @test
