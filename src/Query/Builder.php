@@ -12,7 +12,6 @@ use Illuminate\Support\Str;
 use InvalidArgumentException;
 use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\FluentAQL\Exceptions\BindException;
-use LaravelFreelancerNL\FluentAQL\Expressions\ExpressionInterface as ExpressionInterface;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
 class Builder extends IlluminateQueryBuilder
