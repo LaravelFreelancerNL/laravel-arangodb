@@ -140,7 +140,7 @@ class Blueprint
     /**
      * Generate the compilation method name and call it if method exists in the Grammar object.
      *
-     * @param $command
+     * @param Fluent $command
      * @return mixed
      */
     public function compileAqlCommand($command)

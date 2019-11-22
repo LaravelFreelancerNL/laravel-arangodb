@@ -31,7 +31,7 @@ class Builder extends IlluminateBuilder
      * Update a record in the database.
      *
      * @param  array  $values
-     * @return int
+     * @return boolean
      */
     public function insert(array $values)
     {

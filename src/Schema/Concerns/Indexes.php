@@ -77,7 +77,7 @@ trait Indexes
      *  Specify a spatial index for the table.
      *
      * @param $columns
-     * @param null $name
+     * @param string|null $name
      * @param array $indexOptions
      * @return Fluent
      */
@@ -202,7 +202,7 @@ trait Indexes
 
     /**
      * @param string|null $algorithm
-     * @return mixed|string
+     * @return string
      */
     protected function mapIndexType($algorithm)
     {

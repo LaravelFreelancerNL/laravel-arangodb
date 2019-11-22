@@ -82,9 +82,9 @@ class Grammar extends FluentAqlGrammar
 
     /**
      * @param Builder $builder
-     * @param $table
+     * @param string $table
      * @param string $postfix
-     * @return mixed
+     * @return Builder
      */
     protected function generateTableAlias($builder, $table, $postfix = 'Doc')
     {
@@ -93,6 +93,9 @@ class Grammar extends FluentAqlGrammar
         return $builder;
     }
 
+    /**
+     * @param string $table
+     */
     protected function prefixTable($table)
     {
         return $this->tablePrefix.$table;
@@ -238,7 +241,7 @@ class Grammar extends FluentAqlGrammar
      * Get an array of all the where clauses for the query.
      *
      * @param  \Illuminate\Database\Query\Builder  $builder
-     * @return array
+     * @return string
      */
     protected function compileWheresToArray($builder)
     {
@@ -542,7 +545,7 @@ class Grammar extends FluentAqlGrammar
      * @param Builder $builder
      * @param string $target
      * @param string $value
-     * @return Builder
+     * @return string
      */
     protected function prefixAlias(Builder $builder, string $target, string $value) : string
     {

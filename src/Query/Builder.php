@@ -313,7 +313,7 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Add a raw "order by" clause to the query.
      *
-     * @param string|ExpressionInterface $aql
+     * @param \LaravelFreelancerNL\FluentAQL\Expressions\FunctionExpression $aql
      * @param array $bindings
      * @return $this
      */
