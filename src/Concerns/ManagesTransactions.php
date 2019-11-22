@@ -252,8 +252,8 @@ trait ManagesTransactions
      * Handle an exception encountered when running a transacted statement.
      *
      * @param Exception $e
-     * @param integer $currentAttempt
-     * @param integer $attempts
+     * @param int $currentAttempt
+     * @param int $attempts
      * @return mixed
      */
     protected function handleTransactionException($e, $currentAttempt, $attempts)
