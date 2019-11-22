@@ -64,7 +64,6 @@ trait Tables
         return $this->table;
     }
 
-
     /**
      * Rename the table to a given name.
      *
@@ -75,7 +74,6 @@ trait Tables
     {
         return $this->addCommand('rename', compact('to'));
     }
-
 
     /**
      * Indicate that the table should be dropped.
@@ -102,5 +100,4 @@ trait Tables
 
         return $this->addCommand('dropIfExists');
     }
-
 }

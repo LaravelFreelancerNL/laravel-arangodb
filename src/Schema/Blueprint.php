@@ -8,9 +8,8 @@ use Illuminate\Database\Connection;
 use Illuminate\Support\Fluent;
 use Illuminate\Support\Traits\Macroable;
 use LaravelFreelancerNL\Aranguent\Schema\Concerns\Columns;
-use LaravelFreelancerNL\Aranguent\Schema\Concerns\Tables;
 use LaravelFreelancerNL\Aranguent\Schema\Concerns\Indexes;
-use LaravelFreelancerNL\Aranguent\Schema\Concerns\Views;
+use LaravelFreelancerNL\Aranguent\Schema\Concerns\Tables;
 
 /**
  * Class Blueprint.
@@ -232,7 +231,6 @@ class Blueprint
         return new Fluent(array_merge(compact('name'), $parameters));
     }
 
-
     /**
      * Get the commands on the blueprint.
      *
@@ -281,5 +279,4 @@ class Blueprint
 
         return $this;
     }
-
 }

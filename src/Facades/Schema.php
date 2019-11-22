@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Facade;
 use LaravelFreelancerNL\Aranguent\Schema\Builder;
 
 /**
- * Table handling:
+ * Table handling:.
  * @method static Builder create($collection, Closure $callback, $options = [])
  * @method static Builder drop(string $collection)
  * @method static Builder dropIfExists(string $collection)

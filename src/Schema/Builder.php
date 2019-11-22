@@ -117,7 +117,6 @@ class Builder
     public function collection($collection, Closure $callback)
     {
         $this->collection($collection, $callback);
-
     }
 
     /**
@@ -130,7 +129,6 @@ class Builder
     public function table($table, Closure $callback)
     {
         $this->build($this->createBlueprint($table, $callback));
-
     }
 
     /**
@@ -322,7 +320,6 @@ class Builder
     {
         return $this->figures($collection);
     }
-
 
     /**
      * @param string $name

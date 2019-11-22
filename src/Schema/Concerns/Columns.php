@@ -6,7 +6,6 @@ use Illuminate\Support\Fluent;
 
 trait Columns
 {
-
     /**
      * Check if any document within the table has the column.
      *
@@ -41,7 +40,6 @@ trait Columns
         return $this->addCommand('renameAttribute', $parameters);
     }
 
-
     /**
      * Indicate that the given column(s) should be dropped.
      *
@@ -59,5 +57,4 @@ trait Columns
 
         return $this->addCommand('dropAttribute', compact('parameters'));
     }
-
 }
