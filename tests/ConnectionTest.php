@@ -217,7 +217,6 @@ class ConnectionTest extends TestCase
         $this->assertEquals($newName, $currentName);
     }
 
-
     /**
      * explain a query.
      * @test
