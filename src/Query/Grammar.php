@@ -8,7 +8,6 @@ use LaravelFreelancerNL\FluentAQL\Exceptions\BindException as BindException;
 use LaravelFreelancerNL\FluentAQL\Expressions\FunctionExpression;
 use LaravelFreelancerNL\FluentAQL\Grammar as FluentAqlGrammar;
 
-
 /*
  * Provides AQL syntax functions
  */
@@ -382,13 +381,12 @@ class Grammar extends FluentAqlGrammar
      */
     protected function compileOrdersToArray(Builder $builder, $orders)
     {
-
         return array_map(function ($order) use ($builder) {
-
             if (! isset($order['type']) || $order['type'] != 'Raw') {
                 $order['column'] = $this->prefixAlias($builder, $builder->from, $order['column']);
             }
             unset($order['type']);
+
             return array_values($order);
         }, $orders);
     }

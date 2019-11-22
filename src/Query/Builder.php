@@ -112,7 +112,7 @@ class Builder extends IlluminateQueryBuilder
         $response = $this->getConnection()->execute($this->grammar->compileInsertGetId($this, $values, $sequence)->aqb);
         $this->aqb = new QueryBuilder();
 
-        return (is_array($response)) ?  end($response) : $response;
+        return (is_array($response)) ? end($response) : $response;
     }
 
     /**
@@ -186,7 +186,6 @@ class Builder extends IlluminateQueryBuilder
 
         return false;
     }
-
 
     /**
      * Add a basic where clause to the query.
@@ -269,11 +268,9 @@ class Builder extends IlluminateQueryBuilder
      */
     protected function invalidOperator($operator)
     {
-
         return ! in_array(strtolower($operator), $this->operators, true) &&
             ! isset($this->grammar->getOperators()[strtolower($operator)]);
     }
-
 
     /**
      * Add an "or where" clause to the query.
@@ -339,6 +336,4 @@ class Builder extends IlluminateQueryBuilder
     {
         return $this->orderByRaw($this->grammar->compileRandom($this));
     }
-
-
 }
