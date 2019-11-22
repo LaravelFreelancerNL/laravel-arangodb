@@ -1,6 +1,5 @@
 <?php
 
-
 use ArangoDBClient\Document;
 use LaravelFreelancerNL\Aranguent\Tests\TestCase;
 
