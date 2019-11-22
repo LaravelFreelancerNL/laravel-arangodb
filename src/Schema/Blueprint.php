@@ -2,10 +2,15 @@
 
 namespace LaravelFreelancerNL\Aranguent\Schema;
 
+use ArangoDBClient\CollectionHandler;
 use Closure;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Fluent;
 use Illuminate\Support\Traits\Macroable;
+use LaravelFreelancerNL\Aranguent\Schema\Concerns\Columns;
+use LaravelFreelancerNL\Aranguent\Schema\Concerns\Tables;
+use LaravelFreelancerNL\Aranguent\Schema\Concerns\Indexes;
+use LaravelFreelancerNL\Aranguent\Schema\Concerns\Views;
 
 /**
  * Class Blueprint.
@@ -21,7 +26,10 @@ use Illuminate\Support\Traits\Macroable;
  */
 class Blueprint
 {
-    use Macroable;
+    use Macroable,
+        Tables,
+        Columns,
+        Indexes;
 
     /**
      * The connection that is used by the blueprint.
@@ -33,45 +41,45 @@ class Blueprint
     /**
      * The grammar that is used by the blueprint.
      *
-     * @var \LaravelFreelancerNL\Aranguent\Schema\Grammars\Grammar
+     * @var Grammar
      */
     protected $grammar;
 
     /**
-     * The collection the blueprint describes.
+     * The table the blueprint describes.
      *
      * @var string
      */
-    protected $collection;
+    protected $table;
 
     /**
-     * The handler for collection manipulation.
+     * The handler for table manipulation.
      */
     protected $collectionHandler;
 
     /**
-     * The prefix of the collection.
+     * The prefix of the table.
      *
      * @var string
      */
     protected $prefix;
 
     /**
-     * The commands that should be run for the collection.
+     * The commands that should be run for the table.
      *
      * @var Fluent[]
      */
     protected $commands = [];
 
     /**
-     * Catching attributes to be able to add fluent indexes.
+     * Catching columns to be able to add fluent indexes.
      *
      * @var array
      */
-    protected $attributes = [];
+    protected $columns = [];
 
     /**
-     * Whether to make the collection temporary.
+     * Whether to make the table temporary.
      *
      * @var bool
      */
@@ -89,13 +97,13 @@ class Blueprint
      *
      * Blueprint constructor.
      * @param string $collection
-     * @param \ArangoDBClient\CollectionHandler $collectionHandler
+     * @param CollectionHandler $collectionHandler
      * @param Closure|null $callback
      * @param string $prefix
      */
     public function __construct($collection, $collectionHandler, Closure $callback = null, $prefix = '')
     {
-        $this->collection = $collection;
+        $this->table = $collection;
 
         $this->collectionHandler = $collectionHandler;
 
@@ -116,7 +124,10 @@ class Blueprint
     public function build(Connection $connection, Grammar $grammar)
     {
         $this->connection = $connection;
-        $this->grammar = $connection->getSchemaGrammar();
+
+        if (! isset($grammar)) {
+            $this->grammar = $connection->getSchemaGrammar();
+        }
 
         foreach ($this->commands as $command) {
             if ($command->handler == 'aql') {
@@ -137,7 +148,7 @@ class Blueprint
     {
         $compileMethod = 'compile'.ucfirst($command->name);
         if (method_exists($this->grammar, $compileMethod)) {
-            return $this->grammar->$compileMethod($this->collection, $command);
+            return $this->grammar->$compileMethod($this->table, $command);
         }
     }
 
@@ -181,51 +192,6 @@ class Blueprint
     }
 
     /**
-     * Drop the index by first getting all the indexes on the collection; then selecting the matching one
-     * by type and attributes.
-     * @param $command
-     * @throws \ArangoDBClient\Exception
-     */
-    public function executeDropIndexCommand($command)
-    {
-        if ($this->connection->pretending()) {
-            $this->connection->logQuery('/* '.$command->explanation." */\n", []);
-
-            return;
-        }
-        $attributes = $command->attributes;
-        if (is_string($attributes)) {
-            $attributes = [$attributes];
-        }
-        $indexId = null;
-        $indexData = $this->collectionHandler->getIndexes($this->collection);
-        foreach ($indexData['indexes'] as $key => $index) {
-            if (
-                $index['type'] === $command->type
-                && empty(array_diff($index['fields'], $attributes))
-                && empty(array_diff($attributes, $index['fields']))
-            ) {
-                $this->collectionHandler->dropIndex($index['id']);
-            }
-        }
-    }
-
-    /**
-     * @param $command
-     * @throws \ArangoDBClient\Exception
-     */
-    public function executeIndexCommand($command)
-    {
-        if ($this->connection->pretending()) {
-            $this->connection->logQuery('/* '.$command->explanation." */\n", []);
-
-            return;
-        }
-
-        $this->collectionHandler->index($this->collection, $command->type, $command->attributes, $command->unique, $command->indexOptions);
-    }
-
-    /**
      * Solely provides feedback to the developer in pretend mode.
      *
      * @param $command
@@ -238,284 +204,6 @@ class Blueprint
 
             return;
         }
-    }
-
-    /**
-     * Determine if the blueprint has a create command.
-     *
-     * @return bool
-     */
-    protected function creating()
-    {
-        return collect($this->commands)->contains(function ($command) {
-            return $command->name === 'create';
-        });
-    }
-
-    /**
-     * Indicate that the collection needs to be created.
-     *
-     * @param array $options
-     * @return Fluent
-     */
-    public function create($options = [])
-    {
-        $parameters['options'] = $options;
-        $parameters['explanation'] = "Create '{$this->collection}' collection.";
-        $parameters['handler'] = 'collection';
-
-        return $this->addCommand('create', $parameters);
-    }
-
-    public function executeCreateCommand($command)
-    {
-        if ($this->connection->pretending()) {
-            $this->connection->logQuery('/* '.$command->explanation." */\n", []);
-
-            return;
-        }
-        $options = $command->options;
-        if ($this->temporary === true) {
-            $options['isVolatile'] = true;
-        }
-        if ($this->autoIncrement === true) {
-            $options['keyOptions']['autoincrement'] = true;
-        }
-
-        $collections = $this->collectionHandler->getAllCollections(['excludeSystem' => true]);
-        if (! isset($collections[$this->collection])) {
-            $this->collectionHandler->create($this->collection, $options);
-        }
-    }
-
-    /**
-     * Indicate that the collection should be dropped.
-     *
-     * @return Fluent
-     */
-    public function drop()
-    {
-        $parameters['explanation'] = "Drop the '{$this->collection}' collection.";
-        $parameters['handler'] = 'collection';
-
-        return $this->addCommand('drop', $parameters);
-    }
-
-    /**
-     * Indicate that the collection should be dropped if it exists.
-     *
-     * @return Fluent
-     */
-    public function dropIfExists()
-    {
-        $parameters['explanation'] = "Drop the '{$this->collection}' collection.";
-        $parameters['handler'] = 'collection';
-
-        return $this->addCommand('dropIfExists');
-    }
-
-    /**
-     * Indicate that the given attribute(s) should be dropped.
-     *
-     * @param  array|mixed  $attributes
-     * @return Fluent
-     */
-    public function dropColumn($attributes)
-    {
-        $attributes = is_array($attributes) ? $attributes : func_get_args();
-
-        $parameters['handler'] = 'aql';
-        $parameters['attributes'] = $attributes;
-        $parameters['explanation'] = 'Drop the following attribute(s): '.implode(',', $attributes).'.';
-
-        return $this->addCommand('dropAttribute', compact('parameters'));
-    }
-
-    /**
-     * Check if any document within the collection has the attribute.
-     *
-     * @param string|array $attribute
-     * @return Fluent
-     */
-    public function hasAttribute($attribute)
-    {
-        $parameters['handler'] = 'aql';
-        $parameters['explanation'] = "Checking if any document within the collection has the '".implode(', ', (array) $attribute)."' attribute(s).";
-        $parameters['attribute'] = $attribute;
-
-        return $this->addCommand('hasAttribute', $parameters);
-    }
-
-    /**
-     * Indicate that the given attributes should be renamed.
-     *
-     * @param  string  $from
-     * @param  string  $to
-     * @return Fluent
-     */
-    public function renameColumn($from, $to)
-    {
-        $parameters['handler'] = 'aql';
-        $parameters['explanation'] = "Rename the attribute '$from' to '$to'.";
-        $parameters['from'] = $from;
-        $parameters['to'] = $to;
-
-        return $this->addCommand('renameAttribute', $parameters);
-    }
-
-    /**
-     * Indicate that the given index should be dropped.
-     *
-     * @param  string|array  $attributes
-     * @param  string  $type
-     * @return Fluent
-     */
-    public function dropIndex($attributes, $type)
-    {
-        $parameters['attributes'] = $attributes;
-        $parameters['type'] = $type;
-        $parameters['explanation'] = "Drop the '".$type."' index on [".implode(', ', (array) $attributes).'].';
-        $parameters['handler'] = 'collection';
-
-        return $this->addCommand('dropIndex', $parameters);
-    }
-
-    /**
-     * Rename the collection to a given name.
-     *
-     * @param  string  $to
-     * @return Fluent
-     */
-    public function rename($to)
-    {
-        return $this->addCommand('rename', compact('to'));
-    }
-
-    /**
-     * Specify an index for the table.
-     *
-     * @param  string|array  $columns
-     * @param  string  $name
-     * @param  string|null  $algorithm
-     * @return Fluent
-     */
-    public function index($columns = null, $name = null, $algorithm = null)
-    {
-        $type = $this->mapIndexType($algorithm);
-
-        return $this->indexCommand($type, $columns);
-    }
-
-    /**
-     * Create a hash index for fast exact matching.
-     * Hash ! has ;).
-     *
-     * @param null $attributes
-     * @param array $indexOptions
-     * @return Fluent
-     */
-    public function hashIndex($attributes = null, $indexOptions = [])
-    {
-        return $this->indexCommand('hash', $attributes, $indexOptions);
-    }
-
-    /**
-     * @param null|string $attribute
-     * @param array $indexOptions
-     * @return Fluent
-     */
-    public function fulltextIndex($attribute = null, $indexOptions = [])
-    {
-        return $this->indexCommand('fulltext', $attribute, $indexOptions);
-    }
-
-    /**
-     *  Specify a spatial index for the collection.
-     *
-     * @param $attributes
-     * @param array $indexOptions
-     * @return Fluent
-     */
-    public function geoIndex($attributes, $indexOptions = [])
-    {
-        return $this->indexCommand('geo', $attributes, $indexOptions);
-    }
-
-    /**
-     * Specify a spatial index for the table.
-     * Alias for geoIndex().
-     * @param  string|array  $columns
-     * @param  string  $name
-     * @return Fluent
-     */
-    public function spatialIndex($columns, $name = null)
-    {
-        return $this->geoIndex($columns);
-    }
-
-    public function skiplistIndex($attributes, $indexOptions = [])
-    {
-        return $this->indexCommand('skiplist', $attributes, $indexOptions);
-    }
-
-    /**
-     * Create a TTL index for the table.
-     *
-     * @param $attributes
-     * @param array $indexOptions
-     * @return \Illuminate\Support\Fluent
-     */
-    public function ttlIndex($attributes, $indexOptions = [])
-    {
-        return $this->indexCommand('ttl', $attributes, $indexOptions);
-    }
-
-    /**
-     * Specify a unique index for the table.
-     *
-     * @param  string|array  $columns
-     * @param  string  $name
-     * @param  string|null  $algorithm
-     * @return Fluent
-     */
-    public function unique($columns = null, $name = null, $algorithm = null)
-    {
-        $type = $this->mapIndexType($algorithm);
-
-        $indexOptions['unique'] = true;
-
-        return $this->indexCommand($type, $columns, $indexOptions);
-    }
-
-    /**
-     * Add a new index command to the blueprint.
-     *
-     * @param  string  $type
-     * @param  string|array  $attributes
-     * @param  array $indexOptions
-     * @return Fluent
-     */
-    protected function indexCommand($type = '', $attributes = [], $indexOptions = [])
-    {
-        if ($type == '') {
-            $type = 'skiplist';
-        }
-
-        if ($attributes === null) {
-            $attributes = end($this->attributes);
-        }
-
-        if (is_string($attributes)) {
-            $attributes = [$attributes];
-        }
-
-        $unique = false;
-        if (isset($indexOptions['unique'])) {
-            $unique = $indexOptions['unique'];
-            unset($indexOptions['unique']);
-        }
-
-        return $this->addCommand('index', compact('type', 'attributes', 'unique', 'indexOptions'));
     }
 
     /**
@@ -544,25 +232,6 @@ class Blueprint
         return new Fluent(array_merge(compact('name'), $parameters));
     }
 
-    /**
-     * Get the collection the blueprint describes.
-     *
-     * @return string
-     */
-    public function getCollection()
-    {
-        return $this->collection;
-    }
-
-    /**
-     * Alias for getCollection.
-     *
-     * @return string
-     */
-    public function getTable()
-    {
-        return $this->getCollection();
-    }
 
     /**
      * Get the commands on the blueprint.
@@ -575,7 +244,7 @@ class Blueprint
     }
 
     /**
-     * Silently catch unsupported schema methods. Store attributes for backwards compatible fluent index creation.
+     * Silently catch unsupported schema methods. Store columns for backwards compatible fluent index creation.
      *
      * @param $method
      * @param $args
@@ -585,7 +254,7 @@ class Blueprint
     {
         $columnMethods = [
             'bigIncrements', 'bigInteger', 'binary', 'boolean', 'char', 'date', 'dateTime', 'dateTimeTz', 'decimal',
-            'double', 'enum', 'float', 'geometry', 'geometryCollection', 'increments', 'integer', 'ipAddress', 'json',
+            'double', 'enum', 'engine', 'float', 'geometry', 'geometryCollection', 'increments', 'integer', 'ipAddress', 'json',
             'jsonb', 'lineString', 'longText', 'macAddress', 'mediumIncrements', 'mediumInteger', 'mediumText',
             'morphs', 'uuidMorphs', 'multiLineString', 'multiPoint', 'multiPolygon',
             'nullableMorphs', 'nullableUuidMorphs', 'nullableTimestamps', 'point', 'polygon', 'rememberToken',
@@ -597,7 +266,7 @@ class Blueprint
 
         if (in_array($method, $columnMethods)) {
             if (isset($args)) {
-                $this->attributes[] = $args;
+                $this->columns[] = $args;
             }
         }
 
@@ -613,16 +282,4 @@ class Blueprint
         return $this;
     }
 
-    public function mapIndexType($algorithm)
-    {
-        $typeConversion = [
-            'HASH' => 'hash',
-            'BTREE' => 'skiplist',
-            'RTREE' => 'geo',
-            'TTL' => 'ttl',
-        ];
-        $algorithm = strtoupper($algorithm);
-
-        return (isset($typeConversion[$algorithm])) ? $typeConversion[$algorithm] : 'skiplist';
-    }
 }

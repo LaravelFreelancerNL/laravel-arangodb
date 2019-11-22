@@ -2,6 +2,7 @@
 
 namespace LaravelFreelancerNL\Aranguent\Schema;
 
+use ArangoDBClient\View;
 use Closure;
 use Illuminate\Support\Fluent;
 use LaravelFreelancerNL\Aranguent\Connection;
@@ -16,6 +17,10 @@ class Builder
     protected $connection;
 
     protected $collectionHandler;
+
+    protected $graphHandler;
+
+    protected $viewHandler;
 
     /**
      * The schema grammar instance.
@@ -44,13 +49,17 @@ class Builder
         $this->grammar = $connection->getSchemaGrammar();
 
         $this->collectionHandler = $connection->getCollectionHandler();
+
+        $this->graphHandler = $connection->getGraphHandler();
+
+        $this->viewHandler = $connection->getViewHandler();
     }
 
     /**
      * Create a new collection on the schema.
      *
      * @param  string    $collection
-     * @param  \Closure  $callback
+     * @param  Closure  $callback
      * @param  array $config
      * @return void
      */
@@ -68,7 +77,7 @@ class Builder
      *
      * @param  string  $collection
      * @param  \Closure|null  $callback
-     * @return \LaravelFreelancerNL\Aranguent\Schema\Blueprint
+     * @return Blueprint
      */
     protected function createBlueprint($collection, Closure $callback = null)
     {
@@ -90,7 +99,7 @@ class Builder
     /**
      * Set the Schema Blueprint resolver callback.
      *
-     * @param  \Closure  $resolver
+     * @param  Closure  $resolver
      * @return void
      */
     public function blueprintResolver(Closure $resolver)
@@ -99,27 +108,29 @@ class Builder
     }
 
     /**
-     * Modify a collection's schema.
+     * Alias for table.
      *
      * @param  string    $collection
-     * @param  \Closure  $callback
+     * @param  Closure  $callback
      * @return void
      */
     public function collection($collection, Closure $callback)
     {
-        $this->build($this->createBlueprint($collection, $callback));
+        $this->collection($collection, $callback);
+
     }
 
     /**
-     * Alias for collection.
+     * Modify a table's schema.
      *
      * @param  string    $table
-     * @param  \Closure  $callback
+     * @param  Closure  $callback
      * @return void
      */
     public function table($table, Closure $callback)
     {
-        $this->collection($table, $callback);
+        $this->build($this->createBlueprint($table, $callback));
+
     }
 
     /**
@@ -310,6 +321,63 @@ class Builder
     public function getCollectionInfo($collection)
     {
         return $this->figures($collection);
+    }
+
+
+    /**
+     * @param string $name
+     * @param array $properties
+     * @param string $type
+     * @throws \ArangoDBClient\ClientException
+     * @throws \ArangoDBClient\Exception
+     */
+    public function createView($name, array $properties, $type = 'arangosearch')
+    {
+        $view = new View($name, $type);
+
+        $this->viewHandler->create($view);
+        $this->viewHandler->setProperties($view, $properties);
+    }
+
+    /**
+     * @param string $name
+     * @return mixed
+     * @throws \ArangoDBClient\Exception
+     */
+    public function getView(string $name)
+    {
+        return $this->viewHandler->properties($name);
+    }
+
+    /**
+     * @param string $name
+     * @param array $properties
+     * @throws \ArangoDBClient\ClientException
+     * @throws \ArangoDBClient\Exception
+     */
+    public function editView($name, array $properties)
+    {
+        $this->viewHandler->setProperties($name, $properties);
+    }
+
+    /**
+     * @param string $from
+     * @param string $to
+     * @throws \ArangoDBClient\Exception
+     */
+    public function renameView(string $from, string $to)
+    {
+        $this->viewHandler->rename($from, $to);
+    }
+
+    /**
+     * @param string $name
+     * @throws \ArangoDBClient\ClientException
+     * @throws \ArangoDBClient\Exception
+     */
+    public function dropView(string $name)
+    {
+        $this->viewHandler->drop($name);
     }
 
     /**
