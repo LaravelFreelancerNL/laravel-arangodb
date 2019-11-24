@@ -58,7 +58,6 @@ class SchemaBuilderTest extends TestCase
         $this->assertEquals('search', $view['name']);
     }
 
-
     public function testEditView()
     {
         Schema::createView('search', []);
@@ -68,7 +67,7 @@ class SchemaBuilderTest extends TestCase
         $properties = $viewHandler->properties('search');
         $viewHandler->drop('search');
 
-        $this->assertEquals(5, $properties['consolidationIntervalMsec'] );
+        $this->assertEquals(5, $properties['consolidationIntervalMsec']);
     }
 
     public function testRenameView()
@@ -96,5 +95,4 @@ class SchemaBuilderTest extends TestCase
         $viewHandler = $this->connection->getViewHandler();
         $viewHandler->get('search');
     }
-
 }

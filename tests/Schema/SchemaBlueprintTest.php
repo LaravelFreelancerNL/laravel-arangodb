@@ -42,5 +42,4 @@ class SchemaBlueprintTest extends TestCase
 
         $collectionHandler->getIndex('users', 'users_name_persistent');
     }
-
 }

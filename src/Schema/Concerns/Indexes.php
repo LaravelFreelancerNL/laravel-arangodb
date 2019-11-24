@@ -35,8 +35,6 @@ trait Indexes
         return $this->addCommand('index', compact('type', 'columns', 'indexOptions'));
     }
 
-
-
     /**
      * Specify an index for the table.
      *
@@ -70,7 +68,7 @@ trait Indexes
      * @param array $indexOptions
      * @return Fluent
      */
-    public function fulltextIndex($column = null,  $name = null, $indexOptions = [])
+    public function fulltextIndex($column = null, $name = null, $indexOptions = [])
     {
         return $this->indexCommand('fulltext', $column, $name, $indexOptions);
     }
@@ -161,7 +159,7 @@ trait Indexes
             'type' => $command->type,
             'fields' => $command->columns,
             'unique' => $command->unique,
-            'options' => $command->indexOptions
+            'options' => $command->indexOptions,
         ];
 
         if (isset($command->indexOptions) && is_array($command->indexOptions)) {
@@ -191,11 +189,12 @@ trait Indexes
      * Drop the index by first getting all the indexes on the table; then selecting the matching one
      * by type and columns.
      * @param $command
-    */
+     */
     public function executeDropIndexCommand($command)
     {
         if ($this->connection->pretending()) {
             $this->connection->logQuery('/* '.$command->explanation." */\n", []);
+
             return;
         }
         $this->collectionHandler->dropIndex($this->table, $command->index);
@@ -231,6 +230,4 @@ trait Indexes
 
         return str_replace(['-', '.'], '_', $index);
     }
-
-
 }
