@@ -103,27 +103,30 @@ class QueryBuilderTest extends TestCase
         $this->assertEquals([0 => 'email@example.com', 1 => 'keystring'], $builder->getBindings());
     }
 
-    /**
-     * Compile an aggregated select clause.
-     *
-     * @param  \Illuminate\Database\Query\Builder  $query
-     * @param  array  $aggregate
-     * @return string
-     */
-    protected function compileAggregate(\Illuminate\Database\Query\Builder $query, $aggregate)
+    public function testBasicWhereNulls()
     {
-        $column = $this->columnize($aggregate['columns']);
+        $builder = $this->getBuilder();
+        $builder->select('*')->from('users')->whereNull('_key');
+        $this->assertSame('FOR userDoc IN users FILTER userDoc._key == null RETURN userDoc', $builder->toSql());
+        $this->assertEquals([], $builder->getBindings());
 
-        // If the query has a "distinct" constraint and we're not asking for all columns
-        // we need to prepend "distinct" onto the column name so that the query takes
-        // it into account when it performs the aggregating operations on the data.
-        if (is_array($query->distinct)) {
-            $column = 'distinct '.$this->columnize($query->distinct);
-        } elseif ($query->distinct && $column !== '*') {
-            $column = 'distinct '.$column;
-        }
+        $builder = $this->getBuilder();
+        $builder->select('*')->from('users')->where('_key', '=', 1)->orWhereNull('_key');
+        $this->assertSame('FOR userDoc IN users FILTER userDoc._key == 1 OR userDoc._key == null RETURN userDoc', $builder->toSql());
+        $this->assertEquals([0 => 1], $builder->getBindings());
+    }
 
-        return 'select '.$aggregate['function'].'('.$column.') as aggregate';
+    public function testBasicWhereNotNulls()
+    {
+        $builder = $this->getBuilder();
+        $builder->select('*')->from('users')->whereNotNull('_key');
+        $this->assertSame('FOR userDoc IN users FILTER userDoc._key != null RETURN userDoc', $builder->toSql());
+        $this->assertEquals([], $builder->getBindings());
+
+        $builder = $this->getBuilder();
+        $builder->select('*')->from('users')->where('_key', '>', 1)->orWhereNotNull('_key');
+        $this->assertSame('FOR userDoc IN users FILTER userDoc._key > 1 OR userDoc._key != null RETURN userDoc', $builder->toSql());
+        $this->assertEquals([0 => 1], $builder->getBindings());
     }
 
     public function testOrderBys()

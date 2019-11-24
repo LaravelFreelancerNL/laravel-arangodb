@@ -260,6 +260,29 @@ class Builder extends IlluminateQueryBuilder
         return $this;
     }
 
+
+    /**
+     * Add a "where null" clause to the query.
+     *
+     * @param  string|array  $columns
+     * @param  string  $boolean
+     * @param  bool    $not
+     * @return $this
+     */
+    public function whereNull($columns, $boolean = 'and', $not = false)
+    {
+        $type = 'Basic';
+        $operator = $not ? '!=' : '==';
+        $value = null;
+
+        foreach (Arr::wrap($columns) as $column) {
+            $this->wheres[] = compact('type', 'column', 'operator', 'value', 'boolean');
+        }
+
+        return $this;
+    }
+
+
     /**
      * Determine if the given operator is supported.
      *
