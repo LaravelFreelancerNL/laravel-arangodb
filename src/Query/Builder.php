@@ -260,7 +260,6 @@ class Builder extends IlluminateQueryBuilder
         return $this;
     }
 
-
     /**
      * Add a "where null" clause to the query.
      *
@@ -281,7 +280,6 @@ class Builder extends IlluminateQueryBuilder
 
         return $this;
     }
-
 
     /**
      * Determine if the given operator is supported.
