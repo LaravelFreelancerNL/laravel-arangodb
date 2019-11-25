@@ -5,9 +5,9 @@ use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Eloquent\Builder;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
+use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 use LaravelFreelancerNL\Aranguent\Query\Grammar;
 use LaravelFreelancerNL\Aranguent\Query\Processor;
-use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 use LaravelFreelancerNL\Aranguent\Tests\models\Character as Character;
 use LaravelFreelancerNL\Aranguent\Tests\TestCase;
 use Mockery as M;
@@ -280,4 +280,3 @@ class EloquentModelSaveStub extends Model
         return $mock;
     }
 }
-
