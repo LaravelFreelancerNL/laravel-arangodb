@@ -3,6 +3,7 @@
 namespace LaravelFreelancerNL\Aranguent\Eloquent;
 
 use Illuminate\Database\Eloquent\Model as IlluminateModel;
+use Illuminate\Support\Str;
 use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 
 abstract class Model extends IlluminateModel
@@ -42,13 +43,20 @@ abstract class Model extends IlluminateModel
         return $this->getConnection()->query();
     }
 
-//    /**
-//     * Get the format for database stored dates.
-//     *
-//     * @return string
-//     */
-//    public function getDateFormat()
-//    {
-//        return 'Y-m-d H:i:s.u';
-//    }
+    /**
+     * Qualify the given column name by the model's table.
+     *
+     * @param  string  $column
+     * @return string
+     */
+    public function qualifyColumn($column)
+    {
+        $tableReferer = Str::singular($this->getTable()).'Doc';
+
+        if (Str::startsWith($column, $tableReferer.'.')) {
+            return $column;
+        }
+
+        return $tableReferer.'.'.$column;
+    }
 }

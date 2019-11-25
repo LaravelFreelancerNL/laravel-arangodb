@@ -77,6 +77,14 @@ class QueryBuilderTest extends TestCase
         $this->assertEquals([0 => 1], $builder->getBindings());
     }
 
+    public function testBasicWhereWithReferredValued()
+    {
+        $builder = $this->getBuilder();
+        $builder->select('*')->from('users')->where('userDoc._id', '=', 1);
+        $this->assertSame('FOR userDoc IN users FILTER userDoc._id == 1 RETURN userDoc', $builder->toSql());
+        $this->assertEquals([0 => 1], $builder->getBindings());
+    }
+
     public function testBasicWheresWithMultiplePredicates()
     {
         $builder = $this->getBuilder();

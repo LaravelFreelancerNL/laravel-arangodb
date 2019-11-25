@@ -546,6 +546,13 @@ class Grammar extends FluentAqlGrammar
      */
     protected function prefixAlias(Builder $builder, string $target, string $value) : string
     {
-        return $builder->getAlias($target).'.'.$value;
+        $alias = $builder->getAlias($target);
+
+        if (Str::startsWith($value, $alias.'.')) {
+            return $value;
+        }
+
+        return $alias.'.'.$value;
+
     }
 }
