@@ -443,7 +443,7 @@ class Grammar extends FluentAqlGrammar
             }
         }
         if ($builder->aggregate !== null) {
-            $values = ["aggregate" => "aggregateResult"];
+            $values = ['aggregate' => 'aggregateResult'];
         }
         if (empty($values)) {
             $values = $doc;
