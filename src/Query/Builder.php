@@ -76,6 +76,26 @@ class Builder extends IlluminateQueryBuilder
     }
 
     /**
+     * Run a pagination count query.
+     *
+     * @param  array  $columns
+     * @return array
+     */
+    protected function runPaginationCountQuery($columns = ['*'])
+    {
+        $without = $this->unions ? ['orders', 'limit', 'offset'] : ['columns', 'orders', 'limit', 'offset'];
+
+        $closeResults = $this->cloneWithout($without)
+            ->cloneWithoutBindings($this->unions ? ['order'] : ['select', 'order'])
+            ->setAggregate('count', $this->withoutSelectAliases($columns))
+            ->get()->all();
+
+        $this->aqb = new QueryBuilder();
+
+        return $closeResults;
+    }
+
+    /**
      * Get the SQL representation of the query.
      *
      * @return string
@@ -181,12 +201,16 @@ class Builder extends IlluminateQueryBuilder
             ->setAggregate($function, $columns)
             ->get($columns);
 
+        $this->aqb = new QueryBuilder();
+
         if (! $results->isEmpty()) {
             return array_change_key_case((array) $results[0])['aggregate'];
         }
 
         return false;
     }
+
+
 
     /**
      * Add a basic where clause to the query.
