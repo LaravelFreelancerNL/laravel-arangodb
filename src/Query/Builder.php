@@ -210,8 +210,6 @@ class Builder extends IlluminateQueryBuilder
         return false;
     }
 
-
-
     /**
      * Add a basic where clause to the query.
      *
