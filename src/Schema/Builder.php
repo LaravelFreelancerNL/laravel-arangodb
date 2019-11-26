@@ -2,6 +2,8 @@
 
 namespace LaravelFreelancerNL\Aranguent\Schema;
 
+use ArangoDBClient\ClientException;
+use ArangoDBClient\Exception;
 use ArangoDBClient\View;
 use Closure;
 use Illuminate\Support\Fluent;
@@ -136,7 +138,7 @@ class Builder
      *
      * @param string $collection
      * @return void
-     * @throws \ArangoDBClient\Exception
+     * @throws Exception
      */
     public function drop($collection)
     {
@@ -164,7 +166,7 @@ class Builder
 
     /**
      * @param $collection
-     * @throws \ArangoDBClient\Exception
+     * @throws Exception
      */
     public function dropIfExists($collection)
     {
@@ -178,8 +180,8 @@ class Builder
      *
      * @param array $options
      * @return array
-     * @throws \ArangoDBClient\ClientException
-     * @throws \ArangoDBClient\Exception
+     * @throws ClientException
+     * @throws Exception
      */
     protected function getAllCollections(array $options = [])
     {
@@ -196,8 +198,8 @@ class Builder
      *
      * @param array $options
      * @return array
-     * @throws \ArangoDBClient\ClientException
-     * @throws \ArangoDBClient\Exception
+     * @throws ClientException
+     * @throws Exception
      */
     protected function getAllTables(array $options = [])
     {
@@ -207,7 +209,7 @@ class Builder
     /**
      * @param string $collection
      * @return \ArangoDBClient\Collection
-     * @throws \ArangoDBClient\Exception
+     * @throws Exception
      */
     protected function getCollection($collection)
     {
@@ -220,7 +222,7 @@ class Builder
      * @param $from
      * @param $to
      * @return bool
-     * @throws \ArangoDBClient\Exception
+     * @throws Exception
      */
     public function rename($from, $to)
     {
@@ -232,7 +234,7 @@ class Builder
      *
      * @param string $collection
      * @return bool
-     * @throws \ArangoDBClient\Exception
+     * @throws Exception
      */
     public function hasCollection(string $collection)
     {
@@ -244,7 +246,7 @@ class Builder
      *
      * @param string $table
      * @return bool
-     * @throws \ArangoDBClient\Exception
+     * @throws Exception
      */
     public function hasTable($table)
     {
@@ -325,8 +327,8 @@ class Builder
      * @param string $name
      * @param array $properties
      * @param string $type
-     * @throws \ArangoDBClient\ClientException
-     * @throws \ArangoDBClient\Exception
+     * @throws ClientException
+     * @throws Exception
      */
     public function createView($name, array $properties, $type = 'arangosearch')
     {
@@ -339,7 +341,7 @@ class Builder
     /**
      * @param string $name
      * @return mixed
-     * @throws \ArangoDBClient\Exception
+     * @throws Exception
      */
     public function getView(string $name)
     {
@@ -349,8 +351,8 @@ class Builder
     /**
      * @param string $name
      * @param array $properties
-     * @throws \ArangoDBClient\ClientException
-     * @throws \ArangoDBClient\Exception
+     * @throws ClientException
+     * @throws Exception
      */
     public function editView($name, array $properties)
     {
@@ -360,7 +362,7 @@ class Builder
     /**
      * @param string $from
      * @param string $to
-     * @throws \ArangoDBClient\Exception
+     * @throws Exception
      */
     public function renameView(string $from, string $to)
     {
@@ -369,8 +371,8 @@ class Builder
 
     /**
      * @param string $name
-     * @throws \ArangoDBClient\ClientException
-     * @throws \ArangoDBClient\Exception
+     * @throws ClientException
+     * @throws Exception
      */
     public function dropView(string $name)
     {

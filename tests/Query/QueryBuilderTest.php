@@ -1,5 +1,8 @@
 <?php
 
+use Illuminate\Database\ConnectionInterface;
+use Illuminate\Pagination\AbstractPaginator as Paginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 use LaravelFreelancerNL\Aranguent\Connection as Connection;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 use LaravelFreelancerNL\Aranguent\Query\Grammar;
@@ -191,5 +194,44 @@ class QueryBuilderTest extends TestCase
 
         $results = $builder->from('users')->count();
         $this->assertEquals(1, $results);
+    }
+
+    public function testPaginate()
+    {
+        $perPage = 16;
+        $columns = ['test'];
+        $pageName = 'page-name';
+        $page = 1;
+        $builder = $this->getMockQueryBuilder();
+        $path = 'http://foo.bar?page=3';
+
+        $results = collect([['test' => 'foo'], ['test' => 'bar']]);
+
+        $builder->shouldReceive('getCountForPagination')->once()->andReturn(2);
+        $builder->shouldReceive('forPage')->once()->with($page, $perPage)->andReturnSelf();
+        $builder->shouldReceive('get')->once()->andReturn($results);
+
+        Paginator::currentPathResolver(function () use ($path) {
+            return $path;
+        });
+
+        $result = $builder->paginate($perPage, $columns, $pageName, $page);
+
+        $this->assertEquals(new LengthAwarePaginator($results, 2, $perPage, $page, [
+            'path' => $path,
+            'pageName' => $pageName,
+        ]), $result);
+    }
+
+    /**
+     * @return m\MockInterface
+     */
+    protected function getMockQueryBuilder()
+    {
+        return m::mock(Builder::class, [
+            m::mock(ConnectionInterface::class),
+            new Grammar,
+            m::mock(Processor::class),
+        ])->makePartial();
     }
 }

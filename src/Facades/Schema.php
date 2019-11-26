@@ -14,7 +14,7 @@ use LaravelFreelancerNL\Aranguent\Schema\Builder;
  * @method static Builder table(string $table, \Closure $callback)
  *
  * View handling:
- * @method static Builder createView($name, array $properties, $type = 'ArangoSearch')
+ * @method static Builder createView($name, array $properties, $type = 'arangosearch')
  * @method static Builder getView(string $name)
  * @method static Builder editView($name, array $properties)
  * @method static Builder renameView(string $from, string $to)

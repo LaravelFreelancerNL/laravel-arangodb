@@ -180,8 +180,9 @@ class Builder extends IlluminateQueryBuilder
         $results = $this->cloneWithout($this->unions ? [] : ['columns'])
             ->setAggregate($function, $columns)
             ->get($columns);
+
         if (! $results->isEmpty()) {
-            return $results[0];
+            return array_change_key_case((array) $results[0])['aggregate'];
         }
 
         return false;

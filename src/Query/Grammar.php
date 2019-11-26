@@ -434,13 +434,6 @@ class Grammar extends FluentAqlGrammar
      */
     protected function compileColumns(Builder $builder, array $columns) : Builder
     {
-        // If the query is actually performing an aggregating select, we will let that
-        // compiler handle the building of the select clauses, as it will need some
-        // more syntax that is best handled by that function to keep things neat.
-//        if (! is_null($builder->aggregate)) {
-//            return;
-//        }
-
         $values = [];
 
         $doc = $builder->getAlias($builder->from);
@@ -450,7 +443,7 @@ class Grammar extends FluentAqlGrammar
             }
         }
         if ($builder->aggregate !== null) {
-            $values = 'aggregateResult';
+            $values = ["aggregate" => "aggregateResult"];
         }
         if (empty($values)) {
             $values = $doc;
