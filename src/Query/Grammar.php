@@ -546,6 +546,5 @@ class Grammar extends FluentAqlGrammar
         }
 
         return $alias.'.'.$value;
-
     }
 }
