@@ -246,7 +246,7 @@ class Builder extends IlluminateQueryBuilder
         // assume that the developer is just short-cutting the '=' operators and
         // we will set the operators to '=' and set the values appropriately.
         if ($this->invalidOperator($operator)) {
-            [$value, $operator] = [$operator, '='];
+            [$value, $operator] = [$operator, '=='];
         }
 
         // If the value is a Closure, it means the developer is performing an entire
@@ -313,7 +313,7 @@ class Builder extends IlluminateQueryBuilder
     protected function invalidOperator($operator)
     {
         return ! in_array(strtolower($operator), $this->operators, true) &&
-            ! isset($this->grammar->getOperators()[strtolower($operator)]);
+            ! isset($this->grammar->getOperators()[strtoupper($operator)]);
     }
 
     /**

@@ -140,6 +140,14 @@ class QueryBuilderTest extends TestCase
         $this->assertEquals([0 => 1], $builder->getBindings());
     }
 
+    public function testWhereIn()
+    {
+        $builder = $this->getBuilder();
+        $builder->select()->from('users')->where('country', 'IN', ["The Netherlands", "Germany", "Great-Britain"]);
+        $this->assertSame('FOR userDoc IN users FILTER userDoc.country IN [@1_1,"Germany","Great-Britain"] RETURN userDoc', $builder->toSql());
+
+    }
+
     public function testOrderBys()
     {
         $builder = $this->getBuilder();
