@@ -9,7 +9,7 @@ use Mockery as M;
 
 class SchemaBlueprintTest extends TestCase
 {
-    public function tearDown() : void
+    public function tearDown(): void
     {
         M::close();
     }
@@ -46,8 +46,8 @@ class SchemaBlueprintTest extends TestCase
     public function testIndexNamesOnlyContainsAlphaNumericCharacters()
     {
         Schema::table('characters', function (Blueprint $collection) {
-           $indexName = $collection->createIndexName('persistent', ['addresses[*]']);
-           $this->assertEquals('characters_addresses_array_persistent', $indexName);
+            $indexName = $collection->createIndexName('persistent', ['addresses[*]']);
+            $this->assertEquals('characters_addresses_array_persistent', $indexName);
         });
     }
 
@@ -61,7 +61,6 @@ class SchemaBlueprintTest extends TestCase
         });
     }
 
-    
     public function testDropIndexWithArray()
     {
         Schema::table('characters', function (Blueprint $collection) {
@@ -77,5 +76,4 @@ class SchemaBlueprintTest extends TestCase
 
         $collectionHandler->getIndex('characters', 'characters_addresses_array_persistent');
     }
-
 }
