@@ -227,7 +227,7 @@ trait Indexes
     public function createIndexName($type, array $columns)
     {
         $index = strtolower($this->prefix.$this->table.'_'.implode('_', $columns).'_'.$type);
-
-        return str_replace(['-', '.'], '_', $index);
+        $index = preg_replace("/\[\*+\]+/", '_array', $index);
+        return preg_replace("/[^A-Za-z0-9]+/", '_', $index);
     }
 }

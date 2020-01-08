@@ -95,14 +95,14 @@ class Blueprint
      * Create a new schema blueprint.
      *
      * Blueprint constructor.
-     * @param string $collection
+     * @param string $table
      * @param CollectionHandler $collectionHandler
      * @param Closure|null $callback
      * @param string $prefix
      */
-    public function __construct($collection, $collectionHandler, Closure $callback = null, $prefix = '')
+    public function __construct($table, $collectionHandler, Closure $callback = null, $prefix = '')
     {
-        $this->table = $collection;
+        $this->table = $table;
 
         $this->collectionHandler = $collectionHandler;
 
