@@ -432,7 +432,7 @@ class Grammar extends FluentAqlGrammar
      * @param array $columns
      * @return Builder
      */
-    protected function compileColumns(Builder $builder, array $columns) : Builder
+    protected function compileColumns(Builder $builder, array $columns): Builder
     {
         $values = [];
 
@@ -537,7 +537,7 @@ class Grammar extends FluentAqlGrammar
      * @param string $value
      * @return Builder
      */
-    protected function prefixAlias(Builder $builder, string $target, string $value) : string
+    protected function prefixAlias(Builder $builder, string $target, string $value): string
     {
         $alias = $builder->getAlias($target);
 

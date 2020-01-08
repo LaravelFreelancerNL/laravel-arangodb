@@ -20,7 +20,7 @@ class AranguentConvertMigrationsCommandTest extends TestCase
 
     protected $conversionMigration;
 
-    protected function setUp() : void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -30,7 +30,7 @@ class AranguentConvertMigrationsCommandTest extends TestCase
         copy($stub, $this->conversionMigration);
     }
 
-    public function tearDown() : void
+    public function tearDown(): void
     {
         M::close();
 

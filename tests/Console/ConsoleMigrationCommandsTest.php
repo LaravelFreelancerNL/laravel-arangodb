@@ -13,7 +13,7 @@ class ConsoleMigrationCommandsTest extends TestCase
 
     protected $migrationPath;
 
-    protected function setUp() : void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -25,7 +25,7 @@ class ConsoleMigrationCommandsTest extends TestCase
         array_map('unlink', array_filter((array) glob($this->laravelMigrationPath.'/*')));
     }
 
-    public function tearDown() : void
+    public function tearDown(): void
     {
         M::close();
     }
