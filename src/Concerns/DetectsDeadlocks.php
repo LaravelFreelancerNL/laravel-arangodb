@@ -16,13 +16,12 @@ trait DetectsDeadlocks
      * 1200 - ERROR_ARANGO_CONFLICT (write-write conflict)
      * 1302 - ERROR_ARANGO_TRY_AGAIN
      * 1303 - ERROR_ARANGO_BUSY
-
+     *
      * @param  \Exception  $e
      * @return bool
      */
     protected function causedByDeadlock(Exception $e)
     {
-
         $code = $e->getCode();
 
         return in_array($code, [
