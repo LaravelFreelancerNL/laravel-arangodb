@@ -11,7 +11,7 @@ trait DetectsLostConnections
      *
      * https://www.arangodb.com/docs/stable/appendix-error-codes.html
      * 30 - ERROR_SHUTTING_DOWN
-     * 401 - ERROR_HTTP_UNAUTHORIZED 
+     * 401 - ERROR_HTTP_UNAUTHORIZED
      * 403 - ERROR_HTTP_FORBIDDEN
      * 404 - ERROR_HTTP_NOT_FOUND
      * 405 - ERROR_HTTP_METHOD_NOT_ALLOWED
@@ -22,14 +22,12 @@ trait DetectsLostConnections
      * 504 - ERROR_HTTP_GATEWAY_TIMEOUT
      * 1464 - ERROR_CLUSTER_SHARD_GONE
      * 1465 - ERROR_CLUSTER_CONNECTION_LOST
-     * 
+     *
      * @param  \Throwable  $e
      * @return bool
      */
     protected function causedByLostConnection(Throwable $e)
     {
-
-
         $code = $e->getCode();
 
         return in_array($code, [
