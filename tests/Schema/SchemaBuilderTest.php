@@ -12,7 +12,7 @@ use Mockery as M;
 
 class SchemaBuilderTest extends TestCase
 {
-    public function tearDown() : void
+    public function tearDown(): void
     {
         M::close();
     }

@@ -111,7 +111,7 @@ class Builder extends IlluminateQueryBuilder
      * @return bool
      * @throws BindException
      */
-    public function insert(array $values) : bool
+    public function insert(array $values): bool
     {
         $response = $this->getConnection()->insert($this->grammar->compileInsert($this, $values)->aqb);
         $this->aqb = new QueryBuilder();
@@ -178,12 +178,12 @@ class Builder extends IlluminateQueryBuilder
         return $response;
     }
 
-    public function registerAlias(string $table, string $alias) : void
+    public function registerAlias(string $table, string $alias): void
     {
         $this->aliasRegistry[$table] = $alias;
     }
 
-    public function getAlias(string $table) : string
+    public function getAlias(string $table): string
     {
         return $this->aliasRegistry[$table];
     }
