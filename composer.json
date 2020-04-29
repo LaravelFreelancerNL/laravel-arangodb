@@ -19,7 +19,7 @@
   ],
   "require": {
     "php": ">=7.2",
-    "laravel/framework": "6.*",
+    "laravel/framework": "^6.0 || ^7.0",
     "triagens/arangodb": "^3.5",
     "laravel-freelancer-nl/aql-query-builder": "dev-master",
     "ext-json": "*"
