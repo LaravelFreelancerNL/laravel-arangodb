@@ -8,17 +8,26 @@ use Illuminate\Filesystem\Filesystem;
 
 class MigrationCreator extends IlluminateMigrationCreator
 {
+
+    /**
+     * The filesystem instance.
+     *
+     * @var \Illuminate\Filesystem\Filesystem
+     */
+    protected $files;
+
     /**
      * Create a new migration creator instance.
      *
      * @param Filesystem $files
+     * @param  string|null  $customStubPath
      * @return void
      */
-    public function __construct(Filesystem $files)
+    public function __construct(Filesystem $files, $customStubPath = null)
     {
         $this->files = $files;
 
-        parent::__construct($files);
+        parent::__construct($files, $customStubPath);
     }
 
     /**
