@@ -14,7 +14,7 @@ trait DetectsDeadlocks
      */
     protected function causedByDeadlock(Exception $e)
     {
-        // https://docs.arangodb.com/3.3/Manual/Appendix/ErrorCodes.html
+        // https://www.arangodb.com/docs/stable/appendix-error-codes.html
         // 18 ERROR_LOCK_TIMEOUT
         // 28 ERROR_LOCKED
         // 29 ERROR_DEADLOCK
@@ -22,7 +22,7 @@ trait DetectsDeadlocks
         // 1302 - ERROR_ARANGO_TRY_AGAIN
         // 1303 - ERROR_ARANGO_BUSY
 
-        $code = $e->getServerCode();
+        $code = $e->getCode();
 
         return in_array($code, [
             18,
