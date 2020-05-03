@@ -19,14 +19,14 @@
   ],
   "require": {
     "php": ">=7.2",
-    "laravel/framework": "6.*",
+    "laravel/framework": "7.*",
     "triagens/arangodb": "^3.5",
     "laravel-freelancer-nl/aql-query-builder": "dev-master",
     "ext-json": "*"
   },
   "require-dev": {
-    "orchestra/testbench": "4.*",
-    "phpunit/phpunit": "8.*",
+    "orchestra/testbench": "5.*",
+    "phpunit/phpunit": "^8.4|^9.0",
     "mockery/mockery": "^1.2"
   },
   "repositories": [ ],
