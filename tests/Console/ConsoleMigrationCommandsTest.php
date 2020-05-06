@@ -1,7 +1,8 @@
 <?php
+namespace Tests\Console;
 
-use LaravelFreelancerNL\Aranguent\Tests\TestCase;
 use Mockery as M;
+use Tests\TestCase;
 
 class ConsoleMigrationCommandsTest extends TestCase
 {

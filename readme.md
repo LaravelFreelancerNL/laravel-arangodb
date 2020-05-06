@@ -30,6 +30,7 @@ You may use composer to install Aranguent:
 ### Version compatibility
 | Laravel  | ArangoDB            | Aranguent         |
 | :------- | :------------------ | :---------------- |
+| 7.x.x    | 3.6.x               | 0.x.x             |
 | 6.x.x    | 3.5.x               | 0.x.x             |
 
 

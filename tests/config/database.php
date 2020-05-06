@@ -1,6 +1,5 @@
 <?php
-
-namespace LaravelFreelancerNL\Aranguent\test;
+namespace Tests\Config;
 
 use ArangoDBClient\ConnectionOptions as ArangoConnectionOptions;
 
@@ -9,8 +8,8 @@ return [
         'arangodb' => [
             'name'       => 'arangodb',
             'driver'     => 'arangodb',
-            ArangoConnectionOptions::OPTION_ENDPOINT => 'tcp://arangodb:8529',
-            ArangoConnectionOptions::OPTION_AUTH_USER => '',
+            ArangoConnectionOptions::OPTION_ENDPOINT => 'tcp://localhost:8529',
+            ArangoConnectionOptions::OPTION_AUTH_USER => 'root',
             ArangoConnectionOptions::OPTION_AUTH_PASSWD => '',
             ArangoConnectionOptions::OPTION_CONNECTION => 'Keep-Alive',
         ],
