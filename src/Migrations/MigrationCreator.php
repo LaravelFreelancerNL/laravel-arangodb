@@ -14,11 +14,11 @@ class MigrationCreator extends IlluminateMigrationCreator
      * @param Filesystem $files
      * @return void
      */
-    public function __construct(Filesystem $files)
+    public function __construct(Filesystem $files, $customStubPath = null)
     {
         $this->files = $files;
 
-        parent::__construct($files);
+        parent::__construct($files, $customStubPath);
     }
 
     /**
