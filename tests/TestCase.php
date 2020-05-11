@@ -1,6 +1,6 @@
 <?php
 
-namespace LaravelFreelancerNL\Aranguent\Tests;
+namespace Tests;
 
 use ArangoDBClient\Database;
 use Illuminate\Support\Facades\DB;

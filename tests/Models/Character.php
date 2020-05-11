@@ -1,6 +1,6 @@
 <?php
 
-namespace LaravelFreelancerNL\Aranguent\Tests\models;
+namespace Tests\Models;
 
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 

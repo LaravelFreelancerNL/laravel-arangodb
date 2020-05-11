@@ -1,8 +1,8 @@
 <?php
 
+namespace Tests;
+
 use Illuminate\Support\Fluent as IlluminateFluent;
-use LaravelFreelancerNL\Aranguent\Connection;
-use LaravelFreelancerNL\Aranguent\Tests\TestCase;
 use Mockery as M;
 
 class ConnectionTest extends TestCase
@@ -192,7 +192,7 @@ class ConnectionTest extends TestCase
 
         $result = $this->connection->addQueryToTransaction($query, $bindings);
 
-        $this->assertInstanceOf(\Illuminate\Support\Fluent::class, $result);
+        $this->assertInstanceOf(IlluminateFluent::class, $result);
         //Assert that unbound collection are found
         $this->assertContains('users', $result->collections['read']);
         $this->assertContains('circles', $result->collections['read']);
@@ -236,13 +236,5 @@ class ConnectionTest extends TestCase
 
         $this->assertIsArray($explanation);
         $this->assertArrayHasKey('plan', $explanation);
-    }
-}
-
-class MockArangoConnection extends ArangoDBClient\Connection
-{
-    public function __construct(array $options = [])
-    {
-        //
     }
 }
