@@ -8,11 +8,12 @@ services:
 php:
   - 7.2
   - 7.3
+  - 7.4
 
 # Note: The ArangoDB version includes the colon (:), that way we can test pre-releases (i.e. '-preview:3.4.0-rc.4a').
 env:
-  - ORCHESTRA_VERSION=4.0 ARANGODB_VERSION=":3.5.0"
-  - ORCHESTRA_VERSION=4.0 ARANGODB_VERSION=":latest"
+  - ORCHESTRA_VERSION=4.0 ARANGODB_VERSION=":3.5.0" ARANGODB_ENDPOINT="tcp://arangodb:8529"
+  - ORCHESTRA_VERSION=4.0 ARANGODB_VERSION=":latest" ARANGODB_ENDPOINT="tcp://arangodb:8529"
 
 addons:
   hosts:
