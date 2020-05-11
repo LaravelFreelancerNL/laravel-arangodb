@@ -1,4 +1,5 @@
 <?php
+
 namespace Tests\Eloquent;
 
 use Illuminate\Support\Carbon;
@@ -9,9 +10,9 @@ use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 use LaravelFreelancerNL\Aranguent\Query\Grammar;
 use LaravelFreelancerNL\Aranguent\Query\Processor;
+use Mockery as M;
 use Tests\models\Character;
 use Tests\TestCase;
-use Mockery as M;
 
 class ModelTest extends TestCase
 {
