@@ -1,4 +1,5 @@
 <?php
+
 namespace Tests\Eloquent;
 
 use Tests\TestCase;

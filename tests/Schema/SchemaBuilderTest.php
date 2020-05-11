@@ -7,8 +7,8 @@ use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
 use LaravelFreelancerNL\Aranguent\Schema\Builder;
 use LaravelFreelancerNL\Aranguent\Schema\Grammar;
-use Tests\TestCase;
 use Mockery as M;
+use Tests\TestCase;
 
 class SchemaBuilderTest extends TestCase
 {

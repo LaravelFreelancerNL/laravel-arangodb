@@ -4,8 +4,8 @@ namespace Tests\Schema;
 
 use Illuminate\Support\Fluent;
 use LaravelFreelancerNL\Aranguent\Schema\Grammar;
-use Tests\TestCase;
 use Mockery as M;
+use Tests\TestCase;
 
 class SchemaGrammarTest extends TestCase
 {

@@ -4,8 +4,8 @@ namespace Tests\Schema;
 
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
-use Tests\TestCase;
 use Mockery as M;
+use Tests\TestCase;
 
 class SchemaBlueprintTest extends TestCase
 {
