@@ -18,7 +18,7 @@ class MigrationCreator extends IlluminateMigrationCreator
     {
         $this->files = $files;
 
-        parent::__construct($files);
+        parent::__construct($files, './stubs');
     }
 
     /**

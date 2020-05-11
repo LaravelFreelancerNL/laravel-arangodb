@@ -8,6 +8,8 @@ use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 
 abstract class Model extends IlluminateModel
 {
+    use Concerns\HasRelationships;
+
     /**
      * The primary key for the model.
      *
@@ -59,4 +61,15 @@ abstract class Model extends IlluminateModel
 
         return $tableReferer.'.'.$column;
     }
+
+    /**
+     * Get the default foreign key name for the model.
+     *
+     * @return string
+     */
+    public function getForeignKey()
+    {
+        return Str::snake(class_basename($this)).$this->getKeyName();
+    }
+
 }

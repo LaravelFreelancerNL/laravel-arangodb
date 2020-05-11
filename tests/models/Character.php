@@ -15,4 +15,6 @@ class Character extends Model
         'age',
         'traits',
     ];
+
+
 }
