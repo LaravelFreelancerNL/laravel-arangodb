@@ -1,6 +1,8 @@
 <?php
 
-use LaravelFreelancerNL\Aranguent\Tests\TestCase;
+namespace Tests\Eloquent;
+
+use Tests\TestCase;
 
 class EloquentBuilderTest extends TestCase
 {

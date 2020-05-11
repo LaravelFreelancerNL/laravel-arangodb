@@ -1,14 +1,14 @@
 <?php
 
-namespace Illuminate\Tests\Database;
+namespace Tests\Schema;
 
 use Illuminate\Support\Collection;
 use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
 use LaravelFreelancerNL\Aranguent\Schema\Builder;
 use LaravelFreelancerNL\Aranguent\Schema\Grammar;
-use LaravelFreelancerNL\Aranguent\Tests\TestCase;
 use Mockery as M;
+use Tests\TestCase;
 
 class SchemaBuilderTest extends TestCase
 {

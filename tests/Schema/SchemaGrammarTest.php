@@ -1,11 +1,11 @@
 <?php
 
-namespace LaravelFreelancerNL\Aranguent\Tests\Schema;
+namespace Tests\Schema;
 
 use Illuminate\Support\Fluent;
 use LaravelFreelancerNL\Aranguent\Schema\Grammar;
-use LaravelFreelancerNL\Aranguent\Tests\TestCase;
 use Mockery as M;
+use Tests\TestCase;
 
 class SchemaGrammarTest extends TestCase
 {

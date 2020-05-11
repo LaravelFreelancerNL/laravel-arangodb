@@ -1,14 +1,16 @@
 <?php
 
+namespace Tests\Console;
+
 use Illuminate\Database\Migrations\Migrator;
 use Illuminate\Foundation\Application;
 use LaravelFreelancerNL\Aranguent\Console\Migrations\AranguentConvertMigrationsCommand;
-use LaravelFreelancerNL\Aranguent\Tests\TestCase;
 use Mockery as M;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
+use Tests\TestCase;
 
-class AranguentConvertMigrationsCommandTest extends TestCase
+class ConsoleAranguentConvertMigrationsCommandTest extends TestCase
 {
     protected $packageMigrationPath;
 

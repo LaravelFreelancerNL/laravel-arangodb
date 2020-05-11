@@ -1,5 +1,7 @@
 <?php
 
+namespace Tests\Query;
+
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Pagination\AbstractPaginator as Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -7,9 +9,9 @@ use LaravelFreelancerNL\Aranguent\Connection as Connection;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 use LaravelFreelancerNL\Aranguent\Query\Grammar;
 use LaravelFreelancerNL\Aranguent\Query\Processor;
-use LaravelFreelancerNL\Aranguent\Tests\TestCase;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder as FluentAQL;
 use Mockery as m;
+use Tests\TestCase;
 
 class QueryBuilderTest extends TestCase
 {

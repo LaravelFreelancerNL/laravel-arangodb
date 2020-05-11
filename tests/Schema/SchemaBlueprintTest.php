@@ -1,11 +1,11 @@
 <?php
 
-namespace Illuminate\Tests\Database;
+namespace Tests\Schema;
 
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
-use LaravelFreelancerNL\Aranguent\Tests\TestCase;
 use Mockery as M;
+use Tests\TestCase;
 
 class SchemaBlueprintTest extends TestCase
 {
