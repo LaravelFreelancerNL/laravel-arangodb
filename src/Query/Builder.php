@@ -111,7 +111,7 @@ class Builder extends IlluminateQueryBuilder
      * @return bool
      * @throws BindException
      */
-    public function insert(array $values): bool
+    public function insert(array $values) : bool
     {
         $response = $this->getConnection()->insert($this->grammar->compileInsert($this, $values)->aqb);
         $this->aqb = new QueryBuilder();
@@ -131,8 +131,32 @@ class Builder extends IlluminateQueryBuilder
     {
         $response = $this->getConnection()->execute($this->grammar->compileInsertGetId($this, $values, $sequence)->aqb);
         $this->aqb = new QueryBuilder();
-
         return (is_array($response)) ? end($response) : $response;
+    }
+
+    /**
+     * Set the table which the query is targeting.
+     *
+     * @param  Closure|Builder|string  $table
+     * @param  string|null  $as
+     * @return $this
+     */
+    public function from($table, $as = null)
+    {
+        if ($this->isQueryable($table)) {
+            return $this->fromSub($table, $as);
+        }
+
+        if (stripos($table, ' as ') !== false) {
+            $parts = explode(' as ', $table);
+            $table = $parts[0];
+            $as = $parts[1];
+            $this->registerAlias($table, $as);
+        }
+
+        $this->from = $table;
+
+        return $this;
     }
 
     /**
@@ -178,14 +202,27 @@ class Builder extends IlluminateQueryBuilder
         return $response;
     }
 
-    public function registerAlias(string $table, string $alias): void
+    /**
+     * @param string $table
+     * @param string $alias
+     */
+    public function registerAlias(string $table, string $alias) : void
     {
-        $this->aliasRegistry[$table] = $alias;
+        if (! isset($this->aliasRegistry[$table])) {
+            $this->aliasRegistry[$table] = $alias;
+        }
     }
 
-    public function getAlias(string $table): string
+    /**
+     * @param string $table
+     * @return string
+     */
+    public function getAlias(string $table) : ?string
     {
-        return $this->aliasRegistry[$table];
+        if (isset($this->aliasRegistry[$table])) {
+            return $this->aliasRegistry[$table];
+        }
+        return null;
     }
 
     /**
@@ -209,6 +246,8 @@ class Builder extends IlluminateQueryBuilder
 
         return false;
     }
+
+
 
     /**
      * Add a basic where clause to the query.
@@ -246,7 +285,7 @@ class Builder extends IlluminateQueryBuilder
         // assume that the developer is just short-cutting the '=' operators and
         // we will set the operators to '=' and set the values appropriately.
         if ($this->invalidOperator($operator)) {
-            [$value, $operator] = [$operator, '=='];
+            [$value, $operator] = [$operator, '='];
         }
 
         // If the value is a Closure, it means the developer is performing an entire
@@ -313,7 +352,7 @@ class Builder extends IlluminateQueryBuilder
     protected function invalidOperator($operator)
     {
         return ! in_array(strtolower($operator), $this->operators, true) &&
-            ! isset($this->grammar->getOperators()[strtoupper($operator)]);
+            ! isset($this->grammar->getOperators()[strtolower($operator)]);
     }
 
     /**

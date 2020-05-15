@@ -152,6 +152,49 @@ class ModelTest extends TestCase
 
         $this->assertSame('stubDoc.column', $model->qualifyColumn('column'));
     }
+
+    public function testHasOneCreatesProperRelation()
+    {
+        $model = new EloquentModelStub;
+        $this->addMockConnection($model);
+        $relation = $model->hasOne(EloquentModelSaveStub::class);
+        $this->assertSame('save_stubDoc.eloquent_model_stub_key', $relation->getQualifiedForeignKeyName());
+
+        $model = new EloquentModelStub;
+        $this->addMockConnection($model);
+        $relation = $model->hasOne(EloquentModelSaveStub::class, 'foo');
+        $this->assertSame('save_stubDoc.foo', $relation->getQualifiedForeignKeyName());
+        $this->assertSame($model, $relation->getParent());
+        $this->assertInstanceOf(EloquentModelSaveStub::class, $relation->getQuery()->getModel());
+    }
+
+    public function testBelongsToCreatesProperRelation()
+    {
+        $model = new EloquentModelStub;
+        $this->addMockConnection($model);
+        $relation = $model->belongsToStub();
+        $this->assertSame('belongs_to_stub_key', $relation->getForeignKeyName());
+        $this->assertSame($model, $relation->getParent());
+        $this->assertInstanceOf(EloquentModelSaveStub::class, $relation->getQuery()->getModel());
+
+        $model = new EloquentModelStub;
+        $this->addMockConnection($model);
+        $relation = $model->belongsToExplicitKeyStub();
+        $this->assertSame('foo', $relation->getForeignKeyName());
+    }
+
+
+    protected function addMockConnection($model)
+    {
+        $model->setConnectionResolver($resolver = m::mock(ConnectionResolverInterface::class));
+        $resolver->shouldReceive('connection')->andReturn($connection = m::mock(Connection::class));
+        $connection->shouldReceive('getQueryGrammar')->andReturn($grammar = m::mock(Grammar::class));
+        $connection->shouldReceive('getPostProcessor')->andReturn($processor = m::mock(Processor::class));
+        $connection->shouldReceive('query')->andReturnUsing(function () use ($connection, $grammar, $processor) {
+            return new QueryBuilder($connection, $grammar, $processor);
+        });
+    }
+
 }
 
 class EloquentModelStub extends Model
@@ -251,7 +294,7 @@ class EloquentModelStub extends Model
 class EloquentModelSaveStub extends Model
 {
     protected $table = 'save_stub';
-    protected $guarded = ['id'];
+    protected $guarded = ['_key'];
 
     public function save(array $options = [])
     {
