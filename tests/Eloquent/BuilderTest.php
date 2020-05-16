@@ -4,7 +4,7 @@ namespace Tests\Eloquent;
 
 use Tests\TestCase;
 
-class EloquentBuilderTest extends TestCase
+class BuilderTest extends TestCase
 {
     public function test()
     {

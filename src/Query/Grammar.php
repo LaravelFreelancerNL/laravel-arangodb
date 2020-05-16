@@ -60,6 +60,10 @@ class Grammar extends FluentAqlGrammar
         'not regexp' => '!~',
     ];
 
+    protected $whereTypeOperators = [
+        'In' => 'IN',
+        'NotIn' => 'NOT IN',
+    ];
     /**
      * Get the format for database stored dates.
      *
@@ -243,21 +247,29 @@ class Grammar extends FluentAqlGrammar
     protected function compileWheresToArray($builder)
     {
         $result = collect($builder->wheres)->map(function ($where) use ($builder) {
-            // ArangoDB uses a double '=' for comparison
-            if ($where['operator'] == '=') {
-                $where['operator'] = '==';
+
+            if (isset($where['operator'])) {
+                $where['operator'] = $this->translateOperator($where['operator']);
+            } else {
+                $where['operator'] = $this->getOperatorByWhereType($where['type']);
             }
-            $where['operator'] = $this->translateOperator($where['operator']);
 
             //Prefix table alias on the column
             $where['column'] = $this->prefixAlias($builder, $builder->from, $where['column']);
 
-            return [
-                $where['column'],
-                $where['operator'],
-                $where['value'],
-                $where['boolean'],
-            ];
+            $cleanWhere = [];
+            $cleanWhere[0] = $where['column'];
+            $cleanWhere[1] = $where['operator'];
+            $cleanWhere[2] = null;
+            if (isset($where['value'])) {
+                $cleanWhere[2] = $where['value'];
+            }
+            if (isset($where['values'])) {
+                $cleanWhere[2] = $where['values'];
+            }
+            $cleanWhere[3] = $where['boolean'];
+
+            return $cleanWhere;
         })->all();
 
         return $result;
@@ -531,6 +543,15 @@ class Grammar extends FluentAqlGrammar
         return $operator;
     }
 
+    protected function getOperatorByWhereType($type)
+    {
+        if (isset($this->whereTypeOperators[$type])) {
+            return $this->whereTypeOperators[$type];
+        }
+        return '==';
+    }
+
+
     /**
      * @param Builder $builder
      * @param string $target
@@ -547,4 +568,5 @@ class Grammar extends FluentAqlGrammar
 
         return $alias.'.'.$value;
     }
+
 }

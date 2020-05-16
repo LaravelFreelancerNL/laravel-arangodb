@@ -10,6 +10,7 @@ abstract class Model extends IlluminateModel
 {
     use Concerns\HasRelationships;
 
+
     /**
      * The primary key for the model.
      *

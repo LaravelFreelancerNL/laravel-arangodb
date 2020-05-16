@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\Models;
+namespace Tests\Setup\Models;
 
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 
-class Location extends Model
+class Characteristic extends Model
 {
     //
 }

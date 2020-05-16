@@ -69,6 +69,9 @@ class Builder extends IlluminateQueryBuilder
      */
     protected function runSelect()
     {
+//        if (! isset($this->wheres[0]['value'])) {
+//            dd($this);
+//        }
         $response = $this->connection->select($this->grammar->compileSelect($this)->aqb);
         $this->aqb = new QueryBuilder();
 
@@ -283,9 +286,9 @@ class Builder extends IlluminateQueryBuilder
 
         // If the given operator is not found in the list of valid operators we will
         // assume that the developer is just short-cutting the '=' operators and
-        // we will set the operators to '=' and set the values appropriately.
+        // we will set the operators to '==' and set the values appropriately.
         if ($this->invalidOperator($operator)) {
-            [$value, $operator] = [$operator, '='];
+            [$value, $operator] = [$operator, '=='];
         }
 
         // If the value is a Closure, it means the developer is performing an entire
@@ -352,7 +355,7 @@ class Builder extends IlluminateQueryBuilder
     protected function invalidOperator($operator)
     {
         return ! in_array(strtolower($operator), $this->operators, true) &&
-            ! isset($this->grammar->getOperators()[strtolower($operator)]);
+            ! isset($this->grammar->getOperators()[strtoupper($operator)]);
     }
 
     /**

@@ -7,7 +7,7 @@ use LaravelFreelancerNL\Aranguent\Schema\Grammar;
 use Mockery as M;
 use Tests\TestCase;
 
-class SchemaGrammarTest extends TestCase
+class GrammarTest extends TestCase
 {
     /**
      * @var Grammar

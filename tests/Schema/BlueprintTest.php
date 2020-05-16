@@ -7,7 +7,7 @@ use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
 use Mockery as M;
 use Tests\TestCase;
 
-class SchemaBlueprintTest extends TestCase
+class BlueprintTest extends TestCase
 {
     public function tearDown(): void
     {
