@@ -17,4 +17,5 @@ class Characteristic extends Model
     public function characters()
     {
         return $this->hasMany(Characteristic::class);
-    }}
+    }
+}

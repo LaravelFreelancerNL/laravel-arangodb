@@ -48,5 +48,4 @@ class Location extends Model
     {
         return $this->morphTo();
     }
-
 }

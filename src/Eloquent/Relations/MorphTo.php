@@ -33,9 +33,9 @@ class MorphTo extends IlluminateMorphTo
         $query = $this->replayMacros($instance->newQuery())
             ->mergeConstraintsFrom($this->getQuery())
             ->with(array_merge(
-                       $this->getQuery()->getEagerLoads(),
-                       (array) ($this->morphableEagerLoads[get_class($instance)] ?? [])
-                   ))
+                $this->getQuery()->getEagerLoads(),
+                (array) ($this->morphableEagerLoads[get_class($instance)] ?? [])
+            ))
             ->withCount(
                 (array) ($this->morphableEagerLoadCounts[get_class($instance)] ?? [])
             );
@@ -43,7 +43,8 @@ class MorphTo extends IlluminateMorphTo
         $whereIn = $this->whereInMethod($instance, $ownerKey);
 
         return $query->{$whereIn}(
-            $ownerKey, $this->gatherKeysByType($type)
+            $ownerKey,
+            $this->gatherKeysByType($type)
         )->get();
     }
 }
