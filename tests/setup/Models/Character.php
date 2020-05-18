@@ -13,7 +13,7 @@ class Character extends Model
      *
      * @var array
      */
-    protected $touches  = ['location'];
+    protected $touches = ['location'];
 
     protected $fillable = [
         '_key',
@@ -23,6 +23,7 @@ class Character extends Model
         'age',
         'traits',
         'location_key',
+        'residence_key',
     ];
 
 
@@ -39,5 +40,28 @@ class Character extends Model
         return $this->hasOne(Location::class, 'led_by');
     }
 
+    public function residence()
+    {
+        return $this->belongsTo(Location::class, 'residence_key');
+    }
 
+    public function parents()
+    {
+        return $this->belongsToMany(Character::class, 'ChildOf', '_from', '_to');
+    }
+
+    public function children()
+    {
+        return $this->belongsToMany(Character::class, 'ChildOf', '_to', '_from');
+    }
+
+    public function captured()
+    {
+        return $this->morphMany(Location::class, 'capturable');
+    }
+
+    public function conquered()
+    {
+        return $this->morphOne(Location::class, 'capturable');
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace Tests\Setup\Models;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 
 class Location extends Model
@@ -13,7 +14,11 @@ class Location extends Model
         'name',
         'coordinate',
         'led_by',
+        'capturable_id',
+        'capturable_type',
     ];
+
+
 
     /**
      * Get the last known residence of the character.
@@ -30,4 +35,18 @@ class Location extends Model
     {
         return $this->belongsTo(Character::class, 'led_by');
     }
+
+    /**
+     * @return HasMany
+     */
+    public function inhabitants()
+    {
+        return $this->hasMany(Character::class, 'residence_key');
+    }
+
+    public function capturable()
+    {
+        return $this->morphTo();
+    }
+
 }

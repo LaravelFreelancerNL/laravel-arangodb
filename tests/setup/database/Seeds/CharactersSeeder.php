@@ -1,19 +1,20 @@
 <?php
 
+namespace Tests\Setup\Database\Seeds;
+
 use Illuminate\Database\Seeder;
-use test\models\Character;
+use Tests\Setup\Models\Character;
 
 class CharactersSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Run the database Seeds.
      *
      * @return void
      */
     public function run()
     {
-        $characters = `[
-            { "_key": "NedStark", "name": "Ned", "surname": "Stark", "alive": true, "age": 41, "traits": ["A","H","C","N","P"] },
+        $characters = '[{ "_key": "NedStark", "name": "Ned", "surname": "Stark", "alive": true, "age": 41, "traits": ["A","H","C","N","P"] },
             { "_key": "RobertBaratheon", "name": "Robert", "surname": "Baratheon", "alive": false, "traits": ["A","H","C"] },
             { "_key": "JaimeLannister", "name": "Jaime", "surname": "Lannister", "alive": true, "age": 36, "traits": ["A","F","B"] },
             { "_key": "CatelynStark", "name": "Catelyn", "surname": "Stark", "alive": false, "age": 40, "traits": ["D","H","C"] },
@@ -53,12 +54,14 @@ class CharactersSeeder extends Seeder
             { "_key": "DaarioNaharis", "name": "Daario", "surname": "Naharis", "alive": true, "traits": ["K","P","A"] },
             { "_key": "Missandei", "name": "Missandei", "alive": true, "traits": ["D","L","C","M"] },
             { "_key": "TommenBaratheon", "name": "Tommen", "surname": "Baratheon", "alive": true, "traits": ["I","L","B"] },
-            { "_key": "JaqenHghar", "name": "Jaqen", "surname": "H'ghar", "alive": true, "traits": ["H","F","K"] },
+            { "_key": "JaqenHghar", "name": "Jaqen", "surname": "H\'ghar", "alive": true, "traits": ["H","F","K"] },
             { "_key": "RooseBolton", "name": "Roose", "surname": "Bolton", "alive": true, "traits": ["H","E","F","A"] },
             { "_key": "TheHighSparrow", "name": "The High Sparrow", "alive": true, "traits": ["H","M","F","O"] }
-            ]`;
+            ]';
 
-        $characters = json_decode($characters);
-        Character::insert($characters);
+        $characters = json_decode($characters, JSON_OBJECT_AS_ARRAY);
+        foreach ($characters as $character) {
+            Character::updateOrCreate($character);
+        }
     }
 }

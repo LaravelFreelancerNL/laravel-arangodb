@@ -3,6 +3,7 @@
 namespace Tests;
 
 use ArangoDBClient\Database;
+use Tests\setup\database\Seeds\DatabaseSeeder;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\AranguentServiceProvider;
@@ -65,9 +66,15 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
             '--realpath' => true,
         ])->run();
 
-        $this->artisan('aranguent:model', [
-            'name' => 'Character',
+        $this->artisan('migrate', [
+            '--path' => realpath(__DIR__.'/setup/database/migrations'),
+            '--realpath' => true,
         ])->run();
+
+        // FIXME: Seeding with updateOrCreate requires subqueries
+//        $this->artisan('db:seed', [
+//            '--class' => DatabaseSeeder::class
+//        ])->run();
 
         $this->databaseMigrationRepository = new DatabaseMigrationRepository($this->app['db'], $this->collection);
     }

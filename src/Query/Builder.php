@@ -69,9 +69,6 @@ class Builder extends IlluminateQueryBuilder
      */
     protected function runSelect()
     {
-//        if (! isset($this->wheres[0]['value'])) {
-//            dd($this);
-//        }
         $response = $this->connection->select($this->grammar->compileSelect($this)->aqb);
         $this->aqb = new QueryBuilder();
 
