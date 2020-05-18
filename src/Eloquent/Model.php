@@ -8,6 +8,9 @@ use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 
 abstract class Model extends IlluminateModel
 {
+    use Concerns\HasRelationships;
+
+
     /**
      * The primary key for the model.
      *
@@ -51,12 +54,22 @@ abstract class Model extends IlluminateModel
      */
     public function qualifyColumn($column)
     {
-        $tableReferer = Str::singular($this->getTable()).'Doc';
+        $tableReferer = Str::singular($this->getTable()) . 'Doc';
 
-        if (Str::startsWith($column, $tableReferer.'.')) {
+        if (Str::startsWith($column, $tableReferer . '.')) {
             return $column;
         }
 
-        return $tableReferer.'.'.$column;
+        return $tableReferer . '.' . $column;
+    }
+
+    /**
+     * Get the default foreign key name for the model.
+     *
+     * @return string
+     */
+    public function getForeignKey()
+    {
+        return Str::snake(class_basename($this)) . $this->getKeyName();
     }
 }

@@ -4,14 +4,10 @@ namespace Tests\Eloquent;
 
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use LaravelFreelancerNL\Aranguent\Connection;
-use LaravelFreelancerNL\Aranguent\Eloquent\Builder;
+use LaravelFreelancerNL\Aranguent\Document;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
-use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
-use LaravelFreelancerNL\Aranguent\Query\Grammar;
-use LaravelFreelancerNL\Aranguent\Query\Processor;
 use Mockery as M;
-use Tests\models\Character;
+use Tests\setup\Models\Character;
 use Tests\TestCase;
 
 class ModelTest extends TestCase
@@ -21,24 +17,26 @@ class ModelTest extends TestCase
         parent::setUp();
         Carbon::setTestNow(Carbon::now());
 
-        Character::insert([
+        Character::insert(
             [
-                '_key' => 'NedStark',
-                'name' => 'Ned',
-                'surname' => 'Stark',
-                'alive' => false,
-                'age' => 41,
-                'traits' => ['A', 'H', 'C', 'N', 'P'],
-            ],
-            [
-                '_key' => 'RobertBaratheon',
-                'name' => 'Robert',
-                'surname' => 'Baratheon',
-                'alive' => false,
-                'age' => null,
-                'traits' => ['A', 'H', 'C'],
-            ],
-        ]);
+                [
+                    '_key' => 'NedStark',
+                    'name' => 'Ned',
+                    'surname' => 'Stark',
+                    'alive' => false,
+                    'age' => 41,
+                    'traits' => ['A', 'H', 'C', 'N', 'P'],
+                ],
+                [
+                    '_key' => 'RobertBaratheon',
+                    'name' => 'Robert',
+                    'surname' => 'Baratheon',
+                    'alive' => false,
+                    'age' => null,
+                    'traits' => ['A', 'H', 'C'],
+                ],
+            ]
+        );
     }
 
     public function tearDown(): void
@@ -52,12 +50,15 @@ class ModelTest extends TestCase
 
     public function testCreateAranguentModel()
     {
-        $this->artisan('aranguent:model', [
-            'name' => 'Aranguent',
-            '--force' => '',
-        ])->run();
+        $this->artisan(
+            'aranguent:model',
+            [
+                'name' => 'Aranguent',
+                '--force' => '',
+            ]
+        )->run();
 
-        $file = __DIR__.'/../../vendor/orchestra/testbench-core/laravel/app/Aranguent.php';
+        $file = __DIR__ . '/../../vendor/orchestra/testbench-core/laravel/app/Aranguent.php';
 
         //assert file exists
         $this->assertFileExists($file);
@@ -140,145 +141,9 @@ class ModelTest extends TestCase
             'age' => 41,
             'traits' => ['A', 'H', 'C', 'N', 'P'],
         ];
-        $doc = new \LaravelFreelancerNL\Aranguent\Document();
+        $doc = new Document();
         $doc = $doc->createFromArray($data);
 
-        $this->assertEquals((array) $doc, $data);
-    }
-
-    public function testQualifyColumn()
-    {
-        $model = new EloquentModelStub;
-
-        $this->assertSame('stubDoc.column', $model->qualifyColumn('column'));
-    }
-}
-
-class EloquentModelStub extends Model
-{
-    public $connection;
-    public $scopesCalled = [];
-    protected $table = 'stub';
-    protected $guarded = [];
-    protected $morph_to_stub_type = EloquentModelSaveStub::class;
-
-    public function getListItemsAttribute($value)
-    {
-        return json_decode($value, true);
-    }
-
-    public function setListItemsAttribute($value)
-    {
-        $this->attributes['list_items'] = json_encode($value);
-    }
-
-    public function getPasswordAttribute()
-    {
-        return '******';
-    }
-
-    public function setPasswordAttribute($value)
-    {
-        $this->attributes['password_hash'] = sha1($value);
-    }
-
-    public function publicIncrement($column, $amount = 1, $extra = [])
-    {
-        return $this->increment($column, $amount, $extra);
-    }
-
-    public function belongsToStub()
-    {
-        return $this->belongsTo(EloquentModelSaveStub::class);
-    }
-
-    public function morphToStub()
-    {
-        return $this->morphTo();
-    }
-
-    public function morphToStubWithKeys()
-    {
-        return $this->morphTo(null, 'type', 'id');
-    }
-
-    public function morphToStubWithName()
-    {
-        return $this->morphTo('someName');
-    }
-
-    public function morphToStubWithNameAndKeys()
-    {
-        return $this->morphTo('someName', 'type', 'id');
-    }
-
-    public function belongsToExplicitKeyStub()
-    {
-        return $this->belongsTo(EloquentModelSaveStub::class, 'foo');
-    }
-
-    public function incorrectRelationStub()
-    {
-        return 'foo';
-    }
-
-    public function getDates()
-    {
-        return [];
-    }
-
-    public function getAppendableAttribute()
-    {
-        return 'appended';
-    }
-
-    public function scopePublished(Builder $builder)
-    {
-        $this->scopesCalled[] = 'published';
-    }
-
-    public function scopeCategory(Builder $builder, $category)
-    {
-        $this->scopesCalled['category'] = $category;
-    }
-
-    public function scopeFramework(Builder $builder, $framework, $version)
-    {
-        $this->scopesCalled['framework'] = [$framework, $version];
-    }
-}
-
-class EloquentModelSaveStub extends Model
-{
-    protected $table = 'save_stub';
-    protected $guarded = ['id'];
-
-    public function save(array $options = [])
-    {
-        if ($this->fireModelEvent('saving') === false) {
-            return false;
-        }
-
-        $_SERVER['__eloquent.saved'] = true;
-
-        $this->fireModelEvent('saved', false);
-    }
-
-    public function setIncrementing($value)
-    {
-        $this->incrementing = $value;
-    }
-
-    public function getConnection()
-    {
-        $mock = m::mock(Connection::class);
-        $mock->shouldReceive('getQueryGrammar')->andReturn($grammar = m::mock(Grammar::class));
-        $mock->shouldReceive('getPostProcessor')->andReturn($processor = m::mock(Processor::class));
-        $mock->shouldReceive('getName')->andReturn('name');
-        $mock->shouldReceive('query')->andReturnUsing(function () use ($mock, $grammar, $processor) {
-            return new QueryBuilder($mock, $grammar, $processor);
-        });
-
-        return $mock;
+        $this->assertEquals((array)$doc, $data);
     }
 }

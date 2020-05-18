@@ -32,7 +32,7 @@ class Grammar extends IlluminateGrammar
 
         $filter = [];
         foreach ($command->attribute as $attribute) {
-            $filter[] = ['doc.'.$attribute, '!=', 'null'];
+            $filter[] = ['doc.' . $attribute, '!=', 'null'];
         }
 
         $aqb = AQB::for('doc', $collection)
@@ -61,8 +61,8 @@ class Grammar extends IlluminateGrammar
         $bindings['to'] = $this->wrapBindVar($command->from);
 
         $filter = [
-            ['doc.'.$command->from, '!=', 'null'],
-            ['doc.'.$command->to],
+            ['doc.' . $command->from, '!=', 'null'],
+            ['doc.' . $command->to],
         ];
 
         $aqb = AQB::for('doc', $collection)
@@ -71,9 +71,10 @@ class Grammar extends IlluminateGrammar
                 'doc',
                 [
                     $command->from => 'null',
-                    $command->to => 'doc.'.$command->from,
+                    $command->to => 'doc.' . $command->from,
                 ],
-                $collection)
+                $collection
+            )
             ->options(['keepNull' => true])
             ->get();
 
@@ -98,7 +99,7 @@ class Grammar extends IlluminateGrammar
 
         $data = [];
         foreach ($command->attributes as $attribute) {
-            $filter[] = ['doc.'.$attribute, '!=', 'null', 'OR'];
+            $filter[] = ['doc.' . $attribute, '!=', 'null', 'OR'];
             $data[$attribute] = 'null';
         }
         $aqb = AQB::for('doc', $collection)

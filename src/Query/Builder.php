@@ -48,10 +48,12 @@ class Builder extends IlluminateQueryBuilder
      * @param Processor $processor
      * @param QueryBuilder|null $aqb
      */
-    public function __construct(ConnectionInterface $connection,
-                                Grammar $grammar = null,
-                                Processor $processor = null,
-                                QueryBuilder $aqb = null)
+    public function __construct(
+        ConnectionInterface $connection,
+        Grammar $grammar = null,
+        Processor $processor = null,
+        QueryBuilder $aqb = null
+    )
     {
         $this->connection = $connection;
         $this->grammar = $grammar ?: $connection->getQueryGrammar();
@@ -131,8 +133,32 @@ class Builder extends IlluminateQueryBuilder
     {
         $response = $this->getConnection()->execute($this->grammar->compileInsertGetId($this, $values, $sequence)->aqb);
         $this->aqb = new QueryBuilder();
-
         return (is_array($response)) ? end($response) : $response;
+    }
+
+    /**
+     * Set the table which the query is targeting.
+     *
+     * @param  Closure|Builder|string  $table
+     * @param  string|null  $as
+     * @return $this
+     */
+    public function from($table, $as = null)
+    {
+        if ($this->isQueryable($table)) {
+            return $this->fromSub($table, $as);
+        }
+
+        if (stripos($table, ' as ') !== false) {
+            $parts = explode(' as ', $table);
+            $table = $parts[0];
+            $as = $parts[1];
+            $this->registerAlias($table, $as);
+        }
+
+        $this->from = $table;
+
+        return $this;
     }
 
     /**
@@ -178,14 +204,27 @@ class Builder extends IlluminateQueryBuilder
         return $response;
     }
 
+    /**
+     * @param string $table
+     * @param string $alias
+     */
     public function registerAlias(string $table, string $alias): void
     {
-        $this->aliasRegistry[$table] = $alias;
+        if (! isset($this->aliasRegistry[$table])) {
+            $this->aliasRegistry[$table] = $alias;
+        }
     }
 
-    public function getAlias(string $table): string
+    /**
+     * @param string $table
+     * @return string
+     */
+    public function getAlias(string $table): ?string
     {
-        return $this->aliasRegistry[$table];
+        if (isset($this->aliasRegistry[$table])) {
+            return $this->aliasRegistry[$table];
+        }
+        return null;
     }
 
     /**
@@ -210,6 +249,8 @@ class Builder extends IlluminateQueryBuilder
         return false;
     }
 
+
+
     /**
      * Add a basic where clause to the query.
      *
@@ -232,7 +273,9 @@ class Builder extends IlluminateQueryBuilder
         // passed to the method, we will assume that the operator is an equals sign
         // and keep going. Otherwise, we'll require the operator to be passed in.
         [$value, $operator] = $this->prepareValueAndOperator(
-            $value, $operator, func_num_args() === 2
+            $value,
+            $operator,
+            func_num_args() === 2
         );
 
         // If the columns is actually a Closure instance, we will assume the developer
@@ -244,7 +287,7 @@ class Builder extends IlluminateQueryBuilder
 
         // If the given operator is not found in the list of valid operators we will
         // assume that the developer is just short-cutting the '=' operators and
-        // we will set the operators to '=' and set the values appropriately.
+        // we will set the operators to '==' and set the values appropriately.
         if ($this->invalidOperator($operator)) {
             [$value, $operator] = [$operator, '=='];
         }
@@ -273,7 +316,11 @@ class Builder extends IlluminateQueryBuilder
         // in our array and add the query binding to our array of bindings that
         // will be bound to each SQL statements when it is finally executed.
         $this->wheres[] = compact(
-            'type', 'column', 'operator', 'value', 'boolean'
+            'type',
+            'column',
+            'operator',
+            'value',
+            'boolean'
         );
 
         if (! $value instanceof Expression) {
@@ -343,7 +390,7 @@ class Builder extends IlluminateQueryBuilder
         if ($this->isQueryable($column)) {
             [$query, $bindings] = $this->createSub($column);
 
-            $column = new Expression('('.$query.')');
+            $column = new Expression('(' . $query . ')');
         }
 
         $this->{$this->unions ? 'unionOrders' : 'orders'}[] = [

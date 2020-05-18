@@ -10,7 +10,7 @@ use LaravelFreelancerNL\Aranguent\Schema\Grammar;
 use Mockery as M;
 use Tests\TestCase;
 
-class SchemaBuilderTest extends TestCase
+class BuilderTest extends TestCase
 {
     public function tearDown(): void
     {

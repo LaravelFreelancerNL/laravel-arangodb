@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Config;
+namespace Tests\Setup\Config;
 
 use ArangoDBClient\ConnectionOptions as ArangoConnectionOptions;
 

@@ -37,23 +37,31 @@ class AranguentServiceProvider extends ServiceProvider
     public function register()
     {
         // Add database driver.
-        $this->app->resolving('db', function ($db) {
-            $db->extend('arangodb', function ($config, $name) {
-                $config['name'] = $name;
-                $connection = new Connection($config);
-                $connection->setSchemaGrammar(new SchemaGrammar);
+        $this->app->resolving(
+            'db',
+            function ($db) {
+                $db->extend(
+                    'arangodb',
+                    function ($config, $name) {
+                        $config['name'] = $name;
+                        $connection = new Connection($config);
+                        $connection->setSchemaGrammar(new SchemaGrammar());
 
-                return $connection;
-            });
-        });
-
-        $this->app->resolving(function ($app) {
-            if (class_exists('Illuminate\Foundation\AliasLoader')) {
-                $loader = \Illuminate\Foundation\AliasLoader::getInstance();
-                $loader->alias('Eloquent', 'LaravelFreelancerNL\Aranguent\Eloquent\Model');
-                $loader->alias('Schema', 'LaravelFreelancerNL\Aranguent\Facade\Schema');
+                        return $connection;
+                    }
+                );
             }
-        });
+        );
+
+        $this->app->resolving(
+            function ($app) {
+                if (class_exists('Illuminate\Foundation\AliasLoader')) {
+                    $loader = \Illuminate\Foundation\AliasLoader::getInstance();
+                    $loader->alias('Eloquent', 'LaravelFreelancerNL\Aranguent\Eloquent\Model');
+                    $loader->alias('Schema', 'LaravelFreelancerNL\Aranguent\Facade\Schema');
+                }
+            }
+        );
         $this->app->register('LaravelFreelancerNL\Aranguent\Providers\CommandServiceProvider');
     }
 }

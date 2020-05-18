@@ -3,6 +3,8 @@
 namespace Tests;
 
 use ArangoDBClient\Database;
+use Tests\setup\database\Seeds\DatabaseSeeder;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\AranguentServiceProvider;
 use LaravelFreelancerNL\Aranguent\Migrations\DatabaseMigrationRepository;
@@ -26,12 +28,12 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     /**
      * Define environment setup.
      *
-     * @param  \Illuminate\Foundation\Application  $app
+     * @param  Application  $app
      * @return void
      */
     protected function getEnvironmentSetUp($app)
     {
-        $config = require 'config/database.php';
+        $config = require 'setup/config/database.php';
         $app['config']->set('database.connections.arangodb', $config['connections']['arangodb']);
         $app['config']->set('database.default', 'arangodb');
         $app['config']->set('cache.driver', 'array');
@@ -52,21 +54,27 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->withFactories(realpath(__DIR__.'/database/factories'));
+        $this->withFactories(realpath(__DIR__ . '/setup/database/factories'));
 
-        $this->artisan('aranguent:convert-migrations', ['--realpath' => true, '--path' => __DIR__.'/../vendor/orchestra/testbench-core/laravel/migrations/'])->run();
+        $this->artisan('aranguent:convert-migrations', ['--realpath' => true, '--path' => __DIR__ . '/../vendor/orchestra/testbench-core/laravel/migrations/'])->run();
 
         //Running migrations without loading them through testbench as it does something weird which doesn't save the new collections
         $this->installMigrateIfNotExists();
 
         $this->artisan('migrate', [
-            '--path' => realpath(__DIR__.'/database/migrations'),
+            '--path' => realpath(__DIR__ . '/setup/database/migrations'),
             '--realpath' => true,
         ])->run();
 
-        $this->artisan('aranguent:model', [
-            'name' => 'Character',
+        $this->artisan('migrate', [
+            '--path' => realpath(__DIR__ . '/setup/database/migrations'),
+            '--realpath' => true,
         ])->run();
+
+        // FIXME: Seeding with updateOrCreate requires subqueries
+//        $this->artisan('db:seed', [
+//            '--class' => DatabaseSeeder::class
+//        ])->run();
 
         $this->databaseMigrationRepository = new DatabaseMigrationRepository($this->app['db'], $this->collection);
     }

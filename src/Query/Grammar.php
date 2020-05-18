@@ -60,6 +60,10 @@ class Grammar extends FluentAqlGrammar
         'not regexp' => '!~',
     ];
 
+    protected $whereTypeOperators = [
+        'In' => 'IN',
+        'NotIn' => 'NOT IN',
+    ];
     /**
      * Get the format for database stored dates.
      *
@@ -88,14 +92,14 @@ class Grammar extends FluentAqlGrammar
      */
     protected function generateTableAlias($builder, $table, $postfix = 'Doc')
     {
-        $builder->registerAlias($table, Str::singular($table).$postfix);
+        $builder->registerAlias($table, Str::singular($table) . $postfix);
 
         return $builder;
     }
 
     protected function prefixTable($table)
     {
-        return $this->tablePrefix.$table;
+        return $this->tablePrefix . $table;
     }
 
     /**
@@ -183,7 +187,7 @@ class Grammar extends FluentAqlGrammar
             // function for the component which is responsible for making the SQL.
 
             if (isset($builder->$component) && ! is_null($builder->$component)) {
-                $method = 'compile'.ucfirst($component);
+                $method = 'compile' . ucfirst($component);
 
                 $builder = $this->$method($builder, $builder->$component);
             }
@@ -243,21 +247,28 @@ class Grammar extends FluentAqlGrammar
     protected function compileWheresToArray($builder)
     {
         $result = collect($builder->wheres)->map(function ($where) use ($builder) {
-            // ArangoDB uses a double '=' for comparison
-            if ($where['operator'] == '=') {
-                $where['operator'] = '==';
+            if (isset($where['operator'])) {
+                $where['operator'] = $this->translateOperator($where['operator']);
+            } else {
+                $where['operator'] = $this->getOperatorByWhereType($where['type']);
             }
-            $where['operator'] = $this->translateOperator($where['operator']);
 
             //Prefix table alias on the column
             $where['column'] = $this->prefixAlias($builder, $builder->from, $where['column']);
 
-            return [
-                $where['column'],
-                $where['operator'],
-                $where['value'],
-                $where['boolean'],
-            ];
+            $cleanWhere = [];
+            $cleanWhere[0] = $where['column'];
+            $cleanWhere[1] = $where['operator'];
+            $cleanWhere[2] = null;
+            if (isset($where['value'])) {
+                $cleanWhere[2] = $where['value'];
+            }
+            if (isset($where['values'])) {
+                $cleanWhere[2] = $where['values'];
+            }
+            $cleanWhere[3] = $where['boolean'];
+
+            return $cleanWhere;
         })->all();
 
         return $result;
@@ -272,7 +283,7 @@ class Grammar extends FluentAqlGrammar
      */
     protected function compileAggregate(Builder $builder, $aggregate)
     {
-        $method = 'compile'.ucfirst($aggregate['function']);
+        $method = 'compile' . ucfirst($aggregate['function']);
 
         return $this->$method($builder, $aggregate);
     }
@@ -439,7 +450,7 @@ class Grammar extends FluentAqlGrammar
         $doc = $builder->getAlias($builder->from);
         foreach ($columns as $column) {
             if ($column != null && $column != '*') {
-                $values[$column] = $doc.'.'.$column;
+                $values[$column] = $doc . '.' . $column;
             }
         }
         if ($builder->aggregate !== null) {
@@ -531,6 +542,15 @@ class Grammar extends FluentAqlGrammar
         return $operator;
     }
 
+    protected function getOperatorByWhereType($type)
+    {
+        if (isset($this->whereTypeOperators[$type])) {
+            return $this->whereTypeOperators[$type];
+        }
+        return '==';
+    }
+
+
     /**
      * @param Builder $builder
      * @param string $target
@@ -541,10 +561,10 @@ class Grammar extends FluentAqlGrammar
     {
         $alias = $builder->getAlias($target);
 
-        if (Str::startsWith($value, $alias.'.')) {
+        if (Str::startsWith($value, $alias . '.')) {
             return $value;
         }
 
-        return $alias.'.'.$value;
+        return $alias . '.' . $value;
     }
 }
