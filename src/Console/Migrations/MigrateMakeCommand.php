@@ -91,7 +91,10 @@ class MigrateMakeCommand extends IlluminateMigrateMakeCommand
     protected function writeMigration($name, $collection, $create)
     {
         $file = pathinfo($this->creator->create(
-            $name, $this->getMigrationPath(), $collection, $create
+            $name,
+            $this->getMigrationPath(),
+            $collection,
+            $create
         ), PATHINFO_FILENAME);
 
         $this->line("<info>Created Migration:</info> {$file}");

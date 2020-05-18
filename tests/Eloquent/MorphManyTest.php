@@ -72,7 +72,7 @@ class MorphManyTest extends TestCase
         $character->captured()->save($location);
 
         $this->assertEquals($character->_key, $location->capturable_id);
-        $this->assertCount(1,  $character->captured);
+        $this->assertCount(1, $character->captured);
         $this->assertInstanceOf(Location::class, $character->captured->first());
     }
 

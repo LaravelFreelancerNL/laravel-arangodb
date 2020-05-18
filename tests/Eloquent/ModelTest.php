@@ -58,7 +58,7 @@ class ModelTest extends TestCase
             ]
         )->run();
 
-        $file = __DIR__.'/../../vendor/orchestra/testbench-core/laravel/app/Aranguent.php';
+        $file = __DIR__ . '/../../vendor/orchestra/testbench-core/laravel/app/Aranguent.php';
 
         //assert file exists
         $this->assertFileExists($file);

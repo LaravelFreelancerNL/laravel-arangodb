@@ -48,10 +48,12 @@ class Builder extends IlluminateQueryBuilder
      * @param Processor $processor
      * @param QueryBuilder|null $aqb
      */
-    public function __construct(ConnectionInterface $connection,
-                                Grammar $grammar = null,
-                                Processor $processor = null,
-                                QueryBuilder $aqb = null)
+    public function __construct(
+        ConnectionInterface $connection,
+        Grammar $grammar = null,
+        Processor $processor = null,
+        QueryBuilder $aqb = null
+    )
     {
         $this->connection = $connection;
         $this->grammar = $grammar ?: $connection->getQueryGrammar();
@@ -111,7 +113,7 @@ class Builder extends IlluminateQueryBuilder
      * @return bool
      * @throws BindException
      */
-    public function insert(array $values) : bool
+    public function insert(array $values): bool
     {
         $response = $this->getConnection()->insert($this->grammar->compileInsert($this, $values)->aqb);
         $this->aqb = new QueryBuilder();
@@ -206,7 +208,7 @@ class Builder extends IlluminateQueryBuilder
      * @param string $table
      * @param string $alias
      */
-    public function registerAlias(string $table, string $alias) : void
+    public function registerAlias(string $table, string $alias): void
     {
         if (! isset($this->aliasRegistry[$table])) {
             $this->aliasRegistry[$table] = $alias;
@@ -217,7 +219,7 @@ class Builder extends IlluminateQueryBuilder
      * @param string $table
      * @return string
      */
-    public function getAlias(string $table) : ?string
+    public function getAlias(string $table): ?string
     {
         if (isset($this->aliasRegistry[$table])) {
             return $this->aliasRegistry[$table];
@@ -271,7 +273,9 @@ class Builder extends IlluminateQueryBuilder
         // passed to the method, we will assume that the operator is an equals sign
         // and keep going. Otherwise, we'll require the operator to be passed in.
         [$value, $operator] = $this->prepareValueAndOperator(
-            $value, $operator, func_num_args() === 2
+            $value,
+            $operator,
+            func_num_args() === 2
         );
 
         // If the columns is actually a Closure instance, we will assume the developer
@@ -312,7 +316,11 @@ class Builder extends IlluminateQueryBuilder
         // in our array and add the query binding to our array of bindings that
         // will be bound to each SQL statements when it is finally executed.
         $this->wheres[] = compact(
-            'type', 'column', 'operator', 'value', 'boolean'
+            'type',
+            'column',
+            'operator',
+            'value',
+            'boolean'
         );
 
         if (! $value instanceof Expression) {
@@ -382,7 +390,7 @@ class Builder extends IlluminateQueryBuilder
         if ($this->isQueryable($column)) {
             [$query, $bindings] = $this->createSub($column);
 
-            $column = new Expression('('.$query.')');
+            $column = new Expression('(' . $query . ')');
         }
 
         $this->{$this->unions ? 'unionOrders' : 'orders'}[] = [

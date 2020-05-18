@@ -36,7 +36,7 @@ trait Tables
     public function executeCreateCommand($command)
     {
         if ($this->connection->pretending()) {
-            $this->connection->logQuery('/* '.$command->explanation." */\n", []);
+            $this->connection->logQuery('/* ' . $command->explanation . " */\n", []);
 
             return;
         }

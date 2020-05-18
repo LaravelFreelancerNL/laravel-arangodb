@@ -22,7 +22,7 @@ class BuilderTest extends TestCase
 
     protected function getBuilder()
     {
-        $grammar = new Grammar;
+        $grammar = new Grammar();
         $processor = m::mock(Processor::class);
 
         return new Builder(m::mock(Connection::class), $grammar, $processor);
@@ -270,7 +270,11 @@ class BuilderTest extends TestCase
 
         $this->assertEquals(
             new LengthAwarePaginator(
-                $results, 2, $perPage, $page, [
+                $results,
+                2,
+                $perPage,
+                $page,
+                [
                 'path' => $path,
                 'pageName' => $pageName,
             ]
@@ -288,7 +292,7 @@ class BuilderTest extends TestCase
             Builder::class,
             [
                 m::mock(ConnectionInterface::class),
-                new Grammar,
+                new Grammar(),
                 m::mock(Processor::class),
             ]
         )->makePartial();

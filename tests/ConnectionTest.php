@@ -209,7 +209,7 @@ class ConnectionTest extends TestCase
     public function testChangeDatabaseName()
     {
         $initialName = $this->connection->getDatabaseName();
-        $newName = $initialName.'New';
+        $newName = $initialName . 'New';
         $this->connection->setDatabaseName($newName);
         $currentName = $this->connection->getDatabaseName();
 

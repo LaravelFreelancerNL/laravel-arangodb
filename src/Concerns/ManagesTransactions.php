@@ -79,10 +79,10 @@ trait ManagesTransactions
         }
 
 //        $query = addslashes($query);
-        $jsCommand = 'db._query(aql`'.$query.'`';
+        $jsCommand = 'db._query(aql`' . $query . '`';
         if (! empty($bindings)) {
             $bindings = json_encode($bindings);
-            $jsCommand .= ', '.$bindings;
+            $jsCommand .= ', ' . $bindings;
         }
         $jsCommand .= ');';
         $command = new IlluminateFluent([
