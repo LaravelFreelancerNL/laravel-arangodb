@@ -53,8 +53,7 @@ class Builder extends IlluminateQueryBuilder
         Grammar $grammar = null,
         Processor $processor = null,
         QueryBuilder $aqb = null
-    )
-    {
+    ) {
         $this->connection = $connection;
         $this->grammar = $grammar ?: $connection->getQueryGrammar();
         $this->processor = $processor ?: $connection->getPostProcessor();
