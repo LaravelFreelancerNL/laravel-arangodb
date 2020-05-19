@@ -1,11 +1,13 @@
 <?php
 
+namespace Tests\Setup\Database\Seeds;
+
 use Illuminate\Database\Seeder;
 
 class ChildOfSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Run the database Seeds.
      *
      * @return void
      */

@@ -1,11 +1,14 @@
 <?php
 
+namespace Tests\Setup\Database\Seeds;
+
 use Illuminate\Database\Seeder;
+use Tests\Setup\Models\Location;
 
 class LocationsSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Run the database Seeds.
      *
      * @return void
      */
@@ -23,5 +26,6 @@ class LocationsSeeder extends Seeder
         ]`;
 
         $locations = json_decode($locations);
+        Location::insertOrupdate($locations);
     }
 }
