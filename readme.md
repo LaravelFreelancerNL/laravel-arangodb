@@ -30,8 +30,8 @@ You may use composer to install Aranguent:
 ### Version compatibility
 | Laravel  | ArangoDB            | Aranguent         |
 | :------- | :------------------ | :---------------- |
-| 6.x.x    | 3.5.x               | 0.x.x             |
-
+| ^7.x.x    | ^3.5.x               | 0.1.x             |
+| ^6.x.x    | ^3.5.x               | 0.x.x             |
 
 Connection
 ----------
@@ -81,13 +81,15 @@ ArangoDB knows the following types:
 Type       | Purpose                 | Blueprint Method 
 ---------- | ----------------------- | ----------------
 Hash       | Exact matching          | `$collection->hashIndex($attributes, $indexOptions = [])`
-Skip List  | Ranged matching         | `$collection->skiplistIndex($attributes, $indexOptions = [])`
 Persistent | Ranged matching         | `$collection->persistentIndex($attributes, $indexOptions = [])`
 Geo        | Location matching       | `$collection->geoIndex($attributes, $indexOptions = [])`
 TTL        | Auto-expiring documents | `$collection->ttlIndex($attributes, $indexOptions = [])`
-Fulltext   | (Partial) text matching | `$collection->fulltextIndex($attribute, $indexOptions = [])`
+Fulltext * | (Partial) text matching | `$collection->fulltextIndex($attribute, $indexOptions = [])`
 
-See the [ArangoDB Documentation for more information](https://docs.arangodb.com/3.3/HTTP/Indexes/)
+* Instead of fulltext indices you'll probably want to use [ArangoSearch](https://www.arangodb.com/docs/stable/arangosearch.html) 
+ArangoDB's powerful search engine.  
+
+See the [ArangoDB Documentation for more information](https://docs.arangodb.com/stable/HTTP/Indexes/)
 
 ### Dropping Indexes
 Use `$collection->dropIndex($attributes, $type)` to drop an index from within a Blueprint.

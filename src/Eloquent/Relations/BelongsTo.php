@@ -33,6 +33,6 @@ class BelongsTo extends IlluminateBelongsTo
 
         $whereIn = $this->whereInMethod($this->related, $this->ownerKey);
 
-        $this->query->where($key,'IN', $this->getEagerModelKeys($models));
+        $this->query->where($key, 'IN', $this->getEagerModelKeys($models));
     }
 }

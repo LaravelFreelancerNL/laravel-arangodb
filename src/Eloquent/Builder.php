@@ -22,17 +22,6 @@ class Builder extends IlluminateBuilder
      * @param  array  $values
      * @return int
      */
-    public function update(array $values)
-    {
-        return $this->toBase()->update($this->updateTimestamps($values));
-    }
-
-    /**
-     * Update a record in the database.
-     *
-     * @param  array  $values
-     * @return int
-     */
     public function insert(array $values)
     {
         // Since every insert gets treated like a batch insert, we will make sure the
@@ -80,11 +69,13 @@ class Builder extends IlluminateBuilder
         }
         $timestamp = $this->model->freshTimestampString();
         $updatedAtColumn = $this->model->getUpdatedAtColumn();
-        $createdAtColumn = $this->model->getCreatedAtColumn();
         $timestamps[$updatedAtColumn] = $timestamp;
-        if (! isset($values[$createdAtColumn]) && $this->model->$createdAtColumn == '') {
+
+        $createdAtColumn = $this->model->getCreatedAtColumn();
+        if (! isset($values[$createdAtColumn]) && ! isset($this->model->$createdAtColumn)) {
             $timestamps[$createdAtColumn] = $timestamp;
         }
+
         $values = array_merge(
             $timestamps,
             $values

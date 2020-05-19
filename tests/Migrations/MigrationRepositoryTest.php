@@ -1,7 +1,10 @@
 <?php
 
+namespace Tests\Migrations;
+
 use ArangoDBClient\Document;
-use LaravelFreelancerNL\Aranguent\Tests\TestCase;
+use ArangoDBClient\ServerException;
+use Tests\TestCase;
 
 class MigrationRepositoryTest extends TestCase
 {
@@ -12,7 +15,7 @@ class MigrationRepositoryTest extends TestCase
     public function migrations_collection_is_created()
     {
         if ($this->databaseMigrationRepository->repositoryExists()) {
-            $this->expectException(ArangoDBClient\ServerException::class);
+            $this->expectException(ServerException::class);
             $this->withoutExceptionHandling();
         }
 

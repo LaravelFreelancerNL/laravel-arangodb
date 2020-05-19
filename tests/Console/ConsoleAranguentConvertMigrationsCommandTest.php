@@ -1,14 +1,16 @@
 <?php
 
+namespace Tests\Console;
+
 use Illuminate\Database\Migrations\Migrator;
 use Illuminate\Foundation\Application;
 use LaravelFreelancerNL\Aranguent\Console\Migrations\AranguentConvertMigrationsCommand;
-use LaravelFreelancerNL\Aranguent\Tests\TestCase;
 use Mockery as M;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
+use Tests\TestCase;
 
-class AranguentConvertMigrationsCommandTest extends TestCase
+class ConsoleAranguentConvertMigrationsCommandTest extends TestCase
 {
     protected $packageMigrationPath;
 
@@ -20,17 +22,17 @@ class AranguentConvertMigrationsCommandTest extends TestCase
 
     protected $conversionMigration;
 
-    protected function setUp() : void
+    protected function setUp(): void
     {
         parent::setUp();
 
         //Copy a stub with Illuminate usage to migrations directory
-        $stub = __DIR__.'/../database/stubs/test_stub_for_migration_conversion.php';
-        $this->conversionMigration = __DIR__.'/../database/migrations/test_migration_conversion.php';
+        $stub = __DIR__ . '/../setup/database/stubs/test_stub_for_migration_conversion.php';
+        $this->conversionMigration = __DIR__ . '/../setup/database/migrations/test_migration_conversion.php';
         copy($stub, $this->conversionMigration);
     }
 
-    public function tearDown() : void
+    public function tearDown(): void
     {
         M::close();
 
@@ -63,7 +65,7 @@ class AranguentConvertMigrationsCommandTest extends TestCase
 
     protected function runCommand($command, $input = [])
     {
-        return $command->run(new ArrayInput($input), new NullOutput);
+        return $command->run(new ArrayInput($input), new NullOutput());
     }
 }
 

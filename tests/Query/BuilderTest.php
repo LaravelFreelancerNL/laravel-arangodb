@@ -1,5 +1,7 @@
 <?php
 
+namespace Tests\Query;
+
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Pagination\AbstractPaginator as Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -7,11 +9,11 @@ use LaravelFreelancerNL\Aranguent\Connection as Connection;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 use LaravelFreelancerNL\Aranguent\Query\Grammar;
 use LaravelFreelancerNL\Aranguent\Query\Processor;
-use LaravelFreelancerNL\Aranguent\Tests\TestCase;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder as FluentAQL;
 use Mockery as m;
+use Tests\TestCase;
 
-class QueryBuilderTest extends TestCase
+class BuilderTest extends TestCase
 {
     protected function tearDown(): void
     {
@@ -20,7 +22,7 @@ class QueryBuilderTest extends TestCase
 
     protected function getBuilder()
     {
-        $grammar = new Grammar;
+        $grammar = new Grammar();
         $processor = m::mock(Processor::class);
 
         return new Builder(m::mock(Connection::class), $grammar, $processor);
@@ -49,15 +51,24 @@ class QueryBuilderTest extends TestCase
     {
         $builder = $this->getBuilder();
         $builder->getProcessor()->shouldReceive('processSelect');
-        $builder->getConnection()->shouldReceive('select')->once()->andReturnUsing(function ($aqb) {
-            $this->assertSame('FOR userDoc IN users RETURN userDoc', $aqb->toAql());
-        });
-        $builder->getConnection()->shouldReceive('select')->once()->andReturnUsing(function ($aqb) {
-            $this->assertSame('FOR userDoc IN users RETURN {"name":userDoc.name,"email":userDoc.email}', $aqb->toAql());
-        });
-        $builder->getConnection()->shouldReceive('select')->once()->andReturnUsing(function ($aqb) {
-            $this->assertSame('FOR userDoc IN users RETURN {"name":userDoc.name}', $aqb->toAql());
-        });
+        $builder->getConnection()->shouldReceive('select')->once()->andReturnUsing(
+            function ($aqb) {
+                $this->assertSame('FOR userDoc IN users RETURN userDoc', $aqb->toAql());
+            }
+        );
+        $builder->getConnection()->shouldReceive('select')->once()->andReturnUsing(
+            function ($aqb) {
+                $this->assertSame(
+                    'FOR userDoc IN users RETURN {"name":userDoc.name,"email":userDoc.email}',
+                    $aqb->toAql()
+                );
+            }
+        );
+        $builder->getConnection()->shouldReceive('select')->once()->andReturnUsing(
+            function ($aqb) {
+                $this->assertSame('FOR userDoc IN users RETURN {"name":userDoc.name}', $aqb->toAql());
+            }
+        );
 
         $builder->from('users')->get();
         $this->assertNull($builder->columns);
@@ -92,14 +103,20 @@ class QueryBuilderTest extends TestCase
     {
         $builder = $this->getBuilder();
         $builder->select('*')->from('users')->where('_id', '=', 1)->where('email', '=', 'foo');
-        $this->assertSame('FOR userDoc IN users FILTER userDoc._id == 1 AND userDoc.email == "foo" RETURN userDoc', $builder->toSql());
+        $this->assertSame(
+            'FOR userDoc IN users FILTER userDoc._id == 1 AND userDoc.email == "foo" RETURN userDoc',
+            $builder->toSql()
+        );
     }
 
     public function testBasicOrWheres()
     {
         $builder = $this->getBuilder();
         $builder->select('*')->from('users')->where('_id', '==', 1)->orWhere('email', '==', 'foo');
-        $this->assertSame('FOR userDoc IN users FILTER userDoc._id == 1 OR userDoc.email == "foo" RETURN userDoc', $builder->toSql());
+        $this->assertSame(
+            'FOR userDoc IN users FILTER userDoc._id == 1 OR userDoc.email == "foo" RETURN userDoc',
+            $builder->toSql()
+        );
         $this->assertEquals([0 => 1, 1 => 'foo'], $builder->getBindings());
     }
 
@@ -110,7 +127,10 @@ class QueryBuilderTest extends TestCase
             ->from('users')
             ->where('email', '=', 'email@example.com')
             ->where('_key', '<>', 'keystring');
-        $this->assertSame('FOR userDoc IN users FILTER userDoc.email == "email@example.com" AND userDoc._key != "keystring" RETURN userDoc', $builder->toSql());
+        $this->assertSame(
+            'FOR userDoc IN users FILTER userDoc.email == "email@example.com" AND userDoc._key != "keystring" RETURN userDoc',
+            $builder->toSql()
+        );
         $this->assertEquals([0 => 'email@example.com', 1 => 'keystring'], $builder->getBindings());
     }
 
@@ -123,7 +143,10 @@ class QueryBuilderTest extends TestCase
 
         $builder = $this->getBuilder();
         $builder->select('*')->from('users')->where('_key', '=', 1)->orWhereNull('_key');
-        $this->assertSame('FOR userDoc IN users FILTER userDoc._key == 1 OR userDoc._key == null RETURN userDoc', $builder->toSql());
+        $this->assertSame(
+            'FOR userDoc IN users FILTER userDoc._key == 1 OR userDoc._key == null RETURN userDoc',
+            $builder->toSql()
+        );
         $this->assertEquals([0 => 1], $builder->getBindings());
     }
 
@@ -136,15 +159,31 @@ class QueryBuilderTest extends TestCase
 
         $builder = $this->getBuilder();
         $builder->select('*')->from('users')->where('_key', '>', 1)->orWhereNotNull('_key');
-        $this->assertSame('FOR userDoc IN users FILTER userDoc._key > 1 OR userDoc._key != null RETURN userDoc', $builder->toSql());
+        $this->assertSame(
+            'FOR userDoc IN users FILTER userDoc._key > 1 OR userDoc._key != null RETURN userDoc',
+            $builder->toSql()
+        );
         $this->assertEquals([0 => 1], $builder->getBindings());
+    }
+
+    public function testWhereIn()
+    {
+        $builder = $this->getBuilder();
+        $builder->select()->from('users')->where('country', 'IN', ['The Netherlands', 'Germany', 'Great-Britain']);
+        $this->assertSame(
+            'FOR userDoc IN users FILTER userDoc.country IN [@1_1,"Germany","Great-Britain"] RETURN userDoc',
+            $builder->toSql()
+        );
     }
 
     public function testOrderBys()
     {
         $builder = $this->getBuilder();
         $builder->select('*')->from('users')->orderBy('email')->orderBy('age', 'desc');
-        $this->assertSame('FOR userDoc IN users SORT userDoc.email asc, userDoc.age desc RETURN userDoc', $builder->toSql());
+        $this->assertSame(
+            'FOR userDoc IN users SORT userDoc.email asc, userDoc.age desc RETURN userDoc',
+            $builder->toSql()
+        );
     }
 
     public function testLimitsAndOffsets()
@@ -187,10 +226,20 @@ class QueryBuilderTest extends TestCase
         $this->assertEquals(1, $result);
     }
 
+    public function testFirstMethod()
+    {
+        $builder = $this->getBuilder();
+        $builder->getConnection()->shouldReceive('select')->once()->with(FluentAQL::class)->andReturn(1);
+        $result = $builder->from('users')->where('userDoc.email', '=', 'foo')->first();
+        $this->assertEquals(1, $result);
+    }
+
     public function testAggregates()
     {
         $builder = $this->getBuilder();
-        $builder->getConnection()->shouldReceive('select')->once()->with(FluentAQL::class)->andReturn([['aggregate' => 1]]);
+        $builder->getConnection()->shouldReceive('select')->once()->with(FluentAQL::class)->andReturn(
+            [['aggregate' => 1]]
+        );
 
         $results = $builder->from('users')->count();
         $this->assertEquals(1, $results);
@@ -211,16 +260,27 @@ class QueryBuilderTest extends TestCase
         $builder->shouldReceive('forPage')->once()->with($page, $perPage)->andReturnSelf();
         $builder->shouldReceive('get')->once()->andReturn($results);
 
-        Paginator::currentPathResolver(function () use ($path) {
-            return $path;
-        });
+        Paginator::currentPathResolver(
+            function () use ($path) {
+                return $path;
+            }
+        );
 
         $result = $builder->paginate($perPage, $columns, $pageName, $page);
 
-        $this->assertEquals(new LengthAwarePaginator($results, 2, $perPage, $page, [
-            'path' => $path,
-            'pageName' => $pageName,
-        ]), $result);
+        $this->assertEquals(
+            new LengthAwarePaginator(
+                $results,
+                2,
+                $perPage,
+                $page,
+                [
+                'path' => $path,
+                'pageName' => $pageName,
+            ]
+            ),
+            $result
+        );
     }
 
     /**
@@ -228,10 +288,13 @@ class QueryBuilderTest extends TestCase
      */
     protected function getMockQueryBuilder()
     {
-        return m::mock(Builder::class, [
-            m::mock(ConnectionInterface::class),
-            new Grammar,
-            m::mock(Processor::class),
-        ])->makePartial();
+        return m::mock(
+            Builder::class,
+            [
+                m::mock(ConnectionInterface::class),
+                new Grammar(),
+                m::mock(Processor::class),
+            ]
+        )->makePartial();
     }
 }

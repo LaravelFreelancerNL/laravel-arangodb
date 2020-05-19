@@ -24,9 +24,9 @@ use LaravelFreelancerNL\FluentAQL\QueryBuilder as FluentAQL;
 
 class Connection extends IlluminateConnection
 {
-    use DetectsDeadlocks,
-        DetectsLostConnections,
-        ManagesTransactions;
+    use DetectsDeadlocks;
+    use DetectsLostConnections;
+    use ManagesTransactions;
 
     /**
      * {@inheritdoc}
@@ -128,7 +128,7 @@ class Connection extends IlluminateConnection
      */
     protected function getDefaultQueryGrammar()
     {
-        return new QueryGrammar;
+        return new QueryGrammar();
     }
 
     /**
@@ -138,7 +138,7 @@ class Connection extends IlluminateConnection
      */
     protected function getDefaultPostProcessor()
     {
-        return new Processor;
+        return new Processor();
     }
 
     /**
@@ -390,7 +390,9 @@ class Connection extends IlluminateConnection
     public function query()
     {
         return new QueryBuilder(
-            $this, $this->getQueryGrammar(), $this->getPostProcessor()
+            $this,
+            $this->getQueryGrammar(),
+            $this->getPostProcessor()
         );
     }
 

@@ -25,10 +25,10 @@ use LaravelFreelancerNL\Aranguent\Schema\Concerns\Tables;
  */
 class Blueprint
 {
-    use Macroable,
-        Tables,
-        Columns,
-        Indexes;
+    use Macroable;
+    use Tables;
+    use Columns;
+    use Indexes;
 
     /**
      * The connection that is used by the blueprint.
@@ -95,14 +95,14 @@ class Blueprint
      * Create a new schema blueprint.
      *
      * Blueprint constructor.
-     * @param string $collection
+     * @param string $table
      * @param CollectionHandler $collectionHandler
      * @param Closure|null $callback
      * @param string $prefix
      */
-    public function __construct($collection, $collectionHandler, Closure $callback = null, $prefix = '')
+    public function __construct($table, $collectionHandler, Closure $callback = null, $prefix = '')
     {
-        $this->table = $collection;
+        $this->table = $table;
 
         $this->collectionHandler = $collectionHandler;
 
@@ -145,7 +145,7 @@ class Blueprint
      */
     public function compileAqlCommand($command)
     {
-        $compileMethod = 'compile'.ucfirst($command->name);
+        $compileMethod = 'compile' . ucfirst($command->name);
         if (method_exists($this->grammar, $compileMethod)) {
             return $this->grammar->$compileMethod($this->table, $command);
         }
@@ -158,8 +158,8 @@ class Blueprint
      */
     public function executeCommand($command)
     {
-        $executeNamedMethod = 'execute'.ucfirst($command->name).'Command';
-        $executeHandlerMethod = 'execute'.ucfirst($command->handler).'Command';
+        $executeNamedMethod = 'execute' . ucfirst($command->name) . 'Command';
+        $executeHandlerMethod = 'execute' . ucfirst($command->handler) . 'Command';
         if (method_exists($this, $executeNamedMethod)) {
             $this->$executeNamedMethod($command);
         } elseif (method_exists($this, $executeHandlerMethod)) {
@@ -180,7 +180,7 @@ class Blueprint
     public function executeCollectionCommand($command)
     {
         if ($this->connection->pretending()) {
-            $this->connection->logQuery('/* '.$command->explanation." */\n", []);
+            $this->connection->logQuery('/* ' . $command->explanation . " */\n", []);
 
             return;
         }
@@ -199,7 +199,7 @@ class Blueprint
     public function executeIgnoreCommand($command)
     {
         if ($this->connection->pretending()) {
-            $this->connection->logQuery('/* '.$command->explanation." */\n", []);
+            $this->connection->logQuery('/* ' . $command->explanation . " */\n", []);
 
             return;
         }
