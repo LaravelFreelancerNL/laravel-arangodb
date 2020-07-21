@@ -11,7 +11,6 @@ use Tests\TestCase;
 
 class BuilderTest extends TestCase
 {
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -46,7 +45,5 @@ class BuilderTest extends TestCase
         $this->assertEquals('NedStark', $ned->_key);
         $this->assertEquals($ned->en, $character['en']);
         $this->assertInstanceOf(Character::class, $ned);
-
-
     }
 }

@@ -68,7 +68,6 @@ class BelongsToTest extends TestCase
             ],
         ];
         Location::insert($locations);
-
     }
 
     public function tearDown(): void
