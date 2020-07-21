@@ -426,4 +426,17 @@ class Builder extends IlluminateQueryBuilder
     {
         return $this->orderByRaw($this->grammar->compileRandom($this));
     }
+
+    /**
+     * Get a new join clause.
+     *
+     * @param  IlluminateQueryBuilder  $parentQuery
+     * @param  string  $type
+     * @param  string  $table
+     * @return JoinClause
+     */
+    protected function newJoinClause(IlluminateQueryBuilder $parentQuery, $type, $table)
+    {
+        return new JoinClause($parentQuery, $type, $table);
+    }
 }
