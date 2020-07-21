@@ -18,57 +18,57 @@ class BelongsToTest extends TestCase
         parent::setUp();
         Carbon::setTestNow(Carbon::now());
 
-        Character::insert(
+        $characters = [
             [
-                [
-                    '_key' => 'NedStark',
-                    'name' => 'Ned',
-                    'surname' => 'Stark',
-                    'alive' => false,
-                    'age' => 41,
-                    'traits' => ['A', 'H', 'C', 'N', 'P'],
-                    'location_key' => 'kingslanding',
-                ],
-                [
-                    '_key' => 'SansaStark',
-                    'name' => 'Sansa',
-                    'surname' => 'Stark',
-                    'alive' => true,
-                    'age' => 13,
-                    'traits' => ["D", "I", "J"],
-                    'location_key' => 'winterfell',
-                ],
-                [
-                    '_key' => 'RobertBaratheon',
-                    'name' => 'Robert',
-                    'surname' => 'Baratheon',
-                    'alive' => false,
-                    'age' => null,
-                    'traits' => ['A', 'H', 'C'],
-                    'location_key' => 'dragonstone',
-                ],
-            ]
-        );
-        Location::insert(
+                '_key' => 'NedStark',
+                'name' => 'Ned',
+                'surname' => 'Stark',
+                'alive' => false,
+                'age' => 41,
+                'traits' => ['A', 'H', 'C', 'N', 'P'],
+                'location_key' => 'kingslanding',
+            ],
             [
-                [
-                    "_key" => "dragonstone",
-                    "name" => "Dragonstone",
-                    "coordinate" => [55.167801, -6.815096]
-                ],
-                [
-                    "_key" => "winterfell",
-                    "name" => "Winterfell",
-                    "coordinate" => [54.368321, -5.581312],
-                    "led_by" => "SansaStark",
-                ],
-                [
-                    "_key" => "kingslanding",
-                    "name" => "King's Landing",
-                    "coordinate" => [42.639752, 18.110189]
-                ],
-            ]
-        );
+                '_key' => 'SansaStark',
+                'name' => 'Sansa',
+                'surname' => 'Stark',
+                'alive' => true,
+                'age' => 13,
+                'traits' => ["D", "I", "J"],
+                'location_key' => 'winterfell',
+            ],
+            [
+                '_key' => 'RobertBaratheon',
+                'name' => 'Robert',
+                'surname' => 'Baratheon',
+                'alive' => false,
+                'age' => null,
+                'traits' => ['A', 'H', 'C'],
+                'location_key' => 'dragonstone',
+            ],
+        ];
+        Character::insert($characters);
+
+        $locations = [
+            [
+                "_key" => "dragonstone",
+                "name" => "Dragonstone",
+                "coordinate" => [55.167801, -6.815096]
+            ],
+            [
+                "_key" => "winterfell",
+                "name" => "Winterfell",
+                "coordinate" => [54.368321, -5.581312],
+                "led_by" => "SansaStark",
+            ],
+            [
+                "_key" => "kingslanding",
+                "name" => "King's Landing",
+                "coordinate" => [42.639752, 18.110189]
+            ],
+        ];
+        Location::insert($locations);
+
     }
 
     public function tearDown(): void

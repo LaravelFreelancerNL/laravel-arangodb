@@ -2,6 +2,7 @@
 
 namespace LaravelFreelancerNL\Aranguent\Query;
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
 use LaravelFreelancerNL\FluentAQL\Exceptions\BindException as BindException;
@@ -112,10 +113,9 @@ class Grammar extends FluentAqlGrammar
      */
     public function compileInsert(Builder $builder, array $values)
     {
-        if (! is_array(reset($values))) {
+        if (Arr::isAssoc($values)) {
             $values = [$values];
         }
-
         $table = $this->prefixTable($builder->from);
 
         if (empty($values)) {
@@ -124,9 +124,9 @@ class Grammar extends FluentAqlGrammar
             return $builder;
         }
 
-        $builder->aqb = $builder->aqb->let('docs', $builder->aqb->bind($values))
-            ->for('doc', 'docs')
-            ->insert('doc', $table)
+        $builder->aqb = $builder->aqb->let('values', $values)
+            ->for('value', 'values')
+            ->insert('value', $table)
             ->return('NEW._key')
             ->get();
 
@@ -213,6 +213,27 @@ class Grammar extends FluentAqlGrammar
 
         return $builder;
     }
+
+    /**
+     * Compile the "join" portions of the query.
+     *
+     * @param  Builder  $query
+     * @param  array  $joins
+     * @return string
+     */
+    protected function compileJoins(Builder $query, $joins)
+    {
+        return collect($joins)->map(function ($join) use ($query) {
+            $table = $this->wrapTable($join->table);
+
+            $nestedJoins = is_null($join->joins) ? '' : ' '.$this->compileJoins($query, $join->joins);
+
+            $tableAndNestedJoins = is_null($join->joins) ? $table : '('.$nestedJoins.')';
+
+            return trim("{$join->type} join {$tableAndNestedJoins} {$this->compileWheres($join)}");
+        })->implode(' ');
+    }
+
 
     /**
      * Compile the "where" portions of the query.
