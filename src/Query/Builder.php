@@ -439,5 +439,4 @@ class Builder extends IlluminateQueryBuilder
     {
         return new JoinClause($parentQuery, $type, $table);
     }
-
 }
