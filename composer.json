@@ -21,7 +21,7 @@
     "php": "^7.2",
     "laravel/framework": "^7.0",
     "triagens/arangodb": "3.6.*",
-    "laravel-freelancer-nl/aql-query-builder": "dev-master",
+    "laravel-freelancer-nl/aql-query-builder": "0.2",
     "ext-json": "*"
   },
   "require-dev": {
