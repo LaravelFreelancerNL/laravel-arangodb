@@ -169,9 +169,10 @@ class BuilderTest extends TestCase
     public function testWhereIn()
     {
         $builder = $this->getBuilder();
+
         $builder->select()->from('users')->where('country', 'IN', ['The Netherlands', 'Germany', 'Great-Britain']);
         $this->assertSame(
-            'FOR userDoc IN users FILTER userDoc.country IN [@1_1,"Germany","Great-Britain"] RETURN userDoc',
+            'FOR userDoc IN users FILTER userDoc.country IN [@'.$builder->aqb->getQueryId().'_1,"Germany","Great-Britain"] RETURN userDoc',
             $builder->toSql()
         );
     }

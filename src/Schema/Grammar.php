@@ -4,7 +4,7 @@ namespace LaravelFreelancerNL\Aranguent\Schema;
 
 use Illuminate\Database\Schema\Grammars\Grammar as IlluminateGrammar;
 use Illuminate\Support\Fluent;
-use LaravelFreelancerNL\FluentAQL\Facades\AQB;
+use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
 class Grammar extends IlluminateGrammar
 {
@@ -35,7 +35,7 @@ class Grammar extends IlluminateGrammar
             $filter[] = ['doc.' . $attribute, '!=', 'null'];
         }
 
-        $aqb = AQB::for('doc', $collection)
+        $aqb = (new QueryBuilder())->for('doc', $collection)
             ->filter($filter)
             ->limit(1)
             ->return('true')
@@ -65,7 +65,7 @@ class Grammar extends IlluminateGrammar
             ['doc.' . $command->to],
         ];
 
-        $aqb = AQB::for('doc', $collection)
+        $aqb = (new QueryBuilder())->for('doc', $collection)
             ->filter($filter)
             ->update(
                 'doc',
@@ -102,7 +102,7 @@ class Grammar extends IlluminateGrammar
             $filter[] = ['doc.' . $attribute, '!=', 'null', 'OR'];
             $data[$attribute] = 'null';
         }
-        $aqb = AQB::for('doc', $collection)
+        $aqb = (new QueryBuilder())->for('doc', $collection)
             ->filter($filter)
             ->update('doc', $data, $collection)
             ->options(['keepNull' => false])

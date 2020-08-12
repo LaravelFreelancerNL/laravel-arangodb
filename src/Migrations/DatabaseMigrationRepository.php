@@ -5,7 +5,6 @@ namespace LaravelFreelancerNL\Aranguent\Migrations;
 use Illuminate\Database\ConnectionResolverInterface as IlluminateResolver;
 use Illuminate\Database\Migrations\DatabaseMigrationRepository as IlluminateDatabaseMigrationRepository;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
-use LaravelFreelancerNL\FluentAQL\Facades\AQB;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
 class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
@@ -47,7 +46,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     public function getRan()
     {
-        $qb = AQB::for('m', 'migrations')
+        $qb = (new QueryBuilder())->for('m', 'migrations')
             ->sort(['m.batch', 'm.migrations'])
             ->return('m.migration')
             ->get();
@@ -70,7 +69,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
     {
         $bindings['steps'] = $steps;
 
-        $qb = AQB::for('m', 'migrations')
+        $qb = (new QueryBuilder())->for('m', 'migrations')
             ->filter('m.batch', '>=', 1)
             ->sort([['m.batch', 'DESC'], ['m.migration', 'DESC']])
             ->limit($steps)
@@ -84,7 +83,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
     {
         $batch = $this->getLastBatchNumber();
 
-        $qb = AQB::for('m', 'migrations')
+        $qb = (new QueryBuilder())->for('m', 'migrations')
             ->filter('m.batch', $batch)
             ->sort('m.migration', 'desc')
             ->return('m')
@@ -104,7 +103,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     public function getMigrationBatches()
     {
-        $qb = AQB::for('m', 'migrations')
+        $qb = (new QueryBuilder())->for('m', 'migrations')
             ->sort([['m.batch'], ['m.migration']])
             ->return(['batch' => 'm.batch', 'migration' => 'm.migration'])
             ->get();
@@ -125,7 +124,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     public function log($file, $batch)
     {
-        $qb = AQB::insert(['migration' => $file, 'batch' => $batch], 'migrations')->get();
+        $qb = (new QueryBuilder())->insert(['migration' => $file, 'batch' => $batch], 'migrations')->get();
 
         $this->getConnection()->insert($qb->query, $qb->binds);
 
@@ -142,7 +141,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     public function delete($migration)
     {
-        $qb = AQB::for('m', 'migrations')
+        $qb = (new QueryBuilder())->for('m', 'migrations')
                 ->filter('m.migration', $migration->migration)
                 ->remove('m', 'migrations')
                 ->get();
