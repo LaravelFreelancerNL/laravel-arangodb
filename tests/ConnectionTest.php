@@ -138,7 +138,7 @@ class ConnectionTest extends TestCase
             FOR u IN users
                 FOR p IN @@readCollection
                     FILTER u._key == p.recommendedBy
-                    INSERT { 
+                    INSERT {
                         _from: u._id,
                         _to: p._id
                      } IN @@insertCollection
@@ -167,11 +167,11 @@ class ConnectionTest extends TestCase
         // However the goal is to see if the collections are extracted properly.
         $query = "
             FOR u IN users
-                FOR p 
+                FOR p
                 IN
                  @@readCollection
                     FILTER u._key == p.recommendedBy
-                    INSERT { 
+                    INSERT {
                         _from: u._id,
                         _to: p._id
                      } IN @@insertCollection
@@ -183,7 +183,7 @@ class ConnectionTest extends TestCase
                     } INTO users OPTIONS { ignoreErrors: true }
             FOR v, e, p IN 1..5 OUTBOUND 'circles/A' GRAPH 'traversalGraph'
                 FILTER p.vertices[1]._key == \"G\"
-                RETURN p                             
+                RETURN p
         ";
         $bindings = [
             '@@readCollection' => 'products',
