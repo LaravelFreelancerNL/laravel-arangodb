@@ -33,17 +33,17 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-suggest
 
-      - name: PHP Code Sniffer
-        if: ${{ always() }}
-        run: vendor/bin/phpcs
+#      - name: PHP Code Sniffer
+#        if: ${{ always() }}
+#        run: vendor/bin/phpcs
 
-      - name: PHP Mess Detector
-        if: ${{ always() }}
-        run: vendor/bin/phpmd src/ text cleancode,codesize,controversial
+#      - name: PHP Mess Detector
+#        if: ${{ always() }}
+#        run: vendor/bin/phpmd src/ text cleancode,codesize,controversial
 
-      - name: PHP Stan
-        if: ${{ always() }}
-        run: vendor/bin/phpstan analyse -c phpstan.neon
+#      - name: PHP Stan
+#        if: ${{ always() }}
+#        run: vendor/bin/phpstan analyse -c phpstan.neon
 
       - name: PHP Unit tests
         if: ${{ always() }}

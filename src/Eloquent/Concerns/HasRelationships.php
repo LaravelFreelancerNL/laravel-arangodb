@@ -196,9 +196,15 @@ trait HasRelationships
      * @param  string|null  $relation
      * @return BelongsToMany
      */
-    public function belongsToMany($related, $table = null, $foreignPivotKey = null, $relatedPivotKey = null,
-        $parentKey = null, $relatedKey = null, $relation = null)
-    {
+    public function belongsToMany(
+        $related,
+        $table = null,
+        $foreignPivotKey = null,
+        $relatedPivotKey = null,
+        $parentKey = null,
+        $relatedKey = null,
+        $relation = null
+    ) {
         // If no relationship name was passed, we will pull backtraces to get the
         // name of the calling function. We will use that function name as the
         // title of this relation since that is a great convention to apply.
@@ -222,9 +228,14 @@ trait HasRelationships
         }
 
         return $this->newBelongsToMany(
-            $instance->newQuery(), $this, $table, $foreignPivotKey,
-            $relatedPivotKey, $parentKey ?: $this->getKeyName(),
-            $relatedKey ?: $instance->getKeyName(), $relation
+            $instance->newQuery(),
+            $this,
+            $table,
+            $foreignPivotKey,
+            $relatedPivotKey,
+            $parentKey ?: $this->getKeyName(),
+            $relatedKey ?: $instance->getKeyName(),
+            $relation
         );
     }
 
@@ -241,10 +252,16 @@ trait HasRelationships
      * @param  string|null  $relationName
      * @return BelongsToMany
      */
-    protected function newBelongsToMany(IlluminateBuilder $query, IlluminateModel $parent, $table, $foreignPivotKey, $relatedPivotKey,
-        $parentKey, $relatedKey, $relationName = null)
-    {
+    protected function newBelongsToMany(
+        IlluminateBuilder $query,
+        IlluminateModel $parent,
+        $table,
+        $foreignPivotKey,
+        $relatedPivotKey,
+        $parentKey,
+        $relatedKey,
+        $relationName = null
+    ) {
         return new BelongsToMany($query, $parent, $table, $foreignPivotKey, $relatedPivotKey, $parentKey, $relatedKey, $relationName);
     }
-
 }

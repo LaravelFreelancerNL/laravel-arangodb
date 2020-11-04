@@ -227,7 +227,6 @@ class Grammar extends FluentAqlGrammar
         foreach ($joins as $join) {
             $compileMethod = 'compile' . ucfirst($join->type) . 'Join';
             $builder = $this->$compileMethod($builder, $join);
-
         }
 
         return $builder;
@@ -307,7 +306,6 @@ class Grammar extends FluentAqlGrammar
         }
 
         if (count($predicates = $this->compileWheresToArray($builder)) > 0) {
-
             $builder->aqb = $builder->aqb->filter($predicates);
 
             return $builder;
@@ -325,7 +323,7 @@ class Grammar extends FluentAqlGrammar
     protected function compileWheresToArray($builder)
     {
         $result = collect($builder->wheres)->map(function ($where) use ($builder) {
-            var_dump($where);
+
             if (isset($where['operator'])) {
                 $where['operator'] = $this->translateOperator($where['operator']);
             } else {
@@ -340,7 +338,7 @@ class Grammar extends FluentAqlGrammar
                 }
                 $cleanWhere[0] = $where['column'] ;
             }
-            var_dump($cleanWhere);
+
             if (isset($where['first'])) {
                 $cleanWhere[0] = $where['first'];
             }

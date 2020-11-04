@@ -22,7 +22,6 @@ class JoinTest extends TestCase
         Artisan::call('db:seed', ['--class' => \Tests\Setup\Database\Seeds\CharactersSeeder::class]);
         Artisan::call('db:seed', ['--class' => \Tests\Setup\Database\Seeds\CharacteristicsSeeder::class]);
         Artisan::call('db:seed', ['--class' => \Tests\Setup\Database\Seeds\LocationsSeeder::class]);
-
     }
 
     public function tearDown(): void
@@ -69,6 +68,4 @@ class JoinTest extends TestCase
         $this->assertEquals('NedStark', $characters[0]->_key);
         $this->assertCount(10, $charactersWithoutResidence);
     }
-
-
 }
