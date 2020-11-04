@@ -20,8 +20,10 @@ class Grammar extends IlluminateGrammar
     /**
      * Compile AQL to check if an attribute is in use within a document in the collection.
      * If multiple attributes are set then all must be set in one document.
+     *
      * @param string $collection
      * @param Fluent $command
+     *
      * @return Fluent
      */
     public function compileHasAttribute($collection, Fluent $command)
@@ -32,7 +34,7 @@ class Grammar extends IlluminateGrammar
 
         $filter = [];
         foreach ($command->attribute as $attribute) {
-            $filter[] = ['doc.' . $attribute, '!=', null];
+            $filter[] = ['doc.'.$attribute, '!=', null];
         }
 
         $aqb = (new QueryBuilder())->for('doc', $collection)
@@ -51,6 +53,7 @@ class Grammar extends IlluminateGrammar
      *
      * @param string $collection
      * @param Fluent $command
+     *
      * @return Fluent
      */
     public function compileRenameAttribute($collection, Fluent $command)
@@ -61,8 +64,8 @@ class Grammar extends IlluminateGrammar
         $bindings['to'] = $this->wrapBindVar($command->from);
 
         $filter = [
-            ['doc.' . $command->from, '!=', null],
-            ['doc.' . $command->to, '==', null],
+            ['doc.'.$command->from, '!=', null],
+            ['doc.'.$command->to, '==', null],
         ];
 
         $aqb = (new QueryBuilder())->for('doc', $collection)
@@ -71,7 +74,7 @@ class Grammar extends IlluminateGrammar
                 'doc',
                 [
                     $command->from => null,
-                    $command->to => 'doc.' . $command->from,
+                    $command->to   => 'doc.'.$command->from,
                 ],
                 $collection
             )
@@ -88,6 +91,7 @@ class Grammar extends IlluminateGrammar
      *
      * @param string $collection
      * @param Fluent $command
+     *
      * @return Fluent
      */
     public function compileDropAttribute($collection, Fluent $command)
@@ -99,7 +103,7 @@ class Grammar extends IlluminateGrammar
 
         $data = [];
         foreach ($command->attributes as $attribute) {
-            $filter[] = ['doc.' . $attribute, '!=', null, 'OR'];
+            $filter[] = ['doc.'.$attribute, '!=', null, 'OR'];
             $data[$attribute] = null;
         }
         $aqb = (new QueryBuilder())->for('doc', $collection)
@@ -117,6 +121,7 @@ class Grammar extends IlluminateGrammar
      * Prepare a bindVar for inclusion in an AQL query.
      *
      * @param $attribute
+     *
      * @return string
      */
     public function wrapBindVar($attribute)

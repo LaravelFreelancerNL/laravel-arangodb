@@ -10,7 +10,6 @@ abstract class Model extends IlluminateModel
 {
     use Concerns\HasRelationships;
 
-
     /**
      * The primary key for the model.
      *
@@ -20,6 +19,7 @@ abstract class Model extends IlluminateModel
 
     /**
      * The primary key type.
+     *
      * @var string
      */
     protected $keyType = 'string';
@@ -29,6 +29,7 @@ abstract class Model extends IlluminateModel
      * Create a new Eloquent query builder for the model.
      *
      * @param QueryBuilder $query
+     *
      * @return Builder
      */
     public function newEloquentBuilder($query)
@@ -49,18 +50,19 @@ abstract class Model extends IlluminateModel
     /**
      * Qualify the given column name by the model's table.
      *
-     * @param  string  $column
+     * @param string $column
+     *
      * @return string
      */
     public function qualifyColumn($column)
     {
-        $tableReferer = Str::singular($this->getTable()) . 'Doc';
+        $tableReferer = Str::singular($this->getTable()).'Doc';
 
-        if (Str::startsWith($column, $tableReferer . '.')) {
+        if (Str::startsWith($column, $tableReferer.'.')) {
             return $column;
         }
 
-        return $tableReferer . '.' . $column;
+        return $tableReferer.'.'.$column;
     }
 
     /**
@@ -70,6 +72,6 @@ abstract class Model extends IlluminateModel
      */
     public function getForeignKey()
     {
-        return Str::snake(class_basename($this)) . $this->getKeyName();
+        return Str::snake(class_basename($this)).$this->getKeyName();
     }
 }

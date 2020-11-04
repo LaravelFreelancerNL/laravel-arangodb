@@ -8,6 +8,7 @@ use LaravelFreelancerNL\Aranguent\Schema\Builder;
 
 /**
  * Table handling:.
+ *
  * @method static Builder create($collection, Closure $callback, $options = [])
  * @method static Builder drop(string $collection)
  * @method static Builder dropIfExists(string $collection)
@@ -27,7 +28,8 @@ class Schema extends Facade
     /**
      * Get a schema builder instance for a connection.
      *
-     * @param  string  $name
+     * @param string $name
+     *
      * @return \Illuminate\Database\Schema\Builder
      */
     public static function connection($name)

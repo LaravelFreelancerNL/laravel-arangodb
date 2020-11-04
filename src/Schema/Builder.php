@@ -42,6 +42,7 @@ class Builder
      * Create a new database Schema manager.
      *
      * Builder constructor.
+     *
      * @param Connection $connection
      */
     public function __construct(Connection $connection)
@@ -60,9 +61,10 @@ class Builder
     /**
      * Create a new collection on the schema.
      *
-     * @param  string    $collection
-     * @param  Closure  $callback
-     * @param  array $config
+     * @param string  $collection
+     * @param Closure $callback
+     * @param array   $config
+     *
      * @return void
      */
     public function create($collection, Closure $callback, $config = [])
@@ -77,8 +79,9 @@ class Builder
     /**
      * Create a new command set with a Closure.
      *
-     * @param  string  $collection
-     * @param  \Closure|null  $callback
+     * @param string        $collection
+     * @param \Closure|null $callback
+     *
      * @return Blueprint
      */
     protected function createBlueprint($collection, Closure $callback = null)
@@ -101,7 +104,8 @@ class Builder
     /**
      * Set the Schema Blueprint resolver callback.
      *
-     * @param  Closure  $resolver
+     * @param Closure $resolver
+     *
      * @return void
      */
     public function blueprintResolver(Closure $resolver)
@@ -112,8 +116,9 @@ class Builder
     /**
      * Alias for table.
      *
-     * @param  string    $collection
-     * @param  Closure  $callback
+     * @param string  $collection
+     * @param Closure $callback
+     *
      * @return void
      */
     public function collection($collection, Closure $callback)
@@ -124,8 +129,9 @@ class Builder
     /**
      * Modify a table's schema.
      *
-     * @param  string    $table
-     * @param  Closure  $callback
+     * @param string  $table
+     * @param Closure $callback
+     *
      * @return void
      */
     public function table($table, Closure $callback)
@@ -137,8 +143,10 @@ class Builder
      * Drop a collection from the schema.
      *
      * @param string $collection
-     * @return void
+     *
      * @throws Exception
+     *
+     * @return void
      */
     public function drop($collection)
     {
@@ -166,6 +174,7 @@ class Builder
 
     /**
      * @param $collection
+     *
      * @throws Exception
      */
     public function dropIfExists($collection)
@@ -179,13 +188,15 @@ class Builder
      * Get all of the collection names for the database.
      *
      * @param array $options
-     * @return array
+     *
      * @throws ClientException
      * @throws Exception
+     *
+     * @return array
      */
     protected function getAllCollections(array $options = [])
     {
-        if (! isset($options['excludeSystem'])) {
+        if (!isset($options['excludeSystem'])) {
             $options['excludeSystem'] = true;
         }
 
@@ -197,9 +208,11 @@ class Builder
      * Alias for getAllCollections().
      *
      * @param array $options
-     * @return array
+     *
      * @throws ClientException
      * @throws Exception
+     *
+     * @return array
      */
     protected function getAllTables(array $options = [])
     {
@@ -208,8 +221,10 @@ class Builder
 
     /**
      * @param string $collection
-     * @return \ArangoDBClient\Collection
+     *
      * @throws Exception
+     *
+     * @return \ArangoDBClient\Collection
      */
     protected function getCollection($collection)
     {
@@ -221,8 +236,10 @@ class Builder
      *
      * @param $from
      * @param $to
-     * @return bool
+     *
      * @throws Exception
+     *
+     * @return bool
      */
     public function rename($from, $to)
     {
@@ -233,8 +250,10 @@ class Builder
      * Determine if the given collection exists.
      *
      * @param string $collection
-     * @return bool
+     *
      * @throws Exception
+     *
+     * @return bool
      */
     public function hasCollection(string $collection)
     {
@@ -245,8 +264,10 @@ class Builder
      * Alias for hasCollection.
      *
      * @param string $table
-     * @return bool
+     *
      * @throws Exception
+     *
+     * @return bool
      */
     public function hasTable($table)
     {
@@ -258,6 +279,7 @@ class Builder
      *
      * @param string $collection
      * @param string $attribute
+     *
      * @return bool
      */
     public function hasAttribute($collection, $attribute)
@@ -273,7 +295,8 @@ class Builder
      * Check if any document in the collection has the attribute.
      *
      * @param string $collection
-     * @param array $attributes
+     * @param array  $attributes
+     *
      * @return bool
      */
     public function hasAttributes($collection, $attributes)
@@ -291,8 +314,9 @@ class Builder
     /**
      * Alias for hasAttribute.
      *
-     * @param  string  $table
-     * @param  string  $column
+     * @param string $table
+     * @param string $column
+     *
      * @return bool
      */
     public function hasColumn($table, $column)
@@ -303,8 +327,9 @@ class Builder
     /**
      * Alias for hasAttributes.
      *
-     * @param  string  $table
-     * @param  array  $columns
+     * @param string $table
+     * @param array  $columns
+     *
      * @return bool
      */
     public function hasColumns($table, $columns)
@@ -316,6 +341,7 @@ class Builder
      * get information about the collection.
      *
      * @param $collection
+     *
      * @return mixed
      */
     public function getCollectionInfo($collection)
@@ -325,8 +351,9 @@ class Builder
 
     /**
      * @param string $name
-     * @param array $properties
+     * @param array  $properties
      * @param string $type
+     *
      * @throws ClientException
      * @throws Exception
      */
@@ -340,8 +367,10 @@ class Builder
 
     /**
      * @param string $name
-     * @return mixed
+     *
      * @throws Exception
+     *
+     * @return mixed
      */
     public function getView(string $name)
     {
@@ -350,7 +379,8 @@ class Builder
 
     /**
      * @param string $name
-     * @param array $properties
+     * @param array  $properties
+     *
      * @throws ClientException
      * @throws Exception
      */
@@ -362,6 +392,7 @@ class Builder
     /**
      * @param string $from
      * @param string $to
+     *
      * @throws Exception
      */
     public function renameView(string $from, string $to)
@@ -371,6 +402,7 @@ class Builder
 
     /**
      * @param string $name
+     *
      * @throws ClientException
      * @throws Exception
      */
@@ -394,6 +426,7 @@ class Builder
      *
      * @param $method
      * @param $args
+     *
      * @return null
      */
     public function __call($method, $args)

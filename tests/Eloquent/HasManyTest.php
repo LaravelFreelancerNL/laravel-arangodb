@@ -19,30 +19,30 @@ class HasManyTest extends TestCase
         Character::insert(
             [
                 [
-                    '_key' => 'NedStark',
-                    'name' => 'Ned',
-                    'surname' => 'Stark',
-                    'alive' => false,
-                    'age' => 41,
-                    'traits' => ['A', 'H', 'C', 'N', 'P'],
+                    '_key'          => 'NedStark',
+                    'name'          => 'Ned',
+                    'surname'       => 'Stark',
+                    'alive'         => false,
+                    'age'           => 41,
+                    'traits'        => ['A', 'H', 'C', 'N', 'P'],
                     'residence_key' => 'winterfell',
                 ],
                 [
-                    '_key' => 'SansaStark',
-                    'name' => 'Sansa',
-                    'surname' => 'Stark',
-                    'alive' => true,
-                    'age' => 13,
-                    'traits' => ["D", "I", "J"],
+                    '_key'          => 'SansaStark',
+                    'name'          => 'Sansa',
+                    'surname'       => 'Stark',
+                    'alive'         => true,
+                    'age'           => 13,
+                    'traits'        => ['D', 'I', 'J'],
                     'residence_key' => 'winterfell',
                 ],
                 [
-                    '_key' => 'RobertBaratheon',
-                    'name' => 'Robert',
-                    'surname' => 'Baratheon',
-                    'alive' => false,
-                    'age' => null,
-                    'traits' => ['A', 'H', 'C'],
+                    '_key'          => 'RobertBaratheon',
+                    'name'          => 'Robert',
+                    'surname'       => 'Baratheon',
+                    'alive'         => false,
+                    'age'           => null,
+                    'traits'        => ['A', 'H', 'C'],
                     'residence_key' => 'dragonstone',
                 ],
             ]
@@ -50,20 +50,20 @@ class HasManyTest extends TestCase
         Location::insert(
             [
                 [
-                    "_key" => "dragonstone",
-                    "name" => "Dragonstone",
-                    "coordinate" => [55.167801, -6.815096]
+                    '_key'       => 'dragonstone',
+                    'name'       => 'Dragonstone',
+                    'coordinate' => [55.167801, -6.815096],
                 ],
                 [
-                    "_key" => "winterfell",
-                    "name" => "Winterfell",
-                    "coordinate" => [54.368321, -5.581312],
-                    "led_by" => "SansaStark",
+                    '_key'       => 'winterfell',
+                    'name'       => 'Winterfell',
+                    'coordinate' => [54.368321, -5.581312],
+                    'led_by'     => 'SansaStark',
                 ],
                 [
-                    "_key" => "kingslanding",
-                    "name" => "King's Landing",
-                    "coordinate" => [42.639752, 18.110189]
+                    '_key'       => 'kingslanding',
+                    'name'       => "King's Landing",
+                    'coordinate' => [42.639752, 18.110189],
                 ],
             ]
         );
@@ -93,19 +93,19 @@ class HasManyTest extends TestCase
     {
         $character = Character::create(
             [
-                '_key' => 'TheonGreyjoy',
-                'name' => 'Theon',
+                '_key'    => 'TheonGreyjoy',
+                'name'    => 'Theon',
                 'surname' => 'Greyjoy',
-                'alive' => true,
-                'age' => 16,
-                'traits' => ["E", "R", "K"]
+                'alive'   => true,
+                'age'     => 16,
+                'traits'  => ['E', 'R', 'K'],
             ]
         );
         $location = Location::create(
             [
-                "_key" => "pyke",
-                "name" => "Pyke",
-                "coordinate" => [55.8833342, -6.1388807]
+                '_key'       => 'pyke',
+                'name'       => 'Pyke',
+                'coordinate' => [55.8833342, -6.1388807],
             ]
         );
 
@@ -125,20 +125,20 @@ class HasManyTest extends TestCase
     {
         $location = Location::create(
             [
-                "_key" => "pyke",
-                "name" => "Pyke",
-                "coordinate" => [55.8833342, -6.1388807]
+                '_key'       => 'pyke',
+                'name'       => 'Pyke',
+                'coordinate' => [55.8833342, -6.1388807],
             ]
         );
 
         $location->inhabitants()->create(
             [
-                '_key' => 'TheonGreyjoy',
-                'name' => 'Theon',
+                '_key'    => 'TheonGreyjoy',
+                'name'    => 'Theon',
                 'surname' => 'Greyjoy',
-                'alive' => true,
-                'age' => 16,
-                'traits' => ["E", "R", "K"]
+                'alive'   => true,
+                'age'     => 16,
+                'traits'  => ['E', 'R', 'K'],
             ]
         );
         $character = Character::find('TheonGreyjoy');
@@ -151,7 +151,7 @@ class HasManyTest extends TestCase
 
     public function testWith(): void
     {
-        $location = Location::with('inhabitants')->find("winterfell");
+        $location = Location::with('inhabitants')->find('winterfell');
 
         $this->assertInstanceOf(Character::class, $location->inhabitants->first());
         $this->assertEquals('NedStark', $location->inhabitants->first()->_key);

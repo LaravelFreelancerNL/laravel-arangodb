@@ -6,5 +6,4 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany as IlluminateBelongsToM
 
 class BelongsToMany extends IlluminateBelongsToMany
 {
-
 }

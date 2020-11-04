@@ -53,19 +53,20 @@ class Grammar extends FluentAqlGrammar
     ];
 
     protected $operatorTranslations = [
-        '=' => '==',
-        '<>' => '!=',
-        '<=>' => '==',
-        'rlike' => '=~',
-        'not rlike' => '!~',
-        'regexp' => '=~',
+        '='          => '==',
+        '<>'         => '!=',
+        '<=>'        => '==',
+        'rlike'      => '=~',
+        'not rlike'  => '!~',
+        'regexp'     => '=~',
         'not regexp' => '!~',
     ];
 
     protected $whereTypeOperators = [
-        'In' => 'IN',
+        'In'    => 'IN',
         'NotIn' => 'NOT IN',
     ];
+
     /**
      * Get the format for database stored dates.
      *
@@ -90,27 +91,30 @@ class Grammar extends FluentAqlGrammar
      * @param Builder $builder
      * @param $table
      * @param string $postfix
+     *
      * @return mixed
      */
     protected function generateTableAlias($builder, $table, $postfix = 'Doc')
     {
-        $builder->registerAlias($table, Str::singular($table) . $postfix);
+        $builder->registerAlias($table, Str::singular($table).$postfix);
 
         return $builder;
     }
 
     protected function prefixTable($table)
     {
-        return $this->tablePrefix . $table;
+        return $this->tablePrefix.$table;
     }
 
     /**
      * Compile an insert statement into AQL.
      *
      * @param Builder $builder
-     * @param array $values
-     * @return Builder
+     * @param array   $values
+     *
      * @throws BindException
+     *
+     * @return Builder
      */
     public function compileInsert(Builder $builder, array $values)
     {
@@ -138,9 +142,11 @@ class Grammar extends FluentAqlGrammar
      * Compile an insert and get ID statement into SQL.
      *
      * @param Builder $builder
-     * @param array $values
-     * @return Builder
+     * @param array   $values
+     *
      * @throws BindException
+     *
+     * @return Builder
      */
     public function compileInsertGetId(Builder $builder, $values)
     {
@@ -150,7 +156,8 @@ class Grammar extends FluentAqlGrammar
     /**
      * Compile a select query into AQL.
      *
-     * @param  Builder  $builder
+     * @param Builder $builder
+     *
      * @return Builder
      */
     public function compileSelect(Builder $builder)
@@ -178,6 +185,7 @@ class Grammar extends FluentAqlGrammar
      * Compile the components necessary for a select clause.
      *
      * @param Builder $builder
+     *
      * @return Builder
      */
     protected function compileComponents(Builder $builder)
@@ -187,8 +195,8 @@ class Grammar extends FluentAqlGrammar
             // see if that component exists. If it does we'll just call the compiler
             // function for the component which is responsible for making the SQL.
 
-            if (isset($builder->$component) && ! is_null($builder->$component)) {
-                $method = 'compile' . ucfirst($component);
+            if (isset($builder->$component) && !is_null($builder->$component)) {
+                $method = 'compile'.ucfirst($component);
 
                 $builder = $this->$method($builder, $builder->$component);
             }
@@ -201,7 +209,8 @@ class Grammar extends FluentAqlGrammar
      * Compile the "from" portion of the query -> FOR in AQL.
      *
      * @param Builder $builder
-     * @param string $table
+     * @param string  $table
+     *
      * @return Builder
      */
     protected function compileFrom(Builder $builder, $table)
@@ -218,14 +227,15 @@ class Grammar extends FluentAqlGrammar
     /**
      * Compile the "join" portions of the query.
      *
-     * @param  Builder  $builder
-     * @param  array  $joins
+     * @param Builder $builder
+     * @param array   $joins
+     *
      * @return string
      */
     protected function compileJoins(Builder $builder, $joins)
     {
         foreach ($joins as $join) {
-            $compileMethod = 'compile' . ucfirst($join->type) . 'Join';
+            $compileMethod = 'compile'.ucfirst($join->type).'Join';
             $builder = $this->$compileMethod($builder, $join);
         }
 
@@ -265,14 +275,13 @@ class Grammar extends FluentAqlGrammar
         return $builder;
     }
 
-
-//FOR user IN users
-//  LET friends = (
+    //FOR user IN users
+    //  LET friends = (
 //    FOR friend IN friends
 //      FILTER friend.user == user._key
 //      RETURN friend
-//  )
-//  FOR friendToJoin IN (
+    //  )
+    //  FOR friendToJoin IN (
 //    LENGTH(friends) > 0 ? friends :
 //      [ { /* no match exists */ } ]
 //    )
@@ -280,7 +289,6 @@ class Grammar extends FluentAqlGrammar
 //      user: user,
 //      friend: friend
 //    }
-
 
     protected function compileCrossJoin(Builder $builder, $join)
     {
@@ -291,12 +299,11 @@ class Grammar extends FluentAqlGrammar
         return $builder;
     }
 
-
-
     /**
      * Compile the "where" portions of the query.
      *
      * @param Builder $builder
+     *
      * @return Builder
      */
     protected function compileWheres(Builder $builder)
@@ -317,13 +324,13 @@ class Grammar extends FluentAqlGrammar
     /**
      * Get an array of all the where clauses for the query.
      *
-     * @param  \Illuminate\Database\Query\Builder  $builder
+     * @param \Illuminate\Database\Query\Builder $builder
+     *
      * @return array
      */
     protected function compileWheresToArray($builder)
     {
         $result = collect($builder->wheres)->map(function ($where) use ($builder) {
-
             if (isset($where['operator'])) {
                 $where['operator'] = $this->translateOperator($where['operator']);
             } else {
@@ -336,7 +343,7 @@ class Grammar extends FluentAqlGrammar
                 } else {
                     $where['column'] = $this->prefixAlias($builder, $builder->from, $where['column']);
                 }
-                $cleanWhere[0] = $where['column'] ;
+                $cleanWhere[0] = $where['column'];
             }
 
             if (isset($where['first'])) {
@@ -365,21 +372,24 @@ class Grammar extends FluentAqlGrammar
     /**
      * Compile an aggregated select clause.
      *
-     * @param  Builder  $builder
-     * @param  array  $aggregate
+     * @param Builder $builder
+     * @param array   $aggregate
+     *
      * @return Builder
      */
     protected function compileAggregate(Builder $builder, $aggregate)
     {
-        $method = 'compile' . ucfirst($aggregate['function']);
+        $method = 'compile'.ucfirst($aggregate['function']);
 
         return $this->$method($builder, $aggregate);
     }
 
     /**
      * Compile AQL for count aggregate.
+     *
      * @param Builder $builder
      * @param $aggregate
+     *
      * @return Builder
      */
     protected function compileCount(Builder $builder, $aggregate)
@@ -394,6 +404,7 @@ class Grammar extends FluentAqlGrammar
      *
      * @param Builder $builder
      * @param $aggregate
+     *
      * @return Builder
      */
     protected function compileMax(Builder $builder, $aggregate)
@@ -410,6 +421,7 @@ class Grammar extends FluentAqlGrammar
      *
      * @param Builder $builder
      * @param $aggregate
+     *
      * @return Builder
      */
     protected function compileMin(Builder $builder, $aggregate)
@@ -426,6 +438,7 @@ class Grammar extends FluentAqlGrammar
      *
      * @param Builder $builder
      * @param $aggregate
+     *
      * @return Builder
      */
     protected function compileAvg(Builder $builder, $aggregate)
@@ -442,6 +455,7 @@ class Grammar extends FluentAqlGrammar
      *
      * @param Builder $builder
      * @param $aggregate
+     *
      * @return Builder
      */
     protected function compileSum(Builder $builder, $aggregate)
@@ -457,12 +471,13 @@ class Grammar extends FluentAqlGrammar
      * Compile the "order by" portions of the query.
      *
      * @param Builder $builder
-     * @param array $orders
+     * @param array   $orders
+     *
      * @return Builder
      */
     protected function compileOrders(Builder $builder, $orders)
     {
-        if (! empty($orders)) {
+        if (!empty($orders)) {
             $orders = $this->compileOrdersToFlatArray($builder, $orders);
             $builder->aqb = $builder->aqb->sort(...$orders);
 
@@ -475,8 +490,9 @@ class Grammar extends FluentAqlGrammar
     /**
      * Compile the query orders to an array.
      *
-     * @param  Builder  $builder
-     * @param  array  $orders
+     * @param Builder $builder
+     * @param array   $orders
+     *
      * @return array
      */
     protected function compileOrdersToFlatArray(Builder $builder, $orders)
@@ -484,14 +500,14 @@ class Grammar extends FluentAqlGrammar
         $flatOrders = [];
 
         foreach ($orders as $order) {
-            if (! isset($order['type']) || $order['type'] != 'Raw') {
+            if (!isset($order['type']) || $order['type'] != 'Raw') {
                 $order['column'] = $this->prefixAlias($builder, $builder->from, $order['column']);
             }
 
-            $flatOrders[] =  $order['column'] ;
+            $flatOrders[] = $order['column'];
 
             if (isset($order['direction'])) {
-                $flatOrders[] =  $order['direction'] ;
+                $flatOrders[] = $order['direction'];
             }
         }
 
@@ -503,7 +519,8 @@ class Grammar extends FluentAqlGrammar
      * We are handling this first by saving the offset which will be used by the FluentAQL's limit function.
      *
      * @param Builder $builder
-     * @param int $offset
+     * @param int     $offset
+     *
      * @return Builder
      */
     protected function compileOffset(Builder $builder, $offset)
@@ -517,7 +534,8 @@ class Grammar extends FluentAqlGrammar
      * Compile the "limit" portions of the query.
      *
      * @param Builder $builder
-     * @param int $limit
+     * @param int     $limit
+     *
      * @return Builder
      */
     protected function compileLimit(Builder $builder, $limit)
@@ -536,7 +554,8 @@ class Grammar extends FluentAqlGrammar
      * Compile the "RETURN" portion of the query.
      *
      * @param Builder $builder
-     * @param array $columns
+     * @param array   $columns
+     *
      * @return Builder
      */
     protected function compileColumns(Builder $builder, array $columns): Builder
@@ -546,7 +565,7 @@ class Grammar extends FluentAqlGrammar
         $doc = $builder->getAlias($builder->from);
         foreach ($columns as $column) {
             if ($column != null && $column != '*') {
-                $values[$column] = $doc . '.' . $column;
+                $values[$column] = $doc.'.'.$column;
             }
         }
         if ($builder->aggregate !== null) {
@@ -555,7 +574,7 @@ class Grammar extends FluentAqlGrammar
 
         if (empty($values)) {
             $values = $doc;
-            if (is_array($builder->joins) && ! empty($builder->joins)) {
+            if (is_array($builder->joins) && !empty($builder->joins)) {
                 $values = $this->mergeJoinResults($builder, $values);
             }
         }
@@ -581,7 +600,8 @@ class Grammar extends FluentAqlGrammar
      * Compile an update statement into SQL.
      *
      * @param Builder $builder
-     * @param array $values
+     * @param array   $values
+     *
      * @return Builder
      */
     public function compileUpdate(Builder $builder, array $values)
@@ -603,7 +623,8 @@ class Grammar extends FluentAqlGrammar
      * Compile a delete statement into SQL.
      *
      * @param Builder $builder
-     * @param null $_key
+     * @param null    $_key
+     *
      * @return Builder
      */
     public function compileDelete(Builder $builder, $_key = null)
@@ -612,7 +633,7 @@ class Grammar extends FluentAqlGrammar
         $builder = $this->generateTableAlias($builder, $table);
         $tableAlias = $builder->getAlias($table);
 
-        if (! is_null($_key)) {
+        if (!is_null($_key)) {
             $builder->aqb = $builder->aqb->remove((string) $_key, $table)->get();
 
             return $builder;
@@ -632,6 +653,7 @@ class Grammar extends FluentAqlGrammar
      * Compile the random statement into SQL.
      *
      * @param Builder $builder
+     *
      * @return FunctionExpression;
      */
     public function compileRandom(Builder $builder)
@@ -643,6 +665,7 @@ class Grammar extends FluentAqlGrammar
      * Translate sql operators to their AQL equivalent where possible.
      *
      * @param string $operator
+     *
      * @return mixed|string
      */
     private function translateOperator(string $operator)
@@ -659,24 +682,25 @@ class Grammar extends FluentAqlGrammar
         if (isset($this->whereTypeOperators[$type])) {
             return $this->whereTypeOperators[$type];
         }
+
         return '==';
     }
 
-
     /**
      * @param Builder $builder
-     * @param string $target
-     * @param string $value
+     * @param string  $target
+     * @param string  $value
+     *
      * @return Builder
      */
     protected function prefixAlias(Builder $builder, string $target, string $value): string
     {
         $alias = $builder->getAlias($target);
 
-        if (Str::startsWith($value, $alias . '.')) {
+        if (Str::startsWith($value, $alias.'.')) {
             return $value;
         }
 
-        return $alias . '.' . $value;
+        return $alias.'.'.$value;
     }
 }

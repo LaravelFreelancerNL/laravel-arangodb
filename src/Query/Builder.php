@@ -35,6 +35,7 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Alias' are AQL variables
      * Sticking with the SQL based naming as this is the Laravel driver.
+     *
      * @var QueryBuilder
      */
     protected $aliasRegistry = [];
@@ -44,9 +45,9 @@ class Builder extends IlluminateQueryBuilder
      * Create a new query builder instance.
      *
      * @param ConnectionInterface $connection
-     * @param Grammar $grammar
-     * @param Processor $processor
-     * @param QueryBuilder|null $aqb
+     * @param Grammar             $grammar
+     * @param Processor           $processor
+     * @param QueryBuilder|null   $aqb
      */
     public function __construct(
         ConnectionInterface $connection,
@@ -57,7 +58,7 @@ class Builder extends IlluminateQueryBuilder
         $this->connection = $connection;
         $this->grammar = $grammar ?: $connection->getQueryGrammar();
         $this->processor = $processor ?: $connection->getPostProcessor();
-        if (! $aqb instanceof QueryBuilder) {
+        if (!$aqb instanceof QueryBuilder) {
             $aqb = new QueryBuilder();
         }
         $this->aqb = $aqb;
@@ -79,7 +80,8 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Run a pagination count query.
      *
-     * @param  array  $columns
+     * @param array $columns
+     *
      * @return array
      */
     protected function runPaginationCountQuery($columns = ['*'])
@@ -108,9 +110,12 @@ class Builder extends IlluminateQueryBuilder
 
     /**
      * Insert a new record into the database.
+     *
      * @param array $values
-     * @return bool
+     *
      * @throws BindException
+     *
+     * @return bool
      */
     public function insert(array $values): bool
     {
@@ -123,23 +128,27 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Insert a new record and get the value of the primary key.
      *
-     * @param array $values
+     * @param array       $values
      * @param string|null $sequence
-     * @return int
+     *
      * @throws BindException
+     *
+     * @return int
      */
     public function insertGetId(array $values, $sequence = null)
     {
         $response = $this->getConnection()->execute($this->grammar->compileInsertGetId($this, $values, $sequence)->aqb);
         $this->aqb = new QueryBuilder();
+
         return (is_array($response)) ? end($response) : $response;
     }
 
     /**
      * Set the table which the query is targeting.
      *
-     * @param  Closure|Builder|string  $table
-     * @param  string|null  $as
+     * @param Closure|Builder|string $table
+     * @param string|null            $as
+     *
      * @return $this
      */
     public function from($table, $as = null)
@@ -163,7 +172,8 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Execute the query as a "select" statement.
      *
-     * @param  array|string  $columns
+     * @param array|string $columns
+     *
      * @return Collection
      */
     public function get($columns = ['*'])
@@ -178,7 +188,8 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Update a record in the database.
      *
-     * @param  array  $values
+     * @param array $values
+     *
      * @return int
      */
     public function update(array $values)
@@ -192,7 +203,8 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Delete a record from the database.
      *
-     * @param  mixed  $_key
+     * @param mixed $_key
+     *
      * @return int
      */
     public function delete($_key = null)
@@ -207,11 +219,12 @@ class Builder extends IlluminateQueryBuilder
      * @param Builder $builder
      * @param $table
      * @param string $postfix
+     *
      * @return mixed
      */
     public function generateTableAlias($table, $postfix = 'Doc')
     {
-        $alias = Str::singular($table) . $postfix;
+        $alias = Str::singular($table).$postfix;
         $this->registerAlias($table, $alias);
 
         return $alias;
@@ -223,13 +236,14 @@ class Builder extends IlluminateQueryBuilder
      */
     public function registerAlias(string $table, string $alias): void
     {
-        if (! isset($this->aliasRegistry[$table])) {
+        if (!isset($this->aliasRegistry[$table])) {
             $this->aliasRegistry[$table] = $alias;
         }
     }
 
     /**
      * @param string $table
+     *
      * @return string
      */
     public function getAlias(string $table): ?string
@@ -240,6 +254,7 @@ class Builder extends IlluminateQueryBuilder
         if (in_array($table, $this->aliasRegistry)) {
             return $table;
         }
+
         return null;
     }
 
@@ -259,8 +274,9 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Execute an aggregate function on the database.
      *
-     * @param  string  $function
-     * @param  array   $columns
+     * @param string $function
+     * @param array  $columns
+     *
      * @return mixed
      */
     public function aggregate($function, $columns = ['*'])
@@ -271,21 +287,21 @@ class Builder extends IlluminateQueryBuilder
 
         $this->aqb = new QueryBuilder();
 
-        if (! $results->isEmpty()) {
+        if (!$results->isEmpty()) {
             return array_change_key_case((array) $results[0])['aggregate'];
         }
 
         return false;
     }
 
-
     /**
      * Add a basic where clause to the query.
      *
      * @param Closure|string|array $column
-     * @param mixed $operator
-     * @param mixed $value
-     * @param string $boolean
+     * @param mixed                $operator
+     * @param mixed                $value
+     * @param string               $boolean
+     *
      * @return Builder
      */
     public function where($column, $operator = null, $value = null, $boolean = 'and')
@@ -351,7 +367,7 @@ class Builder extends IlluminateQueryBuilder
             'boolean'
         );
 
-        if (! $value instanceof Expression) {
+        if (!$value instanceof Expression) {
             $this->addBinding($value, 'where');
         }
 
@@ -361,9 +377,10 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Add a "where null" clause to the query.
      *
-     * @param  string|array  $columns
-     * @param  string  $boolean
-     * @param  bool    $not
+     * @param string|array $columns
+     * @param string       $boolean
+     * @param bool         $not
+     *
      * @return $this
      */
     public function whereNull($columns, $boolean = 'and', $not = false)
@@ -382,24 +399,26 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Determine if the given operator is supported.
      *
-     * @param  string  $operator
+     * @param string $operator
+     *
      * @return bool
      */
     protected function invalidOperator($operator)
     {
-        return ! in_array(strtolower($operator), $this->operators, true) &&
-            ! isset($this->grammar->getOperators()[strtoupper($operator)]);
+        return !in_array(strtolower($operator), $this->operators, true) &&
+            !isset($this->grammar->getOperators()[strtoupper($operator)]);
     }
 
     /**
      * Add a join clause to the query.
      *
-     * @param  string  $table
-     * @param  \Closure|string  $first
-     * @param  string|null  $operator
-     * @param  string|null  $second
-     * @param  string  $type
-     * @param  bool  $where
+     * @param string          $table
+     * @param \Closure|string $first
+     * @param string|null     $operator
+     * @param string|null     $second
+     * @param string          $type
+     * @param bool            $where
+     *
      * @return $this
      */
     public function join($table, $first, $operator = null, $second = null, $type = 'inner', $where = false)
@@ -438,13 +457,13 @@ class Builder extends IlluminateQueryBuilder
         return $this;
     }
 
-
     /**
      * Add an "or where" clause to the query.
      *
-     * @param Closure|string|array  $column
-     * @param  mixed  $operator
-     * @param  mixed  $value
+     * @param Closure|string|array $column
+     * @param mixed                $operator
+     * @param mixed                $value
+     *
      * @return IlluminateQueryBuilder|static
      */
     public function orWhere($column, $operator = null, $value = null)
@@ -455,22 +474,23 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Add an "order by" clause to the query.
      *
-     * @param  Closure|IlluminateQueryBuilder|string  $column
-     * @param  string  $direction
-     * @return $this
+     * @param Closure|IlluminateQueryBuilder|string $column
+     * @param string                                $direction
      *
      * @throws InvalidArgumentException
+     *
+     * @return $this
      */
     public function orderBy($column, $direction = 'asc')
     {
         if ($this->isQueryable($column)) {
             [$query, $bindings] = $this->createSub($column);
 
-            $column = new Expression('(' . $query . ')');
+            $column = new Expression('('.$query.')');
         }
 
         $this->{$this->unions ? 'unionOrders' : 'orders'}[] = [
-            'column' => $column,
+            'column'    => $column,
             'direction' => $direction,
         ];
 
@@ -481,7 +501,8 @@ class Builder extends IlluminateQueryBuilder
      * Add a raw "order by" clause to the query.
      *
      * @param string|ExpressionInterface $aql
-     * @param array $bindings
+     * @param array                      $bindings
+     *
      * @return $this
      */
     public function orderByRaw($aql, $bindings = [])
@@ -496,7 +517,8 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Put the query's results in random order.
      *
-     * @param  string  $seed
+     * @param string $seed
+     *
      * @return $this
      */
     public function inRandomOrder($seed = '')
@@ -507,9 +529,10 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Get a new join clause.
      *
-     * @param  IlluminateQueryBuilder  $parentQuery
-     * @param  string  $type
-     * @param  string  $table
+     * @param IlluminateQueryBuilder $parentQuery
+     * @param string                 $type
+     * @param string                 $table
+     *
      * @return JoinClause
      */
     protected function newJoinClause(IlluminateQueryBuilder $parentQuery, $type, $table)

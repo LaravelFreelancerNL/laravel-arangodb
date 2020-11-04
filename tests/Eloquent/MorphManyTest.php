@@ -66,7 +66,7 @@ class MorphManyTest extends TestCase
     public function testSave()
     {
         $location = Location::find('winterfell');
-        $this->assertEquals("TheonGreyjoy", $location->capturable_id);
+        $this->assertEquals('TheonGreyjoy', $location->capturable_id);
 
         $character = Character::find('RamsayBolton');
         $character->captured()->save($location);
@@ -78,7 +78,7 @@ class MorphManyTest extends TestCase
 
     public function testWith(): void
     {
-        $character = Character::with('captured')->find("TheonGreyjoy");
+        $character = Character::with('captured')->find('TheonGreyjoy');
 
         $this->assertInstanceOf(Location::class, $character->captured->first());
         $this->assertEquals('winterfell', $character->captured->first()->_key);

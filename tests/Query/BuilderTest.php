@@ -172,7 +172,7 @@ class BuilderTest extends TestCase
 
         $builder->select()->from('users')->where('country', 'IN', ['The Netherlands', 'Germany', 'Great-Britain']);
         $this->assertSame(
-            'FOR userDoc IN users FILTER userDoc.country IN [@' . $builder->aqb->getQueryId() . '_1,"Germany","Great-Britain"] RETURN userDoc',
+            'FOR userDoc IN users FILTER userDoc.country IN [@'.$builder->aqb->getQueryId().'_1,"Germany","Great-Britain"] RETURN userDoc',
             $builder->toSql()
         );
     }
@@ -276,8 +276,8 @@ class BuilderTest extends TestCase
                 $perPage,
                 $page,
                 [
-                'path' => $path,
-                'pageName' => $pageName,
+                    'path'     => $path,
+                    'pageName' => $pageName,
                 ]
             ),
             $result
@@ -299,7 +299,6 @@ class BuilderTest extends TestCase
 
         $this->assertEquals('userDoc', $result);
     }
-
 
     /**
      * @return m\MockInterface

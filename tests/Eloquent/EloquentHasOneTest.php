@@ -2,12 +2,12 @@
 
 namespace Illuminate\Tests\Database;
 
-use LaravelFreelancerNL\Aranguent\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 use Illuminate\Database\Query\Expression;
+use LaravelFreelancerNL\Aranguent\Eloquent\Builder;
+use LaravelFreelancerNL\Aranguent\Eloquent\Model;
+use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
 

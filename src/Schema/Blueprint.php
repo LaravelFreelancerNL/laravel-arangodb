@@ -95,10 +95,11 @@ class Blueprint
      * Create a new schema blueprint.
      *
      * Blueprint constructor.
-     * @param string $table
+     *
+     * @param string            $table
      * @param CollectionHandler $collectionHandler
-     * @param Closure|null $callback
-     * @param string $prefix
+     * @param Closure|null      $callback
+     * @param string            $prefix
      */
     public function __construct($table, $collectionHandler, Closure $callback = null, $prefix = '')
     {
@@ -108,7 +109,7 @@ class Blueprint
 
         $this->prefix = $prefix;
 
-        if (! is_null($callback)) {
+        if (!is_null($callback)) {
             $callback($this);
         }
     }
@@ -117,14 +118,15 @@ class Blueprint
      * Execute the blueprint against the database.
      *
      * @param Connection $connection
-     * @param Grammar $grammar
+     * @param Grammar    $grammar
+     *
      * @return void
      */
     public function build(Connection $connection, Grammar $grammar)
     {
         $this->connection = $connection;
 
-        if (! isset($grammar)) {
+        if (!isset($grammar)) {
             $this->grammar = $connection->getSchemaGrammar();
         }
 
@@ -141,11 +143,12 @@ class Blueprint
      * Generate the compilation method name and call it if method exists in the Grammar object.
      *
      * @param $command
+     *
      * @return mixed
      */
     public function compileAqlCommand($command)
     {
-        $compileMethod = 'compile' . ucfirst($command->name);
+        $compileMethod = 'compile'.ucfirst($command->name);
         if (method_exists($this->grammar, $compileMethod)) {
             return $this->grammar->$compileMethod($this->table, $command);
         }
@@ -158,8 +161,8 @@ class Blueprint
      */
     public function executeCommand($command)
     {
-        $executeNamedMethod = 'execute' . ucfirst($command->name) . 'Command';
-        $executeHandlerMethod = 'execute' . ucfirst($command->handler) . 'Command';
+        $executeNamedMethod = 'execute'.ucfirst($command->name).'Command';
+        $executeHandlerMethod = 'execute'.ucfirst($command->handler).'Command';
         if (method_exists($this, $executeNamedMethod)) {
             $this->$executeNamedMethod($command);
         } elseif (method_exists($this, $executeHandlerMethod)) {
@@ -180,7 +183,7 @@ class Blueprint
     public function executeCollectionCommand($command)
     {
         if ($this->connection->pretending()) {
-            $this->connection->logQuery('/* ' . $command->explanation . " */\n", []);
+            $this->connection->logQuery('/* '.$command->explanation." */\n", []);
 
             return;
         }
@@ -194,12 +197,13 @@ class Blueprint
      * Solely provides feedback to the developer in pretend mode.
      *
      * @param $command
+     *
      * @return null
      */
     public function executeIgnoreCommand($command)
     {
         if ($this->connection->pretending()) {
-            $this->connection->logQuery('/* ' . $command->explanation . " */\n", []);
+            $this->connection->logQuery('/* '.$command->explanation." */\n", []);
 
             return;
         }
@@ -208,8 +212,9 @@ class Blueprint
     /**
      * Add a new command to the blueprint.
      *
-     * @param  string  $name
-     * @param  array  $parameters
+     * @param string $name
+     * @param array  $parameters
+     *
      * @return Fluent
      */
     protected function addCommand($name, array $parameters = [])
@@ -222,8 +227,9 @@ class Blueprint
     /**
      * Create a new Fluent command.
      *
-     * @param  string  $name
-     * @param  array  $parameters
+     * @param string $name
+     * @param array  $parameters
+     *
      * @return Fluent
      */
     protected function createCommand($name, array $parameters = [])
@@ -246,6 +252,7 @@ class Blueprint
      *
      * @param $method
      * @param $args
+     *
      * @return Blueprint
      */
     public function __call($method, $args)

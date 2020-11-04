@@ -3,11 +3,11 @@
 namespace Tests;
 
 use ArangoDBClient\Database;
-use Tests\setup\database\Seeds\DatabaseSeeder;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\AranguentServiceProvider;
 use LaravelFreelancerNL\Aranguent\Migrations\DatabaseMigrationRepository;
+use Tests\setup\database\Seeds\DatabaseSeeder;
 
 abstract class TestCase extends \Orchestra\Testbench\TestCase
 {
@@ -28,7 +28,8 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     /**
      * Define environment setup.
      *
-     * @param  Application  $app
+     * @param Application $app
+     *
      * @return void
      */
     protected function getEnvironmentSetUp($app)
@@ -54,20 +55,20 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->withFactories(realpath(__DIR__ . '/setup/database/factories'));
+        $this->withFactories(realpath(__DIR__.'/setup/database/factories'));
 
-        $this->artisan('aranguent:convert-migrations', ['--realpath' => true, '--path' => __DIR__ . '/../vendor/orchestra/testbench-core/laravel/migrations/'])->run();
+        $this->artisan('aranguent:convert-migrations', ['--realpath' => true, '--path' => __DIR__.'/../vendor/orchestra/testbench-core/laravel/migrations/'])->run();
 
         //Running migrations without loading them through testbench as it does something weird which doesn't save the new collections
         $this->installMigrateIfNotExists();
 
         $this->artisan('migrate', [
-            '--path' => realpath(__DIR__ . '/setup/database/migrations'),
+            '--path'     => realpath(__DIR__.'/setup/database/migrations'),
             '--realpath' => true,
         ])->run();
 
         $this->artisan('migrate', [
-            '--path' => realpath(__DIR__ . '/setup/database/migrations'),
+            '--path'     => realpath(__DIR__.'/setup/database/migrations'),
             '--realpath' => true,
         ])->run();
 
@@ -97,7 +98,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     {
         $databaseHandler = new Database();
         $response = $databaseHandler->listUserDatabases($this->connection->getArangoConnection());
-        if (! in_array($database, $response['result'])) {
+        if (!in_array($database, $response['result'])) {
             $databaseHandler->create($this->connection->getArangoConnection(), $database);
 
             return true;
@@ -109,7 +110,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     private function installMigrateIfNotExists()
     {
         $collections = $this->collectionHandler->getAllCollections(['excludeSystem' => true]);
-        if (! isset($collections['migrations'])) {
+        if (!isset($collections['migrations'])) {
             $this->artisan('migrate:install', [])->run();
         }
     }

@@ -14,6 +14,7 @@ class ConnectionTest extends TestCase
 
     /**
      * test connection.
+     *
      * @test
      */
     public function connection()
@@ -25,6 +26,7 @@ class ConnectionTest extends TestCase
 
     /**
      * begin transaction.
+     *
      * @test
      */
     public function begin_transaction()
@@ -41,13 +43,14 @@ class ConnectionTest extends TestCase
 
     /**
      * add a command to the transaction.
+     *
      * @test
      */
     public function add_transaction_command()
     {
         $command = new IlluminateFluent([
-            'name' => 'testCommandQuery',
-            'command' => "db._query('INSERT {\"name\": \"Robert\", \"surname\": \"Baratheon\", \"alive\": @value, \"traits\": [\"A\",\"H\",\"C\"] } INTO migrations', {'value' : true});",
+            'name'        => 'testCommandQuery',
+            'command'     => "db._query('INSERT {\"name\": \"Robert\", \"surname\": \"Baratheon\", \"alive\": @value, \"traits\": [\"A\",\"H\",\"C\"] } INTO migrations', {'value' : true});",
             'collections' => ['write' => 'migrations'],
         ]);
 
@@ -66,13 +69,14 @@ class ConnectionTest extends TestCase
 
     /**
      * compile action.
+     *
      * @test
      */
     public function compile_action()
     {
         $command = new IlluminateFluent([
-            'name' => 'testCommandQuery',
-            'command' => "db._query('INSERT {\"name\": \"Robert\", \"surname\": \"Baratheon\", \"alive\": false, \"traits\": [\"A\",\"H\",\"C\"] } INTO Characters', {'value' : 1});",
+            'name'        => 'testCommandQuery',
+            'command'     => "db._query('INSERT {\"name\": \"Robert\", \"surname\": \"Baratheon\", \"alive\": false, \"traits\": [\"A\",\"H\",\"C\"] } INTO Characters', {'value' : 1});",
             'collections' => ['write' => 'Characters'],
         ]);
         $this->connection->beginTransaction();
@@ -88,6 +92,7 @@ class ConnectionTest extends TestCase
 
     /**
      * commit fails if committed too soon.
+     *
      * @test
      */
     public function commit_fails_if_committed_too_soon()
@@ -103,18 +108,19 @@ class ConnectionTest extends TestCase
 
     /**
      * commit a transaction.
+     *
      * @test
      */
     public function commit_a_transaction()
     {
         $command1 = new IlluminateFluent([
-            'name' => 'testCommandQuery',
-            'command' => "db._query('INSERT {\"name\": \"Robert\", \"surname\": \"Baratheon\", \"alive\": @value, \"traits\": [\"A\",\"H\",\"C\"] } INTO migrations', {'value' : true});",
+            'name'        => 'testCommandQuery',
+            'command'     => "db._query('INSERT {\"name\": \"Robert\", \"surname\": \"Baratheon\", \"alive\": @value, \"traits\": [\"A\",\"H\",\"C\"] } INTO migrations', {'value' : true});",
             'collections' => ['write' => 'migrations'],
         ]);
         $command2 = new IlluminateFluent([
-            'name' => 'testCommandQuery',
-            'command' => "db._query('FOR c IN migrations RETURN c');",
+            'name'        => 'testCommandQuery',
+            'command'     => "db._query('FOR c IN migrations RETURN c');",
             'collections' => ['read' => 'migrations'],
         ]);
 
@@ -130,6 +136,7 @@ class ConnectionTest extends TestCase
 
     /**
      * add query to transaction.
+     *
      * @test
      */
     public function add_query_to_transaction()
@@ -144,7 +151,7 @@ class ConnectionTest extends TestCase
                      } IN @@insertCollection
             ';
         $bindings = [
-            '@@readCollection' => 'products',
+            '@@readCollection'   => 'products',
             '@@insertCollection' => 'recommendations',
         ];
 
@@ -159,6 +166,7 @@ class ConnectionTest extends TestCase
 
     /**
      * collection extraction from transactional queries.
+     *
      * @test
      */
     public function collection_extraction_from_transactional_queries()
@@ -186,7 +194,7 @@ class ConnectionTest extends TestCase
                 RETURN p
         ";
         $bindings = [
-            '@@readCollection' => 'products',
+            '@@readCollection'   => 'products',
             '@@insertCollection' => 'recommendations',
         ];
 
@@ -209,7 +217,7 @@ class ConnectionTest extends TestCase
     public function testChangeDatabaseName()
     {
         $initialName = $this->connection->getDatabaseName();
-        $newName = $initialName . 'New';
+        $newName = $initialName.'New';
         $this->connection->setDatabaseName($newName);
         $currentName = $this->connection->getDatabaseName();
 
@@ -219,6 +227,7 @@ class ConnectionTest extends TestCase
 
     /**
      * explain a query.
+     *
      * @test
      */
     public function explain_a_query()

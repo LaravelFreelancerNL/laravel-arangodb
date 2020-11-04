@@ -26,7 +26,6 @@ class Character extends Model
         'residence_key',
     ];
 
-
     /**
      * Get the last known residence of the character.
      */

@@ -28,6 +28,7 @@ class GrammarTest extends TestCase
 
     /**
      * Compile has attribute returns the correct data.
+     *
      * @test
      */
     public function compile_has_attribute_returns_the_correct_data()
@@ -41,7 +42,7 @@ class GrammarTest extends TestCase
 
         $parameters['name'] = 'hasAttribute';
         $parameters['handler'] = 'aql';
-        $parameters['explanation'] = "Checking if any document within the collection has the '" . implode(', ', (array) $attribute) . "' attribute(s).";
+        $parameters['explanation'] = "Checking if any document within the collection has the '".implode(', ', (array) $attribute)."' attribute(s).";
         $parameters['attribute'] = $attribute;
         $command = new Fluent($parameters);
         $results = $this->grammar->compileHasAttribute($collection, $command);
@@ -51,6 +52,7 @@ class GrammarTest extends TestCase
 
     /**
      * Compile drop attribute returns correct data.
+     *
      * @test
      */
     public function compile_drop_attribute_returns_correct_data()
@@ -65,7 +67,7 @@ class GrammarTest extends TestCase
         $parameters['name'] = 'dropAttribute';
         $parameters['handler'] = 'aql';
         $parameters['attributes'] = $attributes;
-        $parameters['explanation'] = 'Drop the following attribute(s): ' . implode(',', $attributes) . '.';
+        $parameters['explanation'] = 'Drop the following attribute(s): '.implode(',', $attributes).'.';
         $command = new Fluent($parameters);
         $results = $this->grammar->compileDropAttribute($collection, $command);
         $this->assertEquals(
@@ -77,6 +79,7 @@ class GrammarTest extends TestCase
 
     /**
      * Compile rename attribute returns correct data.
+     *
      * @test
      */
     public function compile_rename_attribute_returns_correct_data()
@@ -101,12 +104,13 @@ class GrammarTest extends TestCase
 
     /**
      * Attributes are correctly wrapped.
+     *
      * @test
      */
     public function attributes_are_correctly_wrapped()
     {
         $attributes = [
-            'firstAttribute' => 'firstAttribute',
+            'firstAttribute'   => 'firstAttribute',
             '@secondAttribute' => '`@secondAttribute`',
         ];
         foreach (array_keys($attributes) as $attribute) {

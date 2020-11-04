@@ -3,8 +3,6 @@
 namespace Tests\Eloquent;
 
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Date;
-use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use Mockery as M;
 use Tests\setup\Models\Character;
@@ -20,30 +18,30 @@ class BelongsToTest extends TestCase
 
         $characters = [
             [
-                '_key' => 'NedStark',
-                'name' => 'Ned',
-                'surname' => 'Stark',
-                'alive' => false,
-                'age' => 41,
-                'traits' => ['A', 'H', 'C', 'N', 'P'],
+                '_key'         => 'NedStark',
+                'name'         => 'Ned',
+                'surname'      => 'Stark',
+                'alive'        => false,
+                'age'          => 41,
+                'traits'       => ['A', 'H', 'C', 'N', 'P'],
                 'location_key' => 'kingslanding',
             ],
             [
-                '_key' => 'SansaStark',
-                'name' => 'Sansa',
-                'surname' => 'Stark',
-                'alive' => true,
-                'age' => 13,
-                'traits' => ["D", "I", "J"],
+                '_key'         => 'SansaStark',
+                'name'         => 'Sansa',
+                'surname'      => 'Stark',
+                'alive'        => true,
+                'age'          => 13,
+                'traits'       => ['D', 'I', 'J'],
                 'location_key' => 'winterfell',
             ],
             [
-                '_key' => 'RobertBaratheon',
-                'name' => 'Robert',
-                'surname' => 'Baratheon',
-                'alive' => false,
-                'age' => null,
-                'traits' => ['A', 'H', 'C'],
+                '_key'         => 'RobertBaratheon',
+                'name'         => 'Robert',
+                'surname'      => 'Baratheon',
+                'alive'        => false,
+                'age'          => null,
+                'traits'       => ['A', 'H', 'C'],
                 'location_key' => 'dragonstone',
             ],
         ];
@@ -51,20 +49,20 @@ class BelongsToTest extends TestCase
 
         $locations = [
             [
-                "_key" => "dragonstone",
-                "name" => "Dragonstone",
-                "coordinate" => [55.167801, -6.815096]
+                '_key'       => 'dragonstone',
+                'name'       => 'Dragonstone',
+                'coordinate' => [55.167801, -6.815096],
             ],
             [
-                "_key" => "winterfell",
-                "name" => "Winterfell",
-                "coordinate" => [54.368321, -5.581312],
-                "led_by" => "SansaStark",
+                '_key'       => 'winterfell',
+                'name'       => 'Winterfell',
+                'coordinate' => [54.368321, -5.581312],
+                'led_by'     => 'SansaStark',
             ],
             [
-                "_key" => "kingslanding",
-                "name" => "King's Landing",
-                "coordinate" => [42.639752, 18.110189]
+                '_key'       => 'kingslanding',
+                'name'       => "King's Landing",
+                'coordinate' => [42.639752, 18.110189],
             ],
         ];
         Location::insert($locations);
@@ -103,19 +101,19 @@ class BelongsToTest extends TestCase
     {
         $character = Character::create(
             [
-                '_key' => 'TheonGreyjoy',
-                'name' => 'Theon',
+                '_key'    => 'TheonGreyjoy',
+                'name'    => 'Theon',
                 'surname' => 'Greyjoy',
-                'alive' => true,
-                'age' => 16,
-                'traits' => ["E", "R", "K"]
+                'alive'   => true,
+                'age'     => 16,
+                'traits'  => ['E', 'R', 'K'],
             ]
         );
         $location = new Location(
             [
-                "_key" => "pyke",
-                "name" => "Pyke",
-                "coordinate" => [55.8833342, -6.1388807]
+                '_key'       => 'pyke',
+                'name'       => 'Pyke',
+                'coordinate' => [55.8833342, -6.1388807],
             ]
         );
 
@@ -145,7 +143,7 @@ class BelongsToTest extends TestCase
 
     public function testWith(): void
     {
-        $location = Location::with('leader')->find("winterfell");
+        $location = Location::with('leader')->find('winterfell');
 
         $this->assertInstanceOf(Character::class, $location->leader);
         $this->assertEquals('SansaStark', $location->leader->_key);

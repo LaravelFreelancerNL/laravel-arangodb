@@ -6,7 +6,6 @@ use Illuminate\Support\Carbon;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use Mockery as M;
 use Tests\Setup\Models\Character;
-use Tests\Setup\Models\Location;
 use Tests\TestCase;
 
 class BuilderTest extends TestCase
@@ -25,17 +24,18 @@ class BuilderTest extends TestCase
         Model::unsetEventDispatcher();
         M::close();
     }
+
     public function testInsertHandlesArrayAttributes()
     {
         $character = [
             'en' => [
-                'titles' => ['Lord of Winterfell', 'Hand of the king']
+                'titles' => ['Lord of Winterfell', 'Hand of the king'],
             ],
-            '_key' => 'NedStark',
-            'name' => 'Ned',
-            'surname' => 'Stark',
-            'alive' => false,
-            'age' => 41,
+            '_key'         => 'NedStark',
+            'name'         => 'Ned',
+            'surname'      => 'Stark',
+            'alive'        => false,
+            'age'          => 41,
             'location_key' => 'kingslanding',
         ];
         Character::insert($character);

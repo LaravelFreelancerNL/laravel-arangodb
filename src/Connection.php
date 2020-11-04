@@ -34,11 +34,11 @@ class Connection extends IlluminateConnection
      * @var array
      */
     protected $defaultConfig = [
-        ArangoConnectionOptions::OPTION_ENDPOINT => 'tcp://localhost:8529',
+        ArangoConnectionOptions::OPTION_ENDPOINT    => 'tcp://localhost:8529',
         ArangoConnectionOptions::OPTION_CONNECTION  => 'Keep-Alive',
-        ArangoConnectionOptions::OPTION_AUTH_USER => null,
+        ArangoConnectionOptions::OPTION_AUTH_USER   => null,
         ArangoConnectionOptions::OPTION_AUTH_PASSWD => null,
-        'tablePrefix' => '',
+        'tablePrefix'                               => '',
     ];
 
     protected $config;
@@ -84,14 +84,15 @@ class Connection extends IlluminateConnection
      * Connection constructor.
      *
      * @param array $config
+     *
      * @throws Exception
      */
     public function __construct($config = [])
     {
         $this->config = array_merge($this->defaultConfig, $config);
 
-        if (isset($this->config ['database'])) {
-            $this->database = $this->config ['database'];
+        if (isset($this->config['database'])) {
+            $this->database = $this->config['database'];
         }
 
         $this->tablePrefix = $this->config['tablePrefix'];
@@ -145,12 +146,14 @@ class Connection extends IlluminateConnection
      * Run a select statement against the database and returns a generator.
      * ($useReadPdo is a dummy to adhere to the interface).
      *
-     * @param string $query
-     * @param array $bindings
-     * @param bool $useReadPdo
+     * @param string     $query
+     * @param array      $bindings
+     * @param bool       $useReadPdo
      * @param array|null $transactionCollections
-     * @return Iterator|null
+     *
      * @throws Exception
+     *
+     * @return Iterator|null
      */
     public function cursor($query, $bindings = [], $useReadPdo = null, $transactionCollections = null)
     {
@@ -173,9 +176,10 @@ class Connection extends IlluminateConnection
     /**
      * Execute an AQL statement and return the boolean result.
      *
-     * @param  string|FluentAQL  $query
-     * @param  array   $bindings
-     * @param  array|null   $transactionCollections
+     * @param string|FluentAQL $query
+     * @param array            $bindings
+     * @param array|null       $transactionCollections
+     *
      * @return bool
      */
     public function statement($query, $bindings = [], $transactionCollections = null)
@@ -210,9 +214,10 @@ class Connection extends IlluminateConnection
     /**
      * Run an AQL statement and get the number of rows affected.
      *
-     * @param  string|FluentAQL  $query
-     * @param  array   $bindings
-     * @param  array|null   $transactionCollections
+     * @param string|FluentAQL $query
+     * @param array            $bindings
+     * @param array|null       $transactionCollections
+     *
      * @return int
      */
     public function affectingStatement($query, $bindings = [], $transactionCollections = null)
@@ -252,6 +257,7 @@ class Connection extends IlluminateConnection
      * Run a raw, unprepared query against the connection.
      *
      * @param string $query
+     *
      * @return bool
      */
     public function unprepared($query)
@@ -284,9 +290,11 @@ class Connection extends IlluminateConnection
      * Returns the query execution plan. The query will not be executed.
      *
      * @param string $query
-     * @param array $bindings
-     * @return array
+     * @param array  $bindings
+     *
      * @throws Exception
+     *
+     * @return array
      */
     public function explain($query, $bindings = [])
     {
@@ -299,9 +307,10 @@ class Connection extends IlluminateConnection
      * Run a select statement against the database.
      *
      * @param string|FluentAQL $query
-     * @param array $bindings
-     * @param bool $useReadPdo
-     * @param null|array $transactionCollections
+     * @param array            $bindings
+     * @param bool             $useReadPdo
+     * @param null|array       $transactionCollections
+     *
      * @return array
      */
     public function select($query, $bindings = [], $useReadPdo = true, $transactionCollections = null)
@@ -313,9 +322,10 @@ class Connection extends IlluminateConnection
      * Run an AQL query against the database and return the results.
      *
      * @param string|FluentAQL $query
-     * @param array $bindings
-     * @param bool $useReadPdo
-     * @param null|array $transactionCollections
+     * @param array            $bindings
+     * @param bool             $useReadPdo
+     * @param null|array       $transactionCollections
+     *
      * @return array
      */
     public function execute($query, $bindings = [], $useReadPdo = true, $transactionCollections = null)
@@ -346,9 +356,10 @@ class Connection extends IlluminateConnection
     /**
      * Run an insert statement against the database.
      *
-     * @param  string|FluentAQL  $query
-     * @param  array   $bindings
-     * @param  array|null   $transactionCollections
+     * @param string|FluentAQL $query
+     * @param array            $bindings
+     * @param array|null       $transactionCollections
+     *
      * @return bool
      */
     public function insert($query, $bindings = [], $transactionCollections = null)
@@ -359,9 +370,10 @@ class Connection extends IlluminateConnection
     /**
      * Run an update statement against the database.
      *
-     * @param  string|FluentAQL  $query
-     * @param  array   $bindings
-     * @param  array|null   $transactionCollections
+     * @param string|FluentAQL $query
+     * @param array            $bindings
+     * @param array|null       $transactionCollections
+     *
      * @return int
      */
     public function update($query, $bindings = [], $transactionCollections = null)
@@ -372,9 +384,10 @@ class Connection extends IlluminateConnection
     /**
      * Run a delete statement against the database.
      *
-     * @param  string  $query
-     * @param  array   $bindings
-     * @param  array|null   $transactionCollections
+     * @param string     $query
+     * @param array      $bindings
+     * @param array|null $transactionCollections
+     *
      * @return int
      */
     public function delete($query, $bindings = [], $transactionCollections = null)
@@ -439,8 +452,10 @@ class Connection extends IlluminateConnection
      * @param $query
      * @param $bindings
      * @param $connection
-     * @return Statement
+     *
      * @throws Exception
+     *
+     * @return Statement
      */
     public function newArangoStatement($query, $bindings): Statement
     {
@@ -452,7 +467,7 @@ class Connection extends IlluminateConnection
 
     public function getCollectionHandler()
     {
-        if (! isset($this->collectionHandler)) {
+        if (!isset($this->collectionHandler)) {
             $this->collectionHandler = new ArangoCollectionHandler($this->arangoConnection);
             $this->collectionHandler->setDocumentClass(Document::class);
         }
@@ -462,7 +477,7 @@ class Connection extends IlluminateConnection
 
     public function getDocumentHandler()
     {
-        if (! isset($this->documentHandler)) {
+        if (!isset($this->documentHandler)) {
             $this->documentHandler = new ArangoDocumentHandler($this->arangoConnection);
             $this->documentHandler->setDocumentClass(Document::class);
         }
@@ -472,7 +487,7 @@ class Connection extends IlluminateConnection
 
     public function getUserHandler()
     {
-        if (! isset($this->userHandler)) {
+        if (!isset($this->userHandler)) {
             $this->userHandler = new ArangoUserHandler($this->arangoConnection);
             $this->userHandler->setDocumentClass(Document::class);
         }
@@ -482,7 +497,7 @@ class Connection extends IlluminateConnection
 
     public function getGraphHandler()
     {
-        if (! isset($this->graphHandler)) {
+        if (!isset($this->graphHandler)) {
             $this->graphHandler = new ArangoGraphHandler($this->arangoConnection);
             $this->graphHandler->setDocumentClass(Document::class);
         }
@@ -492,7 +507,7 @@ class Connection extends IlluminateConnection
 
     public function getViewHandler()
     {
-        if (! isset($this->viewHandler)) {
+        if (!isset($this->viewHandler)) {
             $this->viewHandler = new ArangoViewHandler($this->arangoConnection);
             $this->viewHandler->setDocumentClass(Document::class);
         }
