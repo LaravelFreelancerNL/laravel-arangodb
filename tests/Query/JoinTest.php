@@ -7,13 +7,10 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use Mockery as m;
-use Tests\Setup\Models\Character;
-use Tests\Setup\Models\Location;
 use Tests\TestCase;
 
 class JoinTest extends TestCase
 {
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -62,7 +59,6 @@ class JoinTest extends TestCase
         $charactersWithoutResidence = DB::table('characters')
             ->whereNull('residence_key')
             ->get();
-
 
         $this->assertCount(33, $characters);
         $this->assertEquals('NedStark', $characters[0]->_key);

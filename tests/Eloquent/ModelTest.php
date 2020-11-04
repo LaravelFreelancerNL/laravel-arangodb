@@ -20,20 +20,20 @@ class ModelTest extends TestCase
         Character::insert(
             [
                 [
-                    '_key' => 'NedStark',
-                    'name' => 'Ned',
+                    '_key'    => 'NedStark',
+                    'name'    => 'Ned',
                     'surname' => 'Stark',
-                    'alive' => false,
-                    'age' => 41,
-                    'traits' => ['A', 'H', 'C', 'N', 'P'],
+                    'alive'   => false,
+                    'age'     => 41,
+                    'traits'  => ['A', 'H', 'C', 'N', 'P'],
                 ],
                 [
-                    '_key' => 'RobertBaratheon',
-                    'name' => 'Robert',
+                    '_key'    => 'RobertBaratheon',
+                    'name'    => 'Robert',
                     'surname' => 'Baratheon',
-                    'alive' => false,
-                    'age' => null,
-                    'traits' => ['A', 'H', 'C'],
+                    'alive'   => false,
+                    'age'     => null,
+                    'traits'  => ['A', 'H', 'C'],
                 ],
             ]
         );
@@ -53,12 +53,12 @@ class ModelTest extends TestCase
         $this->artisan(
             'aranguent:model',
             [
-                'name' => 'Aranguent',
+                'name'    => 'Aranguent',
                 '--force' => '',
             ]
         )->run();
 
-        $file = __DIR__ . '/../../vendor/orchestra/testbench-core/laravel/app/Aranguent.php';
+        $file = __DIR__.'/../../vendor/orchestra/testbench-core/laravel/app/Aranguent.php';
 
         //assert file exists
         $this->assertFileExists($file);
@@ -128,22 +128,22 @@ class ModelTest extends TestCase
             ->inRandomOrder()
             ->toSql();
 
-        $this->assertEquals("FOR characterDoc IN characters SORT RAND()", $results);
+        $this->assertEquals('FOR characterDoc IN characters SORT RAND()', $results);
     }
 
     public function testCastDocumentObjectToArrayWithoutBinaryStrings()
     {
         $data = [
-            '_key' => 'NedStark',
-            'name' => 'Ned',
+            '_key'    => 'NedStark',
+            'name'    => 'Ned',
             'surname' => 'Stark',
-            'alive' => false,
-            'age' => 41,
-            'traits' => ['A', 'H', 'C', 'N', 'P'],
+            'alive'   => false,
+            'age'     => 41,
+            'traits'  => ['A', 'H', 'C', 'N', 'P'],
         ];
         $doc = new Document();
         $doc = $doc->createFromArray($data);
 
-        $this->assertEquals((array)$doc, $data);
+        $this->assertEquals((array) $doc, $data);
     }
 }

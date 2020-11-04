@@ -12,6 +12,7 @@ class MigrationCreator extends IlluminateMigrationCreator
      * Create a new migration creator instance.
      *
      * @param Filesystem $files
+     *
      * @return void
      */
     public function __construct(Filesystem $files, $customStubPath = null)
@@ -24,13 +25,14 @@ class MigrationCreator extends IlluminateMigrationCreator
     /**
      * Create a new migration at the given path.
      *
-     * @param  string  $name
-     * @param  string  $path
-     * @param  string  $collection
-     * @param  bool    $create
-     * @return string
+     * @param string $name
+     * @param string $path
+     * @param string $collection
+     * @param bool   $create
      *
      * @throws Exception
+     *
+     * @return string
      */
     public function create($name, $path, $collection = null, $create = false)
     {
@@ -57,9 +59,10 @@ class MigrationCreator extends IlluminateMigrationCreator
     /**
      * Populate the place-holders in the migration stub.
      *
-     * @param  string  $name
-     * @param  string  $stub
-     * @param  string  $collection
+     * @param string $name
+     * @param string $stub
+     * @param string $collection
+     *
      * @return string
      */
     protected function populateStub($name, $stub, $collection)
@@ -69,7 +72,7 @@ class MigrationCreator extends IlluminateMigrationCreator
         // Here we will replace the table place-holders with the table specified by
         // the developer, which is useful for quickly creating a tables creation
         // or update migration from the console instead of typing it manually.
-        if (! is_null($collection)) {
+        if (!is_null($collection)) {
             $stub = str_replace('DummyCollection', $collection, $stub);
         }
 
@@ -83,6 +86,6 @@ class MigrationCreator extends IlluminateMigrationCreator
      */
     public function stubPath()
     {
-        return __DIR__ . '/stubs';
+        return __DIR__.'/stubs';
     }
 }

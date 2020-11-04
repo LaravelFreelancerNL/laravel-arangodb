@@ -18,8 +18,6 @@ class Location extends Model
         'capturable_type',
     ];
 
-
-
     /**
      * Get the last known residence of the character.
      */

@@ -43,9 +43,9 @@ class CommandServiceProvider extends IlluminateMigrationServiceProvider
         $commands = array_merge(
             $this->commands,
             [
-                'MigrateMake' => 'command.migrate.make',
+                'MigrateMake'                => 'command.migrate.make',
                 'AranguentConvertMigrations' => 'command.aranguent.convert-migrations',
-                'MakeModel' => 'command.model.aranguent',
+                'MakeModel'                  => 'command.model.aranguent',
             ]
         );
         $this->registerCommands($commands);

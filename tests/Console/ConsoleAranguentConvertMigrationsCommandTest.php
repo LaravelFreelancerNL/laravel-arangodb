@@ -27,8 +27,8 @@ class ConsoleAranguentConvertMigrationsCommandTest extends TestCase
         parent::setUp();
 
         //Copy a stub with Illuminate usage to migrations directory
-        $stub = __DIR__ . '/../setup/database/stubs/test_stub_for_migration_conversion.php';
-        $this->conversionMigration = __DIR__ . '/../setup/database/migrations/test_migration_conversion.php';
+        $stub = __DIR__.'/../setup/database/stubs/test_stub_for_migration_conversion.php';
+        $this->conversionMigration = __DIR__.'/../setup/database/migrations/test_migration_conversion.php';
         copy($stub, $this->conversionMigration);
     }
 
@@ -41,6 +41,7 @@ class ConsoleAranguentConvertMigrationsCommandTest extends TestCase
 
     /**
      * Illuminate usage is replaced by Aranguent in migration files.
+     *
      * @test
      */
     public function illuminate_usage_is_replaced_by_aranguent_in_migration_files()

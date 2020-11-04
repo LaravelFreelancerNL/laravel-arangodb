@@ -21,7 +21,8 @@ class MorphTo extends IlluminateMorphTo
     /**
      * Get all of the relation results for a type.
      *
-     * @param  string  $type
+     * @param string $type
+     *
      * @return \Illuminate\Database\Eloquent\Collection
      */
     protected function getResultsByType($type)

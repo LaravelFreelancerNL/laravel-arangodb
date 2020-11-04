@@ -19,30 +19,30 @@ class HasOneTest extends TestCase
         Character::insert(
             [
                 [
-                    '_key' => 'NedStark',
-                    'name' => 'Ned',
-                    'surname' => 'Stark',
-                    'alive' => false,
-                    'age' => 41,
-                    'traits' => ['A', 'H', 'C', 'N', 'P'],
+                    '_key'         => 'NedStark',
+                    'name'         => 'Ned',
+                    'surname'      => 'Stark',
+                    'alive'        => false,
+                    'age'          => 41,
+                    'traits'       => ['A', 'H', 'C', 'N', 'P'],
                     'location_key' => 'kingslanding',
                 ],
                 [
-                    '_key' => 'SansaStark',
-                    'name' => 'Sansa',
-                    'surname' => 'Stark',
-                    'alive' => true,
-                    'age' => 13,
-                    'traits' => ["D", "I", "J"],
+                    '_key'         => 'SansaStark',
+                    'name'         => 'Sansa',
+                    'surname'      => 'Stark',
+                    'alive'        => true,
+                    'age'          => 13,
+                    'traits'       => ['D', 'I', 'J'],
                     'location_key' => 'winterfell',
                 ],
                 [
-                    '_key' => 'RobertBaratheon',
-                    'name' => 'Robert',
-                    'surname' => 'Baratheon',
-                    'alive' => false,
-                    'age' => null,
-                    'traits' => ['A', 'H', 'C'],
+                    '_key'         => 'RobertBaratheon',
+                    'name'         => 'Robert',
+                    'surname'      => 'Baratheon',
+                    'alive'        => false,
+                    'age'          => null,
+                    'traits'       => ['A', 'H', 'C'],
                     'location_key' => 'dragonstone',
                 ],
             ]
@@ -50,20 +50,20 @@ class HasOneTest extends TestCase
         Location::insert(
             [
                 [
-                    "_key" => "dragonstone",
-                    "name" => "Dragonstone",
-                    "coordinate" => [55.167801, -6.815096]
+                    '_key'       => 'dragonstone',
+                    'name'       => 'Dragonstone',
+                    'coordinate' => [55.167801, -6.815096],
                 ],
                 [
-                    "_key" => "winterfell",
-                    "name" => "Winterfell",
-                    "coordinate" => [54.368321, -5.581312],
-                    "led_by" => "SansaStark",
+                    '_key'       => 'winterfell',
+                    'name'       => 'Winterfell',
+                    'coordinate' => [54.368321, -5.581312],
+                    'led_by'     => 'SansaStark',
                 ],
                 [
-                    "_key" => "kingslanding",
-                    "name" => "King's Landing",
-                    "coordinate" => [42.639752, 18.110189]
+                    '_key'       => 'kingslanding',
+                    'name'       => "King's Landing",
+                    'coordinate' => [42.639752, 18.110189],
                 ],
             ]
         );
@@ -102,20 +102,20 @@ class HasOneTest extends TestCase
     {
         $location = Location::create(
             [
-                "_key" => "pyke",
-                "name" => "Pyke",
-                "coordinate" => [55.8833342, -6.1388807]
+                '_key'       => 'pyke',
+                'name'       => 'Pyke',
+                'coordinate' => [55.8833342, -6.1388807],
             ]
         );
 
         $location->leader()->create(
             [
-                '_key' => 'TheonGreyjoy',
-                'name' => 'Theon',
+                '_key'    => 'TheonGreyjoy',
+                'name'    => 'Theon',
                 'surname' => 'Greyjoy',
-                'alive' => true,
-                'age' => 16,
-                'traits' => ["E", "R", "K"]
+                'alive'   => true,
+                'age'     => 16,
+                'traits'  => ['E', 'R', 'K'],
             ]
         );
         $character = Character::find('TheonGreyjoy');
@@ -134,19 +134,19 @@ class HasOneTest extends TestCase
     {
         $character = Character::create(
             [
-                '_key' => 'TheonGreyjoy',
-                'name' => 'Theon',
+                '_key'    => 'TheonGreyjoy',
+                'name'    => 'Theon',
                 'surname' => 'Greyjoy',
-                'alive' => true,
-                'age' => 16,
-                'traits' => ["E", "R", "K"]
+                'alive'   => true,
+                'age'     => 16,
+                'traits'  => ['E', 'R', 'K'],
             ]
         );
         $location = new Location(
             [
-                "_key" => "pyke",
-                "name" => "Pyke",
-                "coordinate" => [55.8833342, -6.1388807]
+                '_key'       => 'pyke',
+                'name'       => 'Pyke',
+                'coordinate' => [55.8833342, -6.1388807],
             ]
         );
 
@@ -161,7 +161,7 @@ class HasOneTest extends TestCase
 
     public function testWith(): void
     {
-        $character = Character::with('leads')->find("SansaStark");
+        $character = Character::with('leads')->find('SansaStark');
 
         $this->assertInstanceOf(Location::class, $character->leads);
         $this->assertEquals('winterfell', $character->leads->_key);

@@ -10,10 +10,11 @@ trait Indexes
     /**
      * Add a new index command to the blueprint.
      *
-     * @param string $type
+     * @param string            $type
      * @param string|array|null $columns
      * @param $name
      * @param array $indexOptions
+     *
      * @return Fluent
      */
     protected function indexCommand($type = '', $columns = null, $name = null, $indexOptions = [])
@@ -38,9 +39,10 @@ trait Indexes
     /**
      * Specify an index for the table.
      *
-     * @param  string|array  $columns
-     * @param  string  $name
-     * @param  string|null  $algorithm
+     * @param string|array $columns
+     * @param string       $name
+     * @param string|null  $algorithm
+     *
      * @return Fluent
      */
     public function index($columns = null, $name = null, $algorithm = null)
@@ -53,8 +55,9 @@ trait Indexes
     /**
      * Create a hash index for fast exact matching.
      *
-     * @param null $columns
+     * @param null  $columns
      * @param array $indexOptions
+     *
      * @return Fluent
      */
     public function hashIndex($columns = null, $indexOptions = [])
@@ -66,6 +69,7 @@ trait Indexes
      * @param null|string $column
      * @param $name
      * @param array $indexOptions
+     *
      * @return Fluent
      */
     public function fulltextIndex($column = null, $name = null, $indexOptions = [])
@@ -77,8 +81,9 @@ trait Indexes
      *  Specify a spatial index for the table.
      *
      * @param $columns
-     * @param null $name
+     * @param null  $name
      * @param array $indexOptions
+     *
      * @return Fluent
      */
     public function geoIndex($columns, $name = null, $indexOptions = [])
@@ -88,8 +93,10 @@ trait Indexes
 
     /**
      * Specify a spatial index for the table.
-     * @param  string|array  $columns
-     * @param  string  $name
+     *
+     * @param string|array $columns
+     * @param string       $name
+     *
      * @return Fluent
      */
     public function spatialIndex($columns, $name = null)
@@ -100,7 +107,8 @@ trait Indexes
     /**
      * @param $columns
      * @param string|null $name
-     * @param array $indexOptions
+     * @param array       $indexOptions
+     *
      * @return Fluent
      */
     public function skiplistIndex($columns, $name = null, $indexOptions = [])
@@ -117,8 +125,9 @@ trait Indexes
      * Create a TTL index for the table.
      *
      * @param $columns
-     * @param null $name
+     * @param null  $name
      * @param array $indexOptions
+     *
      * @return Fluent
      */
     public function ttlIndex($columns, $name = null, $indexOptions = [])
@@ -129,9 +138,10 @@ trait Indexes
     /**
      * Specify a unique index for the table.
      *
-     * @param  string|array  $columns
-     * @param  string  $name
-     * @param  string|null  $algorithm
+     * @param string|array $columns
+     * @param string       $name
+     * @param string|null  $algorithm
+     *
      * @return Fluent
      */
     public function unique($columns = null, $name = null, $algorithm = null)
@@ -145,20 +155,21 @@ trait Indexes
 
     /**
      * @param $command
+     *
      * @throws Exception
      */
     public function executeIndexCommand($command)
     {
         if ($this->connection->pretending()) {
-            $this->connection->logQuery('/* ' . $command->explanation . " */\n", []);
+            $this->connection->logQuery('/* '.$command->explanation." */\n", []);
 
             return;
         }
 
         $options = [
-            'type' => $command->type,
-            'fields' => $command->columns,
-            'unique' => $command->unique,
+            'type'    => $command->type,
+            'fields'  => $command->columns,
+            'unique'  => $command->unique,
             'options' => $command->indexOptions,
         ];
 
@@ -173,13 +184,14 @@ trait Indexes
      * Indicate that the given index should be dropped.
      *
      * @param $name
+     *
      * @return Fluent
      */
     public function dropIndex($name)
     {
         $parameters['name'] = 'dropIndex';
         $parameters['index'] = $name;
-        $parameters['explanation'] = "Drop the '" . $name . "' index on the {$this->table} table.";
+        $parameters['explanation'] = "Drop the '".$name."' index on the {$this->table} table.";
         $parameters['handler'] = 'collection';
 
         return $this->addCommand('dropIndex', $parameters);
@@ -188,12 +200,13 @@ trait Indexes
     /**
      * Drop the index by first getting all the indexes on the table; then selecting the matching one
      * by type and columns.
+     *
      * @param $command
      */
     public function executeDropIndexCommand($command)
     {
         if ($this->connection->pretending()) {
-            $this->connection->logQuery('/* ' . $command->explanation . " */\n", []);
+            $this->connection->logQuery('/* '.$command->explanation." */\n", []);
 
             return;
         }
@@ -202,15 +215,16 @@ trait Indexes
 
     /**
      * @param string|null $algorithm
+     *
      * @return mixed|string
      */
     protected function mapIndexType($algorithm)
     {
         $typeConversion = [
-            'HASH' => 'hash',
+            'HASH'  => 'hash',
             'BTREE' => 'persistent',
             'RTREE' => 'geo',
-            'TTL' => 'ttl',
+            'TTL'   => 'ttl',
         ];
         $algorithm = strtoupper($algorithm);
 
@@ -220,13 +234,14 @@ trait Indexes
     /**
      * Create a default index name for the table.
      *
-     * @param  string  $type
-     * @param  array  $columns
+     * @param string $type
+     * @param array  $columns
+     *
      * @return string
      */
     public function createIndexName($type, array $columns)
     {
-        $index = strtolower($this->prefix . $this->table . '_' . implode('_', $columns) . '_' . $type);
+        $index = strtolower($this->prefix.$this->table.'_'.implode('_', $columns).'_'.$type);
         $index = preg_replace("/\[\*+\]+/", '_array', $index);
 
         return preg_replace('/[^A-Za-z0-9]+/', '_', $index);

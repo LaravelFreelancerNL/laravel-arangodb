@@ -62,7 +62,8 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
     /**
      * Get list of migrations.
      *
-     * @param  int  $steps
+     * @param int $steps
+     *
      * @return array
      */
     public function getMigrations($steps)
@@ -116,7 +117,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      * Log that a migration was run.
      *
      * @param string $file
-     * @param int $batch
+     * @param int    $batch
      */
     public function log($file, $batch)
     {
@@ -132,7 +133,8 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
     /**
      * Remove a migration from the log.
      *
-     * @param  object  $migration
+     * @param object $migration
+     *
      * @return void
      */
     public function delete($migration)
@@ -182,6 +184,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
 
     /**
      * Create the migration repository data store.
+     *
      * @return void
      */
     public function createRepository()
@@ -230,6 +233,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
 
     /**
      * {@inheritdoc}
+     *
      * @return Builder
      */
     protected function table()

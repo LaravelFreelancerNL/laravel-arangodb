@@ -30,11 +30,11 @@ class MorphOneTest extends TestCase
         Location::insert(
             [
                 [
-                    "_key" => "winterfell",
-                    "name" => "Winterfell",
-                    "coordinate" => [54.368321, -5.581312],
-                    "capturable_id" => "RamsayBolton",
-                    "capturable_type" => 'Tests\Setup\Models\Character',
+                    '_key'            => 'winterfell',
+                    'name'            => 'Winterfell',
+                    'coordinate'      => [54.368321, -5.581312],
+                    'capturable_id'   => 'RamsayBolton',
+                    'capturable_type' => 'Tests\Setup\Models\Character',
                 ],
             ]
         );
@@ -73,7 +73,7 @@ class MorphOneTest extends TestCase
 
     public function testWith(): void
     {
-        $character = Character::with('conquered')->find("RamsayBolton");
+        $character = Character::with('conquered')->find('RamsayBolton');
 
         $this->assertInstanceOf(Location::class, $character->conquered);
         $this->assertEquals('winterfell', $character->conquered->_key);

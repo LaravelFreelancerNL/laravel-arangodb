@@ -20,7 +20,8 @@ class Builder extends IlluminateBuilder
     /**
      * Update a record in the database.
      *
-     * @param  array  $values
+     * @param array $values
+     *
      * @return int
      */
     public function insert(array $values)
@@ -57,13 +58,14 @@ class Builder extends IlluminateBuilder
     /**
      * Add the "updated at" column to an array of values.
      *
-     * @param  array  $values
+     * @param array $values
+     *
      * @return array
      */
     protected function updateTimestamps(array $values)
     {
         if (
-            ! $this->model->usesTimestamps() ||
+            !$this->model->usesTimestamps() ||
             is_null($this->model->getUpdatedAtColumn()) ||
             is_null($this->model->getCreatedAtColumn())
         ) {
@@ -74,7 +76,7 @@ class Builder extends IlluminateBuilder
         $timestamps[$updatedAtColumn] = $timestamp;
 
         $createdAtColumn = $this->model->getCreatedAtColumn();
-        if (! isset($values[$createdAtColumn]) && ! isset($this->model->$createdAtColumn)) {
+        if (!isset($values[$createdAtColumn]) && !isset($this->model->$createdAtColumn)) {
             $timestamps[$createdAtColumn] = $timestamp;
         }
 

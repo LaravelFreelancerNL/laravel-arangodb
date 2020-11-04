@@ -18,12 +18,13 @@ trait ManagesTransactions
     /**
      * Execute a Closure within a transaction.
      *
-     * @param  \Closure  $callback
-     * @param  array  $options
-     * @param  int  $attempts
-     * @return mixed
+     * @param \Closure $callback
+     * @param array    $options
+     * @param int      $attempts
      *
      * @throws \Exception|\Throwable
+     *
+     * @return mixed
      */
     public function transaction(Closure $callback, $options = [], $attempts = 1)
     {
@@ -37,9 +38,9 @@ trait ManagesTransactions
     /**
      * Start a new database transaction.
      *
-     * @return void
-     *
      * @throws \Exception
+     *
+     * @return void
      */
     public function beginTransaction()
     {
@@ -69,6 +70,7 @@ trait ManagesTransactions
      * @param $query
      * @param $bindings
      * @param array|null $collections
+     *
      * @return IlluminateFluent
      */
     public function addQueryToTransaction($query, $bindings = [], $collections = null)
@@ -79,15 +81,15 @@ trait ManagesTransactions
         }
 
 //        $query = addslashes($query);
-        $jsCommand = 'db._query(aql`' . $query . '`';
-        if (! empty($bindings)) {
+        $jsCommand = 'db._query(aql`'.$query.'`';
+        if (!empty($bindings)) {
             $bindings = json_encode($bindings);
-            $jsCommand .= ', ' . $bindings;
+            $jsCommand .= ', '.$bindings;
         }
         $jsCommand .= ');';
         $command = new IlluminateFluent([
-            'name' => 'aqlQuery',
-            'command' => $jsCommand,
+            'name'        => 'aqlQuery',
+            'command'     => $jsCommand,
             'collections' => $collections,
         ]);
 
@@ -103,6 +105,7 @@ trait ManagesTransactions
      * @param $query
      * @param $bindings
      * @param $collections
+     *
      * @return mixed
      */
     public function extractTransactionCollections($query, $bindings, $collections)
@@ -120,6 +123,7 @@ trait ManagesTransactions
      * @param $query
      * @param $bindings
      * @param $collections
+     *
      * @return mixed
      */
     public function extractReadCollections($query, $bindings, $collections)
@@ -161,6 +165,7 @@ trait ManagesTransactions
      * @param $query
      * @param $bindings
      * @param $collections
+     *
      * @return mixed
      */
     public function extractWriteCollections($query, $bindings, $collections)
@@ -186,6 +191,7 @@ trait ManagesTransactions
      *
      * @param $collections
      * @param $bindings
+     *
      * @return mixed
      */
     public function getCollectionByBinding($collections, $bindings)
@@ -203,16 +209,18 @@ trait ManagesTransactions
      * Commit the current transaction.
      *
      * @param array $options
-     * @param int $attempts
-     * @return mixed
+     * @param int   $attempts
+     *
      * @throws Exception
+     *
+     * @return mixed
      */
     public function commit($options = [], $attempts = 1)
     {
-        if (! $this->transactions > 0) {
+        if (!$this->transactions > 0) {
             throw new \Exception('Transaction committed before starting one.');
         }
-        if (! isset($this->transactionCommands[$this->transactions]) || empty($this->transactionCommands[$this->transactions])) {
+        if (!isset($this->transactionCommands[$this->transactions]) || empty($this->transactionCommands[$this->transactions])) {
             throw new \Exception('Cannot commit an empty transaction.');
         }
 
@@ -254,6 +262,7 @@ trait ManagesTransactions
      * @param $e
      * @param $currentAttempt
      * @param $attempts
+     *
      * @return mixed
      */
     protected function handleTransactionException($e, $currentAttempt, $attempts)
@@ -342,7 +351,7 @@ trait ManagesTransactions
     /**
      * Handle an exception from a rollback.
      *
-     * @param \Exception  $e
+     * @param \Exception $e
      *
      * @throws \Exception
      */
@@ -385,10 +394,11 @@ trait ManagesTransactions
     /**
      * Dummy override: Rollback the active database transaction.
      *
-     * @param  int|null  $toLevel
-     * @return void
+     * @param int|null $toLevel
      *
      * @throws \Exception
+     *
+     * @return void
      */
     public function rollBack($toLevel = null)
     {
@@ -398,7 +408,8 @@ trait ManagesTransactions
     /**
      * Dummy override: ArangoDB rolls back the entire transaction on a failure.
      *
-     * @param  int  $toLevel
+     * @param int $toLevel
+     *
      * @return void
      */
     protected function performRollBack($toLevel)

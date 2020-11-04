@@ -12,9 +12,8 @@ class House extends Model
     protected $fillable = [
         '_key',
         'name',
-        'location_key'
+        'location_key',
     ];
-
 
     /**
      * Current seat of the house.

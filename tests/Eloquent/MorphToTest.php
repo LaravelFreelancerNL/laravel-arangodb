@@ -30,11 +30,11 @@ class MorphToTest extends TestCase
         Location::insert(
             [
                 [
-                    "_key" => "winterfell",
-                    "name" => "Winterfell",
-                    "coordinate" => [54.368321, -5.581312],
-                    "capturable_id" => "RamsayBolton",
-                    "capturable_type" => "Tests\Setup\Models\Character",
+                    '_key'            => 'winterfell',
+                    'name'            => 'Winterfell',
+                    'coordinate'      => [54.368321, -5.581312],
+                    'capturable_id'   => 'RamsayBolton',
+                    'capturable_type' => "Tests\Setup\Models\Character",
                 ],
             ]
         );
@@ -74,7 +74,7 @@ class MorphToTest extends TestCase
 
     public function testWith(): void
     {
-        $location = Location::with('capturable')->find("winterfell");
+        $location = Location::with('capturable')->find('winterfell');
 
         $this->assertInstanceOf(Character::class, $location->capturable);
         $this->assertEquals('RamsayBolton', $location->capturable->_key);

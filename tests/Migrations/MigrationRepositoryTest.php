@@ -10,6 +10,7 @@ class MigrationRepositoryTest extends TestCase
 {
     /**
      * migrations collection is created.
+     *
      * @test
      */
     public function migrations_collection_is_created()
@@ -27,6 +28,7 @@ class MigrationRepositoryTest extends TestCase
 
     /**
      * log_creates_migration_entry.
+     *
      * @test
      */
     public function log_creates_migration_entry()
@@ -43,6 +45,7 @@ class MigrationRepositoryTest extends TestCase
 
     /**
      * get the highest batch value.
+     *
      * @test
      */
     public function get_the_last_batch_number()
@@ -58,6 +61,7 @@ class MigrationRepositoryTest extends TestCase
 
     /**
      * get all ran migration files.
+     *
      * @test
      */
     public function get_all_ran_migration_files()
@@ -73,6 +77,7 @@ class MigrationRepositoryTest extends TestCase
 
     /**
      * Delete migration.
+     *
      * @test
      */
     public function delete_migration()
@@ -98,6 +103,7 @@ class MigrationRepositoryTest extends TestCase
 
     /**
      * get all migrations within the last batch.
+     *
      * @test
      */
     public function get_last_migration()
@@ -114,6 +120,7 @@ class MigrationRepositoryTest extends TestCase
 
     /**
      * get migration batches.
+     *
      * @test
      */
     public function get_migration_batches()
@@ -130,6 +137,7 @@ class MigrationRepositoryTest extends TestCase
 
     /**
      * get migration batches.
+     *
      * @test
      */
     public function get_migrations()
