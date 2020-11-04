@@ -19,7 +19,7 @@
   ],
   "require": {
     "php": "^7.3|^8.0",
-    "laravel/framework": "^7",
+    "laravel/framework": ">=7",
     "triagens/arangodb": "3.6.*",
     "ext-json": "*",
     "laravel-freelancer-nl/fluentaql": "^1.0"
