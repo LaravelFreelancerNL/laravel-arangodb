@@ -268,8 +268,10 @@ trait ManagesTransactions
         // Retry if the failure was caused by a deadlock or ArangoDB suggests we try so.
         // We can check if we have exceeded the maximum attempt count for this and if
         // we haven't we will return and try this transaction again.
-        if ($this->causedByDeadlock($e) &&
-            $currentAttempt < $attempts) {
+        if (
+            $this->causedByDeadlock($e) &&
+            $currentAttempt < $attempts
+        ) {
             $retry = true;
         }
 

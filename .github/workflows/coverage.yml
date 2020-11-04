@@ -1,0 +1,28 @@
+name: Test Coverage
+
+on: [workflow_dispatch, push, pull_request]
+
+jobs:
+  run:
+    runs-on: ubuntu-18.04
+    name:  Test coverage
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          extensions: mbstring, intl
+          ini-values: post_max_size=256M, short_open_tag=On
+          coverage: xdebug
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      - name: Test coverage
+        run: |
+          vendor/bin/phpunit --coverage-clover clover.xml --whitelist src
+          wget https://scrutinizer-ci.com/ocular.phar
+          php ocular.phar code-coverage:upload --format=php-clover clover.xml

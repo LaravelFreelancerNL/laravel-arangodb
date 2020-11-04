@@ -32,7 +32,7 @@ class Grammar extends IlluminateGrammar
 
         $filter = [];
         foreach ($command->attribute as $attribute) {
-            $filter[] = ['doc.' . $attribute, '!=', 'null'];
+            $filter[] = ['doc.' . $attribute, '!=', null];
         }
 
         $aqb = (new QueryBuilder())->for('doc', $collection)
@@ -61,8 +61,8 @@ class Grammar extends IlluminateGrammar
         $bindings['to'] = $this->wrapBindVar($command->from);
 
         $filter = [
-            ['doc.' . $command->from, '!=', 'null'],
-            ['doc.' . $command->to],
+            ['doc.' . $command->from, '!=', null],
+            ['doc.' . $command->to, '==', null],
         ];
 
         $aqb = (new QueryBuilder())->for('doc', $collection)
@@ -70,7 +70,7 @@ class Grammar extends IlluminateGrammar
             ->update(
                 'doc',
                 [
-                    $command->from => 'null',
+                    $command->from => null,
                     $command->to => 'doc.' . $command->from,
                 ],
                 $collection
@@ -99,8 +99,8 @@ class Grammar extends IlluminateGrammar
 
         $data = [];
         foreach ($command->attributes as $attribute) {
-            $filter[] = ['doc.' . $attribute, '!=', 'null', 'OR'];
-            $data[$attribute] = 'null';
+            $filter[] = ['doc.' . $attribute, '!=', null, 'OR'];
+            $data[$attribute] = null;
         }
         $aqb = (new QueryBuilder())->for('doc', $collection)
             ->filter($filter)

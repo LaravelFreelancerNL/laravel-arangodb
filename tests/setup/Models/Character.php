@@ -52,7 +52,7 @@ class Character extends Model
 
     public function children()
     {
-        return $this->belongsToMany(Character::class, 'ChildOf', '_to', '_from');
+        return $this->belongsToMany(Character::class, 'child_of', '_from', '_to', '_id', '_id');
     }
 
     public function captured()

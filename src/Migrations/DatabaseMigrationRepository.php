@@ -47,7 +47,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
     public function getRan()
     {
         $qb = (new QueryBuilder())->for('m', 'migrations')
-            ->sort(['m.batch', 'm.migrations'])
+            ->sort('m.batch', 'm.migrations')
             ->return('m.migration')
             ->get();
 
@@ -84,16 +84,12 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
         $batch = $this->getLastBatchNumber();
 
         $qb = (new QueryBuilder())->for('m', 'migrations')
-            ->filter('m.batch', $batch)
+            ->filter('m.batch', '==', $batch)
             ->sort('m.migration', 'desc')
             ->return('m')
             ->get();
 
         return $this->getConnection()->select($qb->query);
-
-//        $query = $this->table()->where('batch', );
-//
-//        return $query->orderBy('migration', 'desc')->get()->all();
     }
 
     /**
@@ -142,7 +138,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
     public function delete($migration)
     {
         $qb = (new QueryBuilder())->for('m', 'migrations')
-                ->filter('m.migration', $migration->migration)
+                ->filter('m.migration', '==', $migration->migration)
                 ->remove('m', 'migrations')
                 ->get();
 

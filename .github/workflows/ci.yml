@@ -1,0 +1,50 @@
+name: CI tests
+
+on: [workflow_dispatch, push, pull_request]
+
+jobs:
+  run:
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        php-versions: ['7.3', '7.4']
+        arangodb-versions: ['3.5', 'latest']
+    name:  Quality checks PHP ${{ matrix.php-versions }}
+
+    services:
+      arangodb:
+        image: arangodb:${{ matrix.arangodb-version }}
+        env:
+          ARANGO_NO_AUTH: 1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          extensions: mbstring, intl
+          ini-values: post_max_size=256M, short_open_tag=On
+          coverage: xdebug
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      - name: PHP Code Sniffer
+        if: ${{ always() }}
+        run: vendor/bin/phpcs
+
+      - name: PHP Mess Detector
+        if: ${{ always() }}
+        run: vendor/bin/phpmd src/ text cleancode,codesize,controversial
+
+      - name: PHP Stan
+        if: ${{ always() }}
+        run: vendor/bin/phpstan analyse -c phpstan.neon
+
+      - name: PHP Unit tests
+        if: ${{ always() }}
+        run: vendor/bin/phpunit

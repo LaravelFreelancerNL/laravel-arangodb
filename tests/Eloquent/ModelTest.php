@@ -126,9 +126,9 @@ class ModelTest extends TestCase
     {
         $results = DB::table('characters')
             ->inRandomOrder()
-            ->get();
+            ->toSql();
 
-        $this->assertCount(2, $results);
+        $this->assertEquals("FOR characterDoc IN characters SORT RAND()", $results);
     }
 
     public function testCastDocumentObjectToArrayWithoutBinaryStrings()

@@ -8,6 +8,7 @@ use Illuminate\Support\Traits\Macroable;
 use LaravelFreelancerNL\FluentAQL\Exceptions\BindException as BindException;
 use LaravelFreelancerNL\FluentAQL\Expressions\FunctionExpression;
 use LaravelFreelancerNL\FluentAQL\Grammar as FluentAqlGrammar;
+use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
 /*
  * Provides AQL syntax functions
@@ -217,22 +218,80 @@ class Grammar extends FluentAqlGrammar
     /**
      * Compile the "join" portions of the query.
      *
-     * @param  Builder  $query
+     * @param  Builder  $builder
      * @param  array  $joins
      * @return string
      */
-    protected function compileJoins(Builder $query, $joins)
+    protected function compileJoins(Builder $builder, $joins)
     {
-        return collect($joins)->map(function ($join) use ($query) {
-            $table = $this->wrapTable($join->table);
+        foreach ($joins as $join) {
+            $compileMethod = 'compile' . ucfirst($join->type) . 'Join';
+            $builder = $this->$compileMethod($builder, $join);
 
-            $nestedJoins = is_null($join->joins) ? '' : ' ' . $this->compileJoins($query, $join->joins);
+        }
 
-            $tableAndNestedJoins = is_null($join->joins) ? $table : '(' . $nestedJoins . ')';
-
-            return trim("{$join->type} join {$tableAndNestedJoins} {$this->compileWheres($join)}");
-        })->implode(' ');
+        return $builder;
     }
+
+    protected function compileInnerJoin(Builder $builder, $join)
+    {
+        $table = $join->table;
+        $alias = $builder->generateTableAlias($table);
+        $builder->aqb = $builder->aqb->for($alias, $table)
+            ->filter($this->compileWheresToArray($join));
+
+        return $builder;
+    }
+
+    protected function compileLeftJoin(Builder $builder, $join)
+    {
+        $table = $join->table;
+        $alias = $builder->generateTableAlias($table);
+
+        $resultsToJoin = (new QueryBuilder())
+            ->for($alias, $table)
+            ->filter($this->compileWheresToArray($join))
+            ->return($alias);
+
+        $builder->aqb = $builder->aqb->let($table, $resultsToJoin)
+            ->for(
+                $alias,
+                $builder->aqb->if(
+                    [$builder->aqb->length($table), '>', 0],
+                    $table,
+                    '[]'
+                )
+            );
+
+        return $builder;
+    }
+
+
+//FOR user IN users
+//  LET friends = (
+//    FOR friend IN friends
+//      FILTER friend.user == user._key
+//      RETURN friend
+//  )
+//  FOR friendToJoin IN (
+//    LENGTH(friends) > 0 ? friends :
+//      [ { /* no match exists */ } ]
+//    )
+//    RETURN {
+//      user: user,
+//      friend: friend
+//    }
+
+
+    protected function compileCrossJoin(Builder $builder, $join)
+    {
+        $table = $join->table;
+        $alias = $builder->generateTableAlias($table);
+        $builder->aqb = $builder->aqb->for($alias, $table);
+
+        return $builder;
+    }
+
 
 
     /**
@@ -243,14 +302,12 @@ class Grammar extends FluentAqlGrammar
      */
     protected function compileWheres(Builder $builder)
     {
-        // Each type of where clauses has its own compiler function which is responsible
-        // for actually creating the where clauses SQL. This helps keep the code nice
-        // and maintainable since each clause has a very small method that it uses.
         if (is_null($builder->wheres)) {
             return $builder;
         }
 
         if (count($predicates = $this->compileWheresToArray($builder)) > 0) {
+
             $builder->aqb = $builder->aqb->filter($predicates);
 
             return $builder;
@@ -268,17 +325,26 @@ class Grammar extends FluentAqlGrammar
     protected function compileWheresToArray($builder)
     {
         $result = collect($builder->wheres)->map(function ($where) use ($builder) {
+            var_dump($where);
             if (isset($where['operator'])) {
                 $where['operator'] = $this->translateOperator($where['operator']);
             } else {
                 $where['operator'] = $this->getOperatorByWhereType($where['type']);
             }
-
-            //Prefix table alias on the column
-            $where['column'] = $this->prefixAlias($builder, $builder->from, $where['column']);
-
             $cleanWhere = [];
-            $cleanWhere[0] = $where['column'];
+            if (isset($where['column'])) {
+                if (stripos($where['column'], '.') !== false) {
+                    $where['column'] = $builder->replaceTableForAlias($where['column']);
+                } else {
+                    $where['column'] = $this->prefixAlias($builder, $builder->from, $where['column']);
+                }
+                $cleanWhere[0] = $where['column'] ;
+            }
+            var_dump($cleanWhere);
+            if (isset($where['first'])) {
+                $cleanWhere[0] = $where['first'];
+            }
+
             $cleanWhere[1] = $where['operator'];
             $cleanWhere[2] = null;
             if (isset($where['value'])) {
@@ -286,6 +352,9 @@ class Grammar extends FluentAqlGrammar
             }
             if (isset($where['values'])) {
                 $cleanWhere[2] = $where['values'];
+            }
+            if (isset($where['second'])) {
+                $cleanWhere[2] = $where['second'];
             }
             $cleanWhere[3] = $where['boolean'];
 
@@ -396,7 +465,8 @@ class Grammar extends FluentAqlGrammar
     protected function compileOrders(Builder $builder, $orders)
     {
         if (! empty($orders)) {
-            $builder->aqb = $builder->aqb->sort($this->compileOrdersToArray($builder, $orders));
+            $orders = $this->compileOrdersToFlatArray($builder, $orders);
+            $builder->aqb = $builder->aqb->sort(...$orders);
 
             return $builder;
         }
@@ -411,16 +481,23 @@ class Grammar extends FluentAqlGrammar
      * @param  array  $orders
      * @return array
      */
-    protected function compileOrdersToArray(Builder $builder, $orders)
+    protected function compileOrdersToFlatArray(Builder $builder, $orders)
     {
-        return array_map(function ($order) use ($builder) {
+        $flatOrders = [];
+
+        foreach ($orders as $order) {
             if (! isset($order['type']) || $order['type'] != 'Raw') {
                 $order['column'] = $this->prefixAlias($builder, $builder->from, $order['column']);
             }
-            unset($order['type']);
 
-            return array_values($order);
-        }, $orders);
+            $flatOrders[] =  $order['column'] ;
+
+            if (isset($order['direction'])) {
+                $flatOrders[] =  $order['direction'] ;
+            }
+        }
+
+        return $flatOrders;
     }
 
     /**
@@ -477,13 +554,29 @@ class Grammar extends FluentAqlGrammar
         if ($builder->aggregate !== null) {
             $values = ['aggregate' => 'aggregateResult'];
         }
+
         if (empty($values)) {
             $values = $doc;
+            if (is_array($builder->joins) && ! empty($builder->joins)) {
+                $values = $this->mergeJoinResults($builder, $values);
+            }
         }
 
         $builder->aqb = $builder->aqb->return($values, (bool) $builder->distinct);
 
         return $builder;
+    }
+
+    protected function mergeJoinResults($builder, $baseTable)
+    {
+        $tablesToJoin = [];
+        foreach ($builder->joins as $join) {
+            $tablesToJoin[] = $builder->getAlias($join->table);
+        }
+        $tablesToJoin = array_reverse($tablesToJoin);
+        $tablesToJoin[] = $baseTable;
+
+        return $builder->aqb->merge(...$tablesToJoin);
     }
 
     /**

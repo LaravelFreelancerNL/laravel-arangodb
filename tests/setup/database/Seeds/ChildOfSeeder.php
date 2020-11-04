@@ -3,6 +3,7 @@
 namespace Tests\Setup\Database\Seeds;
 
 use Illuminate\Database\Seeder;
+use Tests\Setup\Models\ChildOf;
 
 class ChildOfSeeder extends Seeder
 {
@@ -13,23 +14,26 @@ class ChildOfSeeder extends Seeder
      */
     public function run()
     {
-        $childOf = `[
-            {"_to": "Characters/NedStark", "_from": "Characters/RobbStark" },
-            {"_to": "Characters/NedStark", "_from": "Characters/SansaStark" },
-            {"_to": "Characters/NedStark", "_from": "Characters/AryaStark" },
-            {"_to": "Characters/NedStark", "_from": "Characters/BranStark" },
-            {"_to": "Characters/CatelynStark", "_from": "Characters/RobbStark" },
-            {"_to": "Characters/CatelynStark", "_from": "Characters/SansaStark" },
-            {"_to": "Characters/CatelynStark", "_from": "Characters/AryaStark" },
-            {"_to": "Characters/CatelynStark", "_from": "Characters/BranStark" },
-            {"_to": "Characters/NedStark", "_from": "Characters/JonSnow" },
-            {"_to": "Characters/TywinLannister", "_from": "Characters/JaimeLannister" },
-            {"_to": "Characters/TywinLannister", "_from": "Characters/CerseiLannister" },
-            {"_to": "Characters/TywinLannister", "_from": "Characters/TyrionLannister" },
-            {"_to": "Characters/CerseiLannister", "_from": "Characters/JoffreyBaratheon" },
-            {"_to": "Characters/JaimeLannister", "_from": "Characters/JoffreyBaratheon" }
-        ]`;
+        $childOf = '[
+            {"_from": "characters/NedStark", "_to": "characters/RobbStark" },
+            {"_from": "characters/NedStark", "_to": "characters/SansaStark" },
+            {"_from": "characters/NedStark", "_to": "characters/AryaStark" },
+            {"_from": "characters/NedStark", "_to": "characters/BranStark" },
+            {"_from": "characters/CatelynStark", "_to": "characters/RobbStark" },
+            {"_from": "characters/CatelynStark", "_to": "characters/SansaStark" },
+            {"_from": "characters/CatelynStark", "_to": "characters/AryaStark" },
+            {"_from": "characters/CatelynStark", "_to": "characters/BranStark" },
+            {"_from": "characters/NedStark", "_to": "characters/JonSnow" },
+            {"_from": "characters/TywinLannister", "_to": "characters/JaimeLannister" },
+            {"_from": "characters/TywinLannister", "_to": "characters/CerseiLannister" },
+            {"_from": "characters/TywinLannister", "_to": "characters/TyrionLannister" },
+            {"_from": "characters/CerseiLannister", "_to": "characters/JoffreyBaratheon" },
+            {"_from": "characters/JaimeLannister", "_to": "characters/JoffreyBaratheon" }
+        ]';
 
-        $childOf = json_decode($childOf);
+        $childOf = json_decode($childOf, JSON_OBJECT_AS_ARRAY);
+        foreach ($childOf as $relation) {
+            ChildOf::insert($relation);
+        }
     }
 }

@@ -14,8 +14,7 @@ class CharacteristicsSeeder extends Seeder
      */
     public function run()
     {
-        $traits = `[
-            { "_key": "A", "en": "strong", "de": "stark" },
+        $traits = '[{ "_key": "A", "en": "strong", "de": "stark" },
             { "_key": "B", "en": "polite", "de": "freundlich" },
             { "_key": "C", "en": "loyal", "de": "loyal" },
             { "_key": "D", "en": "beautiful", "de": "schön" },
@@ -33,9 +32,11 @@ class CharacteristicsSeeder extends Seeder
             { "_key": "P", "en": "brave", "de": "mutig" },
             { "_key": "Q", "en": "mighty", "de": "mächtig" },
             { "_key": "R", "en": "weak", "de": "schwach" }
-        ]`;
+        ]';
 
-        $traits = json_decode($traits);
-        Characteristic::insertOrupdate($traits);
+        $traits = json_decode($traits, JSON_OBJECT_AS_ARRAY);
+        foreach ($traits as $trait) {
+            Characteristic::insert($trait);
+        }
     }
 }

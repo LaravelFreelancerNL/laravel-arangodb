@@ -204,6 +204,20 @@ class Builder extends IlluminateQueryBuilder
     }
 
     /**
+     * @param Builder $builder
+     * @param $table
+     * @param string $postfix
+     * @return mixed
+     */
+    public function generateTableAlias($table, $postfix = 'Doc')
+    {
+        $alias = Str::singular($table) . $postfix;
+        $this->registerAlias($table, $alias);
+
+        return $alias;
+    }
+
+    /**
      * @param string $table
      * @param string $alias
      */
@@ -223,7 +237,23 @@ class Builder extends IlluminateQueryBuilder
         if (isset($this->aliasRegistry[$table])) {
             return $this->aliasRegistry[$table];
         }
+        if (in_array($table, $this->aliasRegistry)) {
+            return $table;
+        }
         return null;
+    }
+
+    public function replaceTableForAlias($reference): string
+    {
+        $referenceParts = explode('.', $reference);
+        $table = array_shift($referenceParts);
+        $alias = $this->getAlias($table);
+        if ($alias == null) {
+            $alias = $this->generateTableAlias($table);
+        }
+        array_unshift($referenceParts, $alias);
+
+        return implode('.', $referenceParts);
     }
 
     /**
@@ -247,7 +277,6 @@ class Builder extends IlluminateQueryBuilder
 
         return false;
     }
-
 
 
     /**
@@ -361,6 +390,54 @@ class Builder extends IlluminateQueryBuilder
         return ! in_array(strtolower($operator), $this->operators, true) &&
             ! isset($this->grammar->getOperators()[strtoupper($operator)]);
     }
+
+    /**
+     * Add a join clause to the query.
+     *
+     * @param  string  $table
+     * @param  \Closure|string  $first
+     * @param  string|null  $operator
+     * @param  string|null  $second
+     * @param  string  $type
+     * @param  bool  $where
+     * @return $this
+     */
+    public function join($table, $first, $operator = null, $second = null, $type = 'inner', $where = false)
+    {
+        $this->registerAlias($table, $this->generateTableAlias($table));
+        $first = $this->replaceTableForAlias($first);
+        $second = $this->replaceTableForAlias($second);
+
+        $join = $this->newJoinClause($this, $type, $table);
+
+        // If the first "column" of the join is really a Closure instance the developer
+        // is trying to build a join with a complex "on" clause containing more than
+        // one condition, so we'll add the join and call a Closure with the query.
+        if ($first instanceof Closure) {
+            $first($join);
+
+            $this->joins[] = $join;
+
+            //we'll take care of the bindings when calling fluentaql
+            $this->addBinding($join->getBindings(), 'join');
+        }
+
+        // If the column is simply a string, we can assume the join simply has a basic
+        // "on" clause with a single condition. So we will just build the join with
+        // this simple join clauses attached to it. There is not a join callback.
+        else {
+            //where and on are the same for aql
+            $method = $where ? 'where' : 'on';
+
+            $this->joins[] = $join->$method($first, $operator, $second);
+
+            //we'll take care of the bindings when calling fluentaql
+            $this->addBinding($join->getBindings(), 'join');
+        }
+
+        return $this;
+    }
+
 
     /**
      * Add an "or where" clause to the query.

@@ -62,9 +62,11 @@ class Builder extends IlluminateBuilder
      */
     protected function updateTimestamps(array $values)
     {
-        if (! $this->model->usesTimestamps() ||
+        if (
+            ! $this->model->usesTimestamps() ||
             is_null($this->model->getUpdatedAtColumn()) ||
-            is_null($this->model->getCreatedAtColumn())) {
+            is_null($this->model->getCreatedAtColumn())
+        ) {
             return $values;
         }
         $timestamp = $this->model->freshTimestampString();
