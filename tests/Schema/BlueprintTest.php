@@ -56,7 +56,7 @@ class BlueprintTest extends TestCase
         Schema::table('characters', function (Blueprint $collection) {
             $options = [
                 'unique' => true,
-                'sparse' => true
+                'sparse' => true,
             ];
 
             $indexName = $collection->createIndexName('persistent', ['address'], $options);
@@ -101,5 +101,4 @@ class BlueprintTest extends TestCase
             $this->assertEquals(1, count($commands[1]['columns']));
         });
     }
-
 }

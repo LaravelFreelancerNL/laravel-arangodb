@@ -234,10 +234,10 @@ trait Indexes
     /**
      * Create a default index name for the table.
      *
-     * @param  string  $type
-     * @param  array  $columns
+     * @param string $type
+     * @param array  $columns
+     * @param array  $options
      *
-     * @param  array  $options
      * @return string
      */
     public function createIndexName($type, array $columns, array $options = [])
