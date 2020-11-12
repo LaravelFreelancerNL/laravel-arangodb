@@ -31,7 +31,7 @@ trait Indexes
             $columns = [$columns];
         }
 
-        $indexOptions['name'] = $name ?: $this->createIndexName($type, $columns);
+        $indexOptions['name'] = $name ?: $this->createIndexName($type, $columns, $indexOptions);
 
         return $this->addCommand('index', compact('type', 'columns', 'indexOptions'));
     }
@@ -234,14 +234,22 @@ trait Indexes
     /**
      * Create a default index name for the table.
      *
-     * @param string $type
-     * @param array  $columns
+     * @param  string  $type
+     * @param  array  $columns
      *
+     * @param  array  $options
      * @return string
      */
-    public function createIndexName($type, array $columns)
+    public function createIndexName($type, array $columns, array $options = [])
     {
-        $index = strtolower($this->prefix.$this->table.'_'.implode('_', $columns).'_'.$type);
+        $nameParts = [];
+        $nameParts[] = $this->prefix.$this->table;
+        $nameParts = array_merge($nameParts, $columns);
+        $nameParts[] = $type;
+        $nameParts = array_merge($nameParts, array_keys($options));
+        array_filter($nameParts);
+
+        $index = strtolower(implode('_', $nameParts));
         $index = preg_replace("/\[\*+\]+/", '_array', $index);
 
         return preg_replace('/[^A-Za-z0-9]+/', '_', $index);

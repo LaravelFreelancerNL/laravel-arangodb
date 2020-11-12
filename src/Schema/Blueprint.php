@@ -270,8 +270,8 @@ class Blueprint
         ];
 
         if (in_array($method, $columnMethods)) {
-            if (isset($args)) {
-                $this->columns[] = $args;
+            if (isset($args[0]) && is_string($args[0])) {
+                $this->columns[] = $args[0];
             }
         }
 

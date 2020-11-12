@@ -261,10 +261,10 @@ class Builder extends IlluminateQueryBuilder
     public function replaceTableForAlias($reference): string
     {
         $referenceParts = explode('.', $reference);
-        $table = array_shift($referenceParts);
-        $alias = $this->getAlias($table);
+        $first = array_shift($referenceParts);
+        $alias = $this->getAlias($first);
         if ($alias == null) {
-            $alias = $this->generateTableAlias($table);
+            $alias = $first;
         }
         array_unshift($referenceParts, $alias);
 
