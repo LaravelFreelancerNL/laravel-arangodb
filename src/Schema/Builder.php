@@ -157,8 +157,8 @@ class Builder
     {
         $collections = $this->getAllCollections();
 
-        foreach ($collections as $key => $name) {
-            $this->collectionHandler->drop($name);
+        foreach ($collections as $key => $collection) {
+            $this->collectionHandler->drop($collection['name']);
         }
     }
 
