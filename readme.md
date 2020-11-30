@@ -2,8 +2,7 @@ Aranguent
 ---------
 <p align="center">
 <a href="https://travis-ci.org/LaravelFreelancerNL/aranguent"><img src="https://travis-ci.org/LaravelFreelancerNL/laravel-arangodb.svg?branch=master" alt="Build Status"></a>
-<a href="https://github.styleci.io/repos/127011133"><img src="https://github.styleci.io/repos/127011133/shield?branch=master" alt="Code style"></a>
-<a href="https://packagist.org/packages/laravel-freelancer-nl/aranguent"><img src="https://poser.pugx.org/laravel-freelancer-nl/aranguent/v/stable" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel-freelancer-nl/aranguent"><img src="https://poser.pugx.org/laravel-freelancer-nl/aranguent/v/unstable" alt="Latest Version"></a>
 <a href="https://packagist.org/packages/laravel-freelancer-nl/aranguent"><img src="https://poser.pugx.org/laravel-freelancer-nl/aranguent/downloads" alt="Total Downloads"></a>
 <a href="https://packagist.org/packages/laravel-freelancer-nl/aranguent"><img src="https://poser.pugx.org/laravel-freelancer-nl/aranguent/license" alt="License"></a>
 
