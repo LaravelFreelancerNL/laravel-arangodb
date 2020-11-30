@@ -42,7 +42,9 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         $this->connection = DB::connection('arangodb');
 
         $this->createDatabase();
-        $this->connection->setDatabaseName(($app['config']['database.database']) ? $app['config']['database.database'] : 'aranguent__test');
+        $this->connection->setDatabaseName(
+            ($app['config']['database.database']) ? $app['config']['database.database'] : 'aranguent__test'
+        );
 
         $this->collectionHandler = $this->connection->getCollectionHandler();
         //Remove all collections
@@ -55,20 +57,23 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->withFactories(realpath(__DIR__.'/setup/database/factories'));
+        $this->withFactories(realpath(__DIR__ . '/setup/database/factories'));
 
-        $this->artisan('aranguent:convert-migrations', ['--realpath' => true, '--path' => __DIR__.'/../vendor/orchestra/testbench-core/laravel/migrations/'])->run();
+        $this->artisan(
+            'aranguent:convert-migrations',
+            ['--realpath' => true, '--path' => __DIR__ . '/../vendor/orchestra/testbench-core/laravel/migrations/']
+        )
+            ->run();
 
-        //Running migrations without loading them through testbench as it does something weird which doesn't save the new collections
         $this->installMigrateIfNotExists();
 
         $this->artisan('migrate', [
-            '--path'     => realpath(__DIR__.'/setup/database/migrations'),
+            '--path'     => realpath(__DIR__ . '/setup/database/migrations'),
             '--realpath' => true,
         ])->run();
 
         $this->artisan('migrate', [
-            '--path'     => realpath(__DIR__.'/setup/database/migrations'),
+            '--path'     => realpath(__DIR__ . '/setup/database/migrations'),
             '--realpath' => true,
         ])->run();
 

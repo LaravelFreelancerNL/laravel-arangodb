@@ -17,7 +17,9 @@ trait Columns
     {
         $parameters = [];
         $parameters['handler'] = 'aql';
-        $parameters['explanation'] = "Checking if any document within the table has the '".implode(', ', (array) $column)."' column(s).";
+        $parameters['explanation'] = "Checking if any document within the table has the '"
+            . implode(', ', (array) $column)
+            . "' column(s).";
         $parameters['column'] = $column;
 
         return $this->addCommand('hasAttribute', $parameters);
@@ -56,7 +58,7 @@ trait Columns
         $parameters = [];
         $parameters['handler'] = 'aql';
         $parameters['attributes'] = $columns;
-        $parameters['explanation'] = 'Drop the following column(s): '.implode(',', $columns).'.';
+        $parameters['explanation'] = 'Drop the following column(s): ' . implode(',', $columns) . '.';
 
         return $this->addCommand('dropAttribute', compact('parameters'));
     }

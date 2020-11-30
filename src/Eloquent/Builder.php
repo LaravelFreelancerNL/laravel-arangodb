@@ -35,11 +35,10 @@ class Builder extends IlluminateBuilder
 
         if (Arr::isAssoc($values)) {
             $values = [$values];
-        }
-        // Here, we will sort the insert keys for every record so that each insert is
-        // in the same order for the record. We need to make sure this is the case
-        // so there are not any errors or problems when inserting these records.
-        else {
+        } else {
+            // Here, we will sort the insert keys for every record so that each insert is
+            // in the same order for the record. We need to make sure this is the case
+            // so there are not any errors or problems when inserting these records.
             foreach ($values as $key => $value) {
                 ksort($value);
 

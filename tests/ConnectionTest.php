@@ -24,12 +24,7 @@ class ConnectionTest extends TestCase
         $this->assertInstanceOf('LaravelFreelancerNL\Aranguent\Connection', $this->connection);
     }
 
-    /**
-     * begin transaction.
-     *
-     * @test
-     */
-    public function begin_transaction()
+    public function testBeginTransaction()
     {
         $this->assertEquals(0, $this->connection->transactionLevel());
         $this->assertEmpty($this->connection->getTransactionCommands());
@@ -41,16 +36,18 @@ class ConnectionTest extends TestCase
         $this->assertEmpty($this->connection->getTransactionCommands()[1]);
     }
 
-    /**
-     * add a command to the transaction.
-     *
-     * @test
-     */
-    public function add_transaction_command()
+    public function testAddTransactionCommand()
     {
+        $query = [
+            "name" => "Robert",
+            "surname" => "Baratheon",
+            "alive" => '@value',
+            "traits" => ["A","H","C"]
+        ];
+
         $command = new IlluminateFluent([
             'name'        => 'testCommandQuery',
-            'command'     => "db._query('INSERT {\"name\": \"Robert\", \"surname\": \"Baratheon\", \"alive\": @value, \"traits\": [\"A\",\"H\",\"C\"] } INTO migrations', {'value' : true});",
+            'command'     => "db._query('INSERT '" . json_encode($query) . "' INTO migrations', {'value' : true});",
             'collections' => ['write' => 'migrations'],
         ]);
 
@@ -67,16 +64,18 @@ class ConnectionTest extends TestCase
         $this->assertNotEmpty($command->command);
     }
 
-    /**
-     * compile action.
-     *
-     * @test
-     */
-    public function compile_action()
+    public function testCompileAction()
     {
+        $query = [
+            "name" => "Robert",
+            "surname" => "Baratheon",
+            "alive" => false,
+            "traits" => ["A","H","C"]
+        ];
+
         $command = new IlluminateFluent([
             'name'        => 'testCommandQuery',
-            'command'     => "db._query('INSERT {\"name\": \"Robert\", \"surname\": \"Baratheon\", \"alive\": false, \"traits\": [\"A\",\"H\",\"C\"] } INTO Characters', {'value' : 1});",
+            'command'     => "db._query('INSERT " . json_encode($query) . " INTO Characters', {'value' : 1});",
             'collections' => ['write' => 'Characters'],
         ]);
         $this->connection->beginTransaction();
@@ -87,15 +86,14 @@ class ConnectionTest extends TestCase
         $this->connection->addTransactionCommand($command);
         $action = $this->connection->compileTransactionAction();
 
-        $this->assertEquals("function () { var db = require('@arangodb').db; db._query('INSERT {\"name\": \"Robert\", \"surname\": \"Baratheon\", \"alive\": false, \"traits\": [\"A\",\"H\",\"C\"] } INTO Characters', {'value' : 1}); }", $action);
+        $this->assertEquals(
+            "function () { var db = require('@arangodb').db; db._query("
+            . "'INSERT " . json_encode($query) . " INTO Characters', {'value' : 1}); }",
+            $action
+        );
     }
 
-    /**
-     * commit fails if committed too soon.
-     *
-     * @test
-     */
-    public function commit_fails_if_committed_too_soon()
+    public function testCommitFailsIfCommittedTooSoon()
     {
         $this->expectExceptionMessage('Transaction committed before starting one.');
         $this->connection->commit();
@@ -106,16 +104,18 @@ class ConnectionTest extends TestCase
         $this->connection->commit();
     }
 
-    /**
-     * commit a transaction.
-     *
-     * @test
-     */
-    public function commit_a_transaction()
+    public function testCommitTransaction()
     {
+        $query = [
+            "name" => "Robert",
+            "surname" => "Baratheon",
+            "alive" => true,
+            "traits" => ["A","H","C"]
+        ];
+
         $command1 = new IlluminateFluent([
             'name'        => 'testCommandQuery',
-            'command'     => "db._query('INSERT {\"name\": \"Robert\", \"surname\": \"Baratheon\", \"alive\": @value, \"traits\": [\"A\",\"H\",\"C\"] } INTO migrations', {'value' : true});",
+            'command'     => "db._query('INSERT " . json_encode($query) . " INTO migrations');",
             'collections' => ['write' => 'migrations'],
         ]);
         $command2 = new IlluminateFluent([
@@ -134,12 +134,7 @@ class ConnectionTest extends TestCase
         $this->assertTrue($results);
     }
 
-    /**
-     * add query to transaction.
-     *
-     * @test
-     */
-    public function add_query_to_transaction()
+    public function testAddQueryToTransaction()
     {
         $query = '
             FOR u IN users
@@ -164,12 +159,7 @@ class ConnectionTest extends TestCase
         $this->assertIsArray($result->collections['write']);
     }
 
-    /**
-     * collection extraction from transactional queries.
-     *
-     * @test
-     */
-    public function collection_extraction_from_transactional_queries()
+    public function testCollectionExtractionFromTransactionalQueries()
     {
         // We're combining multiple queries in one statement which would normally fail when executed.
         // However the goal is to see if the collections are extracted properly.
@@ -217,7 +207,7 @@ class ConnectionTest extends TestCase
     public function testChangeDatabaseName()
     {
         $initialName = $this->connection->getDatabaseName();
-        $newName = $initialName.'New';
+        $newName = $initialName . 'New';
         $this->connection->setDatabaseName($newName);
         $currentName = $this->connection->getDatabaseName();
 
@@ -225,12 +215,7 @@ class ConnectionTest extends TestCase
         $this->assertEquals($newName, $currentName);
     }
 
-    /**
-     * explain a query.
-     *
-     * @test
-     */
-    public function explain_a_query()
+    public function testExplainQuery()
     {
         $query = '
             FOR i IN 1..1000

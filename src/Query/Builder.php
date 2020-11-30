@@ -224,7 +224,7 @@ class Builder extends IlluminateQueryBuilder
      */
     public function generateTableAlias($table, $postfix = 'Doc')
     {
-        $alias = Str::singular($table).$postfix;
+        $alias = Str::singular($table) . $postfix;
         $this->registerAlias($table, $alias);
 
         return $alias;
@@ -439,12 +439,11 @@ class Builder extends IlluminateQueryBuilder
 
             //we'll take care of the bindings when calling fluentaql
             $this->addBinding($join->getBindings(), 'join');
-        }
+        } else {
+            // If the column is simply a string, we can assume the join simply has a basic
+            // "on" clause with a single condition. So we will just build the join with
+            // this simple join clauses attached to it. There is not a join callback.
 
-        // If the column is simply a string, we can assume the join simply has a basic
-        // "on" clause with a single condition. So we will just build the join with
-        // this simple join clauses attached to it. There is not a join callback.
-        else {
             //where and on are the same for aql
             $method = $where ? 'where' : 'on';
 
@@ -486,7 +485,7 @@ class Builder extends IlluminateQueryBuilder
         if ($this->isQueryable($column)) {
             [$query, $bindings] = $this->createSub($column);
 
-            $column = new Expression('('.$query.')');
+            $column = new Expression('(' . $query . ')');
         }
 
         $this->{$this->unions ? 'unionOrders' : 'orders'}[] = [

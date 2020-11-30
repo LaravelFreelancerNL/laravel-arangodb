@@ -96,14 +96,14 @@ class Grammar extends FluentAqlGrammar
      */
     protected function generateTableAlias($builder, $table, $postfix = 'Doc')
     {
-        $builder->registerAlias($table, Str::singular($table).$postfix);
+        $builder->registerAlias($table, Str::singular($table) . $postfix);
 
         return $builder;
     }
 
     protected function prefixTable($table)
     {
-        return $this->tablePrefix.$table;
+        return $this->tablePrefix . $table;
     }
 
     /**
@@ -196,7 +196,7 @@ class Grammar extends FluentAqlGrammar
             // function for the component which is responsible for making the SQL.
 
             if (isset($builder->$component) && !is_null($builder->$component)) {
-                $method = 'compile'.ucfirst($component);
+                $method = 'compile' . ucfirst($component);
 
                 $builder = $this->$method($builder, $builder->$component);
             }
@@ -235,7 +235,7 @@ class Grammar extends FluentAqlGrammar
     protected function compileJoins(Builder $builder, $joins)
     {
         foreach ($joins as $join) {
-            $compileMethod = 'compile'.ucfirst($join->type).'Join';
+            $compileMethod = 'compile' . ucfirst($join->type) . 'Join';
             $builder = $this->$compileMethod($builder, $join);
         }
 
@@ -379,7 +379,7 @@ class Grammar extends FluentAqlGrammar
      */
     protected function compileAggregate(Builder $builder, $aggregate)
     {
-        $method = 'compile'.ucfirst($aggregate['function']);
+        $method = 'compile' . ucfirst($aggregate['function']);
 
         return $this->$method($builder, $aggregate);
     }
@@ -565,7 +565,7 @@ class Grammar extends FluentAqlGrammar
         $doc = $builder->getAlias($builder->from);
         foreach ($columns as $column) {
             if ($column != null && $column != '*') {
-                $values[$column] = $doc.'.'.$column;
+                $values[$column] = $doc . '.' . $column;
             }
         }
         if ($builder->aggregate !== null) {
@@ -697,10 +697,10 @@ class Grammar extends FluentAqlGrammar
     {
         $alias = $builder->getAlias($target);
 
-        if (Str::startsWith($value, $alias.'.')) {
+        if (Str::startsWith($value, $alias . '.')) {
             return $value;
         }
 
-        return $alias.'.'.$value;
+        return $alias . '.' . $value;
     }
 }

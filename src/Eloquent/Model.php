@@ -56,13 +56,13 @@ abstract class Model extends IlluminateModel
      */
     public function qualifyColumn($column)
     {
-        $tableReferer = Str::singular($this->getTable()).'Doc';
+        $tableReferer = Str::singular($this->getTable()) . 'Doc';
 
-        if (Str::startsWith($column, $tableReferer.'.')) {
+        if (Str::startsWith($column, $tableReferer . '.')) {
             return $column;
         }
 
-        return $tableReferer.'.'.$column;
+        return $tableReferer . '.' . $column;
     }
 
     /**
@@ -72,6 +72,6 @@ abstract class Model extends IlluminateModel
      */
     public function getForeignKey()
     {
-        return Str::snake(class_basename($this)).$this->getKeyName();
+        return Str::snake(class_basename($this)) . $this->getKeyName();
     }
 }

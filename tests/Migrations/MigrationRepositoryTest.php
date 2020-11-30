@@ -8,12 +8,7 @@ use Tests\TestCase;
 
 class MigrationRepositoryTest extends TestCase
 {
-    /**
-     * migrations collection is created.
-     *
-     * @test
-     */
-    public function migrations_collection_is_created()
+    public function testMigrationsCollectionIsCreated()
     {
         if ($this->databaseMigrationRepository->repositoryExists()) {
             $this->expectException(ServerException::class);
@@ -26,12 +21,7 @@ class MigrationRepositoryTest extends TestCase
         $this->assertTrue($this->collectionHandler->has($this->collection));
     }
 
-    /**
-     * log_creates_migration_entry.
-     *
-     * @test
-     */
-    public function log_creates_migration_entry()
+    public function testLogCreatesMigrationEntry()
     {
         $filename = 'logtest.php';
         $batch = 40;
@@ -43,12 +33,7 @@ class MigrationRepositoryTest extends TestCase
         $this->assertInstanceOf(Document::class, $documents->first());
     }
 
-    /**
-     * get the highest batch value.
-     *
-     * @test
-     */
-    public function get_the_last_batch_number()
+    public function testGetNumberOfLastBatch()
     {
         $this->databaseMigrationRepository->log('getLastBatchNumberTest', 2);
         $this->databaseMigrationRepository->log('getLastBatchNumberTest', 2);
@@ -59,12 +44,7 @@ class MigrationRepositoryTest extends TestCase
         $this->assertEquals(2, $result);
     }
 
-    /**
-     * get all ran migration files.
-     *
-     * @test
-     */
-    public function get_all_ran_migration_files()
+    public function testGetAllRanMigrationfiles()
     {
         $this->databaseMigrationRepository->log('getRanMigration1', 50);
         $this->databaseMigrationRepository->log('getRanMigration2', 53);
@@ -75,12 +55,7 @@ class MigrationRepositoryTest extends TestCase
         $this->assertEquals(8, count($result));
     }
 
-    /**
-     * Delete migration.
-     *
-     * @test
-     */
-    public function delete_migration()
+    public function testDeleteMigration()
     {
         $filename = 'deletetest.php';
         $batch = 39;
@@ -101,12 +76,7 @@ class MigrationRepositoryTest extends TestCase
         $this->assertNull($documents->first());
     }
 
-    /**
-     * get all migrations within the last batch.
-     *
-     * @test
-     */
-    public function get_last_migration()
+    public function testGetLastMigration()
     {
         $this->databaseMigrationRepository->log('getLastMigration1', 60000);
         $this->databaseMigrationRepository->log('getLastMigration2', 60001);
@@ -118,12 +88,7 @@ class MigrationRepositoryTest extends TestCase
         $this->assertEquals(60001, current($lastBatch)->batch);
     }
 
-    /**
-     * get migration batches.
-     *
-     * @test
-     */
-    public function get_migration_batches()
+    public function testGetMigrationBatches()
     {
         $this->databaseMigrationRepository->log('getMigrationBatches1', 32);
         $this->databaseMigrationRepository->log('getMigrationBatches2', 33);
@@ -135,12 +100,7 @@ class MigrationRepositoryTest extends TestCase
         $this->assertEquals(8, count($batches));
     }
 
-    /**
-     * get migration batches.
-     *
-     * @test
-     */
-    public function get_migrations()
+    public function testGetMigrations()
     {
         $this->databaseMigrationRepository->log('getMigrationBatches1', 42);
         $this->databaseMigrationRepository->log('getMigrationBatches2', 43);

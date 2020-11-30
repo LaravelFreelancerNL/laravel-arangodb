@@ -128,7 +128,8 @@ class BuilderTest extends TestCase
             ->where('email', '=', 'email@example.com')
             ->where('_key', '<>', 'keystring');
         $this->assertSame(
-            'FOR userDoc IN users FILTER userDoc.email == "email@example.com" AND userDoc._key != "keystring" RETURN userDoc',
+            'FOR userDoc IN users '
+            . 'FILTER userDoc.email == "email@example.com" AND userDoc._key != "keystring" RETURN userDoc',
             $builder->toSql()
         );
         $this->assertEquals([0 => 'email@example.com', 1 => 'keystring'], $builder->getBindings());
@@ -170,9 +171,13 @@ class BuilderTest extends TestCase
     {
         $builder = $this->getBuilder();
 
-        $builder->select()->from('users')->where('country', 'IN', ['The Netherlands', 'Germany', 'Great-Britain']);
+        $builder->select()
+            ->from('users')
+            ->where('country', 'IN', ['The Netherlands', 'Germany', 'Great-Britain']);
         $this->assertSame(
-            'FOR userDoc IN users FILTER userDoc.country IN [@'.$builder->aqb->getQueryId().'_1,"Germany","Great-Britain"] RETURN userDoc',
+            'FOR userDoc IN users FILTER userDoc.country IN [@'
+            . $builder->aqb->getQueryId()
+            . '_1,"Germany","Great-Britain"] RETURN userDoc',
             $builder->toSql()
         );
     }

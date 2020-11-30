@@ -161,7 +161,7 @@ trait Indexes
     public function executeIndexCommand($command)
     {
         if ($this->connection->pretending()) {
-            $this->connection->logQuery('/* '.$command->explanation." */\n", []);
+            $this->connection->logQuery('/* ' . $command->explanation . " */\n", []);
 
             return;
         }
@@ -191,7 +191,7 @@ trait Indexes
     {
         $parameters['name'] = 'dropIndex';
         $parameters['index'] = $name;
-        $parameters['explanation'] = "Drop the '".$name."' index on the {$this->table} table.";
+        $parameters['explanation'] = "Drop the '" . $name . "' index on the {$this->table} table.";
         $parameters['handler'] = 'collection';
 
         return $this->addCommand('dropIndex', $parameters);
@@ -206,7 +206,7 @@ trait Indexes
     public function executeDropIndexCommand($command)
     {
         if ($this->connection->pretending()) {
-            $this->connection->logQuery('/* '.$command->explanation." */\n", []);
+            $this->connection->logQuery('/* ' . $command->explanation . " */\n", []);
 
             return;
         }
@@ -243,7 +243,7 @@ trait Indexes
     public function createIndexName($type, array $columns, array $options = [])
     {
         $nameParts = [];
-        $nameParts[] = $this->prefix.$this->table;
+        $nameParts[] = $this->prefix . $this->table;
         $nameParts = array_merge($nameParts, $columns);
         $nameParts[] = $type;
         $nameParts = array_merge($nameParts, array_keys($options));

@@ -17,10 +17,14 @@ class MorphOneTest extends TestCase
         Carbon::setTestNow(Carbon::now());
 
         $characters = '[
-            { "_key": "RamsayBolton", "name": "Ramsay", "surname": "Bolton", "alive": true, "traits": ["E","O","G","A"] },
-            { "_key": "SansaStark", "name": "Sansa", "surname": "Stark", "alive": true, "age": 13, "traits": ["D","I","J"] },
-            { "_key": "RickonStark", "name": "Bran", "surname": "Stark", "alive": true, "age": 10, "traits": ["R"] },
-            { "_key": "TheonGreyjoy", "name": "Theon", "surname": "Greyjoy", "alive": true, "age": 16, "traits": ["E","R","K"] }
+            { "_key": "RamsayBolton", "name": "Ramsay", "surname": "Bolton", "alive": true, '
+            . '"traits": ["E","O","G","A"] },
+            { "_key": "SansaStark", "name": "Sansa", "surname": "Stark", "alive": true, "age": 13, '
+            . '"traits": ["D","I","J"] },
+            { "_key": "RickonStark", "name": "Bran", "surname": "Stark", "alive": true, "age": 10, '
+            . '"traits": ["R"] },
+            { "_key": "TheonGreyjoy", "name": "Theon", "surname": "Greyjoy", "alive": true, "age": 16, '
+            . '"traits": ["E","R","K"] }
         ]';
         $characters = json_decode($characters, JSON_OBJECT_AS_ARRAY);
         foreach ($characters as $character) {

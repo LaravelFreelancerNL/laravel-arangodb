@@ -338,18 +338,6 @@ class Builder
     }
 
     /**
-     * get information about the collection.
-     *
-     * @param $collection
-     *
-     * @return mixed
-     */
-    public function getCollectionInfo($collection)
-    {
-        return $this->figures($collection);
-    }
-
-    /**
      * @param string $name
      * @param array  $properties
      * @param string $type

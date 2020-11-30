@@ -59,7 +59,7 @@ trait HasRelationships
         // foreign key name by using the name of the relationship function, which
         // when combined with an "_id" should conventionally match the columns.
         if (is_null($foreignKey)) {
-            $foreignKey = Str::snake($relation).$instance->getKeyName();
+            $foreignKey = Str::snake($relation) . $instance->getKeyName();
         }
 
         // Once we have the foreign key names, we'll just create a new Eloquent query
@@ -272,6 +272,15 @@ trait HasRelationships
         $relatedKey,
         $relationName = null
     ) {
-        return new BelongsToMany($query, $parent, $table, $foreignPivotKey, $relatedPivotKey, $parentKey, $relatedKey, $relationName);
+        return new BelongsToMany(
+            $query,
+            $parent,
+            $table,
+            $foreignPivotKey,
+            $relatedPivotKey,
+            $parentKey,
+            $relatedKey,
+            $relationName
+        );
     }
 }

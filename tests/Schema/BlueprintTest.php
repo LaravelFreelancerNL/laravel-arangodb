@@ -101,5 +101,4 @@ class BlueprintTest extends TestCase
             $this->assertEquals(1, count($commands[1]['columns']));
         });
     }
-
 }

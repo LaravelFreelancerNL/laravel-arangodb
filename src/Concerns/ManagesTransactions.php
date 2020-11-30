@@ -81,10 +81,10 @@ trait ManagesTransactions
         }
 
 //        $query = addslashes($query);
-        $jsCommand = 'db._query(aql`'.$query.'`';
+        $jsCommand = 'db._query(aql`' . $query . '`';
         if (!empty($bindings)) {
             $bindings = json_encode($bindings);
-            $jsCommand .= ', '.$bindings;
+            $jsCommand .= ', ' . $bindings;
         }
         $jsCommand .= ');';
         $command = new IlluminateFluent([
@@ -137,11 +137,21 @@ trait ManagesTransactions
         }
 
         //FOR statements
-        preg_match_all('/FOR(?:\s+?)(?:\w+)(?:\s+?)(?:IN|INTO)(?:\s+?)(?!OUTBOUND|INBOUND|ANY)(@?@?\w+(?!\.))/mis', $query, $rawForCollections);
+        preg_match_all(
+            '/FOR(?:\s+?)(?:\w+)(?:\s+?)(?:IN|INTO)(?:\s+?)(?!OUTBOUND|INBOUND|ANY)(@?@?\w+(?!\.))/mis',
+            $query,
+            $rawForCollections
+        );
         $extractedCollections = array_merge($extractedCollections, $rawForCollections[1]);
 
         //Document functions which require a document as their first argument
-        preg_match_all('/(?:DOCUMENT\(|ATTRIBUTES\(|HAS\(|KEEP\(|LENGTH\(|MATCHES\(|PARSE_IDENTIFIER\(|UNSET\(|UNSET_RECURSIVE\(|VALUES\(|OUTBOUND|INBOUND|ANY)(?:\s+?)(?!\{)(?:\"|\'|\`)(@?@?\w+)\/(?:\w+)(?:\"|\'|\`)/mis', $query, $rawDocCollections);
+        preg_match_all(
+            '/(?:DOCUMENT\(|ATTRIBUTES\(|HAS\(|KEEP\(|LENGTH\(|MATCHES'
+            . '\(|PARSE_IDENTIFIER\(|UNSET\(|UNSET_RECURSIVE\(|VALUES\(|OUTBOUND|INBOUND|ANY)'
+            . '(?:\s+?)(?!\{)(?:\"|\'|\`)(@?@?\w+)\/(?:\w+)(?:\"|\'|\`)/mis',
+            $query,
+            $rawDocCollections
+        );
         $extractedCollections = array_merge($extractedCollections, $rawDocCollections[1]);
 
         $extractedCollections = array_map('trim', $extractedCollections);
@@ -170,7 +180,12 @@ trait ManagesTransactions
      */
     public function extractWriteCollections($query, $bindings, $collections)
     {
-        preg_match_all('/(?:\s+?)(?:INSERT|REPLACE|UPDATE|REMOVE)(?:\s+?)(?:{(?:.*?)}|@?@?\w+?)(?:\s+?)(?:IN|INTO)(?:\s+?)(@?@?\w+)/mis', $query, $extractedCollections);
+        preg_match_all(
+            '/(?:\s+?)(?:INSERT|REPLACE|UPDATE|REMOVE)'
+            . '(?:\s+?)(?:{(?:.*?)}|@?@?\w+?)(?:\s+?)(?:IN|INTO)(?:\s+?)(@?@?\w+)/mis',
+            $query,
+            $extractedCollections
+        );
         $extractedCollections = array_map('trim', $extractedCollections[1]);
 
         $extractedCollections = $this->getCollectionByBinding($extractedCollections, $bindings);
@@ -220,7 +235,10 @@ trait ManagesTransactions
         if (!$this->transactions > 0) {
             throw new \Exception('Transaction committed before starting one.');
         }
-        if (!isset($this->transactionCommands[$this->transactions]) || empty($this->transactionCommands[$this->transactions])) {
+        if (
+            !isset($this->transactionCommands[$this->transactions])
+            || empty($this->transactionCommands[$this->transactions])
+        ) {
             throw new \Exception('Cannot commit an empty transaction.');
         }
 

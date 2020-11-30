@@ -126,7 +126,7 @@ class JoinClause extends Builder
      */
     public function newQuery()
     {
-        return new static($this->newParentQuery(), $this->type, $this->table);
+        return new self($this->newParentQuery(), $this->type, $this->table);
     }
 
     /**
