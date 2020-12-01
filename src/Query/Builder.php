@@ -17,6 +17,7 @@ use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
 class Builder extends IlluminateQueryBuilder
 {
+
     /**
      * @var Grammar
      */
@@ -31,14 +32,6 @@ class Builder extends IlluminateQueryBuilder
      * @var QueryBuilder
      */
     public $aqb;
-
-    /**
-     * Alias' are AQL variables
-     * Sticking with the SQL based naming as this is the Laravel driver.
-     *
-     * @var QueryBuilder
-     */
-    protected $aliasRegistry = [];
 
     /**
      * @override
@@ -144,32 +137,6 @@ class Builder extends IlluminateQueryBuilder
     }
 
     /**
-     * Set the table which the query is targeting.
-     *
-     * @param Closure|Builder|string $table
-     * @param string|null            $as
-     *
-     * @return $this
-     */
-    public function from($table, $as = null)
-    {
-        if ($this->isQueryable($table)) {
-            return $this->fromSub($table, $as);
-        }
-
-        if (stripos($table, ' as ') !== false) {
-            $parts = explode(' as ', $table);
-            $table = $parts[0];
-            $as = $parts[1];
-            $this->registerAlias($table, $as);
-        }
-
-        $this->from = $table;
-
-        return $this;
-    }
-
-    /**
      * Execute the query as a "select" statement.
      *
      * @param array|string $columns
@@ -213,62 +180,6 @@ class Builder extends IlluminateQueryBuilder
         $this->aqb = new QueryBuilder();
 
         return $response;
-    }
-
-    /**
-     * @param Builder $builder
-     * @param $table
-     * @param string $postfix
-     *
-     * @return mixed
-     */
-    public function generateTableAlias($table, $postfix = 'Doc')
-    {
-        $alias = Str::singular($table) . $postfix;
-        $this->registerAlias($table, $alias);
-
-        return $alias;
-    }
-
-    /**
-     * @param string $table
-     * @param string $alias
-     */
-    public function registerAlias(string $table, string $alias): void
-    {
-        if (!isset($this->aliasRegistry[$table])) {
-            $this->aliasRegistry[$table] = $alias;
-        }
-    }
-
-    /**
-     * @param string $table
-     *
-     * @return string
-     */
-    public function getAlias(string $table): ?string
-    {
-        if (isset($this->aliasRegistry[$table])) {
-            return $this->aliasRegistry[$table];
-        }
-        if (in_array($table, $this->aliasRegistry)) {
-            return $table;
-        }
-
-        return null;
-    }
-
-    public function replaceTableForAlias($reference): string
-    {
-        $referenceParts = explode('.', $reference);
-        $first = array_shift($referenceParts);
-        $alias = $this->getAlias($first);
-        if ($alias == null) {
-            $alias = $first;
-        }
-        array_unshift($referenceParts, $alias);
-
-        return implode('.', $referenceParts);
     }
 
     /**
@@ -375,28 +286,6 @@ class Builder extends IlluminateQueryBuilder
     }
 
     /**
-     * Add a "where null" clause to the query.
-     *
-     * @param string|array $columns
-     * @param string       $boolean
-     * @param bool         $not
-     *
-     * @return $this
-     */
-    public function whereNull($columns, $boolean = 'and', $not = false)
-    {
-        $type = 'Basic';
-        $operator = $not ? '!=' : '==';
-        $value = null;
-
-        foreach (Arr::wrap($columns) as $column) {
-            $this->wheres[] = compact('type', 'column', 'operator', 'value', 'boolean');
-        }
-
-        return $this;
-    }
-
-    /**
      * Determine if the given operator is supported.
      *
      * @param string $operator
@@ -423,10 +312,6 @@ class Builder extends IlluminateQueryBuilder
      */
     public function join($table, $first, $operator = null, $second = null, $type = 'inner', $where = false)
     {
-        $this->registerAlias($table, $this->generateTableAlias($table));
-        $first = $this->replaceTableForAlias($first);
-        $second = $this->replaceTableForAlias($second);
-
         $join = $this->newJoinClause($this, $type, $table);
 
         // If the first "column" of the join is really a Closure instance the developer
@@ -454,20 +339,6 @@ class Builder extends IlluminateQueryBuilder
         }
 
         return $this;
-    }
-
-    /**
-     * Add an "or where" clause to the query.
-     *
-     * @param Closure|string|array $column
-     * @param mixed                $operator
-     * @param mixed                $value
-     *
-     * @return IlluminateQueryBuilder|static
-     */
-    public function orWhere($column, $operator = null, $value = null)
-    {
-        return $this->where($column, $operator, $value, 'or');
     }
 
     /**

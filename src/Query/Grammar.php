@@ -5,6 +5,8 @@ namespace LaravelFreelancerNL\Aranguent\Query;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesWhereClauses;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\HasAliases;
 use LaravelFreelancerNL\FluentAQL\Exceptions\BindException as BindException;
 use LaravelFreelancerNL\FluentAQL\Expressions\FunctionExpression;
 use LaravelFreelancerNL\FluentAQL\Grammar as FluentAqlGrammar;
@@ -16,6 +18,8 @@ use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
 class Grammar extends FluentAqlGrammar
 {
+    use CompilesWhereClauses;
+    use HasAliases;
     use Macroable;
 
     public $name;
@@ -85,20 +89,6 @@ class Grammar extends FluentAqlGrammar
     public function getOperators()
     {
         return $this->comparisonOperators;
-    }
-
-    /**
-     * @param Builder $builder
-     * @param $table
-     * @param string $postfix
-     *
-     * @return mixed
-     */
-    protected function generateTableAlias($builder, $table, $postfix = 'Doc')
-    {
-        $builder->registerAlias($table, Str::singular($table) . $postfix);
-
-        return $builder;
     }
 
     protected function prefixTable($table)
@@ -216,10 +206,9 @@ class Grammar extends FluentAqlGrammar
     protected function compileFrom(Builder $builder, $table)
     {
         $table = $this->prefixTable($table);
-        $builder = $this->generateTableAlias($builder, $table);
-        $tableAlias = $builder->getAlias($table);
+        $alias = $this->registerTableAlias($table);
 
-        $builder->aqb = $builder->aqb->for($tableAlias, $table);
+        $builder->aqb = $builder->aqb->for($alias, $table);
 
         return $builder;
     }
@@ -299,75 +288,6 @@ class Grammar extends FluentAqlGrammar
         return $builder;
     }
 
-    /**
-     * Compile the "where" portions of the query.
-     *
-     * @param Builder $builder
-     *
-     * @return Builder
-     */
-    protected function compileWheres(Builder $builder)
-    {
-        if (is_null($builder->wheres)) {
-            return $builder;
-        }
-
-        if (count($predicates = $this->compileWheresToArray($builder)) > 0) {
-            $builder->aqb = $builder->aqb->filter($predicates);
-
-            return $builder;
-        }
-
-        return $builder;
-    }
-
-    /**
-     * Get an array of all the where clauses for the query.
-     *
-     * @param \Illuminate\Database\Query\Builder $builder
-     *
-     * @return array
-     */
-    protected function compileWheresToArray($builder)
-    {
-        $result = collect($builder->wheres)->map(function ($where) use ($builder) {
-            if (isset($where['operator'])) {
-                $where['operator'] = $this->translateOperator($where['operator']);
-            } else {
-                $where['operator'] = $this->getOperatorByWhereType($where['type']);
-            }
-            $cleanWhere = [];
-            if (isset($where['column'])) {
-                if (stripos($where['column'], '.') !== false) {
-                    $where['column'] = $builder->replaceTableForAlias($where['column']);
-                } else {
-                    $where['column'] = $this->prefixAlias($builder, $builder->from, $where['column']);
-                }
-                $cleanWhere[0] = $where['column'];
-            }
-
-            if (isset($where['first'])) {
-                $cleanWhere[0] = $where['first'];
-            }
-
-            $cleanWhere[1] = $where['operator'];
-            $cleanWhere[2] = null;
-            if (isset($where['value'])) {
-                $cleanWhere[2] = $where['value'];
-            }
-            if (isset($where['values'])) {
-                $cleanWhere[2] = $where['values'];
-            }
-            if (isset($where['second'])) {
-                $cleanWhere[2] = $where['second'];
-            }
-            $cleanWhere[3] = $where['boolean'];
-
-            return $cleanWhere;
-        })->all();
-
-        return $result;
-    }
 
     /**
      * Compile an aggregated select clause.
@@ -562,7 +482,7 @@ class Grammar extends FluentAqlGrammar
     {
         $values = [];
 
-        $doc = $builder->getAlias($builder->from);
+        $doc = $this->getTableAlias($builder->from);
         foreach ($columns as $column) {
             if ($column != null && $column != '*') {
                 $values[$column] = $doc . '.' . $column;
@@ -677,30 +597,5 @@ class Grammar extends FluentAqlGrammar
         return $operator;
     }
 
-    protected function getOperatorByWhereType($type)
-    {
-        if (isset($this->whereTypeOperators[$type])) {
-            return $this->whereTypeOperators[$type];
-        }
 
-        return '==';
-    }
-
-    /**
-     * @param Builder $builder
-     * @param string  $target
-     * @param string  $value
-     *
-     * @return Builder
-     */
-    protected function prefixAlias(Builder $builder, string $target, string $value): string
-    {
-        $alias = $builder->getAlias($target);
-
-        if (Str::startsWith($value, $alias . '.')) {
-            return $value;
-        }
-
-        return $alias . '.' . $value;
-    }
 }
