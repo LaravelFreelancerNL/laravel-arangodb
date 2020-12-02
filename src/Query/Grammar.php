@@ -282,7 +282,7 @@ class Grammar extends FluentAqlGrammar
     protected function compileCrossJoin(Builder $builder, $join)
     {
         $table = $join->table;
-        $alias = $builder->generateTableAlias($table);
+        $alias = $this->generateTableAlias($table);
         $builder->aqb = $builder->aqb->for($alias, $table);
 
         return $builder;
@@ -329,7 +329,7 @@ class Grammar extends FluentAqlGrammar
      */
     protected function compileMax(Builder $builder, $aggregate)
     {
-        $column = $this->prefixAlias($builder, $builder->from, $aggregate['columns'][0]);
+        $column = $this->normalizeColumn($builder, $aggregate['columns'][0]);
 
         $builder->aqb = $builder->aqb->collect()->aggregate('aggregateResult', $builder->aqb->max($column));
 
@@ -346,7 +346,7 @@ class Grammar extends FluentAqlGrammar
      */
     protected function compileMin(Builder $builder, $aggregate)
     {
-        $column = $this->prefixAlias($builder, $builder->from, $aggregate['columns'][0]);
+        $column = $this->normalizeColumn($builder, $aggregate['columns'][0]);
 
         $builder->aqb = $builder->aqb->collect()->aggregate('aggregateResult', $builder->aqb->min($column));
 
@@ -363,7 +363,7 @@ class Grammar extends FluentAqlGrammar
      */
     protected function compileAvg(Builder $builder, $aggregate)
     {
-        $column = $this->prefixAlias($builder, $builder->from, $aggregate['columns'][0]);
+        $column = $this->normalizeColumn($builder, $aggregate['columns'][0]);
 
         $builder->aqb = $builder->aqb->collect()->aggregate('aggregateResult', $builder->aqb->average($column));
 
@@ -380,7 +380,7 @@ class Grammar extends FluentAqlGrammar
      */
     protected function compileSum(Builder $builder, $aggregate)
     {
-        $column = $this->prefixAlias($builder, $builder->from, $aggregate['columns'][0]);
+        $column = $this->normalizeColumn($builder, $aggregate['columns'][0]);
 
         $builder->aqb = $builder->aqb->collect()->aggregate('aggregateResult', $builder->aqb->sum($column));
 
@@ -421,7 +421,7 @@ class Grammar extends FluentAqlGrammar
 
         foreach ($orders as $order) {
             if (!isset($order['type']) || $order['type'] != 'Raw') {
-                $order['column'] = $this->prefixAlias($builder, $builder->from, $order['column']);
+                $order['column'] = $this->normalizeColumn($builder, $order['column']);
             }
 
             $flatOrders[] = $order['column'];
@@ -482,10 +482,9 @@ class Grammar extends FluentAqlGrammar
     {
         $values = [];
 
-        $doc = $this->getTableAlias($builder->from);
         foreach ($columns as $column) {
             if ($column != null && $column != '*') {
-                $values[$column] = $doc . '.' . $column;
+                $values[$column] = $this->normalizeColumn($builder, $column);
             }
         }
         if ($builder->aggregate !== null) {
@@ -493,7 +492,7 @@ class Grammar extends FluentAqlGrammar
         }
 
         if (empty($values)) {
-            $values = $doc;
+            $values = $this->getTableAlias($builder->from);
             if (is_array($builder->joins) && !empty($builder->joins)) {
                 $values = $this->mergeJoinResults($builder, $values);
             }
@@ -508,7 +507,7 @@ class Grammar extends FluentAqlGrammar
     {
         $tablesToJoin = [];
         foreach ($builder->joins as $join) {
-            $tablesToJoin[] = $builder->getAlias($join->table);
+            $tablesToJoin[] = $this->getTableAlias($join->table);
         }
         $tablesToJoin = array_reverse($tablesToJoin);
         $tablesToJoin[] = $baseTable;
@@ -526,9 +525,10 @@ class Grammar extends FluentAqlGrammar
      */
     public function compileUpdate(Builder $builder, array $values)
     {
+
         $table = $this->prefixTable($builder->from);
-        $builder = $this->generateTableAlias($builder, $table);
-        $tableAlias = $builder->getAlias($table);
+        $tableAlias = $this->generateTableAlias($table);
+
         $builder->aqb = $builder->aqb->for($tableAlias, $table);
 
         //Fixme: joins?
@@ -550,10 +550,11 @@ class Grammar extends FluentAqlGrammar
     public function compileDelete(Builder $builder, $_key = null)
     {
         $table = $this->prefixTable($builder->from);
-        $builder = $this->generateTableAlias($builder, $table);
-        $tableAlias = $builder->getAlias($table);
+        $tableAlias = $this->generateTableAlias($table);
+
 
         if (!is_null($_key)) {
+
             $builder->aqb = $builder->aqb->remove((string) $_key, $table)->get();
 
             return $builder;

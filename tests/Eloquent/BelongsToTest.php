@@ -80,6 +80,7 @@ class BelongsToTest extends TestCase
     public function testRetrieveRelation()
     {
         $location = Location::find('winterfell');
+
         $character = $location->leader;
 
         $this->assertEquals('SansaStark', $character->_key);

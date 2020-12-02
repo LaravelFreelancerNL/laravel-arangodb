@@ -72,15 +72,6 @@ trait CompilesWhereClauses {
         return $this->isExpression($value) ? $this->getValue($value) : $query->aqb->bind($value);
     }
 
-    protected function normalizeColumn(IluminateBuilder $query, $column)
-    {
-            if (stripos($column, '.') !== false) {
-                return $this->replaceTableForAlias($column);
-            }
-
-            return $this->prefixAlias($query->from, $column);
-    }
-
     protected function normalizeOperator($where)
     {
             if (isset($where['operator'])) {

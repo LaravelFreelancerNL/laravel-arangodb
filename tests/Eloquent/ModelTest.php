@@ -90,6 +90,10 @@ class ModelTest extends TestCase
         $character = Character::first();
 
         $character->delete();
+
+        $deletedCharacter = Character::firstOrFail();
+
+        $this->assertNotEquals($character->_key, $deletedCharacter->_key);
     }
 
     public function testCount()

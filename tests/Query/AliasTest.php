@@ -54,7 +54,7 @@ class AliasTest extends TestCase
     {
         $builder = $this->getBuilder();
         $alias = $builder->grammar->registerTableAlias('users', 'userDoc');
-        $result = $builder->getTableAlias('users');
+        $result = $builder->grammar->getTableAlias('users');
 
         $this->assertEquals(  'userDoc', $result);
     }

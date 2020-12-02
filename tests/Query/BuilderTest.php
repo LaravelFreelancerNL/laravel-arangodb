@@ -191,32 +191,6 @@ class BuilderTest extends TestCase
         );
     }
 
-    public function testReplaceTableForAlias()
-    {
-        $builder = $this->getBuilder();
-        $builder->registerAlias('users', $builder->generateTableAlias('users'));
-        $result = $builder->replaceTableForAlias('users.email');
-
-        $this->assertEquals('userDoc.email', $result);
-    }
-
-    public function testReplaceTableForAliasWithoutColumn()
-    {
-        $builder = $this->getBuilder();
-        $builder->registerAlias('users', $builder->generateTableAlias('users'));
-        $result = $builder->replaceTableForAlias('users');
-
-        $this->assertEquals('userDoc', $result);
-    }
-
-    public function testReplaceTableForAliasNotOnAttribute()
-    {
-        $builder = $this->getBuilder();
-        $result = $builder->replaceTableForAlias('en.email');
-
-        $this->assertEquals('en.email', $result);
-    }
-
     /**
      * @return m\MockInterface
      */
