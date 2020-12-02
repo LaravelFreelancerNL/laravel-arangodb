@@ -75,7 +75,6 @@ class AliasTest extends TestCase
         $result = $builder->grammar->getColumnAlias('column');
 
         $this->assertEquals('pivot_column', $result);
-
     }
 
 }

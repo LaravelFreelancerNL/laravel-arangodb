@@ -28,16 +28,28 @@ class WheresTest extends TestCase
     {
         $builder = $this->getBuilder();
         $builder->select('*')->from('users')->where('_id', '=', 1);
-        $this->assertSame('FOR userDoc IN users FILTER userDoc._id == @' . $builder->aqb->getQueryId() . '_1 RETURN userDoc', $builder->toSql());
+
+        $this->assertSame(
+            'FOR userDoc IN users FILTER userDoc._id == @'
+              . $builder->aqb->getQueryId()
+              . '_1 RETURN userDoc', $builder->toSql());
         $this->assertEquals([0 => 1], $builder->getBindings());
     }
 
     public function testBasicWheresWithMultiplePredicates()
     {
         $builder = $this->getBuilder();
-        $builder->select('*')->from('users')->where('_id', '=', 1)->where('email', '=', 'foo');
+        $builder->select('*')
+            ->from('users')
+            ->where('_id', '=', 1)
+            ->where('email', '=', 'foo');
+
         $this->assertSame(
-            'FOR userDoc IN users FILTER userDoc._id == @' . $builder->aqb->getQueryId() . '_1 AND userDoc.email == @' . $builder->aqb->getQueryId() . '_2 RETURN userDoc',
+            'FOR userDoc IN users FILTER userDoc._id == @'
+            . $builder->aqb->getQueryId()
+            . '_1 AND userDoc.email == @'
+            . $builder->aqb->getQueryId()
+            . '_2 RETURN userDoc',
             $builder->toSql()
         );
     }
@@ -45,9 +57,15 @@ class WheresTest extends TestCase
     public function testBasicOrWheres()
     {
         $builder = $this->getBuilder();
-        $builder->select('*')->from('users')->where('_id', '==', 1)->orWhere('email', '==', 'foo');
+        $builder->select('*')
+            ->from('users')
+            ->where('_id', '==', 1)
+            ->orWhere('email', '==', 'foo');
+
         $this->assertSame(
-            'FOR userDoc IN users FILTER userDoc._id == @' . $builder->aqb->getQueryId() . '_1 OR userDoc.email == @' . $builder->aqb->getQueryId() . '_2 RETURN userDoc',
+            'FOR userDoc IN users FILTER userDoc._id == @'
+            . $builder->aqb->getQueryId() . '_1 OR userDoc.email == @'
+            . $builder->aqb->getQueryId() . '_2 RETURN userDoc',
             $builder->toSql()
         );
         $this->assertEquals([0 => 1, 1 => 'foo'], $builder->getBindings());
@@ -60,15 +78,75 @@ class WheresTest extends TestCase
             ->from('users')
             ->where('email', '=', 'email@example.com')
             ->where('_key', '<>', 'keystring');
+
         $this->assertSame(
             'FOR userDoc IN users '
-            . 'FILTER userDoc.email == @' . $builder->aqb->getQueryId() . '_1 AND userDoc._key != @' . $builder->aqb->getQueryId() . '_2 RETURN userDoc',
+            . 'FILTER userDoc.email == @'
+            . $builder->aqb->getQueryId()
+            . '_1 AND userDoc._key != @'
+            . $builder->aqb->getQueryId()
+            . '_2 RETURN userDoc',
             $builder->toSql()
         );
         $this->assertEquals([0 => 'email@example.com', 1 => 'keystring'], $builder->getBindings());
     }
 
-    public function testBasicWhereNulls()
+    public function testWhereBetween()
+    {
+        $builder = $this->getBuilder();
+        $builder->select('*')->from('users')->whereBetween('votes', [1, 100]);
+
+        $this->assertSame(
+            'FOR userDoc IN users FILTER (userDoc.votes >= @'
+            . $builder->aqb->getQueryId()
+            . '_1 AND userDoc.votes <= @'
+            . $builder->aqb->getQueryId()
+            . '_2) RETURN userDoc', $builder->toSql());
+    }
+
+    public function testWhereNotBetween()
+    {
+        $builder = $this->getBuilder();
+        $builder->select('*')->from('users')->whereNotBetween('votes', [1, 100]);
+
+        $this->assertSame(
+            'FOR userDoc IN users FILTER (userDoc.votes < @'
+            . $builder->aqb->getQueryId()
+            . '_1 OR userDoc.votes > @'
+            . $builder->aqb->getQueryId()
+            . '_2) RETURN userDoc', $builder->toSql());
+    }
+
+    public function testWhereBetweenColumns()
+    {
+        $builder = $this->getBuilder();
+        $builder->select('*')->from('users')->whereBetweenColumns('votes', ['min_vote', 'max_vote']);
+
+        $this->assertSame(
+            'FOR userDoc IN users FILTER (userDoc.votes >= userDoc.min_vote AND userDoc.votes <= userDoc.max_vote) RETURN userDoc', $builder->toSql());
+    }
+
+
+
+    public function testWhereColumn()
+    {
+        $builder = $this->getBuilder();
+        $builder->select('*')->from('users')->whereColumn('first_name', '=', 'last_name');
+
+        $this->assertSame(
+            'FOR userDoc IN users FILTER userDoc.first_name == userDoc.last_name RETURN userDoc', $builder->toSql());
+    }
+
+    public function testWhereColumnWithoutOperator()
+    {
+        $builder = $this->getBuilder();
+        $builder->select('*')->from('users')->whereColumn('first_name', 'last_name');
+
+        $this->assertSame(
+            'FOR userDoc IN users FILTER userDoc.first_name == userDoc.last_name RETURN userDoc', $builder->toSql());
+    }
+
+    public function testWhereNulls()
     {
         $builder = $this->getBuilder();
         $builder->select('*')->from('users')->whereNull('_key');
@@ -76,15 +154,21 @@ class WheresTest extends TestCase
         $this->assertEquals([], $builder->getBindings());
 
         $builder = $this->getBuilder();
-        $builder->select('*')->from('users')->where('_key', '=', 1)->orWhereNull('_key');
+        $builder->select('*')
+            ->from('users')
+            ->where('_key', '=', 1)
+            ->orWhereNull('_key');
+
         $this->assertSame(
-            'FOR userDoc IN users FILTER userDoc._key == 1 OR userDoc._key == null RETURN userDoc',
+            'FOR userDoc IN users FILTER userDoc._key == @'
+            . $builder->aqb->getQueryId()
+            . '_1 OR userDoc._key == null RETURN userDoc',
             $builder->toSql()
         );
         $this->assertEquals([0 => 1], $builder->getBindings());
     }
 
-    public function testBasicWhereNotNulls()
+    public function testWhereNotNulls()
     {
         $builder = $this->getBuilder();
         $builder->select('*')->from('users')->whereNotNull('_key');
@@ -92,9 +176,15 @@ class WheresTest extends TestCase
         $this->assertEquals([], $builder->getBindings());
 
         $builder = $this->getBuilder();
-        $builder->select('*')->from('users')->where('_key', '>', 1)->orWhereNotNull('_key');
+        $builder->select('*')
+            ->from('users')
+            ->where('_key', '>', 1)
+            ->orWhereNotNull('_key');
+
         $this->assertSame(
-            'FOR userDoc IN users FILTER userDoc._key > 1 OR userDoc._key != null RETURN userDoc',
+            'FOR userDoc IN users FILTER userDoc._key > @'
+            . $builder->aqb->getQueryId()
+            . '_1 OR userDoc._key != null RETURN userDoc',
             $builder->toSql()
         );
         $this->assertEquals([0 => 1], $builder->getBindings());
@@ -106,14 +196,61 @@ class WheresTest extends TestCase
 
         $builder->select()
             ->from('users')
-            ->where('country', 'IN', ['The Netherlands', 'Germany', 'Great-Britain']);
+            ->whereIn('country', ['The Netherlands', 'Germany', 'Great-Britain']);
+
         $this->assertSame(
-            'FOR userDoc IN users FILTER userDoc.country IN [@'
+            'FOR userDoc IN users FILTER userDoc.country IN @'
             . $builder->aqb->getQueryId()
-            . '_1,"Germany","Great-Britain"] RETURN userDoc',
+            . '_1 RETURN userDoc',
             $builder->toSql()
         );
     }
 
+    public function testWhereIntegerInRaw()
+    {
+        $builder = $this->getBuilder();
 
+        $builder->select()
+            ->from('users')
+            ->whereIntegerInRaw('country', [0, 1, 2, 3]);
+
+        $this->assertSame(
+            'FOR userDoc IN users FILTER userDoc.country IN @'
+            . $builder->aqb->getQueryId()
+            . '_1 RETURN userDoc',
+            $builder->toSql()
+        );
+    }
+
+    public function testWhereNotIn()
+    {
+        $builder = $this->getBuilder();
+
+        $builder->select()
+            ->from('users')
+            ->whereNotIn('country', ['The Netherlands', 'Germany', 'Great-Britain']);
+
+        $this->assertSame(
+            'FOR userDoc IN users FILTER userDoc.country NOT IN @'
+            . $builder->aqb->getQueryId()
+            . '_1 RETURN userDoc',
+            $builder->toSql()
+        );
+    }
+
+    public function testWhereIntegerNotInRaw()
+    {
+        $builder = $this->getBuilder();
+
+        $builder->select()
+            ->from('users')
+            ->whereIntegerNotInRaw('country', [0, 1, 2, 3]);
+
+        $this->assertSame(
+            'FOR userDoc IN users FILTER userDoc.country NOT IN @'
+            . $builder->aqb->getQueryId()
+            . '_1 RETURN userDoc',
+            $builder->toSql()
+        );
+    }
 }
