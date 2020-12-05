@@ -17,7 +17,7 @@ trait HasAliases {
      * @param  string  $alias
      * @return string
      */
-    public function registerTableAlias(string $table, string $alias = null): string
+    protected function registerTableAlias(string $table, string $alias = null): string
     {
         if ($alias == null) {
             $alias = $this->generateTableAlias($table);
@@ -36,7 +36,7 @@ trait HasAliases {
      * @param $table
      * @return mixed|null
      */
-    public function getTableAlias($table)
+    protected function getTableAlias($table)
     {
         if (isset($this->tableAliases[$table])) {
             return $this->tableAliases[$table];
@@ -50,7 +50,7 @@ trait HasAliases {
      * @param  string|null  $alias
      * @return bool
      */
-    public function registerColumnAlias(string $column, string $alias = null)
+    protected function registerColumnAlias(string $column, string $alias = null)
     {
         if (preg_match("/\sas\s/i", $column)) {
             [$column, $alias] = $this->extractAlias($column);
@@ -68,7 +68,7 @@ trait HasAliases {
      * @param $column
      * @return mixed
      */
-    public function getColumnAlias(string $column)
+    protected function getColumnAlias(string $column)
     {
         if (isset($this->columnAliases[$column])) {
             return $this->columnAliases[$column];
@@ -83,7 +83,7 @@ trait HasAliases {
      * @param  string  $entity
      * @return array|false|string[]
      */
-    public function extractAlias(string $entity)
+    protected function extractAlias(string $entity)
     {
         $results = preg_split( "/\sas\s/i", $entity);
         $results[1] = trim($results[1], '`');
@@ -97,12 +97,12 @@ trait HasAliases {
      *
      * @return mixed
      */
-    public function generateTableAlias($table, $postfix = 'Doc')
+    protected function generateTableAlias($table, $postfix = 'Doc')
     {
         return Str::singular($table) . $postfix;
     }
 
-    public function replaceTableForAlias($reference): string
+    protected function replaceTableForAlias($reference): string
     {
         $referenceParts = explode('.', $reference);
         $first = array_shift($referenceParts);
@@ -143,6 +143,9 @@ trait HasAliases {
         if ($table == null) {
             $table = $query->from;
         }
+
+        // Replace SQL JSON arrow for AQL dot
+        $column = str_replace('->', '.', $column);
 
         $references = explode('.', $column);
 

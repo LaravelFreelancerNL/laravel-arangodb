@@ -304,4 +304,154 @@ trait CompilesWhereClauses {
         $predicate[3] = $where['boolean'];
         return $predicate;
     }
+
+    /**
+     * Compile a "whereJsonContains" clause.
+     *
+     * @param  IluminateBuilder  $query
+     * @param  array  $where
+     * @return string
+     */
+    protected function whereJsonContains(IluminateBuilder $query, $where)
+    {
+        $operator = $where['not'] ? 'NOT IN' : 'IN';
+
+        $predicate[0] = $query->aqb->bind($where['value']);
+        $predicate[1] = $operator;
+        $predicate[2] = $this->normalizeColumn($query, $where['column']);
+        $predicate[3] = $where['boolean'];
+
+        return $predicate;
+    }
+
+    /**
+     * Compile a "whereJsonContains" clause.
+     *
+     * @param  IluminateBuilder  $query
+     * @param  array  $where
+     * @return array
+     */
+    protected function whereJsonLength(IluminateBuilder $query, $where)
+    {
+        $predicate = [];
+
+        $where = $this->normalizeOperator($where);
+
+        $column = $this->normalizeColumn($query, $where['column']);
+
+        $predicate[0] = $query->aqb->length($column);
+        $predicate[1] = $where['operator'];
+        $predicate[2] = $this->parameter($query, $where['value']);
+        $predicate[3] = $where['boolean'];
+
+        return $predicate;
+    }
+
+
+    /**
+     * Compile a where date clause.
+     *
+     * @param  IluminateBuilder  $query
+     * @param  array  $where
+     * @return array
+     */
+    protected function whereDate(IluminateBuilder $query, $where)
+    {
+        $predicate = [];
+
+        $where = $this->normalizeOperator($where);
+
+        $predicate[0] = $query->aqb->dateFormat($this->normalizeColumn($query, $where['column']), "%yyyy-%mm-%dd");
+        $predicate[1] = $where['operator'];
+        $predicate[2] = $this->parameter($query, $where['value']);
+        $predicate[3] = $where['boolean'];
+
+        return $predicate;
+    }
+
+    /**
+     * Compile a where year clause.
+     *
+     * @param  IluminateBuilder  $query
+     * @param  array  $where
+     * @return array
+     */
+    protected function whereYear(IluminateBuilder $query, $where)
+    {
+        $predicate = [];
+
+        $where = $this->normalizeOperator($where);
+
+        $predicate[0] = $query->aqb->dateYear($this->normalizeColumn($query, $where['column']));
+        $predicate[1] = $where['operator'];
+        $predicate[2] = $this->parameter($query, $where['value']);
+        $predicate[3] = $where['boolean'];
+
+        return $predicate;
+    }
+
+    /**
+     * Compile a where month clause.
+     *
+     * @param  IluminateBuilder  $query
+     * @param  array  $where
+     * @return array
+     */
+    protected function whereMonth(IluminateBuilder $query, $where)
+    {
+        $predicate = [];
+
+        $where = $this->normalizeOperator($where);
+
+        $predicate[0] = $query->aqb->dateMonth($this->normalizeColumn($query, $where['column']));
+        $predicate[1] = $where['operator'];
+        $predicate[2] = $this->parameter($query, $where['value']);
+        $predicate[3] = $where['boolean'];
+
+        return $predicate;
+    }
+
+
+    /**
+     * Compile a where day clause.
+     *
+     * @param  IluminateBuilder  $query
+     * @param  array  $where
+     * @return array
+     */
+    protected function whereDay(IluminateBuilder $query, $where)
+    {
+        $predicate = [];
+
+        $where = $this->normalizeOperator($where);
+
+        $predicate[0] = $query->aqb->dateDay($this->normalizeColumn($query, $where['column']));
+        $predicate[1] = $where['operator'];
+        $predicate[2] = $this->parameter($query, $where['value']);
+        $predicate[3] = $where['boolean'];
+
+        return $predicate;
+    }
+
+    /**
+     * Compile a where time clause.
+     *
+     * @param  IluminateBuilder  $query
+     * @param  array  $where
+     * @return array
+     */
+    protected function whereTime(IluminateBuilder $query, $where)
+    {
+        $predicate = [];
+
+        $where = $this->normalizeOperator($where);
+
+        $predicate[0] = $query->aqb->dateFormat($this->normalizeColumn($query, $where['column']), "%hh:%ii:%ss");
+        $predicate[1] = $where['operator'];
+        $predicate[2] = $this->parameter($query, $where['value']);
+        $predicate[3] = $where['boolean'];
+
+        return $predicate;
+    }
+
 }

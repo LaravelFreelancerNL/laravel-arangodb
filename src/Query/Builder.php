@@ -153,6 +153,16 @@ class Builder extends IlluminateQueryBuilder
     }
 
     /**
+     * Get the current query value bindings in a flattened array.
+     *
+     * @return array
+     */
+    public function getBindings()
+    {
+        return $this->aqb->binds;
+    }
+
+    /**
      * Update a record in the database.
      *
      * @param array $values
@@ -281,6 +291,24 @@ class Builder extends IlluminateQueryBuilder
         if (!$value instanceof Expression) {
             $this->addBinding($value, 'where');
         }
+
+        return $this;
+    }
+
+    /**
+     * Add a "where JSON contains" clause to the query.
+     *
+     * @param  string  $column
+     * @param  mixed  $value
+     * @param  string  $boolean
+     * @param  bool  $not
+     * @return IlluminateQueryBuilder
+     */
+    public function whereJsonContains($column, $value, $boolean = 'and', $not = false)
+    {
+        $type = 'JsonContains';
+
+        $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
 
         return $this;
     }
