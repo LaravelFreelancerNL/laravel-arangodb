@@ -6,7 +6,8 @@ use Illuminate\Database\Query\Builder as IluminateBuilder;
 use Illuminate\Support\Str;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 
-trait HasAliases {
+trait HasAliases
+{
 
     protected $tableAliases = [];
 
@@ -17,7 +18,7 @@ trait HasAliases {
      * @param  string  $alias
      * @return string
      */
-    protected function registerTableAlias(string $table, string $alias = null): string
+    public function registerTableAlias(string $table, string $alias = null): string
     {
         if ($alias == null) {
             $alias = $this->generateTableAlias($table);
@@ -46,38 +47,6 @@ trait HasAliases {
     }
 
     /**
-     * @param  string  $column
-     * @param  string|null  $alias
-     * @return bool
-     */
-    protected function registerColumnAlias(string $column, string $alias = null)
-    {
-        if (preg_match("/\sas\s/i", $column)) {
-            [$column, $alias] = $this->extractAlias($column);
-        }
-
-        if (isset($alias)) {
-            $this->columnAliases[$column] = $alias;
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * @param $column
-     * @return mixed
-     */
-    protected function getColumnAlias(string $column)
-    {
-        if (isset($this->columnAliases[$column])) {
-            return $this->columnAliases[$column];
-        }
-
-        return null;
-    }
-
-    /**
      * Extract table and alias from sql alias notation (entity AS `alias`)
      *
      * @param  string  $entity
@@ -85,8 +54,13 @@ trait HasAliases {
      */
     protected function extractAlias(string $entity)
     {
-        $results = preg_split( "/\sas\s/i", $entity);
-        $results[1] = trim($results[1], '`');
+        $results = preg_split("/\sas\s/i", $entity);
+        if (isset($results[1])) {
+            $results[1] = trim($results[1], '`');
+        }
+        if (! isset($results[1])) {
+            $results[1] = $results[0];
+        }
 
         return $results;
     }
@@ -133,6 +107,38 @@ trait HasAliases {
     }
 
     /**
+     * @param  string  $column
+     * @param  string|null  $alias
+     * @return bool
+     */
+    protected function registerColumnAlias(string $column, string $alias = null)
+    {
+        if (preg_match("/\sas\s/i", $column)) {
+            [$column, $alias] = $this->extractAlias($column);
+        }
+
+        if (isset($alias)) {
+            $this->columnAliases[$column] = $alias;
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param $column
+     * @return mixed
+     */
+    protected function getColumnAlias(string $column)
+    {
+        if (isset($this->columnAliases[$column])) {
+            return $this->columnAliases[$column];
+        }
+
+        return null;
+    }
+
+    /**
      * @param  IluminateBuilder  $query
      * @param $column
      * @param $table
@@ -163,5 +169,4 @@ trait HasAliases {
 
         return implode('.', $references);
     }
-
 }

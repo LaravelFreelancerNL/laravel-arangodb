@@ -58,6 +58,26 @@ class Builder extends IlluminateQueryBuilder
     }
 
     /**
+     * Set the table which the query is targeting.
+     *
+     * @param  \Closure|IlluminateQueryBuilder|string  $table
+     * @param  string|null  $as
+     * @return IlluminateQueryBuilder
+     */
+    public function from($table, $as = null)
+    {
+        if ($this->isQueryable($table)) {
+            return $this->fromSub($table, $as);
+        }
+
+        $this->grammar->registerTableAlias($table, $as);
+
+        $this->from = $table;
+
+        return $this;
+    }
+
+    /**
      * Run the query as a "select" statement against the connection.
      *
      * @return array
@@ -89,6 +109,29 @@ class Builder extends IlluminateQueryBuilder
         $this->aqb = new QueryBuilder();
 
         return $closeResults;
+    }
+
+    /**
+     * Set the columns to be selected.
+     *
+     * @param  array|mixed  $columns
+     * @return IlluminateQueryBuilder
+     */
+    public function select($columns = ['*'])
+    {
+        $this->columns = [];
+        $this->bindings['select'] = [];
+        $columns = is_array($columns) ? $columns : func_get_args();
+
+        foreach ($columns as $as => $column) {
+            if (is_string($as) && $this->isQueryable($column)) {
+                $this->selectSub($column, $as);
+            } else {
+                $this->columns[$as] = $column;
+            }
+        }
+
+        return $this;
     }
 
     /**
@@ -145,11 +188,9 @@ class Builder extends IlluminateQueryBuilder
      */
     public function get($columns = ['*'])
     {
-        $results = collect($this->onceWithColumns(Arr::wrap($columns), function () {
+        return collect($this->onceWithColumns(Arr::wrap($columns), function () {
             return $this->runSelect();
         }));
-
-        return $results;
     }
 
     /**
@@ -351,7 +392,7 @@ class Builder extends IlluminateQueryBuilder
             $this->joins[] = $join;
 
             //we'll take care of the bindings when calling fluentaql
-            $this->addBinding($join->getBindings(), 'join');
+//            $this->addBinding($join->getBindings(), 'join');
         } else {
             // If the column is simply a string, we can assume the join simply has a basic
             // "on" clause with a single condition. So we will just build the join with
@@ -363,7 +404,7 @@ class Builder extends IlluminateQueryBuilder
             $this->joins[] = $join->$method($first, $operator, $second);
 
             //we'll take care of the bindings when calling fluentaql
-            $this->addBinding($join->getBindings(), 'join');
+//            $this->addBinding($join->getBindings(), 'join');
         }
 
         return $this;

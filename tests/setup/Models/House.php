@@ -16,14 +16,6 @@ class House extends Model
     ];
 
     /**
-     * Current seat of the house.
-     */
-    public function seat()
-    {
-        return $this->hasOne(Location::class);
-    }
-
-    /**
      * Get the last known residence of the character.
      */
     public function head()
@@ -32,10 +24,10 @@ class House extends Model
     }
 
     /**
-     * @return HasMany
+     * Get all of the tags for the post.
      */
-    public function household()
+    public function tags()
     {
-        return $this->hasMany(Character::class, 'residence_key');
+        return $this->morphToMany(Tag::class, 'taggable');
     }
 }

@@ -17,7 +17,7 @@ class JoinTest extends TestCase
         Carbon::setTestNow(Carbon::now());
 
         Artisan::call('db:seed', ['--class' => \Tests\Setup\Database\Seeds\CharactersSeeder::class]);
-        Artisan::call('db:seed', ['--class' => \Tests\Setup\Database\Seeds\CharacteristicsSeeder::class]);
+        Artisan::call('db:seed', ['--class' => \Tests\Setup\Database\Seeds\TagsSeeder::class]);
         Artisan::call('db:seed', ['--class' => \Tests\Setup\Database\Seeds\LocationsSeeder::class]);
     }
 
@@ -32,15 +32,13 @@ class JoinTest extends TestCase
 
     public function testJoin()
     {
-//        $characters = DB::table('characters')
-//            ->join('locations', 'characters.residence_key', '=', 'locations._key');
-////            ->where('residence_key', '=', 'winterfell');
-////            ->toSql();
-////            ->get();
-//        dd($characters);
-//
-//        $this->assertCount(15, $characters);
-//        $this->assertEquals('NedStark', $characters[0]->_key);
+        $characters = DB::table('characters')
+            ->join('locations', 'characters.residence_key', '=', 'locations._key')
+            ->where('residence_key', '=', 'winterfell')
+            ->get();
+
+        $this->assertCount(15, $characters);
+        $this->assertEquals('NedStark', $characters[0]->_key);
     }
 
     public function testCrossJoin()
@@ -54,16 +52,16 @@ class JoinTest extends TestCase
 
     public function testLeftJoin()
     {
-//        $characters = DB::table('characters')
-//            ->leftJoin('locations', 'characters.residence_key', '=', 'locations._key')
-//            ->get();
-//
-//        $charactersWithoutResidence = DB::table('characters')
-//            ->whereNull('residence_key')
-//            ->get();
-//
-//        $this->assertCount(33, $characters);
-//        $this->assertEquals('NedStark', $characters[0]->_key);
-//        $this->assertCount(10, $charactersWithoutResidence);
+        $characters = DB::table('characters')
+            ->leftJoin('locations', 'characters.residence_key', '=', 'locations._key')
+            ->get();
+
+        $charactersWithoutResidence = DB::table('characters')
+            ->whereNull('residence_key')
+            ->get();
+
+        $this->assertCount(33, $characters);
+        $this->assertEquals('NedStark', $characters[0]->_key);
+        $this->assertCount(10, $charactersWithoutResidence);
     }
 }

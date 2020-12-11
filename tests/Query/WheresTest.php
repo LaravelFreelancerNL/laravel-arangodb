@@ -32,8 +32,10 @@ class WheresTest extends TestCase
         $this->assertSame(
             'FOR userDoc IN users FILTER userDoc._id == @'
               . $builder->aqb->getQueryId()
-              . '_1 RETURN userDoc', $builder->toSql());
-        $this->assertEquals([$builder->aqb->getQueryId().'_1' => 1], $builder->getBindings());
+            . '_1 RETURN userDoc',
+            $builder->toSql()
+        );
+        $this->assertEquals([$builder->aqb->getQueryId() . '_1' => 1], $builder->getBindings());
     }
 
     public function testBasicWheresWithMultiplePredicates()
@@ -68,7 +70,13 @@ class WheresTest extends TestCase
             . $builder->aqb->getQueryId() . '_2 RETURN userDoc',
             $builder->toSql()
         );
-        $this->assertEquals([$builder->aqb->getQueryId().'_1' => 1, $builder->aqb->getQueryId().'_2' => 'foo'], $builder->getBindings());
+        $this->assertEquals(
+            [
+                $builder->aqb->getQueryId() . '_1' => 1,
+                $builder->aqb->getQueryId() . '_2' => 'foo'
+            ],
+            $builder->getBindings()
+        );
     }
 
     public function testWhereOperatorConversion()
@@ -88,7 +96,13 @@ class WheresTest extends TestCase
             . '_2 RETURN userDoc',
             $builder->toSql()
         );
-        $this->assertEquals([$builder->aqb->getQueryId().'_1' => 'email@example.com', $builder->aqb->getQueryId().'_2' => 'keystring'], $builder->getBindings());
+        $this->assertEquals(
+            [
+                $builder->aqb->getQueryId() . '_1' => 'email@example.com',
+                $builder->aqb->getQueryId() . '_2' => 'keystring'
+            ],
+            $builder->getBindings()
+        );
     }
 
     public function testWhereJsonArrowConversion()
@@ -152,7 +166,9 @@ class WheresTest extends TestCase
             . $builder->aqb->getQueryId()
             . '_1 AND userDoc.votes <= @'
             . $builder->aqb->getQueryId()
-            . '_2) RETURN userDoc', $builder->toSql());
+            . '_2) RETURN userDoc',
+            $builder->toSql()
+        );
     }
 
     public function testWhereNotBetween()
@@ -165,7 +181,9 @@ class WheresTest extends TestCase
             . $builder->aqb->getQueryId()
             . '_1 OR userDoc.votes > @'
             . $builder->aqb->getQueryId()
-            . '_2) RETURN userDoc', $builder->toSql());
+            . '_2) RETURN userDoc',
+            $builder->toSql()
+        );
     }
 
     public function testWhereBetweenColumns()
@@ -174,7 +192,10 @@ class WheresTest extends TestCase
         $builder->select('*')->from('users')->whereBetweenColumns('votes', ['min_vote', 'max_vote']);
 
         $this->assertSame(
-            'FOR userDoc IN users FILTER (userDoc.votes >= userDoc.min_vote AND userDoc.votes <= userDoc.max_vote) RETURN userDoc', $builder->toSql());
+            'FOR userDoc IN users FILTER (userDoc.votes >= userDoc.min_vote AND userDoc.votes <= userDoc.max_vote)'
+            . ' RETURN userDoc',
+            $builder->toSql()
+        );
     }
 
     public function testWhereColumn()
@@ -183,7 +204,9 @@ class WheresTest extends TestCase
         $builder->select('*')->from('users')->whereColumn('first_name', '=', 'last_name');
 
         $this->assertSame(
-            'FOR userDoc IN users FILTER userDoc.first_name == userDoc.last_name RETURN userDoc', $builder->toSql());
+            'FOR userDoc IN users FILTER userDoc.first_name == userDoc.last_name RETURN userDoc',
+            $builder->toSql()
+        );
     }
 
     public function testWhereColumnWithoutOperator()
@@ -192,7 +215,9 @@ class WheresTest extends TestCase
         $builder->select('*')->from('users')->whereColumn('first_name', 'last_name');
 
         $this->assertSame(
-            'FOR userDoc IN users FILTER userDoc.first_name == userDoc.last_name RETURN userDoc', $builder->toSql());
+            'FOR userDoc IN users FILTER userDoc.first_name == userDoc.last_name RETURN userDoc',
+            $builder->toSql()
+        );
     }
 
     public function testWhereNulls()
@@ -214,7 +239,7 @@ class WheresTest extends TestCase
             . '_1 OR userDoc._key == null RETURN userDoc',
             $builder->toSql()
         );
-        $this->assertEquals([$builder->aqb->getQueryId().'_1' => 1], $builder->getBindings());
+        $this->assertEquals([$builder->aqb->getQueryId() . '_1' => 1], $builder->getBindings());
     }
 
     public function testWhereNotNulls()
@@ -236,7 +261,7 @@ class WheresTest extends TestCase
             . '_1 OR userDoc._key != null RETURN userDoc',
             $builder->toSql()
         );
-        $this->assertEquals([$builder->aqb->getQueryId().'_1' => 1], $builder->getBindings());
+        $this->assertEquals([$builder->aqb->getQueryId() . '_1' => 1], $builder->getBindings());
     }
 
     public function testWhereIn()
@@ -313,10 +338,12 @@ class WheresTest extends TestCase
             . $builder->aqb->getQueryId()
             . '_2) == @'
             . $builder->aqb->getQueryId()
-            . '_1 RETURN userDoc', $builder->toSql());
+            . '_1 RETURN userDoc',
+            $builder->toSql()
+        );
         $this->assertEquals([
-                $builder->aqb->getQueryId().'_1' => '2016-12-31',
-                $builder->aqb->getQueryId().'_2' => "%yyyy-%mm-%dd"
+                $builder->aqb->getQueryId() . '_1' => '2016-12-31',
+                $builder->aqb->getQueryId() . '_2' => "%yyyy-%mm-%dd"
             ], $builder->getBindings());
     }
 
@@ -328,9 +355,11 @@ class WheresTest extends TestCase
         $this->assertSame(
             'FOR userDoc IN users FILTER DATE_YEAR(userDoc.created_at) == @'
             . $builder->aqb->getQueryId()
-            . '_1 RETURN userDoc', $builder->toSql());
+            . '_1 RETURN userDoc',
+            $builder->toSql()
+        );
 
-        $this->assertEquals([$builder->aqb->getQueryId().'_1' => "2016"], $builder->getBindings());
+        $this->assertEquals([$builder->aqb->getQueryId() . '_1' => "2016"], $builder->getBindings());
     }
 
     public function testWhereMonth()
@@ -341,9 +370,11 @@ class WheresTest extends TestCase
         $this->assertSame(
             'FOR userDoc IN users FILTER DATE_MONTH(userDoc.created_at) == @'
             . $builder->aqb->getQueryId()
-            . '_1 RETURN userDoc', $builder->toSql());
+            . '_1 RETURN userDoc',
+            $builder->toSql()
+        );
 
-        $this->assertEquals([$builder->aqb->getQueryId().'_1' => "12"], $builder->getBindings());
+        $this->assertEquals([$builder->aqb->getQueryId() . '_1' => "12"], $builder->getBindings());
     }
 
     public function testWhereDay()
@@ -354,9 +385,11 @@ class WheresTest extends TestCase
         $this->assertSame(
             'FOR userDoc IN users FILTER DATE_DAY(userDoc.created_at) == @'
             . $builder->aqb->getQueryId()
-            . '_1 RETURN userDoc', $builder->toSql());
+            . '_1 RETURN userDoc',
+            $builder->toSql()
+        );
 
-        $this->assertEquals([$builder->aqb->getQueryId().'_1' => "31"], $builder->getBindings());
+        $this->assertEquals([$builder->aqb->getQueryId() . '_1' => "31"], $builder->getBindings());
     }
 
     public function testWhereTime()
@@ -369,11 +402,13 @@ class WheresTest extends TestCase
             . $builder->aqb->getQueryId()
             . '_2) == @'
             . $builder->aqb->getQueryId()
-            . '_1 RETURN userDoc', $builder->toSql());
+            . '_1 RETURN userDoc',
+            $builder->toSql()
+        );
 
         $this->assertEquals([
-                $builder->aqb->getQueryId().'_1' => "11:20:45",
-                $builder->aqb->getQueryId().'_2' => "%hh:%ii:%ss"
+                $builder->aqb->getQueryId() . '_1' => "11:20:45",
+                $builder->aqb->getQueryId() . '_2' => "%hh:%ii:%ss"
             ], $builder->getBindings());
     }
 }

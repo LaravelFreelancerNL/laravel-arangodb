@@ -4,7 +4,7 @@ namespace Tests\Setup\Models;
 
 use LaravelFreelancerNL\Aranguent\Eloquent\Pivot;
 
-class ChildOf extends Pivot
+class Child extends Pivot
 {
-    //
+    protected $table = 'children';
 }

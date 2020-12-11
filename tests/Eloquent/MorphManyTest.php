@@ -11,7 +11,7 @@ use Tests\TestCase;
 
 class MorphManyTest extends TestCase
 {
-    protected function setUp(): void
+    public function setUp(): void
     {
         parent::setUp();
         Carbon::setTestNow(Carbon::now());

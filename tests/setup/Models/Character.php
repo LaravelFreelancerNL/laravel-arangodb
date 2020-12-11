@@ -46,12 +46,30 @@ class Character extends Model
 
     public function parents()
     {
-        return $this->belongsToMany(Character::class, 'ChildOf', '_from', '_to');
+        return $this->belongsToMany(
+            Character::class,
+            'children',
+            '_to',
+            '_from',
+            '_id',
+            '_id'
+        );
     }
 
     public function children()
     {
-        return $this->belongsToMany(Character::class, 'child_of', '_from', '_to', '_id', '_id');
+        return $this->belongsToMany(
+            Character::class,
+            'children',
+            '_from',
+            '_to',
+            '_id',
+            '_id'
+        )->using('Tests\Setup\Models\Child')
+            ->withPivot([
+                            'created_by',
+                            'updated_by',
+                        ]);
     }
 
     public function captured()
@@ -62,5 +80,13 @@ class Character extends Model
     public function conquered()
     {
         return $this->morphOne(Location::class, 'capturable');
+    }
+
+    /**
+     * Get all of the tags for the post.
+     */
+    public function tags()
+    {
+        return $this->morphToMany(Tag::class, 'taggable');
     }
 }

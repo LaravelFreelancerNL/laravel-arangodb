@@ -6,7 +6,7 @@ use Illuminate\Database\Migrations\Migration;
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
 
-class CreateCharacteristicsTable extends Migration
+class CreateTagsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -15,9 +15,8 @@ class CreateCharacteristicsTable extends Migration
      */
     public function up()
     {
-        Schema::create('characteristics', function (Blueprint $collection) {
-//            $collection->skiplistIndex('en[*]');
-//            $collection->skiplistIndex('de[*]');
+        Schema::create('tags', function (Blueprint $collection) {
+            //
         });
     }
 
@@ -28,6 +27,6 @@ class CreateCharacteristicsTable extends Migration
      */
     public function down()
     {
-        Schema::drop('characteristics');
+        Schema::drop('tags');
     }
 }

@@ -72,6 +72,12 @@ abstract class Model extends IlluminateModel
      */
     public function getForeignKey()
     {
-        return Str::snake(class_basename($this)) . $this->getKeyName();
+        $keyName = $this->getKeyName();
+
+        if ($keyName[0] != '_') {
+            $keyName = '_' . $keyName;
+        }
+
+        return Str::snake(class_basename($this)) . $keyName;
     }
 }

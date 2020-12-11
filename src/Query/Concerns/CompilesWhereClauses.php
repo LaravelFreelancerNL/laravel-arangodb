@@ -6,7 +6,8 @@ use Illuminate\Database\Query\Builder as IluminateBuilder;
 use Illuminate\Database\Query\Expression;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 
-trait CompilesWhereClauses {
+trait CompilesWhereClauses
+{
     /**
      * Compile the "where" portions of the query.
      *
@@ -20,7 +21,9 @@ trait CompilesWhereClauses {
             return $builder;
         }
 
-        if (count($predicates = $this->compileWheresToArray($builder)) > 0) {
+        $predicates = $this->compileWheresToArray($builder);
+
+        if (count($predicates) > 0) {
             $builder->aqb = $builder->aqb->filter($predicates);
         }
 
@@ -69,16 +72,16 @@ trait CompilesWhereClauses {
      */
     public function parameter(IluminateBuilder $query, $value)
     {
-        return $this->isExpression($value) ? $this->getValue($value) : $query->aqb->bind($value);
+        return $this->isExpression($value) ? $query->getValue($value) : $query->aqb->bind($value);
     }
 
     protected function normalizeOperator($where)
     {
-            if (isset($where['operator'])) {
-                $where['operator'] = $this->translateOperator($where['operator']);
-            } else {
-                $where['operator'] = $this->getOperatorByWhereType($where['type']);
-            }
+        if (isset($where['operator'])) {
+            $where['operator'] = $this->translateOperator($where['operator']);
+        } else {
+            $where['operator'] = $this->getOperatorByWhereType($where['type']);
+        }
 
             return $where;
     }
@@ -113,6 +116,8 @@ trait CompilesWhereClauses {
      */
     protected function whereBetween(IluminateBuilder $query, $where)
     {
+        $predicate = [];
+
         [$minOperator, $maxOperator, $boolean] = $this->getBetweenOperators($where['not']);
 
         $min = $this->parameter($query, reset($where['values']));
@@ -161,6 +166,8 @@ trait CompilesWhereClauses {
      */
     protected function whereBetweenColumns(IluminateBuilder $query, $where)
     {
+        $predicate = [];
+
         [$minOperator, $maxOperator, $boolean] = $this->getBetweenOperators($where['not']);
 
         $column = $this->normalizeColumn($query, $where['column']);
@@ -209,6 +216,8 @@ trait CompilesWhereClauses {
      */
     protected function whereNull(IluminateBuilder $query, $where)
     {
+        $predicate = [];
+
         $predicate[0] = $this->normalizeColumn($query, $where['column']);
         $predicate[1] = '==';
         $predicate[2] = null;
@@ -226,6 +235,8 @@ trait CompilesWhereClauses {
      */
     protected function whereNotNull(IluminateBuilder $query, $where)
     {
+        $predicate = [];
+
         $predicate[0] = $this->normalizeColumn($query, $where['column']);
         $predicate[1] = '!=';
         $predicate[2] = null;
@@ -243,6 +254,8 @@ trait CompilesWhereClauses {
      */
     protected function whereIn(IluminateBuilder $query, $where)
     {
+        $predicate = [];
+
         $predicate[0] = $this->normalizeColumn($query, $where['column']);
         $predicate[1] = 'IN';
         $predicate[2] = $this->parameter($query, $where['values']);
@@ -262,6 +275,8 @@ trait CompilesWhereClauses {
      */
     protected function whereInRaw(IluminateBuilder $query, $where)
     {
+        $predicate = [];
+
         $predicate[0] = $this->normalizeColumn($query, $where['column']);
         $predicate[1] = 'IN';
         $predicate[2] = '[' . implode(', ', $where['values']) . ']';
@@ -279,6 +294,8 @@ trait CompilesWhereClauses {
      */
     protected function whereNotIn(IluminateBuilder $query, $where)
     {
+        $predicate = [];
+
         $predicate[0] = $this->normalizeColumn($query, $where['column']);
         $predicate[1] = 'NOT IN';
         $predicate[2] = $this->parameter($query, $where['values']);
@@ -298,6 +315,8 @@ trait CompilesWhereClauses {
      */
     protected function whereNotInRaw(IluminateBuilder $query, $where)
     {
+        $predicate = [];
+
         $predicate[0] = $this->normalizeColumn($query, $where['column']);
         $predicate[1] = 'NOT IN';
         $predicate[2] = '[' . implode(', ', $where['values']) . ']';
@@ -314,6 +333,8 @@ trait CompilesWhereClauses {
      */
     protected function whereJsonContains(IluminateBuilder $query, $where)
     {
+        $predicate = [];
+
         $operator = $where['not'] ? 'NOT IN' : 'IN';
 
         $predicate[0] = $query->aqb->bind($where['value']);
@@ -453,5 +474,4 @@ trait CompilesWhereClauses {
 
         return $predicate;
     }
-
 }

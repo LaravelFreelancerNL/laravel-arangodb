@@ -46,4 +46,12 @@ class Location extends Model
     {
         return $this->morphTo();
     }
+
+    /**
+     * Get all of the tags for the post.
+     */
+    public function tags()
+    {
+        return $this->morphToMany(Tag::class, 'taggable');
+    }
 }

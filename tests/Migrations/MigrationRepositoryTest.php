@@ -52,7 +52,7 @@ class MigrationRepositoryTest extends TestCase
 
         $result = $this->databaseMigrationRepository->getRan();
 
-        $this->assertEquals(8, count($result));
+        $this->assertEquals(9, count($result));
     }
 
     public function testDeleteMigration()
@@ -97,7 +97,7 @@ class MigrationRepositoryTest extends TestCase
         $batches = $this->databaseMigrationRepository->getMigrationBatches();
 
         $this->assertIsArray($batches);
-        $this->assertEquals(8, count($batches));
+        $this->assertEquals(9, count($batches));
     }
 
     public function testGetMigrations()

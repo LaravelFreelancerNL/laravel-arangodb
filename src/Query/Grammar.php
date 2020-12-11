@@ -234,7 +234,8 @@ class Grammar extends FluentAqlGrammar
     protected function compileInnerJoin(Builder $builder, $join)
     {
         $table = $join->table;
-        $alias = $builder->generateTableAlias($table);
+        $alias = $this->generateTableAlias($table);
+        $this->registerTableAlias($table, $alias);
         $builder->aqb = $builder->aqb->for($alias, $table)
             ->filter($this->compileWheresToArray($join));
 
@@ -244,7 +245,8 @@ class Grammar extends FluentAqlGrammar
     protected function compileLeftJoin(Builder $builder, $join)
     {
         $table = $join->table;
-        $alias = $builder->generateTableAlias($table);
+        $alias = $this->generateTableAlias($table);
+        $this->registerTableAlias($table, $alias);
 
         $resultsToJoin = (new QueryBuilder())
             ->for($alias, $table)
@@ -480,13 +482,35 @@ class Grammar extends FluentAqlGrammar
      */
     protected function compileColumns(Builder $builder, array $columns): Builder
     {
+        $returnDocs = [];
+        $returnAttributes = [];
         $values = [];
 
         foreach ($columns as $column) {
+            // Extract rows
+            if (substr($column, strlen($column) - 2)  === '.*') {
+                $table = substr($column, 0, strlen($column) - 2);
+                $returnDocs[] = $this->getTableAlias($table);
+
+                continue;
+            }
+
             if ($column != null && $column != '*') {
-                $values[$column] = $this->normalizeColumn($builder, $column);
+                [$column, $alias] = $this->extractAlias($column);
+
+                $returnAttributes[$alias] = $this->normalizeColumn($builder, $column);
             }
         }
+        if (! empty($returnAttributes) && empty($returnDocs)) {
+            $values = $returnAttributes;
+        }
+        if (! empty($returnAttributes) && ! empty($returnDocs)) {
+            $returnDocs[] = $returnAttributes;
+        }
+        if (! empty($returnDocs)) {
+            $values = $builder->aqb->merge(...$returnDocs);
+        }
+
         if ($builder->aggregate !== null) {
             $values = ['aggregate' => 'aggregateResult'];
         }
@@ -542,6 +566,11 @@ class Grammar extends FluentAqlGrammar
     /**
      * Compile a delete statement into SQL.
      *
+     * @SuppressWarnings(PHPMD.CamelCaseParameterName)
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     *
+     * Fixme: use Laravel default parameter name
+     *
      * @param Builder $builder
      * @param null    $_key
      *
@@ -554,7 +583,6 @@ class Grammar extends FluentAqlGrammar
 
 
         if (!is_null($_key)) {
-
             $builder->aqb = $builder->aqb->remove((string) $_key, $table)->get();
 
             return $builder;
@@ -597,6 +625,4 @@ class Grammar extends FluentAqlGrammar
 
         return $operator;
     }
-
-
 }

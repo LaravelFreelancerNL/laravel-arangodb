@@ -77,11 +77,6 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
             '--realpath' => true,
         ])->run();
 
-        // FIXME: Seeding with updateOrCreate requires subqueries
-//        $this->artisan('db:seed', [
-//            '--class' => DatabaseSeeder::class
-//        ])->run();
-
         $this->databaseMigrationRepository = new DatabaseMigrationRepository($this->app['db'], $this->collection);
     }
 
