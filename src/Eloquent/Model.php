@@ -8,7 +8,7 @@ use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 
 abstract class Model extends IlluminateModel
 {
-    use Concerns\HasRelationships;
+//    use Concerns\HasRelationships;
 
     /**
      * The primary key for the model.
