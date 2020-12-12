@@ -1,12 +1,10 @@
 <?php
 
-//namespace Tests\Setup\Database\Migrations;
-
 use Illuminate\Database\Migrations\Migration;
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
 
-class CreateTagsTable extends Migration
+class CreateChildrenEdgeTable extends Migration
 {
     /**
      * Run the migrations.
@@ -15,9 +13,12 @@ class CreateTagsTable extends Migration
      */
     public function up()
     {
-        Schema::create('tags', function (Blueprint $collection) {
-            //
-        });
+        Schema::create(
+            'children',
+            function (Blueprint $collection) {
+            },
+            ['type' => 3]
+        );
     }
 
     /**
@@ -27,6 +28,6 @@ class CreateTagsTable extends Migration
      */
     public function down()
     {
-        Schema::drop('tags');
+        Schema::drop('children');
     }
 }

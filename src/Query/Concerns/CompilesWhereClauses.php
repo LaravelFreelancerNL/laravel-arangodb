@@ -79,12 +79,30 @@ trait CompilesWhereClauses
     {
         if (isset($where['operator'])) {
             $where['operator'] = $this->translateOperator($where['operator']);
-        } else {
+        }
+        if (! isset($where['operator'])) {
             $where['operator'] = $this->getOperatorByWhereType($where['type']);
         }
 
             return $where;
     }
+
+    /**
+     * Translate sql operators to their AQL equivalent where possible.
+     *
+     * @param string $operator
+     *
+     * @return mixed|string
+     */
+    private function translateOperator(string $operator)
+    {
+        if (isset($this->operatorTranslations[strtolower($operator)])) {
+            $operator = $this->operatorTranslations[$operator];
+        }
+
+        return $operator;
+    }
+
 
     /**
      * Compile a basic where clause.

@@ -8,7 +8,6 @@
         Inspired by https://github.com/phpmd/phpmd/issues/137
         using http://phpmd.org/documentation/creating-a-ruleset.html
     </description>
-    <!-- se importan los rulesets, en este caso todos. -->
     <rule ref="rulesets/cleancode.xml">
         <exclude name="StaticAccess"/>
     </rule>
@@ -29,15 +28,15 @@
     <rule ref="rulesets/design.xml">
         <exclude name="CouplingBetweenObjects"/>
     </rule>
-    <!-- beware the façades yo. -->
     <rule ref="rulesets/design.xml/CouplingBetweenObjects">
         <properties>
             <property name="minimum" value="20"/>
         </properties>
     </rule>
-    <!-- se importa naming y se excluye ShortVariable para ser ajustada despues. -->
     <rule ref="rulesets/naming.xml">
         <exclude name="ShortVariable"/>
+        <exclude name="LongVariable"/>
+        <exclude name="ShortMethodName"/>
     </rule>
     <rule ref="rulesets/naming.xml/ShortVariable"
           since="0.2"
@@ -49,6 +48,56 @@
             <property name="minimum" description="Minimum length for a variable, property or parameter name" value="2"/>
             <property name="exceptions" value="id,q,w,i,j,v,e,f,fp" />
         </properties>
+    </rule>
+    <rule name="LongVariable"
+          since="0.2"
+          message="Avoid excessively long variable names like {0}. Keep variable name length under {1}."
+          class="PHPMD\Rule\Naming\LongVariable"
+          externalInfoUrl="https://phpmd.org/rules/naming.html#longvariable">
+        <description>
+            Detects when a field, formal or local variable is declared with a long name.
+        </description>
+        <priority>3</priority>
+        <properties>
+            <property name="maximum" description="The variable length reporting threshold" value="30"/>
+            <property name="subtract-suffixes" description="Comma-separated list of suffixes that will not count in the length of the variable name. Only the first matching suffix will be subtracted." value=""/>
+        </properties>
+        <example>
+            <![CDATA[
+class Something {
+    protected $reallyLongIntName = -3; // VIOLATION - Field
+    public static function main( array $interestingArgumentsList[] ) { // VIOLATION - Formal
+        $otherReallyLongName = -5; // VIOLATION - Local
+        for ($interestingIntIndex = 0; // VIOLATION - For
+             $interestingIntIndex < 10;
+             $interestingIntIndex++ ) {
+        }
+    }
+}
+]]>
+        </example>
+    </rule>
+    <rule name="ShortMethodName"
+          since="0.2"
+          message="Avoid using short method names like {0}::{1}(). The configured minimum method name length is {2}."
+          class="PHPMD\Rule\Naming\ShortMethodName"
+          externalInfoUrl="https://phpmd.org/rules/naming.html#shortmethodname">
+        <description>
+            Detects when very short method names are used.
+        </description>
+        <priority>3</priority>
+        <properties>
+            <property name="minimum" description="Minimum length for a method or function name" value="3"/>
+            <property name="exceptions" description="Comma-separated list of exceptions" value="on"/>
+        </properties>
+        <example>
+            <![CDATA[
+class ShortMethod {
+    public function a( $index ) { // Violation
+    }
+}
+            ]]>
+        </example>
     </rule>
     <rule ref="rulesets/unusedcode.xml"/>
 </ruleset>

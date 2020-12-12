@@ -1,12 +1,10 @@
 <?php
 
-//namespace Tests\Setup\Database\migrations;
-
 use Illuminate\Database\Migrations\Migration;
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
 
-class CreateHousesTable extends Migration
+class CreateLocationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -15,9 +13,9 @@ class CreateHousesTable extends Migration
      */
     public function up()
     {
-        Schema::create('houses', function (Blueprint $collection) {
+        Schema::create('locations', function (Blueprint $collection) {
 //            $collection->skiplistIndex('name');
-//            $collection->skiplistIndex('location_key');
+//            $collection->geoIndex('coordinate');
         });
     }
 
@@ -28,6 +26,6 @@ class CreateHousesTable extends Migration
      */
     public function down()
     {
-        Schema::drop('houses');
+        Schema::drop('locations');
     }
 }

@@ -68,8 +68,6 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     public function getMigrations($steps)
     {
-        $bindings['steps'] = $steps;
-
         $qb = (new QueryBuilder())->for('m', 'migrations')
             ->filter('m.batch', '>=', 1)
             ->sort([['m.batch', 'DESC'], ['m.migration', 'DESC']])

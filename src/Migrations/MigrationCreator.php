@@ -25,6 +25,8 @@ class MigrationCreator extends IlluminateMigrationCreator
     /**
      * Create a new migration at the given path.
      *
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     *
      * @param string $name
      * @param string $path
      * @param string $collection

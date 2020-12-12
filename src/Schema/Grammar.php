@@ -58,11 +58,6 @@ class Grammar extends IlluminateGrammar
      */
     public function compileRenameAttribute($collection, Fluent $command)
     {
-        $bindings['@collection'] = $collection;
-
-        $bindings['from'] = $this->wrapBindVar($command->to);
-        $bindings['to'] = $this->wrapBindVar($command->from);
-
         $filter = [
             ['doc.' . $command->from, '!=', null],
             ['doc.' . $command->to, '==', null],

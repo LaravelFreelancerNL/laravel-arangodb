@@ -126,7 +126,8 @@ class Builder extends IlluminateQueryBuilder
         foreach ($columns as $as => $column) {
             if (is_string($as) && $this->isQueryable($column)) {
                 $this->selectSub($column, $as);
-            } else {
+            }
+            if (! is_string($as) || ! $this->isQueryable($column)) {
                 $this->columns[$as] = $column;
             }
         }
@@ -221,13 +222,13 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Delete a record from the database.
      *
-     * @param mixed $_key
+     * @param mixed $id
      *
      * @return int
      */
-    public function delete($_key = null)
+    public function delete($id = null)
     {
-        $response = $this->connection->delete($this->grammar->compileDelete($this, $_key)->aqb);
+        $response = $this->connection->delete($this->grammar->compileDelete($this, $id)->aqb);
         $this->aqb = new QueryBuilder();
 
         return $response;
@@ -307,17 +308,6 @@ class Builder extends IlluminateQueryBuilder
 
         $type = 'Basic';
 
-        // If the column is making a JSON reference we'll check to see if the value
-        // is a boolean. If it is, we'll add the raw boolean string as an actual
-        // value to the query to ensure this is properly handled by the query.
-        if (Str::contains($column, '->') && is_bool($value)) {
-            $value = new Expression($value ? 'true' : 'false');
-
-            if (is_string($column)) {
-                $type = 'JsonBoolean';
-            }
-        }
-
         // Now that we are working with just a simple query we can put the elements
         // in our array and add the query binding to our array of bindings that
         // will be bound to each SQL statements when it is finally executed.
@@ -338,6 +328,8 @@ class Builder extends IlluminateQueryBuilder
 
     /**
      * Add a "where JSON contains" clause to the query.
+     *
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      *
      * @param  string  $column
      * @param  mixed  $value
@@ -370,6 +362,9 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Add a join clause to the query.
      *
+     * The boolean argument flag is part of this method's API in Laravel.
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     *
      * @param string          $table
      * @param \Closure|string $first
      * @param string|null     $operator
@@ -390,10 +385,8 @@ class Builder extends IlluminateQueryBuilder
             $first($join);
 
             $this->joins[] = $join;
-
-            //we'll take care of the bindings when calling fluentaql
-//            $this->addBinding($join->getBindings(), 'join');
-        } else {
+        }
+        if (! $first instanceof Closure) {
             // If the column is simply a string, we can assume the join simply has a basic
             // "on" clause with a single condition. So we will just build the join with
             // this simple join clauses attached to it. There is not a join callback.
@@ -402,9 +395,6 @@ class Builder extends IlluminateQueryBuilder
             $method = $where ? 'where' : 'on';
 
             $this->joins[] = $join->$method($first, $operator, $second);
-
-            //we'll take care of the bindings when calling fluentaql
-//            $this->addBinding($join->getBindings(), 'join');
         }
 
         return $this;
@@ -424,6 +414,9 @@ class Builder extends IlluminateQueryBuilder
     {
         if ($this->isQueryable($column)) {
             [$query, $bindings] = $this->createSub($column);
+
+            //fixme: Remove binding when implementing subqueries
+            $bindings = null;
 
             $column = new Expression('(' . $query . ')');
         }
@@ -446,6 +439,8 @@ class Builder extends IlluminateQueryBuilder
      */
     public function orderByRaw($aql, $bindings = [])
     {
+        $bindings = [];
+
         $type = 'Raw';
         $column = $aql;
         $this->{$this->unions ? 'unionOrders' : 'orders'}[] = compact('type', 'column');
@@ -462,6 +457,9 @@ class Builder extends IlluminateQueryBuilder
      */
     public function inRandomOrder($seed = '')
     {
+        // ArangoDB's random function doesn't accept a seed.
+        $seed = null;
+
         return $this->orderByRaw($this->grammar->compileRandom($this));
     }
 

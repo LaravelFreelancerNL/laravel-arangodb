@@ -3,14 +3,14 @@
 namespace LaravelFreelancerNL\Aranguent\Query;
 
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesAggregates;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesJoins;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesWhereClauses;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\HasAliases;
 use LaravelFreelancerNL\FluentAQL\Exceptions\BindException as BindException;
 use LaravelFreelancerNL\FluentAQL\Expressions\FunctionExpression;
 use LaravelFreelancerNL\FluentAQL\Grammar as FluentAqlGrammar;
-use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
 /*
  * Provides AQL syntax functions
@@ -18,6 +18,8 @@ use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
 class Grammar extends FluentAqlGrammar
 {
+    use CompilesAggregates;
+    use CompilesJoins;
     use CompilesWhereClauses;
     use HasAliases;
     use Macroable;
@@ -213,181 +215,7 @@ class Grammar extends FluentAqlGrammar
         return $builder;
     }
 
-    /**
-     * Compile the "join" portions of the query.
-     *
-     * @param Builder $builder
-     * @param array   $joins
-     *
-     * @return string
-     */
-    protected function compileJoins(Builder $builder, $joins)
-    {
-        foreach ($joins as $join) {
-            $compileMethod = 'compile' . ucfirst($join->type) . 'Join';
-            $builder = $this->$compileMethod($builder, $join);
-        }
 
-        return $builder;
-    }
-
-    protected function compileInnerJoin(Builder $builder, $join)
-    {
-        $table = $join->table;
-        $alias = $this->generateTableAlias($table);
-        $this->registerTableAlias($table, $alias);
-        $builder->aqb = $builder->aqb->for($alias, $table)
-            ->filter($this->compileWheresToArray($join));
-
-        return $builder;
-    }
-
-    protected function compileLeftJoin(Builder $builder, $join)
-    {
-        $table = $join->table;
-        $alias = $this->generateTableAlias($table);
-        $this->registerTableAlias($table, $alias);
-
-        $resultsToJoin = (new QueryBuilder())
-            ->for($alias, $table)
-            ->filter($this->compileWheresToArray($join))
-            ->return($alias);
-
-        $builder->aqb = $builder->aqb->let($table, $resultsToJoin)
-            ->for(
-                $alias,
-                $builder->aqb->if(
-                    [$builder->aqb->length($table), '>', 0],
-                    $table,
-                    '[]'
-                )
-            );
-
-        return $builder;
-    }
-
-    //FOR user IN users
-    //  LET friends = (
-//    FOR friend IN friends
-//      FILTER friend.user == user._key
-//      RETURN friend
-    //  )
-    //  FOR friendToJoin IN (
-//    LENGTH(friends) > 0 ? friends :
-//      [ { /* no match exists */ } ]
-//    )
-//    RETURN {
-//      user: user,
-//      friend: friend
-//    }
-
-    protected function compileCrossJoin(Builder $builder, $join)
-    {
-        $table = $join->table;
-        $alias = $this->generateTableAlias($table);
-        $builder->aqb = $builder->aqb->for($alias, $table);
-
-        return $builder;
-    }
-
-
-    /**
-     * Compile an aggregated select clause.
-     *
-     * @param Builder $builder
-     * @param array   $aggregate
-     *
-     * @return Builder
-     */
-    protected function compileAggregate(Builder $builder, $aggregate)
-    {
-        $method = 'compile' . ucfirst($aggregate['function']);
-
-        return $this->$method($builder, $aggregate);
-    }
-
-    /**
-     * Compile AQL for count aggregate.
-     *
-     * @param Builder $builder
-     * @param $aggregate
-     *
-     * @return Builder
-     */
-    protected function compileCount(Builder $builder, $aggregate)
-    {
-        $builder->aqb = $builder->aqb->collect()->withCount('aggregateResult');
-
-        return $builder;
-    }
-
-    /**
-     * Compile AQL for max aggregate.
-     *
-     * @param Builder $builder
-     * @param $aggregate
-     *
-     * @return Builder
-     */
-    protected function compileMax(Builder $builder, $aggregate)
-    {
-        $column = $this->normalizeColumn($builder, $aggregate['columns'][0]);
-
-        $builder->aqb = $builder->aqb->collect()->aggregate('aggregateResult', $builder->aqb->max($column));
-
-        return $builder;
-    }
-
-    /**
-     * Compile AQL for min aggregate.
-     *
-     * @param Builder $builder
-     * @param $aggregate
-     *
-     * @return Builder
-     */
-    protected function compileMin(Builder $builder, $aggregate)
-    {
-        $column = $this->normalizeColumn($builder, $aggregate['columns'][0]);
-
-        $builder->aqb = $builder->aqb->collect()->aggregate('aggregateResult', $builder->aqb->min($column));
-
-        return $builder;
-    }
-
-    /**
-     * Compile AQL for average aggregate.
-     *
-     * @param Builder $builder
-     * @param $aggregate
-     *
-     * @return Builder
-     */
-    protected function compileAvg(Builder $builder, $aggregate)
-    {
-        $column = $this->normalizeColumn($builder, $aggregate['columns'][0]);
-
-        $builder->aqb = $builder->aqb->collect()->aggregate('aggregateResult', $builder->aqb->average($column));
-
-        return $builder;
-    }
-
-    /**
-     * Compile AQL for sum aggregate.
-     *
-     * @param Builder $builder
-     * @param $aggregate
-     *
-     * @return Builder
-     */
-    protected function compileSum(Builder $builder, $aggregate)
-    {
-        $column = $this->normalizeColumn($builder, $aggregate['columns'][0]);
-
-        $builder->aqb = $builder->aqb->collect()->aggregate('aggregateResult', $builder->aqb->sum($column));
-
-        return $builder;
-    }
 
     /**
      * Compile the "order by" portions of the query.
@@ -486,6 +314,7 @@ class Grammar extends FluentAqlGrammar
         $returnAttributes = [];
         $values = [];
 
+        // Prepare columns
         foreach ($columns as $column) {
             // Extract rows
             if (substr($column, strlen($column) - 2)  === '.*') {
@@ -501,12 +330,24 @@ class Grammar extends FluentAqlGrammar
                 $returnAttributes[$alias] = $this->normalizeColumn($builder, $column);
             }
         }
-        if (! empty($returnAttributes) && empty($returnDocs)) {
+        $values = $this->determineReturnValues($builder, $returnAttributes, $returnDocs);
+        $builder->aqb = $builder->aqb->return($values, (bool) $builder->distinct);
+
+        return $builder;
+    }
+
+    protected function determineReturnValues($builder, $returnAttributes = [], $returnDocs = [])
+    {
+        $values = [];
+
+        if (! empty($returnAttributes)) {
             $values = $returnAttributes;
         }
+
         if (! empty($returnAttributes) && ! empty($returnDocs)) {
             $returnDocs[] = $returnAttributes;
         }
+
         if (! empty($returnDocs)) {
             $values = $builder->aqb->merge(...$returnDocs);
         }
@@ -522,10 +363,9 @@ class Grammar extends FluentAqlGrammar
             }
         }
 
-        $builder->aqb = $builder->aqb->return($values, (bool) $builder->distinct);
-
-        return $builder;
+        return $values;
     }
+
 
     protected function mergeJoinResults($builder, $baseTable)
     {
@@ -569,21 +409,19 @@ class Grammar extends FluentAqlGrammar
      * @SuppressWarnings(PHPMD.CamelCaseParameterName)
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      *
-     * Fixme: use Laravel default parameter name
-     *
      * @param Builder $builder
-     * @param null    $_key
+     * @param null    $id
      *
      * @return Builder
      */
-    public function compileDelete(Builder $builder, $_key = null)
+    public function compileDelete(Builder $builder, $id = null)
     {
         $table = $this->prefixTable($builder->from);
         $tableAlias = $this->generateTableAlias($table);
 
 
-        if (!is_null($_key)) {
-            $builder->aqb = $builder->aqb->remove((string) $_key, $table)->get();
+        if (!is_null($id)) {
+            $builder->aqb = $builder->aqb->remove((string) $id, $table)->get();
 
             return $builder;
         }
@@ -608,21 +446,5 @@ class Grammar extends FluentAqlGrammar
     public function compileRandom(Builder $builder)
     {
         return $builder->aqb->rand();
-    }
-
-    /**
-     * Translate sql operators to their AQL equivalent where possible.
-     *
-     * @param string $operator
-     *
-     * @return mixed|string
-     */
-    private function translateOperator(string $operator)
-    {
-        if (isset($this->operatorTranslations[strtolower($operator)])) {
-            $operator = $this->operatorTranslations[$operator];
-        }
-
-        return $operator;
     }
 }

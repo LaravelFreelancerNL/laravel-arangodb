@@ -1,7 +1,5 @@
 <?php
 
-//namespace Tests\Setup\Database\Migrations;
-
 use Illuminate\Database\Migrations\Migration;
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;

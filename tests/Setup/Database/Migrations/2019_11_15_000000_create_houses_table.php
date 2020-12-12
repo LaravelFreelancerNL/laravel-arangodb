@@ -1,12 +1,10 @@
 <?php
 
-//namespace Tests\Setup\Database\migrations;
-
 use Illuminate\Database\Migrations\Migration;
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
 
-class CreateChildrenEdgeTable extends Migration
+class CreateHousesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -15,12 +13,10 @@ class CreateChildrenEdgeTable extends Migration
      */
     public function up()
     {
-        Schema::create(
-            'children',
-            function (Blueprint $collection) {
-            },
-            ['type' => 3]
-        );
+        Schema::create('houses', function (Blueprint $collection) {
+//            $collection->skiplistIndex('name');
+//            $collection->skiplistIndex('location_key');
+        });
     }
 
     /**
@@ -30,6 +26,6 @@ class CreateChildrenEdgeTable extends Migration
      */
     public function down()
     {
-        Schema::drop('children');
+        Schema::drop('houses');
     }
 }

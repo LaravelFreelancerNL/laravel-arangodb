@@ -280,6 +280,7 @@ class Blueprint
             $this->autoIncrement = true;
         }
 
+        $info = [];
         $info['method'] = $method;
         $info['explanation'] = "'$method' is ignored; Aranguent Schema Blueprint doesn't support it.";
         $this->addCommand('ignore', $info);

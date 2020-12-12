@@ -38,6 +38,4 @@ class Tag extends Model
     {
         return $this->morphedByMany(House::class, 'taggable');
     }
-
-
 }

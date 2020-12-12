@@ -49,7 +49,7 @@ trait Indexes
     {
         $type = $this->mapIndexType($algorithm);
 
-        return $this->indexCommand($type, $columns);
+        return $this->indexCommand($type, $columns, $name);
     }
 
     /**
@@ -148,6 +148,7 @@ trait Indexes
     {
         $type = $this->mapIndexType($algorithm);
 
+        $indexOptions = [];
         $indexOptions['unique'] = true;
 
         return $this->indexCommand($type, $columns, $name, $indexOptions);
@@ -189,6 +190,7 @@ trait Indexes
      */
     public function dropIndex($name)
     {
+        $parameters = [];
         $parameters['name'] = 'dropIndex';
         $parameters['index'] = $name;
         $parameters['explanation'] = "Drop the '" . $name . "' index on the {$this->table} table.";

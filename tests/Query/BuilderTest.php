@@ -5,16 +5,30 @@ namespace Tests\Query;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Pagination\AbstractPaginator as Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Connection as Connection;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 use LaravelFreelancerNL\Aranguent\Query\Grammar;
 use LaravelFreelancerNL\Aranguent\Query\Processor;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder as FluentAQL;
 use Mockery as m;
+use Tests\Setup\Database\Seeds\CharactersSeeder;
+use Tests\Setup\Database\Seeds\ChildrenSeeder;
+use Tests\Setup\Database\Seeds\LocationsSeeder;
 use Tests\TestCase;
 
 class BuilderTest extends TestCase
 {
+    public function setUp(): void
+    {
+        parent::setUp();
+        Carbon::setTestNow(Carbon::now());
+
+        Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
+    }
+
     protected function tearDown(): void
     {
         m::close();
@@ -144,51 +158,15 @@ class BuilderTest extends TestCase
 
     public function testAggregates()
     {
-        $builder = $this->getBuilder();
-        $builder->getConnection()->shouldReceive('select')->once()->with(FluentAQL::class)->andReturn(
-            [['aggregate' => 1]]
-        );
-
-        $results = $builder->from('users')->count();
-        $this->assertEquals(1, $results);
+        $results = DB::table('characters')->count();
+        $this->assertEquals(43, $results);
     }
 
     public function testPaginate()
     {
-        $perPage = 16;
-        $columns = ['test'];
-        $pageName = 'page-name';
-        $page = 1;
-        $builder = $this->getMockQueryBuilder();
-        $path = 'http://foo.bar?page=3';
-
-        $results = collect([['test' => 'foo'], ['test' => 'bar']]);
-
-        $builder->shouldReceive('getCountForPagination')->once()->andReturn(2);
-        $builder->shouldReceive('forPage')->once()->with($page, $perPage)->andReturnSelf();
-        $builder->shouldReceive('get')->once()->andReturn($results);
-
-        Paginator::currentPathResolver(
-            function () use ($path) {
-                return $path;
-            }
-        );
-
-        $result = $builder->paginate($perPage, $columns, $pageName, $page);
-
-        $this->assertEquals(
-            new LengthAwarePaginator(
-                $results,
-                2,
-                $perPage,
-                $page,
-                [
-                    'path'     => $path,
-                    'pageName' => $pageName,
-                ]
-            ),
-            $result
-        );
+        $result = DB::table('characters')->paginate(15)->toArray();
+        $this->assertEquals(43, $result['total']);
+        $this->assertEquals(15, count($result['data']));
     }
 
     /**

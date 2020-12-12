@@ -1,12 +1,10 @@
 <?php
 
-//namespace Tests\Setup\Database\migrations;
-
 use Illuminate\Database\Migrations\Migration;
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
 
-class CreateCharactersTable extends Migration
+class CreateTagsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -15,9 +13,8 @@ class CreateCharactersTable extends Migration
      */
     public function up()
     {
-        Schema::create('characters', function (Blueprint $collection) {
-//            $collection->fulltextIndex('name');
-//            $collection->fulltextIndex('surname');
+        Schema::create('tags', function (Blueprint $collection) {
+            //
         });
     }
 
@@ -28,6 +25,6 @@ class CreateCharactersTable extends Migration
      */
     public function down()
     {
-        Schema::drop('characters');
+        Schema::drop('tags');
     }
 }

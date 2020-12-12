@@ -73,7 +73,7 @@ class MorphToManyTest extends TestCase
         $tags = $reloadedCharacter->tags;
 
         $this->assertEquals(5, count($tags));
-        $this->assertEquals( 'B',$reloadedCharacter->tags[0]->_key);
+        $this->assertEquals('B', $reloadedCharacter->tags[0]->_key);
     }
 
     public function testDetach()

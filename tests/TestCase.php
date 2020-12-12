@@ -7,7 +7,6 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\AranguentServiceProvider;
 use LaravelFreelancerNL\Aranguent\Migrations\DatabaseMigrationRepository;
-use Tests\setup\database\Seeds\DatabaseSeeder;
 
 abstract class TestCase extends \Orchestra\Testbench\TestCase
 {
@@ -34,7 +33,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
      */
     protected function getEnvironmentSetUp($app)
     {
-        $config = require 'setup/config/database.php';
+        $config = require 'Setup/config/database.php';
         $app['config']->set('database.connections.arangodb', $config['connections']['arangodb']);
         $app['config']->set('database.default', 'arangodb');
         $app['config']->set('cache.driver', 'array');
@@ -57,28 +56,13 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->withFactories(realpath(__DIR__ . '/setup/database/factories'));
 
-        $this->artisan(
-            'aranguent:convert-migrations',
-            ['--realpath' => true, '--path' => __DIR__ . '/../vendor/orchestra/testbench-core/laravel/migrations/']
-        )
-            ->run();
-
-        $this->installMigrateIfNotExists();
-
-        $this->artisan('migrate', [
-            '--path'     => realpath(__DIR__ . '/setup/database/migrations'),
-            '--realpath' => true,
-        ])->run();
-
-        $this->artisan('migrate', [
-            '--path'     => realpath(__DIR__ . '/setup/database/migrations'),
-            '--realpath' => true,
-        ])->run();
+        $this->migrate();
 
         $this->databaseMigrationRepository = new DatabaseMigrationRepository($this->app['db'], $this->collection);
     }
+
+
 
     protected function getPackageProviders($app)
     {
@@ -105,6 +89,24 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         }
 
         return false;
+    }
+
+    protected function migrate()
+    {
+        //Convert orchestra migrations
+        $this->artisan(
+            'aranguent:convert-migrations',
+            ['--realpath' => true, '--path' => __DIR__ . '/../vendor/orchestra/testbench-core/laravel/migrations/']
+        )
+            ->run();
+
+        $this->installMigrateIfNotExists();
+
+        $this->artisan('migrate', [
+            '--path'     => realpath(__DIR__ . '/Setup/Database/Migrations'),
+            '--realpath' => true,
+        ])->run();
+
     }
 
     private function installMigrateIfNotExists()

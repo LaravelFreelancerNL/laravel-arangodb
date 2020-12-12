@@ -10,8 +10,11 @@ namespace LaravelFreelancerNL\Aranguent;
  */
 class Document
 {
+    protected $options;
+
     public function __construct(array $options = null)
     {
+        $this->options = $options;
     }
 
     public static function createFromArray($values, array $options = [])

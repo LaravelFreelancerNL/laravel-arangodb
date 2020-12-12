@@ -54,7 +54,7 @@ class AranguentServiceProvider extends ServiceProvider
         );
 
         $this->app->resolving(
-            function ($app) {
+            function () {
                 if (class_exists('Illuminate\Foundation\AliasLoader')) {
                     $loader = \Illuminate\Foundation\AliasLoader::getInstance();
                     $loader->alias('Eloquent', 'LaravelFreelancerNL\Aranguent\Eloquent\Model');

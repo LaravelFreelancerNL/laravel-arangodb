@@ -2,19 +2,15 @@
 
 namespace LaravelFreelancerNL\Aranguent;
 
-use ArangoDBClient\CollectionHandler as ArangoCollectionHandler;
 use ArangoDBClient\Connection as ArangoConnection;
 use ArangoDBClient\ConnectionOptions as ArangoConnectionOptions;
-use ArangoDBClient\DocumentHandler as ArangoDocumentHandler;
 use ArangoDBClient\Exception;
-use ArangoDBClient\GraphHandler as ArangoGraphHandler;
 use ArangoDBClient\Statement;
-use ArangoDBClient\UserHandler as ArangoUserHandler;
-use ArangoDBClient\ViewHandler as ArangoViewHandler;
 use Illuminate\Database\Connection as IlluminateConnection;
 use Iterator;
 use LaravelFreelancerNL\Aranguent\Concerns\DetectsDeadlocks;
 use LaravelFreelancerNL\Aranguent\Concerns\DetectsLostConnections;
+use LaravelFreelancerNL\Aranguent\Concerns\HandlesArangoDb;
 use LaravelFreelancerNL\Aranguent\Concerns\ManagesTransactions;
 use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 use LaravelFreelancerNL\Aranguent\Query\Grammar as QueryGrammar;
@@ -24,6 +20,7 @@ use LaravelFreelancerNL\FluentAQL\QueryBuilder as FluentAQL;
 
 class Connection extends IlluminateConnection
 {
+    use HandlesArangoDb;
     use DetectsDeadlocks;
     use DetectsLostConnections;
     use ManagesTransactions;
@@ -45,8 +42,6 @@ class Connection extends IlluminateConnection
 
     protected $arangoConnection;
 
-    protected $readArangoConnection;
-
     protected $reconnector;
 
     protected $database;
@@ -62,16 +57,6 @@ class Connection extends IlluminateConnection
     protected $loggingQueries;
 
     protected $queryLog;
-
-    protected $collectionHandler;
-
-    protected $viewHandler;
-
-    protected $documentHandler;
-
-    protected $graphHandler;
-
-    protected $userHandler;
 
     /**
      * The ArangoDB driver name.
@@ -111,7 +96,7 @@ class Connection extends IlluminateConnection
     /**
      * Get a schema builder instance for the connection.
      *
-     * @return \LaravelFreelancerNL\Aranguent\Schema\Builder
+     * @return SchemaBuilder
      */
     public function getSchemaBuilder()
     {
@@ -157,6 +142,9 @@ class Connection extends IlluminateConnection
      */
     public function cursor($query, $bindings = [], $useReadPdo = null, $transactionCollections = null)
     {
+        // Usage of a separate DB to read date isn't supported at this time
+        $useReadPdo = null;
+
         return $this->run($query, $bindings, function ($query, $bindings) use ($transactionCollections) {
             if ($this->pretending()) {
                 return [];
@@ -306,6 +294,8 @@ class Connection extends IlluminateConnection
     /**
      * Run a select statement against the database.
      *
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     *
      * @param string|FluentAQL $query
      * @param array            $bindings
      * @param bool             $useReadPdo
@@ -321,6 +311,8 @@ class Connection extends IlluminateConnection
     /**
      * Run an AQL query against the database and return the results.
      *
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     *
      * @param string|FluentAQL $query
      * @param array            $bindings
      * @param bool             $useReadPdo
@@ -330,6 +322,9 @@ class Connection extends IlluminateConnection
      */
     public function execute($query, $bindings = [], $useReadPdo = true, $transactionCollections = null)
     {
+        // Usage of a separate DB to read date isn't supported at this time
+        $useReadPdo = null;
+
         if ($query instanceof FluentAQL) {
             $bindings = $query->binds;
             $transactionCollections = $query->collections;
@@ -451,11 +446,8 @@ class Connection extends IlluminateConnection
     /**
      * @param $query
      * @param $bindings
-     * @param $connection
-     *
-     * @throws Exception
-     *
      * @return Statement
+     * @throws Exception
      */
     public function newArangoStatement($query, $bindings): Statement
     {
@@ -465,55 +457,6 @@ class Connection extends IlluminateConnection
         return $statement;
     }
 
-    public function getCollectionHandler()
-    {
-        if (!isset($this->collectionHandler)) {
-            $this->collectionHandler = new ArangoCollectionHandler($this->arangoConnection);
-            $this->collectionHandler->setDocumentClass(Document::class);
-        }
-
-        return $this->collectionHandler;
-    }
-
-    public function getDocumentHandler()
-    {
-        if (!isset($this->documentHandler)) {
-            $this->documentHandler = new ArangoDocumentHandler($this->arangoConnection);
-            $this->documentHandler->setDocumentClass(Document::class);
-        }
-
-        return $this->documentHandler;
-    }
-
-    public function getUserHandler()
-    {
-        if (!isset($this->userHandler)) {
-            $this->userHandler = new ArangoUserHandler($this->arangoConnection);
-            $this->userHandler->setDocumentClass(Document::class);
-        }
-
-        return $this->userHandler;
-    }
-
-    public function getGraphHandler()
-    {
-        if (!isset($this->graphHandler)) {
-            $this->graphHandler = new ArangoGraphHandler($this->arangoConnection);
-            $this->graphHandler->setDocumentClass(Document::class);
-        }
-
-        return $this->graphHandler;
-    }
-
-    public function getViewHandler()
-    {
-        if (!isset($this->viewHandler)) {
-            $this->viewHandler = new ArangoViewHandler($this->arangoConnection);
-            $this->viewHandler->setDocumentClass(Document::class);
-        }
-
-        return $this->viewHandler;
-    }
 
     public function setDatabaseName($database)
     {

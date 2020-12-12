@@ -4,11 +4,12 @@ namespace Tests\Eloquent;
 
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use Mockery as M;
+use Tests\Setup\Database\Seeds\CharactersSeeder;
+use Tests\Setup\Database\Seeds\ChildrenSeeder;
+use Tests\Setup\Database\Seeds\LocationsSeeder;
 use Tests\setup\Models\Character;
-use Tests\Setup\Models\Location;
 use Tests\TestCase;
 
 class BelongsToManyTest extends TestCase
@@ -18,9 +19,9 @@ class BelongsToManyTest extends TestCase
         parent::setUp();
         Carbon::setTestNow(Carbon::now());
 
-        Artisan::call('db:seed', ['--class' => \Tests\Setup\Database\Seeds\CharactersSeeder::class]);
-        Artisan::call('db:seed', ['--class' => \Tests\Setup\Database\Seeds\LocationsSeeder::class]);
-        Artisan::call('db:seed', ['--class' => \Tests\Setup\Database\Seeds\ChildrenSeeder::class]);
+        Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
+        Artisan::call('db:seed', ['--class' => LocationsSeeder::class]);
+        Artisan::call('db:seed', ['--class' => ChildrenSeeder::class]);
     }
 
     public function tearDown(): void
@@ -35,7 +36,6 @@ class BelongsToManyTest extends TestCase
     public function testRetrieveRelation()
     {
         $parent = Character::find('NedStark');
-
         $children = $parent->children;
 
         $this->assertEquals(5, count($children));
@@ -127,7 +127,7 @@ class BelongsToManyTest extends TestCase
         $reloadedChild = Character::find('JonSnow');
 
         $this->assertEquals(2, count($reloadedChild->parents));
-        $this->assertEquals( 'characters/LyannaStark',$reloadedChild->parents[0]->_id);
-        $this->assertEquals( 'characters/RhaegarTargaryen',$reloadedChild->parents[1]->_id);
+        $this->assertEquals('characters/LyannaStark', $reloadedChild->parents[0]->_id);
+        $this->assertEquals('characters/RhaegarTargaryen', $reloadedChild->parents[1]->_id);
     }
 }

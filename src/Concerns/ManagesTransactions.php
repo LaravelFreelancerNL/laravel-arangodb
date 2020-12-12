@@ -129,9 +129,13 @@ trait ManagesTransactions
     public function extractReadCollections($query, $bindings, $collections)
     {
         $extractedCollections = [];
+        $rawWithCollections = [];
+        $rawForCollections = [];
+        $rawDocCollections = [];
+
         //WITH statement at the start of the query
         preg_match_all('/^(?:\s+?)WITH(?:\s+?)([\S\s]*?)(?:\s+?)FOR/mis', $query, $rawWithCollections);
-        foreach ($rawWithCollections[1] as $key => $value) {
+        foreach ($rawWithCollections[1] as $value) {
             $splits = preg_split("/\s*,\s*/", $value);
             $extractedCollections = array_merge($extractedCollections, $splits);
         }
@@ -160,7 +164,8 @@ trait ManagesTransactions
 
         if (isset($collections['read'])) {
             $collections['read'] = array_merge($collections['read'], $extractedCollections);
-        } else {
+        }
+        if (! isset($collections['read'])) {
             $collections['read'] = $extractedCollections;
         }
 
@@ -192,7 +197,8 @@ trait ManagesTransactions
 
         if (isset($collections['write'])) {
             $collections['write'] = array_merge($collections['write'], $extractedCollections);
-        } else {
+        }
+        if (! isset($collections['write'])) {
             $collections['write'] = $extractedCollections;
         }
 
@@ -233,13 +239,13 @@ trait ManagesTransactions
     public function commit($options = [], $attempts = 1)
     {
         if (!$this->transactions > 0) {
-            throw new \Exception('Transaction committed before starting one.');
+            throw new Exception('Transaction committed before starting one.');
         }
         if (
             !isset($this->transactionCommands[$this->transactions])
             || empty($this->transactionCommands[$this->transactions])
         ) {
-            throw new \Exception('Cannot commit an empty transaction.');
+            throw new Exception('Cannot commit an empty transaction.');
         }
 
         $options['collections'] = $this->compileTransactionCollections();
@@ -399,50 +405,50 @@ trait ManagesTransactions
 
     //Override unused trait transaction functions with dummy methods
 
-    /**
-     * Dummy.
-     *
-     * @param $e
-     */
-    public function handleBeginTransactionException($e)
-    {
-        //
-    }
+//    /**
+//     * Dummy.
+//     *
+//     * @param $e
+//     */
+//    public function handleBeginTransactionException($e)
+//    {
+//        //
+//    }
 
-    /**
-     * Dummy override: Rollback the active database transaction.
-     *
-     * @param int|null $toLevel
-     *
-     * @throws \Exception
-     *
-     * @return void
-     */
-    public function rollBack($toLevel = null)
-    {
-        //
-    }
-
-    /**
-     * Dummy override: ArangoDB rolls back the entire transaction on a failure.
-     *
-     * @param int $toLevel
-     *
-     * @return void
-     */
-    protected function performRollBack($toLevel)
-    {
-        //
-    }
-
-    /**
-     * Create a save point within the database.
-     * Not supported by ArangoDB(?).
-     *
-     * @return void
-     */
-    protected function createSavepoint()
-    {
-        //
-    }
+//    /**
+//     * Dummy override: Rollback the active database transaction.
+//     *
+//     * @param int|null $toLevel
+//     *
+//     * @throws \Exception
+//     *
+//     * @return void
+//     */
+//    public function rollBack($toLevel = null)
+//    {
+//        //
+//    }
+//
+//    /**
+//     * Dummy override: ArangoDB rolls back the entire transaction on a failure.
+//     *
+//     * @param int $toLevel
+//     *
+//     * @return void
+//     */
+//    protected function performRollBack($toLevel)
+//    {
+//        //
+//    }
+//
+//    /**
+//     * Create a save point within the database.
+//     * Not supported by ArangoDB(?).
+//     *
+//     * @return void
+//     */
+//    protected function createSavepoint()
+//    {
+//        //
+//    }
 }
