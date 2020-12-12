@@ -3,7 +3,7 @@ name: Test Coverage
 on: [workflow_dispatch, push, pull_request]
 
 env:
-  DB_ENDPOINT: arangodb:8529
+  DB_ENDPOINT: tcp://arangodb:8529
 
 jobs:
   run:
