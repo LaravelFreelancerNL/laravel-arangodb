@@ -13,7 +13,7 @@ jobs:
 
     services:
       arangodb:
-        image: arangodb:${{ matrix.arangodb-version }}
+        image: arangodb:${{ matrix.arangodb-versions }}
         env:
           ARANGO_NO_AUTH: 1
 
