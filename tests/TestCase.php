@@ -106,7 +106,6 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
             '--path'     => realpath(__DIR__ . '/Setup/Database/Migrations'),
             '--realpath' => true,
         ])->run();
-
     }
 
     private function installMigrateIfNotExists()

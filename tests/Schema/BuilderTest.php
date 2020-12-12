@@ -109,5 +109,4 @@ class BuilderTest extends TestCase
 
         $this->migrate();
     }
-
 }
