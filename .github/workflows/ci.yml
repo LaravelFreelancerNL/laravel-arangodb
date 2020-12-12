@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        php-versions: ['7.3', '7.4', '8.0']
+        php-versions: ['7.3', '7.4']
         arangodb-versions: ['3.5', 'latest']
     name:  Quality checks PHP ${{ matrix.php-versions }}
 
