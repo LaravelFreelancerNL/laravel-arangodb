@@ -3,6 +3,7 @@
 namespace LaravelFreelancerNL\Aranguent\Schema;
 
 use ArangoDBClient\ClientException;
+use ArangoDBClient\Collection;
 use ArangoDBClient\Exception;
 use ArangoDBClient\View;
 use Closure;
@@ -142,9 +143,7 @@ class Builder
     /**
      * Drop a collection from the schema.
      *
-     * @param string $collection
-     *
-     * @throws Exception
+     * @param  string  $collection
      *
      * @return void
      */
@@ -157,8 +156,8 @@ class Builder
     {
         $collections = $this->getAllCollections();
 
-        foreach ($collections as $key => $name) {
-            $this->collectionHandler->drop($name);
+        foreach ($collections as $name) {
+            $this->collectionHandler->drop($name['name']);
         }
     }
 
@@ -179,7 +178,8 @@ class Builder
      */
     public function dropIfExists($collection)
     {
-        if ($collections = $this->hasCollection($collection)) {
+        $collections = $this->hasCollection($collection);
+        if ($collections) {
             $this->drop($collection);
         }
     }
@@ -187,14 +187,11 @@ class Builder
     /**
      * Get all of the collection names for the database.
      *
-     * @param array $options
-     *
-     * @throws ClientException
-     * @throws Exception
+     * @param  array  $options
      *
      * @return array
      */
-    protected function getAllCollections(array $options = [])
+    public function getAllCollections(array $options = [])
     {
         if (!isset($options['excludeSystem'])) {
             $options['excludeSystem'] = true;
@@ -207,10 +204,7 @@ class Builder
      * Get all of the table names for the database.
      * Alias for getAllCollections().
      *
-     * @param array $options
-     *
-     * @throws ClientException
-     * @throws Exception
+     * @param  array  $options
      *
      * @return array
      */
@@ -220,11 +214,9 @@ class Builder
     }
 
     /**
-     * @param string $collection
+     * @param  string  $collection
      *
-     * @throws Exception
-     *
-     * @return \ArangoDBClient\Collection
+     * @return Collection
      */
     protected function getCollection($collection)
     {
@@ -301,6 +293,7 @@ class Builder
      */
     public function hasAttributes($collection, $attributes)
     {
+        $parameters = [];
         $parameters['name'] = 'hasAttribute';
         $parameters['handler'] = 'aql';
         $parameters['attribute'] = $attributes;
@@ -338,18 +331,6 @@ class Builder
     }
 
     /**
-     * get information about the collection.
-     *
-     * @param $collection
-     *
-     * @return mixed
-     */
-    public function getCollectionInfo($collection)
-    {
-        return $this->figures($collection);
-    }
-
-    /**
      * @param string $name
      * @param array  $properties
      * @param string $type
@@ -378,11 +359,8 @@ class Builder
     }
 
     /**
-     * @param string $name
-     * @param array  $properties
-     *
-     * @throws ClientException
-     * @throws Exception
+     * @param  string  $name
+     * @param  array  $properties
      */
     public function editView($name, array $properties)
     {
@@ -390,10 +368,9 @@ class Builder
     }
 
     /**
-     * @param string $from
-     * @param string $to
+     * @param  string  $from
+     * @param  string  $to
      *
-     * @throws Exception
      */
     public function renameView(string $from, string $to)
     {
@@ -401,10 +378,7 @@ class Builder
     }
 
     /**
-     * @param string $name
-     *
-     * @throws ClientException
-     * @throws Exception
+     * @param  string  $name
      */
     public function dropView(string $name)
     {

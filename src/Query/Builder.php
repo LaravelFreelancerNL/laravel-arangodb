@@ -17,6 +17,7 @@ use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
 class Builder extends IlluminateQueryBuilder
 {
+
     /**
      * @var Grammar
      */
@@ -31,14 +32,6 @@ class Builder extends IlluminateQueryBuilder
      * @var QueryBuilder
      */
     public $aqb;
-
-    /**
-     * Alias' are AQL variables
-     * Sticking with the SQL based naming as this is the Laravel driver.
-     *
-     * @var QueryBuilder
-     */
-    protected $aliasRegistry = [];
 
     /**
      * @override
@@ -62,6 +55,26 @@ class Builder extends IlluminateQueryBuilder
             $aqb = new QueryBuilder();
         }
         $this->aqb = $aqb;
+    }
+
+    /**
+     * Set the table which the query is targeting.
+     *
+     * @param  \Closure|IlluminateQueryBuilder|string  $table
+     * @param  string|null  $as
+     * @return IlluminateQueryBuilder
+     */
+    public function from($table, $as = null)
+    {
+        if ($this->isQueryable($table)) {
+            return $this->fromSub($table, $as);
+        }
+
+        $this->grammar->registerTableAlias($table, $as);
+
+        $this->from = $table;
+
+        return $this;
     }
 
     /**
@@ -96,6 +109,30 @@ class Builder extends IlluminateQueryBuilder
         $this->aqb = new QueryBuilder();
 
         return $closeResults;
+    }
+
+    /**
+     * Set the columns to be selected.
+     *
+     * @param  array|mixed  $columns
+     * @return IlluminateQueryBuilder
+     */
+    public function select($columns = ['*'])
+    {
+        $this->columns = [];
+        $this->bindings['select'] = [];
+        $columns = is_array($columns) ? $columns : func_get_args();
+
+        foreach ($columns as $as => $column) {
+            if (is_string($as) && $this->isQueryable($column)) {
+                $this->selectSub($column, $as);
+            }
+            if (! is_string($as) || ! $this->isQueryable($column)) {
+                $this->columns[$as] = $column;
+            }
+        }
+
+        return $this;
     }
 
     /**
@@ -144,32 +181,6 @@ class Builder extends IlluminateQueryBuilder
     }
 
     /**
-     * Set the table which the query is targeting.
-     *
-     * @param Closure|Builder|string $table
-     * @param string|null            $as
-     *
-     * @return $this
-     */
-    public function from($table, $as = null)
-    {
-        if ($this->isQueryable($table)) {
-            return $this->fromSub($table, $as);
-        }
-
-        if (stripos($table, ' as ') !== false) {
-            $parts = explode(' as ', $table);
-            $table = $parts[0];
-            $as = $parts[1];
-            $this->registerAlias($table, $as);
-        }
-
-        $this->from = $table;
-
-        return $this;
-    }
-
-    /**
      * Execute the query as a "select" statement.
      *
      * @param array|string $columns
@@ -178,11 +189,19 @@ class Builder extends IlluminateQueryBuilder
      */
     public function get($columns = ['*'])
     {
-        $results = collect($this->onceWithColumns(Arr::wrap($columns), function () {
+        return collect($this->onceWithColumns(Arr::wrap($columns), function () {
             return $this->runSelect();
         }));
+    }
 
-        return $results;
+    /**
+     * Get the current query value bindings in a flattened array.
+     *
+     * @return array
+     */
+    public function getBindings()
+    {
+        return $this->aqb->binds;
     }
 
     /**
@@ -203,72 +222,16 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Delete a record from the database.
      *
-     * @param mixed $_key
+     * @param mixed $id
      *
      * @return int
      */
-    public function delete($_key = null)
+    public function delete($id = null)
     {
-        $response = $this->connection->delete($this->grammar->compileDelete($this, $_key)->aqb);
+        $response = $this->connection->delete($this->grammar->compileDelete($this, $id)->aqb);
         $this->aqb = new QueryBuilder();
 
         return $response;
-    }
-
-    /**
-     * @param Builder $builder
-     * @param $table
-     * @param string $postfix
-     *
-     * @return mixed
-     */
-    public function generateTableAlias($table, $postfix = 'Doc')
-    {
-        $alias = Str::singular($table).$postfix;
-        $this->registerAlias($table, $alias);
-
-        return $alias;
-    }
-
-    /**
-     * @param string $table
-     * @param string $alias
-     */
-    public function registerAlias(string $table, string $alias): void
-    {
-        if (!isset($this->aliasRegistry[$table])) {
-            $this->aliasRegistry[$table] = $alias;
-        }
-    }
-
-    /**
-     * @param string $table
-     *
-     * @return string
-     */
-    public function getAlias(string $table): ?string
-    {
-        if (isset($this->aliasRegistry[$table])) {
-            return $this->aliasRegistry[$table];
-        }
-        if (in_array($table, $this->aliasRegistry)) {
-            return $table;
-        }
-
-        return null;
-    }
-
-    public function replaceTableForAlias($reference): string
-    {
-        $referenceParts = explode('.', $reference);
-        $first = array_shift($referenceParts);
-        $alias = $this->getAlias($first);
-        if ($alias == null) {
-            $alias = $first;
-        }
-        array_unshift($referenceParts, $alias);
-
-        return implode('.', $referenceParts);
     }
 
     /**
@@ -345,17 +308,6 @@ class Builder extends IlluminateQueryBuilder
 
         $type = 'Basic';
 
-        // If the column is making a JSON reference we'll check to see if the value
-        // is a boolean. If it is, we'll add the raw boolean string as an actual
-        // value to the query to ensure this is properly handled by the query.
-        if (Str::contains($column, '->') && is_bool($value)) {
-            $value = new Expression($value ? 'true' : 'false');
-
-            if (is_string($column)) {
-                $type = 'JsonBoolean';
-            }
-        }
-
         // Now that we are working with just a simple query we can put the elements
         // in our array and add the query binding to our array of bindings that
         // will be bound to each SQL statements when it is finally executed.
@@ -375,23 +327,21 @@ class Builder extends IlluminateQueryBuilder
     }
 
     /**
-     * Add a "where null" clause to the query.
+     * Add a "where JSON contains" clause to the query.
      *
-     * @param string|array $columns
-     * @param string       $boolean
-     * @param bool         $not
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      *
-     * @return $this
+     * @param  string  $column
+     * @param  mixed  $value
+     * @param  string  $boolean
+     * @param  bool  $not
+     * @return IlluminateQueryBuilder
      */
-    public function whereNull($columns, $boolean = 'and', $not = false)
+    public function whereJsonContains($column, $value, $boolean = 'and', $not = false)
     {
-        $type = 'Basic';
-        $operator = $not ? '!=' : '==';
-        $value = null;
+        $type = 'JsonContains';
 
-        foreach (Arr::wrap($columns) as $column) {
-            $this->wheres[] = compact('type', 'column', 'operator', 'value', 'boolean');
-        }
+        $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
 
         return $this;
     }
@@ -412,6 +362,9 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Add a join clause to the query.
      *
+     * The boolean argument flag is part of this method's API in Laravel.
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     *
      * @param string          $table
      * @param \Closure|string $first
      * @param string|null     $operator
@@ -423,10 +376,6 @@ class Builder extends IlluminateQueryBuilder
      */
     public function join($table, $first, $operator = null, $second = null, $type = 'inner', $where = false)
     {
-        $this->registerAlias($table, $this->generateTableAlias($table));
-        $first = $this->replaceTableForAlias($first);
-        $second = $this->replaceTableForAlias($second);
-
         $join = $this->newJoinClause($this, $type, $table);
 
         // If the first "column" of the join is really a Closure instance the developer
@@ -436,39 +385,19 @@ class Builder extends IlluminateQueryBuilder
             $first($join);
 
             $this->joins[] = $join;
-
-            //we'll take care of the bindings when calling fluentaql
-            $this->addBinding($join->getBindings(), 'join');
         }
+        if (! $first instanceof Closure) {
+            // If the column is simply a string, we can assume the join simply has a basic
+            // "on" clause with a single condition. So we will just build the join with
+            // this simple join clauses attached to it. There is not a join callback.
 
-        // If the column is simply a string, we can assume the join simply has a basic
-        // "on" clause with a single condition. So we will just build the join with
-        // this simple join clauses attached to it. There is not a join callback.
-        else {
             //where and on are the same for aql
             $method = $where ? 'where' : 'on';
 
             $this->joins[] = $join->$method($first, $operator, $second);
-
-            //we'll take care of the bindings when calling fluentaql
-            $this->addBinding($join->getBindings(), 'join');
         }
 
         return $this;
-    }
-
-    /**
-     * Add an "or where" clause to the query.
-     *
-     * @param Closure|string|array $column
-     * @param mixed                $operator
-     * @param mixed                $value
-     *
-     * @return IlluminateQueryBuilder|static
-     */
-    public function orWhere($column, $operator = null, $value = null)
-    {
-        return $this->where($column, $operator, $value, 'or');
     }
 
     /**
@@ -486,7 +415,10 @@ class Builder extends IlluminateQueryBuilder
         if ($this->isQueryable($column)) {
             [$query, $bindings] = $this->createSub($column);
 
-            $column = new Expression('('.$query.')');
+            //fixme: Remove binding when implementing subqueries
+            $bindings = null;
+
+            $column = new Expression('(' . $query . ')');
         }
 
         $this->{$this->unions ? 'unionOrders' : 'orders'}[] = [
@@ -507,6 +439,8 @@ class Builder extends IlluminateQueryBuilder
      */
     public function orderByRaw($aql, $bindings = [])
     {
+        $bindings = [];
+
         $type = 'Raw';
         $column = $aql;
         $this->{$this->unions ? 'unionOrders' : 'orders'}[] = compact('type', 'column');
@@ -523,6 +457,9 @@ class Builder extends IlluminateQueryBuilder
      */
     public function inRandomOrder($seed = '')
     {
+        // ArangoDB's random function doesn't accept a seed.
+        $seed = null;
+
         return $this->orderByRaw($this->grammar->compileRandom($this));
     }
 

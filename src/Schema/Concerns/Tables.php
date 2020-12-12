@@ -15,6 +15,7 @@ trait Tables
      */
     public function create($options = [])
     {
+        $parameters = [];
         $parameters['options'] = $options;
         $parameters['explanation'] = "Create '{$this->table}' table.";
         $parameters['handler'] = 'table';
@@ -37,7 +38,7 @@ trait Tables
     public function executeCreateCommand($command)
     {
         if ($this->connection->pretending()) {
-            $this->connection->logQuery('/* '.$command->explanation." */\n", []);
+            $this->connection->logQuery('/* ' . $command->explanation . " */\n", []);
 
             return;
         }
@@ -84,6 +85,7 @@ trait Tables
      */
     public function drop()
     {
+        $parameters = [];
         $parameters['explanation'] = "Drop the '{$this->table}' table.";
         $parameters['handler'] = 'table';
 
@@ -97,6 +99,7 @@ trait Tables
      */
     public function dropIfExists()
     {
+        $parameters = [];
         $parameters['explanation'] = "Drop the '{$this->table}' table.";
         $parameters['handler'] = 'table';
 

@@ -81,10 +81,10 @@ trait ManagesTransactions
         }
 
 //        $query = addslashes($query);
-        $jsCommand = 'db._query(aql`'.$query.'`';
+        $jsCommand = 'db._query(aql`' . $query . '`';
         if (!empty($bindings)) {
             $bindings = json_encode($bindings);
-            $jsCommand .= ', '.$bindings;
+            $jsCommand .= ', ' . $bindings;
         }
         $jsCommand .= ');';
         $command = new IlluminateFluent([
@@ -129,19 +129,33 @@ trait ManagesTransactions
     public function extractReadCollections($query, $bindings, $collections)
     {
         $extractedCollections = [];
+        $rawWithCollections = [];
+        $rawForCollections = [];
+        $rawDocCollections = [];
+
         //WITH statement at the start of the query
         preg_match_all('/^(?:\s+?)WITH(?:\s+?)([\S\s]*?)(?:\s+?)FOR/mis', $query, $rawWithCollections);
-        foreach ($rawWithCollections[1] as $key => $value) {
+        foreach ($rawWithCollections[1] as $value) {
             $splits = preg_split("/\s*,\s*/", $value);
             $extractedCollections = array_merge($extractedCollections, $splits);
         }
 
         //FOR statements
-        preg_match_all('/FOR(?:\s+?)(?:\w+)(?:\s+?)(?:IN|INTO)(?:\s+?)(?!OUTBOUND|INBOUND|ANY)(@?@?\w+(?!\.))/mis', $query, $rawForCollections);
+        preg_match_all(
+            '/FOR(?:\s+?)(?:\w+)(?:\s+?)(?:IN|INTO)(?:\s+?)(?!OUTBOUND|INBOUND|ANY)(@?@?\w+(?!\.))/mis',
+            $query,
+            $rawForCollections
+        );
         $extractedCollections = array_merge($extractedCollections, $rawForCollections[1]);
 
         //Document functions which require a document as their first argument
-        preg_match_all('/(?:DOCUMENT\(|ATTRIBUTES\(|HAS\(|KEEP\(|LENGTH\(|MATCHES\(|PARSE_IDENTIFIER\(|UNSET\(|UNSET_RECURSIVE\(|VALUES\(|OUTBOUND|INBOUND|ANY)(?:\s+?)(?!\{)(?:\"|\'|\`)(@?@?\w+)\/(?:\w+)(?:\"|\'|\`)/mis', $query, $rawDocCollections);
+        preg_match_all(
+            '/(?:DOCUMENT\(|ATTRIBUTES\(|HAS\(|KEEP\(|LENGTH\(|MATCHES'
+            . '\(|PARSE_IDENTIFIER\(|UNSET\(|UNSET_RECURSIVE\(|VALUES\(|OUTBOUND|INBOUND|ANY)'
+            . '(?:\s+?)(?!\{)(?:\"|\'|\`)(@?@?\w+)\/(?:\w+)(?:\"|\'|\`)/mis',
+            $query,
+            $rawDocCollections
+        );
         $extractedCollections = array_merge($extractedCollections, $rawDocCollections[1]);
 
         $extractedCollections = array_map('trim', $extractedCollections);
@@ -150,7 +164,8 @@ trait ManagesTransactions
 
         if (isset($collections['read'])) {
             $collections['read'] = array_merge($collections['read'], $extractedCollections);
-        } else {
+        }
+        if (! isset($collections['read'])) {
             $collections['read'] = $extractedCollections;
         }
 
@@ -170,14 +185,20 @@ trait ManagesTransactions
      */
     public function extractWriteCollections($query, $bindings, $collections)
     {
-        preg_match_all('/(?:\s+?)(?:INSERT|REPLACE|UPDATE|REMOVE)(?:\s+?)(?:{(?:.*?)}|@?@?\w+?)(?:\s+?)(?:IN|INTO)(?:\s+?)(@?@?\w+)/mis', $query, $extractedCollections);
+        preg_match_all(
+            '/(?:\s+?)(?:INSERT|REPLACE|UPDATE|REMOVE)'
+            . '(?:\s+?)(?:{(?:.*?)}|@?@?\w+?)(?:\s+?)(?:IN|INTO)(?:\s+?)(@?@?\w+)/mis',
+            $query,
+            $extractedCollections
+        );
         $extractedCollections = array_map('trim', $extractedCollections[1]);
 
         $extractedCollections = $this->getCollectionByBinding($extractedCollections, $bindings);
 
         if (isset($collections['write'])) {
             $collections['write'] = array_merge($collections['write'], $extractedCollections);
-        } else {
+        }
+        if (! isset($collections['write'])) {
             $collections['write'] = $extractedCollections;
         }
 
@@ -218,10 +239,13 @@ trait ManagesTransactions
     public function commit($options = [], $attempts = 1)
     {
         if (!$this->transactions > 0) {
-            throw new \Exception('Transaction committed before starting one.');
+            throw new Exception('Transaction committed before starting one.');
         }
-        if (!isset($this->transactionCommands[$this->transactions]) || empty($this->transactionCommands[$this->transactions])) {
-            throw new \Exception('Cannot commit an empty transaction.');
+        if (
+            !isset($this->transactionCommands[$this->transactions])
+            || empty($this->transactionCommands[$this->transactions])
+        ) {
+            throw new Exception('Cannot commit an empty transaction.');
         }
 
         $options['collections'] = $this->compileTransactionCollections();
@@ -381,50 +405,50 @@ trait ManagesTransactions
 
     //Override unused trait transaction functions with dummy methods
 
-    /**
-     * Dummy.
-     *
-     * @param $e
-     */
-    public function handleBeginTransactionException($e)
-    {
-        //
-    }
+//    /**
+//     * Dummy.
+//     *
+//     * @param $e
+//     */
+//    public function handleBeginTransactionException($e)
+//    {
+//        //
+//    }
 
-    /**
-     * Dummy override: Rollback the active database transaction.
-     *
-     * @param int|null $toLevel
-     *
-     * @throws \Exception
-     *
-     * @return void
-     */
-    public function rollBack($toLevel = null)
-    {
-        //
-    }
-
-    /**
-     * Dummy override: ArangoDB rolls back the entire transaction on a failure.
-     *
-     * @param int $toLevel
-     *
-     * @return void
-     */
-    protected function performRollBack($toLevel)
-    {
-        //
-    }
-
-    /**
-     * Create a save point within the database.
-     * Not supported by ArangoDB(?).
-     *
-     * @return void
-     */
-    protected function createSavepoint()
-    {
-        //
-    }
+//    /**
+//     * Dummy override: Rollback the active database transaction.
+//     *
+//     * @param int|null $toLevel
+//     *
+//     * @throws \Exception
+//     *
+//     * @return void
+//     */
+//    public function rollBack($toLevel = null)
+//    {
+//        //
+//    }
+//
+//    /**
+//     * Dummy override: ArangoDB rolls back the entire transaction on a failure.
+//     *
+//     * @param int $toLevel
+//     *
+//     * @return void
+//     */
+//    protected function performRollBack($toLevel)
+//    {
+//        //
+//    }
+//
+//    /**
+//     * Create a save point within the database.
+//     * Not supported by ArangoDB(?).
+//     *
+//     * @return void
+//     */
+//    protected function createSavepoint()
+//    {
+//        //
+//    }
 }

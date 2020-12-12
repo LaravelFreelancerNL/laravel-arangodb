@@ -8,6 +8,7 @@ use LaravelFreelancerNL\Aranguent\Console\Migrations\AranguentConvertMigrationsC
 use Mockery as M;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
+use Tests\Setup\ClassStubs\ApplicationDatabaseMigrationStub;
 use Tests\TestCase;
 
 class ConsoleAranguentConvertMigrationsCommandTest extends TestCase
@@ -27,8 +28,8 @@ class ConsoleAranguentConvertMigrationsCommandTest extends TestCase
         parent::setUp();
 
         //Copy a stub with Illuminate usage to migrations directory
-        $stub = __DIR__.'/../setup/database/stubs/test_stub_for_migration_conversion.php';
-        $this->conversionMigration = __DIR__.'/../setup/database/migrations/test_migration_conversion.php';
+        $stub = __DIR__ . '/../Setup/Database/stubs/test_stub_for_migration_conversion.php';
+        $this->conversionMigration = __DIR__ . '/../Setup/Database/Migrations/test_migration_conversion.php';
         copy($stub, $this->conversionMigration);
     }
 
@@ -44,7 +45,7 @@ class ConsoleAranguentConvertMigrationsCommandTest extends TestCase
      *
      * @test
      */
-    public function illuminate_usage_is_replaced_by_aranguent_in_migration_files()
+    public function illuminateUsageIsReplacedByAranguentInMigrationFiles()
     {
         $command = new AranguentConvertMigrationsCommand($migrator = M::mock(Migrator::class));
         $app = new ApplicationDatabaseMigrationStub(['path.database' => __DIR__]);
@@ -67,20 +68,5 @@ class ConsoleAranguentConvertMigrationsCommandTest extends TestCase
     protected function runCommand($command, $input = [])
     {
         return $command->run(new ArrayInput($input), new NullOutput());
-    }
-}
-
-class ApplicationDatabaseMigrationStub extends Application
-{
-    public function __construct(array $data = [])
-    {
-        foreach ($data as $abstract => $instance) {
-            $this->instance($abstract, $instance);
-        }
-    }
-
-    public function environment(...$environments)
-    {
-        return 'development';
     }
 }

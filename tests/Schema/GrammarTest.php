@@ -26,12 +26,7 @@ class GrammarTest extends TestCase
         M::close();
     }
 
-    /**
-     * Compile has attribute returns the correct data.
-     *
-     * @test
-     */
-    public function compile_has_attribute_returns_the_correct_data()
+    public function testCompileHasAttributeReturnsCorrectData()
     {
         $collection = 'GrammarTestCollection';
         $attribute = [
@@ -42,20 +37,20 @@ class GrammarTest extends TestCase
 
         $parameters['name'] = 'hasAttribute';
         $parameters['handler'] = 'aql';
-        $parameters['explanation'] = "Checking if any document within the collection has the '".implode(', ', (array) $attribute)."' attribute(s).";
+        $parameters['explanation'] = "Checking if any document within the collection has the '"
+            . implode(', ', (array) $attribute) . "' attribute(s).";
         $parameters['attribute'] = $attribute;
         $command = new Fluent($parameters);
         $results = $this->grammar->compileHasAttribute($collection, $command);
 
-        $this->assertEquals('FOR doc IN GrammarTestCollection FILTER doc.firstAttribute != null AND doc.SecondAttribute != null AND doc.@theThirdAttribute != null LIMIT 1 RETURN true', $results->aqb->query);
+        $this->assertEquals(
+            'FOR doc IN GrammarTestCollection FILTER doc.firstAttribute != null AND doc.SecondAttribute != null '
+            . 'AND doc.@theThirdAttribute != null LIMIT 1 RETURN true',
+            $results->aqb->query
+        );
     }
 
-    /**
-     * Compile drop attribute returns correct data.
-     *
-     * @test
-     */
-    public function compile_drop_attribute_returns_correct_data()
+    public function testCompileDropAttributeReturnsCorrectData()
     {
         $collection = 'GrammarTestCollection';
         $attributes = [
@@ -67,22 +62,20 @@ class GrammarTest extends TestCase
         $parameters['name'] = 'dropAttribute';
         $parameters['handler'] = 'aql';
         $parameters['attributes'] = $attributes;
-        $parameters['explanation'] = 'Drop the following attribute(s): '.implode(',', $attributes).'.';
+        $parameters['explanation'] = 'Drop the following attribute(s): ' . implode(',', $attributes) . '.';
         $command = new Fluent($parameters);
         $results = $this->grammar->compileDropAttribute($collection, $command);
         $this->assertEquals(
-            'FOR doc IN GrammarTestCollection FILTER doc.firstAttribute != null OR doc.SecondAttribute != null OR doc.@theThirdAttribute != null UPDATE doc WITH {"firstAttribute":null,"SecondAttribute":null,"@theThirdAttribute":null} IN GrammarTestCollection OPTIONS {"keepNull":false}',
+            'FOR doc IN GrammarTestCollection FILTER doc.firstAttribute != null OR doc.SecondAttribute != null '
+            . 'OR doc.@theThirdAttribute != null UPDATE doc WITH '
+            . '{"firstAttribute":null,"SecondAttribute":null,"@theThirdAttribute":null} '
+            . 'IN GrammarTestCollection OPTIONS {"keepNull":false}',
             $results->aqb->query
         );
         $this->assertEquals([$collection], $results->aqb->collections['write']);
     }
 
-    /**
-     * Compile rename attribute returns correct data.
-     *
-     * @test
-     */
-    public function compile_rename_attribute_returns_correct_data()
+    public function testCompileRenameAttributeReturnsCorrectData()
     {
         $collection = 'GrammarTestCollection';
         $from = 'oldAttributeName';
@@ -96,18 +89,15 @@ class GrammarTest extends TestCase
         $command = new Fluent($parameters);
         $results = $this->grammar->compileRenameAttribute($collection, $command);
         self::assertEquals(
-            'FOR doc IN GrammarTestCollection FILTER doc.oldAttributeName != null AND doc.newAttributeName == null UPDATE doc WITH {"oldAttributeName":null,"newAttributeName":doc.oldAttributeName} IN GrammarTestCollection OPTIONS {"keepNull":true}',
+            'FOR doc IN GrammarTestCollection FILTER doc.oldAttributeName != null AND doc.newAttributeName == null'
+            . ' UPDATE doc WITH {"oldAttributeName":null,"newAttributeName":doc.oldAttributeName} '
+            . 'IN GrammarTestCollection OPTIONS {"keepNull":true}',
             $results->aqb->query
         );
         $this->assertEquals($collection, $results->aqb->collections['write'][0]);
     }
 
-    /**
-     * Attributes are correctly wrapped.
-     *
-     * @test
-     */
-    public function attributes_are_correctly_wrapped()
+    public function testAttributesAreWrappedCorrectly()
     {
         $attributes = [
             'firstAttribute'   => 'firstAttribute',

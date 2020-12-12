@@ -58,7 +58,7 @@ class ModelTest extends TestCase
             ]
         )->run();
 
-        $file = __DIR__.'/../../vendor/orchestra/testbench-core/laravel/app/Aranguent.php';
+        $file = __DIR__ . '/../../vendor/orchestra/testbench-core/laravel/app/Models/Aranguent.php';
 
         //assert file exists
         $this->assertFileExists($file);
@@ -90,6 +90,10 @@ class ModelTest extends TestCase
         $character = Character::first();
 
         $character->delete();
+
+        $deletedCharacter = Character::firstOrFail();
+
+        $this->assertNotEquals($character->_key, $deletedCharacter->_key);
     }
 
     public function testCount()
@@ -129,21 +133,5 @@ class ModelTest extends TestCase
             ->toSql();
 
         $this->assertEquals('FOR characterDoc IN characters SORT RAND()', $results);
-    }
-
-    public function testCastDocumentObjectToArrayWithoutBinaryStrings()
-    {
-        $data = [
-            '_key'    => 'NedStark',
-            'name'    => 'Ned',
-            'surname' => 'Stark',
-            'alive'   => false,
-            'age'     => 41,
-            'traits'  => ['A', 'H', 'C', 'N', 'P'],
-        ];
-        $doc = new Document();
-        $doc = $doc->createFromArray($data);
-
-        $this->assertEquals((array) $doc, $data);
     }
 }

@@ -34,7 +34,7 @@ class Grammar extends IlluminateGrammar
 
         $filter = [];
         foreach ($command->attribute as $attribute) {
-            $filter[] = ['doc.'.$attribute, '!=', null];
+            $filter[] = ['doc.' . $attribute, '!=', null];
         }
 
         $aqb = (new QueryBuilder())->for('doc', $collection)
@@ -58,14 +58,9 @@ class Grammar extends IlluminateGrammar
      */
     public function compileRenameAttribute($collection, Fluent $command)
     {
-        $bindings['@collection'] = $collection;
-
-        $bindings['from'] = $this->wrapBindVar($command->to);
-        $bindings['to'] = $this->wrapBindVar($command->from);
-
         $filter = [
-            ['doc.'.$command->from, '!=', null],
-            ['doc.'.$command->to, '==', null],
+            ['doc.' . $command->from, '!=', null],
+            ['doc.' . $command->to, '==', null],
         ];
 
         $aqb = (new QueryBuilder())->for('doc', $collection)
@@ -74,7 +69,7 @@ class Grammar extends IlluminateGrammar
                 'doc',
                 [
                     $command->from => null,
-                    $command->to   => 'doc.'.$command->from,
+                    $command->to   => 'doc.' . $command->from,
                 ],
                 $collection
             )
@@ -103,7 +98,7 @@ class Grammar extends IlluminateGrammar
 
         $data = [];
         foreach ($command->attributes as $attribute) {
-            $filter[] = ['doc.'.$attribute, '!=', null, 'OR'];
+            $filter[] = ['doc.' . $attribute, '!=', null, 'OR'];
             $data[$attribute] = null;
         }
         $aqb = (new QueryBuilder())->for('doc', $collection)

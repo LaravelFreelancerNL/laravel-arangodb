@@ -19,7 +19,7 @@ use LaravelFreelancerNL\Aranguent\Schema\Concerns\Tables;
  * 2) ArangoDB doesn't allow DB schema actions within AQL nor within a transaction.
  *
  * This means that:
- * 1) We catch column related methods silently for backwards compatibility and ease of migrating from one DB type to another
+ * 1) We catch column related methods silently for backwards compatibility and ease of migrating between DB types
  * 2) We don't need to compile AQL for transactions within the accompanying schema grammar. (for now)
  * 3) We can just execute each command on order. We will gather them first for possible future optimisations.
  */
@@ -122,7 +122,7 @@ class Blueprint
      *
      * @return void
      */
-    public function build(Connection $connection, Grammar $grammar)
+    public function build(Connection $connection, Grammar $grammar = null)
     {
         $this->connection = $connection;
 
@@ -148,7 +148,7 @@ class Blueprint
      */
     public function compileAqlCommand($command)
     {
-        $compileMethod = 'compile'.ucfirst($command->name);
+        $compileMethod = 'compile' . ucfirst($command->name);
         if (method_exists($this->grammar, $compileMethod)) {
             return $this->grammar->$compileMethod($this->table, $command);
         }
@@ -161,8 +161,8 @@ class Blueprint
      */
     public function executeCommand($command)
     {
-        $executeNamedMethod = 'execute'.ucfirst($command->name).'Command';
-        $executeHandlerMethod = 'execute'.ucfirst($command->handler).'Command';
+        $executeNamedMethod = 'execute' . ucfirst($command->name) . 'Command';
+        $executeHandlerMethod = 'execute' . ucfirst($command->handler) . 'Command';
         if (method_exists($this, $executeNamedMethod)) {
             $this->$executeNamedMethod($command);
         } elseif (method_exists($this, $executeHandlerMethod)) {
@@ -183,7 +183,7 @@ class Blueprint
     public function executeCollectionCommand($command)
     {
         if ($this->connection->pretending()) {
-            $this->connection->logQuery('/* '.$command->explanation." */\n", []);
+            $this->connection->logQuery('/* ' . $command->explanation . " */\n", []);
 
             return;
         }
@@ -203,7 +203,7 @@ class Blueprint
     public function executeIgnoreCommand($command)
     {
         if ($this->connection->pretending()) {
-            $this->connection->logQuery('/* '.$command->explanation." */\n", []);
+            $this->connection->logQuery('/* ' . $command->explanation . " */\n", []);
 
             return;
         }
@@ -259,8 +259,8 @@ class Blueprint
     {
         $columnMethods = [
             'bigIncrements', 'bigInteger', 'binary', 'boolean', 'char', 'date', 'dateTime', 'dateTimeTz', 'decimal',
-            'double', 'enum', 'engine', 'float', 'geometry', 'geometryCollection', 'increments', 'integer', 'ipAddress', 'json',
-            'jsonb', 'lineString', 'longText', 'macAddress', 'mediumIncrements', 'mediumInteger', 'mediumText',
+            'double', 'enum', 'engine', 'float', 'geometry', 'geometryCollection', 'increments', 'integer', 'ipAddress',
+            'json', 'jsonb', 'lineString', 'longText', 'macAddress', 'mediumIncrements', 'mediumInteger', 'mediumText',
             'morphs', 'uuidMorphs', 'multiLineString', 'multiPoint', 'multiPolygon',
             'nullableMorphs', 'nullableUuidMorphs', 'nullableTimestamps', 'point', 'polygon', 'rememberToken',
             'set', 'smallIncrements', 'smallInteger', 'softDeletes', 'softDeletesTz', 'string',
@@ -280,6 +280,7 @@ class Blueprint
             $this->autoIncrement = true;
         }
 
+        $info = [];
         $info['method'] = $method;
         $info['explanation'] = "'$method' is ignored; Aranguent Schema Blueprint doesn't support it.";
         $this->addCommand('ignore', $info);

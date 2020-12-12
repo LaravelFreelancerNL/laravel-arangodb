@@ -10,8 +10,10 @@ use LaravelFreelancerNL\Aranguent\Schema\Builder;
  * Table handling:.
  *
  * @method static Builder create($collection, Closure $callback, $options = [])
+ * @method static Builder getAllCollections()
  * @method static Builder drop(string $collection)
  * @method static Builder dropIfExists(string $collection)
+ * @method static Builder dropAllTables()
  * @method static Builder table(string $table, \Closure $callback)
  *
  * View handling:
@@ -28,6 +30,8 @@ class Schema extends Facade
     /**
      * Get a schema builder instance for a connection.
      *
+     * @SuppressWarnings(PHPMD.UndefinedVariable)
+     *
      * @param string $name
      *
      * @return \Illuminate\Database\Schema\Builder
@@ -39,6 +43,8 @@ class Schema extends Facade
 
     /**
      * Get the registered name of the component.
+     *
+     * @SuppressWarnings(PHPMD.UndefinedVariable)
      *
      * @return string
      */

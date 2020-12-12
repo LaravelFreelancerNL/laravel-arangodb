@@ -95,4 +95,18 @@ class BuilderTest extends TestCase
         $viewHandler = $this->connection->getViewHandler();
         $viewHandler->get('search');
     }
+
+    public function testDropAllTables()
+    {
+        $initialCollections = Schema::getAllCollections();
+
+        Schema::dropAllTables();
+
+        $collections = Schema::getAllCollections();
+
+        $this->assertEquals(10, count($initialCollections));
+        $this->assertEquals(0, count($collections));
+
+        $this->migrate();
+    }
 }

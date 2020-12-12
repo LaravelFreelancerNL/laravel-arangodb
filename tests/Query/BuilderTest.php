@@ -5,16 +5,30 @@ namespace Tests\Query;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Pagination\AbstractPaginator as Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Connection as Connection;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 use LaravelFreelancerNL\Aranguent\Query\Grammar;
 use LaravelFreelancerNL\Aranguent\Query\Processor;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder as FluentAQL;
 use Mockery as m;
+use Tests\Setup\Database\Seeds\CharactersSeeder;
+use Tests\Setup\Database\Seeds\ChildrenSeeder;
+use Tests\Setup\Database\Seeds\LocationsSeeder;
 use Tests\TestCase;
 
 class BuilderTest extends TestCase
 {
+    public function setUp(): void
+    {
+        parent::setUp();
+        Carbon::setTestNow(Carbon::now());
+
+        Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
+    }
+
     protected function tearDown(): void
     {
         m::close();
@@ -83,99 +97,6 @@ class BuilderTest extends TestCase
         $this->assertNull($builder->columns);
     }
 
-    public function testBasicWheres()
-    {
-        $builder = $this->getBuilder();
-        $builder->select('*')->from('users')->where('_id', '=', 1);
-        $this->assertSame('FOR userDoc IN users FILTER userDoc._id == 1 RETURN userDoc', $builder->toSql());
-        $this->assertEquals([0 => 1], $builder->getBindings());
-    }
-
-    public function testBasicWhereWithReferredValued()
-    {
-        $builder = $this->getBuilder();
-        $builder->select('*')->from('users')->where('userDoc._id', '=', 1);
-        $this->assertSame('FOR userDoc IN users FILTER userDoc._id == 1 RETURN userDoc', $builder->toSql());
-        $this->assertEquals([0 => 1], $builder->getBindings());
-    }
-
-    public function testBasicWheresWithMultiplePredicates()
-    {
-        $builder = $this->getBuilder();
-        $builder->select('*')->from('users')->where('_id', '=', 1)->where('email', '=', 'foo');
-        $this->assertSame(
-            'FOR userDoc IN users FILTER userDoc._id == 1 AND userDoc.email == "foo" RETURN userDoc',
-            $builder->toSql()
-        );
-    }
-
-    public function testBasicOrWheres()
-    {
-        $builder = $this->getBuilder();
-        $builder->select('*')->from('users')->where('_id', '==', 1)->orWhere('email', '==', 'foo');
-        $this->assertSame(
-            'FOR userDoc IN users FILTER userDoc._id == 1 OR userDoc.email == "foo" RETURN userDoc',
-            $builder->toSql()
-        );
-        $this->assertEquals([0 => 1, 1 => 'foo'], $builder->getBindings());
-    }
-
-    public function testWhereOperatorConversion()
-    {
-        $builder = $this->getBuilder();
-        $builder->select('*')
-            ->from('users')
-            ->where('email', '=', 'email@example.com')
-            ->where('_key', '<>', 'keystring');
-        $this->assertSame(
-            'FOR userDoc IN users FILTER userDoc.email == "email@example.com" AND userDoc._key != "keystring" RETURN userDoc',
-            $builder->toSql()
-        );
-        $this->assertEquals([0 => 'email@example.com', 1 => 'keystring'], $builder->getBindings());
-    }
-
-    public function testBasicWhereNulls()
-    {
-        $builder = $this->getBuilder();
-        $builder->select('*')->from('users')->whereNull('_key');
-        $this->assertSame('FOR userDoc IN users FILTER userDoc._key == null RETURN userDoc', $builder->toSql());
-        $this->assertEquals([], $builder->getBindings());
-
-        $builder = $this->getBuilder();
-        $builder->select('*')->from('users')->where('_key', '=', 1)->orWhereNull('_key');
-        $this->assertSame(
-            'FOR userDoc IN users FILTER userDoc._key == 1 OR userDoc._key == null RETURN userDoc',
-            $builder->toSql()
-        );
-        $this->assertEquals([0 => 1], $builder->getBindings());
-    }
-
-    public function testBasicWhereNotNulls()
-    {
-        $builder = $this->getBuilder();
-        $builder->select('*')->from('users')->whereNotNull('_key');
-        $this->assertSame('FOR userDoc IN users FILTER userDoc._key != null RETURN userDoc', $builder->toSql());
-        $this->assertEquals([], $builder->getBindings());
-
-        $builder = $this->getBuilder();
-        $builder->select('*')->from('users')->where('_key', '>', 1)->orWhereNotNull('_key');
-        $this->assertSame(
-            'FOR userDoc IN users FILTER userDoc._key > 1 OR userDoc._key != null RETURN userDoc',
-            $builder->toSql()
-        );
-        $this->assertEquals([0 => 1], $builder->getBindings());
-    }
-
-    public function testWhereIn()
-    {
-        $builder = $this->getBuilder();
-
-        $builder->select()->from('users')->where('country', 'IN', ['The Netherlands', 'Germany', 'Great-Britain']);
-        $this->assertSame(
-            'FOR userDoc IN users FILTER userDoc.country IN [@'.$builder->aqb->getQueryId().'_1,"Germany","Great-Britain"] RETURN userDoc',
-            $builder->toSql()
-        );
-    }
 
     public function testOrderBys()
     {
@@ -237,77 +158,15 @@ class BuilderTest extends TestCase
 
     public function testAggregates()
     {
-        $builder = $this->getBuilder();
-        $builder->getConnection()->shouldReceive('select')->once()->with(FluentAQL::class)->andReturn(
-            [['aggregate' => 1]]
-        );
-
-        $results = $builder->from('users')->count();
-        $this->assertEquals(1, $results);
+        $results = DB::table('characters')->count();
+        $this->assertEquals(43, $results);
     }
 
     public function testPaginate()
     {
-        $perPage = 16;
-        $columns = ['test'];
-        $pageName = 'page-name';
-        $page = 1;
-        $builder = $this->getMockQueryBuilder();
-        $path = 'http://foo.bar?page=3';
-
-        $results = collect([['test' => 'foo'], ['test' => 'bar']]);
-
-        $builder->shouldReceive('getCountForPagination')->once()->andReturn(2);
-        $builder->shouldReceive('forPage')->once()->with($page, $perPage)->andReturnSelf();
-        $builder->shouldReceive('get')->once()->andReturn($results);
-
-        Paginator::currentPathResolver(
-            function () use ($path) {
-                return $path;
-            }
-        );
-
-        $result = $builder->paginate($perPage, $columns, $pageName, $page);
-
-        $this->assertEquals(
-            new LengthAwarePaginator(
-                $results,
-                2,
-                $perPage,
-                $page,
-                [
-                    'path'     => $path,
-                    'pageName' => $pageName,
-                ]
-            ),
-            $result
-        );
-    }
-
-    public function testReplaceTableForAlias()
-    {
-        $builder = $this->getBuilder();
-        $builder->registerAlias('users', $builder->generateTableAlias('users'));
-        $result = $builder->replaceTableForAlias('users.email');
-
-        $this->assertEquals('userDoc.email', $result);
-    }
-
-    public function testReplaceTableForAliasWithoutColumn()
-    {
-        $builder = $this->getBuilder();
-        $builder->registerAlias('users', $builder->generateTableAlias('users'));
-        $result = $builder->replaceTableForAlias('users');
-
-        $this->assertEquals('userDoc', $result);
-    }
-
-    public function testReplaceTableForAliasNotOnAttribute()
-    {
-        $builder = $this->getBuilder();
-        $result = $builder->replaceTableForAlias('en.email');
-
-        $this->assertEquals('en.email', $result);
+        $result = DB::table('characters')->paginate(15)->toArray();
+        $this->assertEquals(43, $result['total']);
+        $this->assertEquals(15, count($result['data']));
     }
 
     /**
