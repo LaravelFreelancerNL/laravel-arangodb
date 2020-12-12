@@ -4,6 +4,8 @@ on: [workflow_dispatch, push, pull_request]
 
 env:
   DB_ENDPOINT: tcp://arangodb:8529
+  DB_HOST: arangodb
+  DB_PORT: 8529
 
 jobs:
   run:
