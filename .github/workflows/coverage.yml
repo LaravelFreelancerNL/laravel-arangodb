@@ -2,10 +2,24 @@ name: Test Coverage
 
 on: [workflow_dispatch, push, pull_request]
 
+env:
+  DB_ENDPOINT: tcp://arangodb:8529
+
 jobs:
   run:
     runs-on: ubuntu-18.04
+
     name:  Test coverage
+
+    services:
+      arangodb:
+        image: arangodb:latest
+        ports:
+          - 8529:8529
+        container_name: arangodb
+        env:
+          ARANGO_NO_AUTH: 1
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
