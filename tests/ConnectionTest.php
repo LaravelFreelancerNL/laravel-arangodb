@@ -2,7 +2,9 @@
 
 namespace Tests;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Fluent as IlluminateFluent;
+use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 use Mockery as M;
 
 class ConnectionTest extends TestCase
@@ -134,75 +136,21 @@ class ConnectionTest extends TestCase
         $this->assertTrue($results);
     }
 
+
     public function testAddQueryToTransaction()
     {
-        $query = '
-            FOR u IN users
-                FOR p IN @@readCollection
-                    FILTER u._key == p.recommendedBy
-                    INSERT {
-                        _from: u._id,
-                        _to: p._id
-                     } IN @@insertCollection
-            ';
-        $bindings = [
-            '@@readCollection'   => 'products',
-            '@@insertCollection' => 'recommendations',
-        ];
+        $aqb = new QueryBuilder();
+        $aqb = $aqb->let('values', [1,2,3,4])
+            ->for('value', 'values')
+            ->insert('value', 'teams')
+            ->return('NEW._key')
+            ->get();
 
-        $result = $this->connection->addQueryToTransaction($query, $bindings);
+        $result = $this->connection->addQueryToTransaction($aqb->query, $aqb->binds, $aqb->collections);
 
-        $this->assertInstanceOf(IlluminateFluent::class, $result);
-        $this->assertEquals('aqlQuery', $result->name);
-        $this->assertStringContainsString('db._query', $result->command);
-        $this->assertIsArray($result->collections['read']);
-        $this->assertIsArray($result->collections['write']);
+        $this->assertEquals('teams', $result['collections']['write'][0]);
     }
 
-    public function testCollectionExtractionFromTransactionalQueries()
-    {
-        // We're combining multiple queries in one statement which would normally fail when executed.
-        // However the goal is to see if the collections are extracted properly.
-        $query = "
-            FOR u IN users
-                FOR p
-                IN
-                 @@readCollection
-                    FILTER u._key == p.recommendedBy
-                    INSERT {
-                        _from: u._id,
-                        _to: p._id
-                     } IN @@insertCollection
-            FOR i IN 1..1000
-                INSERT {
-                    _key: CONCAT('test', i),
-                    name: \"test\",
-                    foobar: true
-                    } INTO users OPTIONS { ignoreErrors: true }
-            FOR v, e, p IN 1..5 OUTBOUND 'circles/A' GRAPH 'traversalGraph'
-                FILTER p.vertices[1]._key == \"G\"
-                RETURN p
-        ";
-        $bindings = [
-            '@@readCollection'   => 'products',
-            '@@insertCollection' => 'recommendations',
-        ];
-
-        $result = $this->connection->addQueryToTransaction($query, $bindings);
-
-        $this->assertInstanceOf(IlluminateFluent::class, $result);
-        //Assert that unbound collection are found
-        $this->assertContains('users', $result->collections['read']);
-        $this->assertContains('circles', $result->collections['read']);
-
-        //Assert that bound collections are found
-        $this->assertContains('products', $result->collections['read']);
-        $this->assertContains('recommendations', $result->collections['write']);
-
-        //Assert that iterations are not found
-        $this->assertNotContains('1', $result->collections['read']);
-        $this->assertNotContains('1..1000', $result->collections['read']);
-    }
 
     public function testChangeDatabaseName()
     {
@@ -230,5 +178,17 @@ class ConnectionTest extends TestCase
 
         $this->assertIsArray($explanation);
         $this->assertArrayHasKey('plan', $explanation);
+    }
+
+    public function testErrorHandlingCollectionNotFound()
+    {
+        $this->expectExceptionCode(404);
+        DB::table('this_collection_does_not_exist')->get();
+    }
+
+    public function testErrorHandlingMalformedAql()
+    {
+        $this->expectExceptionCode(400);
+        DB::statement('this aql is malformed');
     }
 }

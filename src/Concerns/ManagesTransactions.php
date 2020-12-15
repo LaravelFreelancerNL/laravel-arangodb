@@ -73,15 +73,11 @@ trait ManagesTransactions
      *
      * @return IlluminateFluent
      */
-    public function addQueryToTransaction($query, $bindings = [], $collections = null)
+    public function addQueryToTransaction($query, $bindings = [], $collections = [])
     {
-        //If transaction collections aren't provided we will try to extract them from the query.
-        if (empty($collections)) {
-            $collections = $this->extractTransactionCollections($query, $bindings, $collections);
-        }
+        [$query, $bindings, $collections] = $this->handleQueryBuilder($query, $bindings, $collections);
 
-//        $query = addslashes($query);
-        $jsCommand = 'db._query(aql`' . $query . '`';
+         $jsCommand = 'db._query(aql`' . $query . '`';
         if (!empty($bindings)) {
             $bindings = json_encode($bindings);
             $jsCommand .= ', ' . $bindings;
@@ -96,134 +92,6 @@ trait ManagesTransactions
         $this->addTransactionCommand($command);
 
         return $command;
-    }
-
-    /**
-     * Transaction like a list of read collections to prevent possible read deadlocks.
-     * Transactions require a list of write collections to prepare write locks.
-     *
-     * @param $query
-     * @param $bindings
-     * @param $collections
-     *
-     * @return mixed
-     */
-    public function extractTransactionCollections($query, $bindings, $collections)
-    {
-        //Extract write collections
-        $collections = $this->extractReadCollections($query, $bindings, $collections);
-        $collections = $this->extractWriteCollections($query, $bindings, $collections);
-
-        return $collections;
-    }
-
-    /**
-     * Extract collections that are read from in a query. Not required but can prevent deadlocks.
-     *
-     * @param $query
-     * @param $bindings
-     * @param $collections
-     *
-     * @return mixed
-     */
-    public function extractReadCollections($query, $bindings, $collections)
-    {
-        $extractedCollections = [];
-        $rawWithCollections = [];
-        $rawForCollections = [];
-        $rawDocCollections = [];
-
-        //WITH statement at the start of the query
-        preg_match_all('/^(?:\s+?)WITH(?:\s+?)([\S\s]*?)(?:\s+?)FOR/mis', $query, $rawWithCollections);
-        foreach ($rawWithCollections[1] as $value) {
-            $splits = preg_split("/\s*,\s*/", $value);
-            $extractedCollections = array_merge($extractedCollections, $splits);
-        }
-
-        //FOR statements
-        preg_match_all(
-            '/FOR(?:\s+?)(?:\w+)(?:\s+?)(?:IN|INTO)(?:\s+?)(?!OUTBOUND|INBOUND|ANY)(@?@?\w+(?!\.))/mis',
-            $query,
-            $rawForCollections
-        );
-        $extractedCollections = array_merge($extractedCollections, $rawForCollections[1]);
-
-        //Document functions which require a document as their first argument
-        preg_match_all(
-            '/(?:DOCUMENT\(|ATTRIBUTES\(|HAS\(|KEEP\(|LENGTH\(|MATCHES'
-            . '\(|PARSE_IDENTIFIER\(|UNSET\(|UNSET_RECURSIVE\(|VALUES\(|OUTBOUND|INBOUND|ANY)'
-            . '(?:\s+?)(?!\{)(?:\"|\'|\`)(@?@?\w+)\/(?:\w+)(?:\"|\'|\`)/mis',
-            $query,
-            $rawDocCollections
-        );
-        $extractedCollections = array_merge($extractedCollections, $rawDocCollections[1]);
-
-        $extractedCollections = array_map('trim', $extractedCollections);
-
-        $extractedCollections = $this->getCollectionByBinding($extractedCollections, $bindings);
-
-        if (isset($collections['read'])) {
-            $collections['read'] = array_merge($collections['read'], $extractedCollections);
-        }
-        if (! isset($collections['read'])) {
-            $collections['read'] = $extractedCollections;
-        }
-
-        $collections['read'] = array_unique($collections['read']);
-
-        return $collections;
-    }
-
-    /**
-     * Extract collections that are written to in a query.
-     *
-     * @param $query
-     * @param $bindings
-     * @param $collections
-     *
-     * @return mixed
-     */
-    public function extractWriteCollections($query, $bindings, $collections)
-    {
-        preg_match_all(
-            '/(?:\s+?)(?:INSERT|REPLACE|UPDATE|REMOVE)'
-            . '(?:\s+?)(?:{(?:.*?)}|@?@?\w+?)(?:\s+?)(?:IN|INTO)(?:\s+?)(@?@?\w+)/mis',
-            $query,
-            $extractedCollections
-        );
-        $extractedCollections = array_map('trim', $extractedCollections[1]);
-
-        $extractedCollections = $this->getCollectionByBinding($extractedCollections, $bindings);
-
-        if (isset($collections['write'])) {
-            $collections['write'] = array_merge($collections['write'], $extractedCollections);
-        }
-        if (! isset($collections['write'])) {
-            $collections['write'] = $extractedCollections;
-        }
-
-        $collections['read'] = array_unique($collections['read']);
-
-        return $collections;
-    }
-
-    /**
-     * Get the collection names that are bound in a query.
-     *
-     * @param $collections
-     * @param $bindings
-     *
-     * @return mixed
-     */
-    public function getCollectionByBinding($collections, $bindings)
-    {
-        foreach ($collections as $key => $collection) {
-            if (strpos($collection, '@@') === 0 && isset($bindings[$collection])) {
-                $collections[$key] = $bindings[$collection];
-            }
-        }
-
-        return $collections;
     }
 
     /**
@@ -264,7 +132,6 @@ trait ManagesTransactions
         $results = null;
 
         $this->arangoTransaction = new ArangoTransaction($this->arangoConnection, $options);
-
         for ($currentAttempt = 1; $currentAttempt <= $attempts; $currentAttempt++) {
             try {
                 $results = $this->arangoTransaction->execute();

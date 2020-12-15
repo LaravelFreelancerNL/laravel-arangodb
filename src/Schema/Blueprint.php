@@ -259,9 +259,9 @@ class Blueprint
     {
         $columnMethods = [
             'bigIncrements', 'bigInteger', 'binary', 'boolean', 'char', 'date', 'dateTime', 'dateTimeTz', 'decimal',
-            'double', 'enum', 'engine', 'float', 'geometry', 'geometryCollection', 'increments', 'integer', 'ipAddress',
-            'json', 'jsonb', 'lineString', 'longText', 'macAddress', 'mediumIncrements', 'mediumInteger', 'mediumText',
-            'morphs', 'uuidMorphs', 'multiLineString', 'multiPoint', 'multiPolygon',
+            'double', 'enum', 'engine', 'float', 'foreignId', 'geometry', 'geometryCollection', 'increments', 'integer',
+            'ipAddress', 'json', 'jsonb', 'lineString', 'longText', 'macAddress', 'mediumIncrements', 'mediumInteger',
+            'mediumText', 'morphs', 'uuidMorphs', 'multiLineString', 'multiPoint', 'multiPolygon',
             'nullableMorphs', 'nullableUuidMorphs', 'nullableTimestamps', 'point', 'polygon', 'rememberToken',
             'set', 'smallIncrements', 'smallInteger', 'softDeletes', 'softDeletesTz', 'string',
             'text', 'time', 'timeTz', 'timestamp', 'timestampTz', 'timestamps', 'tinyIncrements', 'tinyInteger',

@@ -34,14 +34,6 @@ class BuilderTest extends TestCase
         m::close();
     }
 
-    protected function getBuilder()
-    {
-        $grammar = new Grammar();
-        $processor = m::mock(Processor::class);
-
-        return new Builder(m::mock(Connection::class), $grammar, $processor);
-    }
-
     public function testInsertGetIdMethod()
     {
         $builder = $this->getBuilder();

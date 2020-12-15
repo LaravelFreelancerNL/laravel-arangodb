@@ -17,15 +17,11 @@ trait DetectsLostConnections
     {
         // https://www.arangodb.com/docs/stable/appendix-error-codes.html
         // 30 - ERROR_SHUTTING_DOWN
-        // 401 - ERROR_HTTP_UNAUTHORIZED
-        // 403 - ERROR_HTTP_FORBIDDEN
-        // 404 - ERROR_HTTP_NOT_FOUND
-        // 405 - ERROR_HTTP_METHOD_NOT_ALLOWED
-        // 406 - ERROR_HTTP_NOT_ACCEPTABLE
-        // 412 - ERROR_HTTP_PRECONDITION_FAILED
         // 500 - ERROR_HTTP_SERVER_ERROR
         // 503 - ERROR_HTTP_SERVICE_UNAVAILABLE
         // 504 - ERROR_HTTP_GATEWAY_TIMEOUT
+        // 1302 - ERROR_ARANGO_TRY_AGAIN
+        // 1303 - ERROR_ARANGO_BUSY
         // 1464 - ERROR_CLUSTER_SHARD_GONE
         // 1465 - ERROR_CLUSTER_CONNECTION_LOST
 
@@ -33,15 +29,11 @@ trait DetectsLostConnections
 
         return in_array($code, [
             30,
-            401,
-            403,
-            404,
-            405,
-            406,
-            412,
             500,
             503,
             504,
+            1302,
+            1303,
             1464,
             1465,
         ]);

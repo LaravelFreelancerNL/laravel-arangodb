@@ -101,4 +101,33 @@ class BlueprintTest extends TestCase
             $this->assertEquals(1, count($commands[1]['columns']));
         });
     }
+
+    public function testForeignIdIsExcluded()
+    {
+        Schema::table('characters', function (Blueprint $collection) {
+            $collection->foreignId('user_id')->index();
+
+            $commands = $collection->getCommands();
+
+            $this->assertEquals(2, count($commands));
+            $this->assertEquals('ignore', $commands[0]['name']);
+            $this->assertEquals('foreignId', $commands[0]['method']);
+            $this->assertEquals('user_id', $commands[1]['columns'][0]);
+        });
+    }
+
+    public function testDefault()
+    {
+        Schema::table('characters', function (Blueprint $collection) {
+            $collection->string('name')->default('John Doe');
+
+            $commands = $collection->getCommands();
+
+            $this->assertEquals(2, count($commands));
+            $this->assertEquals('ignore', $commands[0]['name']);
+            $this->assertEquals('string', $commands[0]['method']);
+            $this->assertEquals('ignore', $commands[1]['name']);
+            $this->assertEquals('default', $commands[1]['method']);
+        });
+    }
 }

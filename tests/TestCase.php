@@ -6,7 +6,12 @@ use ArangoDBClient\Database;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\AranguentServiceProvider;
+use LaravelFreelancerNL\Aranguent\Connection as Connection;
 use LaravelFreelancerNL\Aranguent\Migrations\DatabaseMigrationRepository;
+use LaravelFreelancerNL\Aranguent\Query\Builder;
+use LaravelFreelancerNL\Aranguent\Query\Grammar;
+use LaravelFreelancerNL\Aranguent\Query\Processor;
+use Mockery as m;
 
 abstract class TestCase extends \Orchestra\Testbench\TestCase
 {
@@ -114,5 +119,13 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         if (!isset($collections['migrations'])) {
             $this->artisan('migrate:install', [])->run();
         }
+    }
+
+    protected function getBuilder()
+    {
+        $grammar = new Grammar();
+        $processor = m::mock(Processor::class);
+
+        return new Builder(m::mock(Connection::class), $grammar, $processor);
     }
 }

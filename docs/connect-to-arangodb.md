@@ -13,6 +13,7 @@
 ```
 Provide an array of endpoints to handle failover if you have a replication set up. 
 
-The endpoint for the default ArangoDB docker image is 'tcp://arangodb:8529'.
-
 2) Set your default connection `DB_CONNECTION=arangodb` in your .env file.
+
+## Connect to docker
+To connect to the default ArangoDB docker image you need to set your DB_ENDPOINT to 'tcp://arangodb:8529'.

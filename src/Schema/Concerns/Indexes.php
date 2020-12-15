@@ -20,7 +20,7 @@ trait Indexes
     protected function indexCommand($type = '', $columns = null, $name = null, $indexOptions = [])
     {
         if ($type == '') {
-            $type = $this->mapIndexType('persistent');
+            $type = $this->mapIndexAlgorithm('persistent');
         }
 
         if ($columns === null) {
@@ -47,7 +47,7 @@ trait Indexes
      */
     public function index($columns = null, $name = null, $algorithm = null)
     {
-        $type = $this->mapIndexType($algorithm);
+        $type = $this->mapIndexAlgorithm($algorithm);
 
         return $this->indexCommand($type, $columns, $name);
     }
@@ -146,7 +146,7 @@ trait Indexes
      */
     public function unique($columns = null, $name = null, $algorithm = null)
     {
-        $type = $this->mapIndexType($algorithm);
+        $type = $this->mapIndexAlgorithm($algorithm);
 
         $indexOptions = [];
         $indexOptions['unique'] = true;
@@ -220,9 +220,9 @@ trait Indexes
      *
      * @return mixed|string
      */
-    protected function mapIndexType($algorithm)
+    protected function mapIndexAlgorithm($algorithm)
     {
-        $typeConversion = [
+        $algorithmConversion = [
             'HASH'  => 'hash',
             'BTREE' => 'persistent',
             'RTREE' => 'geo',
@@ -230,7 +230,7 @@ trait Indexes
         ];
         $algorithm = strtoupper($algorithm);
 
-        return (isset($typeConversion[$algorithm])) ? $typeConversion[$algorithm] : 'persistent';
+        return (isset($algorithmConversion[$algorithm])) ? $algorithmConversion[$algorithm] : 'persistent';
     }
 
     /**
