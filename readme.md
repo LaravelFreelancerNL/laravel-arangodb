@@ -23,7 +23,7 @@ You may use composer to install Aranguent:
 | Laravel  | ArangoDB            | PHP            | Aranguent         |
 | :------- | :------------------ | :------------------ | :---------------- |
 | ^7.x.x    | ^3.5.x               | ^7.3               | ^0.3             |
-| ^8.x.x    | ^3.5.x               | ^7.3               | ^0.4             |
+| ^8.x.x    | ^3.6.x               | ^7.3               | ^0.5            |
 
 ## Documentation
 1) [Connect to ArangoDB](docs/connect-to-arangodb.md): set up a connection
