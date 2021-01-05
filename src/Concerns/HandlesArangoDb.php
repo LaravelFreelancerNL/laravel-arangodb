@@ -5,10 +5,10 @@ namespace LaravelFreelancerNL\Aranguent\Concerns;
 use ArangoDBClient\CollectionHandler as ArangoCollectionHandler;
 use ArangoDBClient\DocumentHandler as ArangoDocumentHandler;
 use ArangoDBClient\GraphHandler as ArangoGraphHandler;
+use ArangoDBClient\StreamingTransactionHandler;
 use ArangoDBClient\UserHandler as ArangoUserHandler;
 use ArangoDBClient\ViewHandler as ArangoViewHandler;
 use LaravelFreelancerNL\Aranguent\Document;
-use Throwable;
 
 trait HandlesArangoDb
 {
@@ -35,16 +35,6 @@ trait HandlesArangoDb
         return $this->arangoHandlers['document'];
     }
 
-    public function getUserHandler()
-    {
-        if (!isset($this->arangoHandlers['user'])) {
-            $this->arangoHandlers['user'] = new ArangoUserHandler($this->arangoConnection);
-            $this->arangoHandlers['user']->setDocumentClass(Document::class);
-        }
-
-        return $this->arangoHandlers['user'];
-    }
-
     public function getGraphHandler()
     {
         if (!isset($this->arangoHandlers['graph'])) {
@@ -55,6 +45,16 @@ trait HandlesArangoDb
         return $this->arangoHandlers['graph'];
     }
 
+    public function getUserHandler()
+    {
+        if (!isset($this->arangoHandlers['user'])) {
+            $this->arangoHandlers['user'] = new ArangoUserHandler($this->arangoConnection);
+            $this->arangoHandlers['user']->setDocumentClass(Document::class);
+        }
+
+        return $this->arangoHandlers['user'];
+    }
+
     public function getViewHandler()
     {
         if (!isset($this->arangoHandlers['view'])) {
@@ -63,5 +63,18 @@ trait HandlesArangoDb
         }
 
         return $this->arangoHandlers['view'];
+    }
+
+    /**
+     * Get/set streaming transaction handler
+     * @return mixed
+     */
+    public function getTransactionHandler()
+    {
+        if (!isset($this->arangoHandlers['transaction'])) {
+            $this->arangoHandlers['transaction'] = new StreamingTransactionHandler($this->arangoConnection);
+        }
+
+        return $this->arangoHandlers['transaction'];
     }
 }

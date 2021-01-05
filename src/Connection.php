@@ -134,24 +134,18 @@ class Connection extends IlluminateConnection
      * @param string     $query
      * @param array      $bindings
      * @param bool       $useReadPdo
-     * @param array|null $transactionCollections
      *
      * @throws Exception
      *
      * @return Iterator|null
      */
-    public function cursor($query, $bindings = [], $useReadPdo = null, $transactionCollections = [])
+    public function cursor($query, $bindings = [], $useReadPdo = null)
     {
         // Usage of a separate DB to read date isn't supported at this time
         $useReadPdo = null;
 
-        return $this->run($query, $bindings, function ($query, $bindings) use ($transactionCollections) {
+        return $this->run($query, $bindings, function ($query, $bindings) {
             if ($this->pretending()) {
-                return [];
-            }
-            if ($this->transactionLevel() > 0) {
-                $this->addQueryToTransaction($query, $bindings, $transactionCollections);
-
                 return [];
             }
 
@@ -166,26 +160,18 @@ class Connection extends IlluminateConnection
      *
      * @param string|FluentAQL $query
      * @param array            $bindings
-     * @param array|null       $transactionCollections
      *
      * @return bool
      */
-    public function statement($query, $bindings = [], $transactionCollections = [])
+    public function statement($query, $bindings = [])
     {
-        if ($query instanceof FluentAQL) {
-            $bindings = $query->binds;
-            $transactionCollections = $query->collections;
-            $query = $query->query;
-        }
+        [$query, $bindings] = $this->handleQueryBuilder(
+            $query,
+            $bindings
+        );
 
-        return $this->run($query, $bindings, function ($query, $bindings) use ($transactionCollections) {
+        return $this->run($query, $bindings, function ($query, $bindings) {
             if ($this->pretending()) {
-                return true;
-            }
-
-            if ($this->transactionLevel() > 0) {
-                $this->addQueryToTransaction($query, $bindings, $transactionCollections);
-
                 return true;
             }
 
@@ -205,26 +191,18 @@ class Connection extends IlluminateConnection
      *
      * @param string|FluentAQL $query
      * @param array            $bindings
-     * @param array|null       $transactionCollections
      *
      * @return int
      */
-    public function affectingStatement($query, $bindings = [], $transactionCollections = [])
+    public function affectingStatement($query, $bindings = [])
     {
-        [$query, $bindings, $transactionCollections] = $this->handleQueryBuilder(
+        [$query, $bindings] = $this->handleQueryBuilder(
             $query,
-            $bindings,
-            $transactionCollections
+            $bindings
         );
 
-        return $this->run($query, $bindings, function () use ($query, $bindings, $transactionCollections) {
+        return $this->run($query, $bindings, function () use ($query, $bindings) {
             if ($this->pretending()) {
-                return 0;
-            }
-
-            if ($this->transactionLevel() > 0) {
-                $this->addQueryToTransaction($query, $bindings, $transactionCollections);
-
                 return 0;
             }
 
@@ -255,11 +233,6 @@ class Connection extends IlluminateConnection
         return $this->run($query, [], function ($query) {
             if ($this->pretending()) {
                 return true;
-            }
-            if ($this->transactionLevel() > 0) {
-                $this->addQueryToTransaction($query);
-
-                return [];
             }
 
             $statement = $this->newArangoStatement($query, []);
@@ -301,13 +274,12 @@ class Connection extends IlluminateConnection
      * @param string|FluentAQL $query
      * @param array            $bindings
      * @param bool             $useReadPdo
-     * @param null|array       $transactionCollections
      *
      * @return array
      */
-    public function select($query, $bindings = [], $useReadPdo = true, $transactionCollections = [])
+    public function select($query, $bindings = [], $useReadPdo = true)
     {
-        return $this->execute($query, $bindings, $useReadPdo, $transactionCollections);
+        return $this->execute($query, $bindings, $useReadPdo);
     }
 
     /**
@@ -318,28 +290,21 @@ class Connection extends IlluminateConnection
      * @param string|FluentAQL $query
      * @param array            $bindings
      * @param bool             $useReadPdo
-     * @param null|array       $transactionCollections
      *
      * @return array
      */
-    public function execute($query, $bindings = [], $useReadPdo = true, $transactionCollections = [])
+    public function execute($query, $bindings = [], $useReadPdo = true)
     {
         // Usage of a separate DB to read date isn't supported at this time
         $useReadPdo = null;
 
         if ($query instanceof FluentAQL) {
             $bindings = $query->binds;
-//            $transactionCollections = $query->collections;
             $query = $query->query;
         }
 
-        return $this->run($query, $bindings, function () use ($query, $bindings, $transactionCollections) {
+        return $this->run($query, $bindings, function () use ($query, $bindings) {
             if ($this->pretending()) {
-                return [];
-            }
-            if ($this->transactionLevel() > 0) {
-                $this->addQueryToTransaction($query, $bindings, $transactionCollections);
-
                 return [];
             }
 
@@ -348,48 +313,6 @@ class Connection extends IlluminateConnection
 
             return $cursor->getAll();
         });
-    }
-
-    /**
-     * Run an insert statement against the database.
-     *
-     * @param string|FluentAQL $query
-     * @param array            $bindings
-     * @param array|null       $transactionCollections
-     *
-     * @return bool
-     */
-    public function insert($query, $bindings = [], $transactionCollections = [])
-    {
-        return $this->statement($query, $bindings, $transactionCollections);
-    }
-
-    /**
-     * Run an update statement against the database.
-     *
-     * @param string|FluentAQL $query
-     * @param array            $bindings
-     * @param array|null       $transactionCollections
-     *
-     * @return int
-     */
-    public function update($query, $bindings = [], $transactionCollections = [])
-    {
-        return $this->affectingStatement($query, $bindings, $transactionCollections);
-    }
-
-    /**
-     * Run a delete statement against the database.
-     *
-     * @param string     $query
-     * @param array      $bindings
-     * @param array|null $transactionCollections
-     *
-     * @return int
-     */
-    public function delete($query, $bindings = [], $transactionCollections = [])
-    {
-        return $this->affectingStatement($query, $bindings, $transactionCollections);
     }
 
     /**
@@ -453,7 +376,13 @@ class Connection extends IlluminateConnection
      */
     protected function newArangoStatement($query, $bindings): Statement
     {
-        $statement = new Statement($this->arangoConnection, ['query' => $query, 'bindVars' => $bindings]);
+        $data = ['query' => $query, 'bindVars' => $bindings];
+
+        if ($this->transactionLevel() > 0) {
+            $data['transaction'] = $this->arangoTransaction;
+        }
+
+        $statement = new Statement($this->arangoConnection, $data);
         $statement->setDocumentClass(Document::class);
 
         return $statement;
@@ -474,16 +403,14 @@ class Connection extends IlluminateConnection
     /**
      * @param  FluentAQL|string  $query
      * @param  array  $bindings
-     * @param  array|null  $transactionCollections
      * @return array
      */
-    private function handleQueryBuilder($query, array $bindings, ?array $transactionCollections)
+    private function handleQueryBuilder($query, array $bindings)
     {
         if ($query instanceof FluentAQL) {
             $bindings = $query->binds;
-            $transactionCollections = $query->collections;
             $query = $query->query;
         }
-        return [$query, $bindings, $transactionCollections];
+        return [$query, $bindings];
     }
 }
