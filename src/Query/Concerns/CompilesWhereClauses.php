@@ -4,6 +4,7 @@ namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
 use Illuminate\Database\Query\Builder as IluminateBuilder;
 use Illuminate\Database\Query\Expression;
+use Illuminate\Database\Query\JoinClause;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 
 trait CompilesWhereClauses
@@ -491,5 +492,23 @@ trait CompilesWhereClauses
         $predicate[3] = $where['boolean'];
 
         return $predicate;
+    }
+
+    /**
+     * Compile a nested where clause.
+     *
+     * @param  IluminateBuilder  $query
+     * @param  array  $where
+     * @return string
+     */
+    protected function whereNested(IluminateBuilder $query, $where)
+    {
+        $predicates = [];
+        $predicates = $this->compileWheresToArray($where['query']);
+
+        $query->aqb->binds = array_merge($query->aqb->binds,  $where['query']->aqb->binds);
+        $query->aqb->collections = array_merge_recursive($query->aqb->collections,  $where['query']->aqb->collections);
+
+        return $predicates;
     }
 }
