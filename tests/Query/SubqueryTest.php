@@ -4,7 +4,6 @@ namespace Tests\Query;
 
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use Mockery as m;
 use Tests\Setup\Database\Seeds\CharactersSeeder;
@@ -37,16 +36,71 @@ class SubqueryTest extends TestCase
     public function testSubqueryWhere()
     {
         $characters = Character::where(function ($query) {
+                $query->select('name')
+                    ->from('locations')
+                    ->whereColumn('locations.led_by', 'characters._key')
+                    ->limit(1);
+            }, 'Dragonstone')
+            ->get();
+        $this->assertEquals('DaenerysTargaryen', $characters[0]->_key);
+    }
+
+    public function testWhereSub()
+    {
+        $characters = Character::where('_key', '==', function ($query) {
+            $query->select('led_by')
+                ->from('locations')
+                ->where('name', 'Dragonstone')
+                ->limit(1);
+            })
+            ->get();
+
+        $this->assertEquals('DaenerysTargaryen', $characters[0]->_key);
+    }
+
+    public function testWhereExistsWithMultipleResults()
+    {
+        $characters = Character::whereExists(function ($query) {
+                $query->select('name')
+                    ->from('locations')
+                    ->whereColumn('locations.led_by', 'characters._key');
+            })
+            ->get();
+        $this->assertEquals(3, count($characters));
+    }
+
+    public function testWhereExistsWithLimit()
+    {
+        $characters = Character::whereExists(function ($query) {
+                $query->select('name')
+                    ->from('locations')
+                    ->whereColumn('locations.led_by', 'characters._key')
+                    ->limit(1);
+            })
+            ->get();
+        $this->assertEquals(3, count($characters));
+    }
+
+    public function testWhereNotExistsWithMultipleResults()
+    {
+        $characters = Character::whereNotExists(function ($query) {
             $query->select('name')
                 ->from('locations')
-                ->whereColumn('locations.led_by', 'characters._key')
-                ->limit(1);
-        }, 'The Red Keep')->get();
+                ->whereColumn('locations.led_by', 'characters._key');
+        })
+            ->get();
+        $this->assertEquals(40, count($characters));
+    }
 
-        dd($characters);
-
-
-//        $this->assertCount(15, $characters);
-//        $this->assertEquals('NedStark', $characters[0]->_key);
+    public function testWhereNotExistsWithLimit()
+    {
+        $characters = Character::whereNotExists(function ($query) {
+                $query->select('name')
+                    ->from('locations')
+                    ->whereColumn('locations.led_by', 'characters._key')
+                    ->limit(1);
+            })
+            ->get();
+        $this->assertEquals(40, count($characters));
     }
 }

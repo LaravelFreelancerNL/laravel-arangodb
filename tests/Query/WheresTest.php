@@ -437,6 +437,5 @@ class WheresTest extends TestCase
             . ') RETURN characterDoc',
             $query
         );
-
     }
 }

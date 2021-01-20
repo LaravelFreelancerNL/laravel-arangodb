@@ -5,6 +5,8 @@ namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 use Illuminate\Database\Query\Builder as IluminateBuilder;
 use Illuminate\Support\Str;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
+use LaravelFreelancerNL\FluentAQL\Expressions\FunctionExpression;
+use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
 trait HasAliases
 {
@@ -15,7 +17,7 @@ trait HasAliases
 
     /**
      * @param  string  $table
-     * @param  string  $alias
+     * @param  string|null  $alias
      * @return string
      */
     public function registerTableAlias(string $table, string $alias = null): string
@@ -111,7 +113,7 @@ trait HasAliases
      * @param  string|null  $alias
      * @return bool
      */
-    protected function registerColumnAlias(string $column, string $alias = null)
+    public function registerColumnAlias(string $column, string $alias = null) : bool
     {
         if (preg_match("/\sas\s/i", $column)) {
             [$column, $alias] = $this->extractAlias($column);
@@ -148,6 +150,14 @@ trait HasAliases
     {
         if ($table == null) {
             $table = $query->from;
+        }
+
+        if ((is_string($column) || is_numeric($column)) && key_exists($column, $query->variables) ) {
+            return $column;
+        }
+
+        if ($column instanceof QueryBuilder || $column instanceof FunctionExpression) {
+            return $column;
         }
 
         // Replace SQL JSON arrow for AQL dot

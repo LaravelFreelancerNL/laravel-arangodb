@@ -4,6 +4,8 @@ namespace LaravelFreelancerNL\Aranguent\Query;
 
 use Closure;
 use Illuminate\Database\ConnectionInterface;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Arr;
@@ -12,6 +14,7 @@ use InvalidArgumentException;
 use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\FluentAQL\Exceptions\BindException;
 use LaravelFreelancerNL\FluentAQL\Expressions\ExpressionInterface as ExpressionInterface;
+use LaravelFreelancerNL\FluentAQL\Expressions\FunctionExpression;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
 class Builder extends IlluminateQueryBuilder
@@ -33,13 +36,20 @@ class Builder extends IlluminateQueryBuilder
     public $aqb;
 
     /**
+     * The query variables that should be set.
+     *
+     * @var array
+     */
+    public $variables = [];
+
+    /**
      * @override
      * Create a new query builder instance.
      *
-     * @param ConnectionInterface $connection
-     * @param Grammar             $grammar
-     * @param Processor           $processor
-     * @param QueryBuilder|null   $aqb
+     * @param  ConnectionInterface  $connection
+     * @param  Grammar|null  $grammar
+     * @param  Processor|null  $processor
+     * @param  QueryBuilder|null  $aqb
      */
     public function __construct(
         ConnectionInterface $connection,
@@ -54,6 +64,22 @@ class Builder extends IlluminateQueryBuilder
             $aqb = new QueryBuilder();
         }
         $this->aqb = $aqb;
+    }
+
+    /**
+     * Delete a record from the database.
+     *
+     * @param mixed $id
+     *
+     * @return int
+     */
+    public function delete($id = null)
+    {
+        $this->grammar->compileDelete($this, $id)->setAql();
+        $response = $this->connection->delete($this->aqb);
+        $this->aqb = new QueryBuilder();
+
+        return $response;
     }
 
     /**
@@ -83,9 +109,9 @@ class Builder extends IlluminateQueryBuilder
      */
     protected function runSelect()
     {
-        $response = $this->connection->select($this->grammar->compileSelect($this)->aqb);
+        $this->grammar->compileSelect($this)->setAql();
+        $response = $this->connection->select($this->aqb);
         $this->aqb = new QueryBuilder();
-
         return $response;
     }
 
@@ -135,13 +161,41 @@ class Builder extends IlluminateQueryBuilder
     }
 
     /**
+     * Add a subselect expression to the query.
+     *
+     * @param $query
+     * @param  string  $as
+     * @return $this
+     *
+     */
+    public function selectSub($query, $as)
+    {
+        $query = $this->createSub($query);
+
+        // Register $as as attribute alias
+        $this->grammar->registerColumnAlias($as, $as);
+
+        // Set $as as return value
+        $this->columns[] = $as;
+
+        // let alias = query
+        $this->variables[$as] = $query;
+
+        return $query;
+    }
+
+    /**
      * Get the SQL representation of the query.
      *
      * @return string
      */
     public function toSql()
     {
-        return $this->grammar->compileSelect($this)->aqb->query;
+        $this->grammar->compileSelect($this)->setAql();
+        $result = $this->aqb->query;
+        $this->aqb = new QueryBuilder();
+
+        return $result;
     }
 
     /**
@@ -155,7 +209,8 @@ class Builder extends IlluminateQueryBuilder
      */
     public function insert(array $values): bool
     {
-        $response = $this->getConnection()->insert($this->grammar->compileInsert($this, $values)->aqb);
+        $this->grammar->compileInsert($this, $values)->setAql();
+        $response = $this->getConnection()->insert($this->aqb);
         $this->aqb = new QueryBuilder();
 
         return $response;
@@ -173,7 +228,8 @@ class Builder extends IlluminateQueryBuilder
      */
     public function insertGetId(array $values, $sequence = null)
     {
-        $response = $this->getConnection()->execute($this->grammar->compileInsertGetId($this, $values, $sequence)->aqb);
+        $this->grammar->compileInsertGetId($this, $values, $sequence)->setAql();
+        $response = $this->getConnection()->execute($this->aqb);
         $this->aqb = new QueryBuilder();
 
         return (is_array($response)) ? end($response) : $response;
@@ -203,6 +259,12 @@ class Builder extends IlluminateQueryBuilder
         return $this->aqb->binds;
     }
 
+    protected function setAql()
+    {
+        $this->aqb = $this->aqb->get();
+        return $this;
+    }
+
     /**
      * Update a record in the database.
      *
@@ -212,26 +274,14 @@ class Builder extends IlluminateQueryBuilder
      */
     public function update(array $values)
     {
-        $response = $this->connection->update($this->grammar->compileUpdate($this, $values)->aqb);
+        $this->grammar->compileUpdate($this, $values)->setAql();
+        $response = $this->connection->update($this->aqb);
         $this->aqb = new QueryBuilder();
 
         return $response;
     }
 
-    /**
-     * Delete a record from the database.
-     *
-     * @param mixed $id
-     *
-     * @return int
-     */
-    public function delete($id = null)
-    {
-        $response = $this->connection->delete($this->grammar->compileDelete($this, $id)->aqb);
-        $this->aqb = new QueryBuilder();
 
-        return $response;
-    }
 
     /**
      * Execute an aggregate function on the database.
@@ -259,7 +309,7 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Add a basic where clause to the query.
      *
-     * @param Closure|string|array $column
+     * @param Closure|string|array|QueryBuilder $column
      * @param mixed                $operator
      * @param mixed                $value
      * @param string               $boolean
@@ -287,8 +337,16 @@ class Builder extends IlluminateQueryBuilder
         // If the columns is actually a Closure instance, we will assume the developer
         // wants to begin a nested where statement which is wrapped in parenthesis.
         // We'll add that Closure to the query then return back out immediately.
-        if ($column instanceof Closure) {
+        if ($column instanceof Closure && is_null($operator)) {
             return $this->whereNested($column, $boolean);
+        }
+
+        // If the column is a Closure instance and there is an operator value, we will
+        // assume the developer wants to run a subquery and then compare the result
+        // of that subquery with the given value that was provided to the method.
+        if ($this->isQueryable($column) && ! is_null($operator)) {
+            $sub = $this->createSub($column);
+            return $this->where($sub, $operator, $value, $boolean);
         }
 
         // If the given operator is not found in the list of valid operators we will
@@ -303,6 +361,13 @@ class Builder extends IlluminateQueryBuilder
         // within the where clause to get the appropriate query record results.
         if ($value instanceof Closure) {
             return $this->whereSub($column, $operator, $value, $boolean);
+        }
+
+        // If the value is "null", we will just assume the developer wants to add a
+        // where null clause to the query. So, we will allow a short-cut here to
+        // that method for convenience so the developer doesn't have to check.
+        if (is_null($value)) {
+            return $this->whereNull($column, $boolean, $operator !== '=');
         }
 
         $type = 'Basic';
@@ -326,6 +391,73 @@ class Builder extends IlluminateQueryBuilder
     }
 
     /**
+     * Add an exists clause to the query.
+     *
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     *
+     * @param  IlluminateQueryBuilder  $query
+     * @param  string  $boolean
+     * @param  bool  $not
+     * @return IlluminateQueryBuilder
+     */
+    public function addWhereExistsQuery(IlluminateQueryBuilder $query, $boolean = 'and', $not = false)
+    {
+        if ($not) {
+            return $this->addWhereNotExistsQuery($query, $boolean = 'and');
+        }
+
+        $type = 'Exists';
+
+        $query->grammar->compileSelect($query);
+
+        if ($query->limit != 1) {
+            $query->aqb = $query->aqb->length($query->aqb);
+            $operator = '>';
+            $value = 0;
+        }
+
+        if (isset($query->limit) && $query->limit == 1) {
+            $query->aqb = $query->aqb->first($query->aqb);
+            $operator = '!=';
+            $value = null;
+        }
+
+        $this->wheres[] = compact('type', 'query', 'operator', 'value', 'boolean');
+
+        return $this;
+    }
+
+    /**
+     * Add an not exists clause to the query.
+     *
+     * @param  IlluminateQueryBuilder  $query
+     * @param  string  $boolean
+     * @return IlluminateQueryBuilder
+     */
+    public function addWhereNotExistsQuery(IlluminateQueryBuilder $query, $boolean = 'and')
+    {
+        $type = 'Exists';
+
+        $query->grammar->compileSelect($query);
+
+        if ($query->limit != 1) {
+            $query->aqb = $query->aqb->length($query->aqb);
+            $operator = '==';
+            $value = 0;
+        }
+
+        if (isset($query->limit) && $query->limit == 1) {
+            $query->aqb = $query->aqb->first($query->aqb);
+            $operator = '==';
+            $value = null;
+        }
+
+        $this->wheres[] = compact('type', 'query', 'operator', 'value', 'boolean');
+
+        return $this;
+    }
+
+    /**
      * Add a "where JSON contains" clause to the query.
      *
      * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
@@ -341,6 +473,38 @@ class Builder extends IlluminateQueryBuilder
         $type = 'JsonContains';
 
         $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+
+        return $this;
+    }
+
+    /**
+     * Add a full sub-select to the query.
+     *
+     * @param  string  $column
+     * @param  string  $operator
+     * @param  \Closure  $callback
+     * @param  string  $boolean
+     * @return IlluminateQueryBuilder
+     */
+    protected function whereSub($column, $operator, Closure $callback, $boolean)
+    {
+        $type = 'Sub';
+
+        // Once we have the query instance we can simply execute it so it can add all
+        // of the sub-select's conditions to itself, and then we can cache it off
+        // in the array of where clauses for the "main" parent query instance.
+        call_user_func($callback, $query = $this->forSubQuery());
+
+        $query->grammar->compileSelect($query);
+
+        if (isset($query->limit) && $query->limit == 1) {
+            //Return the value, not an array of values
+            $query->aqb = $query->aqb->first($query->aqb);
+        }
+
+        $this->wheres[] = compact(
+            'type', 'column', 'operator', 'query', 'boolean'
+        );
 
         return $this;
     }
@@ -445,6 +609,40 @@ class Builder extends IlluminateQueryBuilder
         $this->{$this->unions ? 'unionOrders' : 'orders'}[] = compact('type', 'column');
 
         return $this;
+    }
+
+    /**
+     * Parse the subquery into SQL and bindings.
+     *
+     * @param  mixed  $query
+     * @return array|QueryBuilder
+     *
+     * @throws \InvalidArgumentException
+     */
+    protected function parseSub($query)
+    {
+        if ($query instanceof self || $query instanceof EloquentBuilder || $query instanceof Relation ) {
+            $query = $this->prependDatabaseNameIfCrossDatabaseQuery($query);
+            $query->grammar->compileSelect($query);
+
+            if (isset($query->limit) && $query->limit == 1) {
+                //Return the value, not an array of values
+                return $query->aqb->first($query->aqb);
+            }
+            return $query->aqb;
+        }
+
+        if ($query instanceof QueryBuilder || $query instanceof FunctionExpression) {
+            return $query;
+        }
+
+        if (is_string($query)) {
+            return $query;
+        }
+
+        throw new InvalidArgumentException(
+            'A subquery must be a query builder instance, a Closure, or a string.'
+        );
     }
 
     /**

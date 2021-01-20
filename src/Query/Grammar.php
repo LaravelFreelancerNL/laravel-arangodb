@@ -47,6 +47,7 @@ class Grammar extends FluentAqlGrammar
      */
     protected $selectComponents = [
         'from',
+        'variables',
         'joins',
         'wheres',
         'groups',
@@ -116,7 +117,7 @@ class Grammar extends FluentAqlGrammar
         $table = $this->prefixTable($builder->from);
 
         if (empty($values)) {
-            $builder->aqb = $builder->aqb->insert('{}', $table)->get();
+            $builder->aqb = $builder->aqb->insert('{}', $table);
 
             return $builder;
         }
@@ -124,8 +125,7 @@ class Grammar extends FluentAqlGrammar
         $builder->aqb = $builder->aqb->let('values', $values)
             ->for('value', 'values')
             ->insert('value', $table)
-            ->return('NEW._key')
-            ->get();
+            ->return('NEW._key');
 
         return $builder;
     }
@@ -167,8 +167,6 @@ class Grammar extends FluentAqlGrammar
 //        if ($builder->unions) {
 //            $sql = $this->wrapUnion($sql).' '.$this->compileUnions($builder);
 //        }
-
-        $builder->aqb = $builder->aqb->get();
 
         return $builder;
     }
@@ -215,7 +213,21 @@ class Grammar extends FluentAqlGrammar
         return $builder;
     }
 
+    /**
+     * @param  Builder  $builder
+     * @param  array $variables
+     * @return Builder
+     */
+    protected function compileVariables(Builder $builder, array $variables)
+    {
+        if (! empty($variables)) {
+            foreach ($variables as $variable => $data) {
+                $builder->aqb = $builder->aqb->let($variable, $data);
+            }
+        }
 
+        return $builder;
+    }
 
     /**
      * Compile the "order by" portions of the query.
@@ -344,6 +356,12 @@ class Grammar extends FluentAqlGrammar
             $values = $returnAttributes;
         }
 
+        // If there is just one attribute/column given we assume that you want a list of values
+        //  instead of a list of objects
+        if (count($returnAttributes) == 1 && empty($returnDocs)) {
+            $values = reset($returnAttributes);
+        }
+
         if (! empty($returnAttributes) && ! empty($returnDocs)) {
             $returnDocs[] = $returnAttributes;
         }
@@ -398,7 +416,7 @@ class Grammar extends FluentAqlGrammar
         //Fixme: joins?
         $builder = $this->compileWheres($builder);
 
-        $builder->aqb = $builder->aqb->update($tableAlias, $values, $table)->get();
+        $builder->aqb = $builder->aqb->update($tableAlias, $values, $table);
 
         return $builder;
     }
@@ -421,7 +439,7 @@ class Grammar extends FluentAqlGrammar
 
 
         if (!is_null($id)) {
-            $builder->aqb = $builder->aqb->remove((string) $id, $table)->get();
+            $builder->aqb = $builder->aqb->remove((string) $id, $table);
 
             return $builder;
         }
@@ -431,7 +449,7 @@ class Grammar extends FluentAqlGrammar
         //Fixme: joins?
         $builder = $this->compileWheres($builder);
 
-        $builder->aqb = $builder->aqb->remove($tableAlias, $table)->get();
+        $builder->aqb = $builder->aqb->remove($tableAlias, $table);
 
         return $builder;
     }
@@ -447,4 +465,16 @@ class Grammar extends FluentAqlGrammar
     {
         return $builder->aqb->rand();
     }
+
+    /**
+     * Get the value of a raw expression.
+     *
+     * @param  \Illuminate\Database\Query\Expression  $expression
+     * @return string
+     */
+    public function getValue($expression)
+    {
+        return $expression->getValue();
+    }
+
 }

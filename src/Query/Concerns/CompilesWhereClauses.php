@@ -37,7 +37,7 @@ trait CompilesWhereClauses
      * @param  IluminateBuilder  $query
      * @return array
      */
-    protected function compileWheresToArray($query)
+    protected function compileWheresToArray(IluminateBuilder $query): array
     {
         return collect($query->wheres)->map(function ($where) use ($query) {
             return $this->{"where{$where['type']}"}($query, $where);
@@ -73,7 +73,7 @@ trait CompilesWhereClauses
      */
     public function parameter(IluminateBuilder $query, $value)
     {
-        return $this->isExpression($value) ? $query->getValue($value) : $query->aqb->bind($value);
+        return $this->isExpression($value) ? $this->getValue($value) : $query->aqb->bind($value);
     }
 
     protected function normalizeOperator($where)
@@ -510,5 +510,64 @@ trait CompilesWhereClauses
         $query->aqb->collections = array_merge_recursive($query->aqb->collections,  $where['query']->aqb->collections);
 
         return $predicates;
+    }
+
+    /**
+     * Compile a where condition with a sub-select.
+     *
+     * @param  IluminateBuilder  $query
+     * @param  array  $where
+     * @return string
+     */
+    protected function whereSub(IluminateBuilder $query, $where)
+    {
+        $predicate = [];
+
+        $where = $this->normalizeOperator($where);
+
+        $predicate[0] = $this->normalizeColumn($query, $where['column']);
+        $predicate[1] = $where['operator'];
+        $predicate[2] = $where['query']->aqb;
+        $predicate[3] = $where['boolean'];
+
+        return $predicate;
+    }
+
+    /**
+     * Compile a where exists clause.
+     *
+     * @param  IluminateBuilder  $query
+     * @param  array  $where
+     * @return string
+     */
+    protected function whereExists(IluminateBuilder $query, $where)
+    {
+        $predicate = [];
+
+        $predicate[0] = $where['query']->aqb;
+        $predicate[1] = $where['operator'];
+        $predicate[2] = $where['value'];
+        $predicate[3] = $where['boolean'];
+
+        return $predicate;
+    }
+
+    /**
+     * Compile a where exists clause.
+     *
+     * @param  IluminateBuilder  $query
+     * @param  array  $where
+     * @return string
+     */
+    protected function whereNotExists(IluminateBuilder $query, $where)
+    {
+        $predicate = [];
+
+        $predicate[0] = $where['query']->aqb;
+        $predicate[1] = $where['operator'];
+        $predicate[2] = $where['value'];
+        $predicate[3] = $where['boolean'];
+
+        return $predicate;
     }
 }

@@ -8,6 +8,8 @@ use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 
 trait IsAranguentModel
 {
+    use HasAranguentRelationships;
+
     /**
      * @override
      * Create a new Eloquent query builder for the model.
