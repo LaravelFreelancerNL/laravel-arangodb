@@ -40,7 +40,7 @@ class SubqueryTest extends TestCase
                     ->from('locations')
                     ->whereColumn('locations.led_by', 'characters._key')
                     ->limit(1);
-            }, 'Dragonstone')
+        }, 'Dragonstone')
             ->get();
         $this->assertEquals('DaenerysTargaryen', $characters[0]->_key);
     }
@@ -52,7 +52,7 @@ class SubqueryTest extends TestCase
                 ->from('locations')
                 ->where('name', 'Dragonstone')
                 ->limit(1);
-            })
+        })
             ->get();
 
         $this->assertEquals('DaenerysTargaryen', $characters[0]->_key);
@@ -64,7 +64,7 @@ class SubqueryTest extends TestCase
                 $query->select('name')
                     ->from('locations')
                     ->whereColumn('locations.led_by', 'characters._key');
-            })
+        })
             ->get();
         $this->assertEquals(3, count($characters));
     }
@@ -76,7 +76,7 @@ class SubqueryTest extends TestCase
                     ->from('locations')
                     ->whereColumn('locations.led_by', 'characters._key')
                     ->limit(1);
-            })
+        })
             ->get();
         $this->assertEquals(3, count($characters));
     }
@@ -99,7 +99,7 @@ class SubqueryTest extends TestCase
                     ->from('locations')
                     ->whereColumn('locations.led_by', 'characters._key')
                     ->limit(1);
-            })
+        })
             ->get();
         $this->assertEquals(40, count($characters));
     }

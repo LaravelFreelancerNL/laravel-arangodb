@@ -506,8 +506,8 @@ trait CompilesWhereClauses
         $predicates = [];
         $predicates = $this->compileWheresToArray($where['query']);
 
-        $query->aqb->binds = array_merge($query->aqb->binds,  $where['query']->aqb->binds);
-        $query->aqb->collections = array_merge_recursive($query->aqb->collections,  $where['query']->aqb->collections);
+        $query->aqb->binds = array_merge($query->aqb->binds, $where['query']->aqb->binds);
+        $query->aqb->collections = array_merge_recursive($query->aqb->collections, $where['query']->aqb->collections);
 
         return $predicates;
     }
@@ -536,6 +536,8 @@ trait CompilesWhereClauses
     /**
      * Compile a where exists clause.
      *
+     *  @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     *
      * @param  IluminateBuilder  $query
      * @param  array  $where
      * @return string
@@ -554,6 +556,8 @@ trait CompilesWhereClauses
 
     /**
      * Compile a where exists clause.
+     *
+     *  @SuppressWarnings(PHPMD.UnusedFormalParameter)
      *
      * @param  IluminateBuilder  $query
      * @param  array  $where

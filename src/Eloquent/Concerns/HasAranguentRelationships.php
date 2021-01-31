@@ -53,10 +53,26 @@ trait HasAranguentRelationships
      * @param  string|null  $relationName
      * @return IlluminateBelongsToMany
      */
-    protected function newBelongsToMany(Builder $query, Model $parent, $table, $foreignPivotKey, $relatedPivotKey,
-        $parentKey, $relatedKey, $relationName = null)
-    {
-        return new BelongsToMany($query, $parent, $table, $foreignPivotKey, $relatedPivotKey, $parentKey, $relatedKey, $relationName);
+    protected function newBelongsToMany(
+        Builder $query,
+        Model $parent,
+        $table,
+        $foreignPivotKey,
+        $relatedPivotKey,
+        $parentKey,
+        $relatedKey,
+        $relationName = null
+    ) {
+        return new BelongsToMany(
+            $query,
+            $parent,
+            $table,
+            $foreignPivotKey,
+            $relatedPivotKey,
+            $parentKey,
+            $relatedKey,
+            $relationName
+        );
     }
 
     /**
@@ -99,8 +115,15 @@ trait HasAranguentRelationships
      * @param  string  $secondLocalKey
      * @return IlluminateHasOneThrough
      */
-    protected function newHasOneThrough(Builder $query, Model $farParent, Model $throughParent, $firstKey, $secondKey, $localKey, $secondLocalKey)
-    {
+    protected function newHasOneThrough(
+        Builder $query,
+        Model $farParent,
+        Model $throughParent,
+        $firstKey,
+        $secondKey,
+        $localKey,
+        $secondLocalKey
+    ) {
         return new HasOneThrough($query, $farParent, $throughParent, $firstKey, $secondKey, $localKey, $secondLocalKey);
     }
 
@@ -153,6 +176,10 @@ trait HasAranguentRelationships
     /**
      * Instantiate a new MorphToMany relationship.
      *
+     *  Laravel API PHPMD exclusions
+     *  @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     *  @SuppressWarnings(PHPMD.ExcessiveParameterList)
+     *
      * @param  Builder  $query
      * @param  Model  $parent
      * @param  string  $name
@@ -174,9 +201,20 @@ trait HasAranguentRelationships
         $relatedPivotKey,
         $parentKey,
         $relatedKey,
-        $relationName = null, $inverse = false)
-    {
-        return new MorphToMany($query, $parent, $name, $table, $foreignPivotKey, $relatedPivotKey, $parentKey, $relatedKey,
-                               $relationName, $inverse);
+        $relationName = null,
+        $inverse = false
+    ) {
+        return new MorphToMany(
+            $query,
+            $parent,
+            $name,
+            $table,
+            $foreignPivotKey,
+            $relatedPivotKey,
+            $parentKey,
+            $relatedKey,
+            $relationName,
+            $inverse
+        );
     }
 }

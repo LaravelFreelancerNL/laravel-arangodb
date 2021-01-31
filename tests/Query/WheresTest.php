@@ -29,7 +29,7 @@ class WheresTest extends TestCase
     public function testBasicWheres()
     {
         $builder = $this->getBuilder();
-        $builder->select('*')->from('users')->where('_id', '=', 1);
+        $builder = $builder->select('*')->from('users')->where('_id', '=', 1);
 
         $this->assertSame(
             'FOR userDoc IN users FILTER userDoc._id == @'
@@ -37,6 +37,7 @@ class WheresTest extends TestCase
             . '_1 RETURN userDoc',
             $builder->toSql()
         );
+
         $this->assertEquals([$builder->aqb->getQueryId() . '_1' => 1], $builder->getBindings());
     }
 
