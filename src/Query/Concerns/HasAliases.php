@@ -5,6 +5,8 @@ namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 use Illuminate\Database\Query\Builder as IluminateBuilder;
 use Illuminate\Support\Str;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
+use LaravelFreelancerNL\FluentAQL\Expressions\FunctionExpression;
+use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
 trait HasAliases
 {
@@ -15,11 +17,14 @@ trait HasAliases
 
     /**
      * @param  string  $table
-     * @param  string  $alias
+     * @param  string|null  $alias
      * @return string
      */
     public function registerTableAlias(string $table, string $alias = null): string
     {
+        if ($alias == null && stripos($table, ' as ') !== false) {
+            [$table, $alias] = explode(' as ', $table);
+        }
         if ($alias == null) {
             $alias = $this->generateTableAlias($table);
         }
@@ -111,7 +116,7 @@ trait HasAliases
      * @param  string|null  $alias
      * @return bool
      */
-    protected function registerColumnAlias(string $column, string $alias = null)
+    public function registerColumnAlias(string $column, string $alias = null): bool
     {
         if (preg_match("/\sas\s/i", $column)) {
             [$column, $alias] = $this->extractAlias($column);
@@ -150,6 +155,14 @@ trait HasAliases
             $table = $query->from;
         }
 
+        if ((is_string($column) || is_numeric($column)) && key_exists($column, $query->variables)) {
+            return $column;
+        }
+
+        if ($column instanceof QueryBuilder || $column instanceof FunctionExpression) {
+            return $column;
+        }
+
         // Replace SQL JSON arrow for AQL dot
         $column = str_replace('->', '.', $column);
 
@@ -157,16 +170,28 @@ trait HasAliases
 
         //We check for an existing alias to determine of the first reference is a table.
         // In which case we replace it with the alias.
+        $references = $this->normalizeColumnReferences($references, $table);
+
+        return implode('.', $references);
+    }
+
+    /**
+     * @param $references
+     * @param  null  $table
+     * @return mixed
+     */
+    protected function normalizeColumnReferences($references, $table = null)
+    {
         $tableAlias = $this->getTableAlias($references[0]);
         if (isset($tableAlias)) {
             $references[0] = $tableAlias;
         }
 
-        if ($tableAlias === null && ! $this->isTableAlias($references[0])) {
+        if ($tableAlias === null && $table != null && ! $this->isTableAlias($references[0])) {
             $tableAlias = $this->generateTableAlias($table);
             array_unshift($references, $tableAlias);
         }
 
-        return implode('.', $references);
+        return $references;
     }
 }

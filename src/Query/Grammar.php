@@ -5,6 +5,7 @@ namespace LaravelFreelancerNL\Aranguent\Query;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Traits\Macroable;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesAggregates;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesColumns;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesJoins;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesWhereClauses;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\HasAliases;
@@ -19,6 +20,7 @@ use LaravelFreelancerNL\FluentAQL\Grammar as FluentAqlGrammar;
 class Grammar extends FluentAqlGrammar
 {
     use CompilesAggregates;
+    use CompilesColumns;
     use CompilesJoins;
     use CompilesWhereClauses;
     use HasAliases;
@@ -47,6 +49,7 @@ class Grammar extends FluentAqlGrammar
      */
     protected $selectComponents = [
         'from',
+        'variables',
         'joins',
         'wheres',
         'groups',
@@ -116,7 +119,7 @@ class Grammar extends FluentAqlGrammar
         $table = $this->prefixTable($builder->from);
 
         if (empty($values)) {
-            $builder->aqb = $builder->aqb->insert('{}', $table)->get();
+            $builder->aqb = $builder->aqb->insert('{}', $table);
 
             return $builder;
         }
@@ -124,8 +127,7 @@ class Grammar extends FluentAqlGrammar
         $builder->aqb = $builder->aqb->let('values', $values)
             ->for('value', 'values')
             ->insert('value', $table)
-            ->return('NEW._key')
-            ->get();
+            ->return('NEW._key');
 
         return $builder;
     }
@@ -167,8 +169,6 @@ class Grammar extends FluentAqlGrammar
 //        if ($builder->unions) {
 //            $sql = $this->wrapUnion($sql).' '.$this->compileUnions($builder);
 //        }
-
-        $builder->aqb = $builder->aqb->get();
 
         return $builder;
     }
@@ -215,7 +215,21 @@ class Grammar extends FluentAqlGrammar
         return $builder;
     }
 
+    /**
+     * @param  Builder  $builder
+     * @param  array $variables
+     * @return Builder
+     */
+    protected function compileVariables(Builder $builder, array $variables)
+    {
+        if (! empty($variables)) {
+            foreach ($variables as $variable => $data) {
+                $builder->aqb = $builder->aqb->let($variable, $data);
+            }
+        }
 
+        return $builder;
+    }
 
     /**
      * Compile the "order by" portions of the query.
@@ -300,84 +314,6 @@ class Grammar extends FluentAqlGrammar
         return $builder;
     }
 
-    /**
-     * Compile the "RETURN" portion of the query.
-     *
-     * @param Builder $builder
-     * @param array   $columns
-     *
-     * @return Builder
-     */
-    protected function compileColumns(Builder $builder, array $columns): Builder
-    {
-        $returnDocs = [];
-        $returnAttributes = [];
-        $values = [];
-
-        // Prepare columns
-        foreach ($columns as $column) {
-            // Extract rows
-            if (substr($column, strlen($column) - 2)  === '.*') {
-                $table = substr($column, 0, strlen($column) - 2);
-                $returnDocs[] = $this->getTableAlias($table);
-
-                continue;
-            }
-
-            if ($column != null && $column != '*') {
-                [$column, $alias] = $this->extractAlias($column);
-
-                $returnAttributes[$alias] = $this->normalizeColumn($builder, $column);
-            }
-        }
-        $values = $this->determineReturnValues($builder, $returnAttributes, $returnDocs);
-        $builder->aqb = $builder->aqb->return($values, (bool) $builder->distinct);
-
-        return $builder;
-    }
-
-    protected function determineReturnValues($builder, $returnAttributes = [], $returnDocs = [])
-    {
-        $values = [];
-
-        if (! empty($returnAttributes)) {
-            $values = $returnAttributes;
-        }
-
-        if (! empty($returnAttributes) && ! empty($returnDocs)) {
-            $returnDocs[] = $returnAttributes;
-        }
-
-        if (! empty($returnDocs)) {
-            $values = $builder->aqb->merge(...$returnDocs);
-        }
-
-        if ($builder->aggregate !== null) {
-            $values = ['aggregate' => 'aggregateResult'];
-        }
-
-        if (empty($values)) {
-            $values = $this->getTableAlias($builder->from);
-            if (is_array($builder->joins) && !empty($builder->joins)) {
-                $values = $this->mergeJoinResults($builder, $values);
-            }
-        }
-
-        return $values;
-    }
-
-
-    protected function mergeJoinResults($builder, $baseTable)
-    {
-        $tablesToJoin = [];
-        foreach ($builder->joins as $join) {
-            $tablesToJoin[] = $this->getTableAlias($join->table);
-        }
-        $tablesToJoin = array_reverse($tablesToJoin);
-        $tablesToJoin[] = $baseTable;
-
-        return $builder->aqb->merge(...$tablesToJoin);
-    }
 
     /**
      * Compile an update statement into SQL.
@@ -398,7 +334,7 @@ class Grammar extends FluentAqlGrammar
         //Fixme: joins?
         $builder = $this->compileWheres($builder);
 
-        $builder->aqb = $builder->aqb->update($tableAlias, $values, $table)->get();
+        $builder->aqb = $builder->aqb->update($tableAlias, $values, $table);
 
         return $builder;
     }
@@ -421,7 +357,7 @@ class Grammar extends FluentAqlGrammar
 
 
         if (!is_null($id)) {
-            $builder->aqb = $builder->aqb->remove((string) $id, $table)->get();
+            $builder->aqb = $builder->aqb->remove((string) $id, $table);
 
             return $builder;
         }
@@ -431,7 +367,7 @@ class Grammar extends FluentAqlGrammar
         //Fixme: joins?
         $builder = $this->compileWheres($builder);
 
-        $builder->aqb = $builder->aqb->remove($tableAlias, $table)->get();
+        $builder->aqb = $builder->aqb->remove($tableAlias, $table);
 
         return $builder;
     }
@@ -446,5 +382,16 @@ class Grammar extends FluentAqlGrammar
     public function compileRandom(Builder $builder)
     {
         return $builder->aqb->rand();
+    }
+
+    /**
+     * Get the value of a raw expression.
+     *
+     * @param  \Illuminate\Database\Query\Expression  $expression
+     * @return string
+     */
+    public function getValue($expression)
+    {
+        return $expression->getValue();
     }
 }

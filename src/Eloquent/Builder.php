@@ -3,10 +3,17 @@
 namespace LaravelFreelancerNL\Aranguent\Eloquent;
 
 use Illuminate\Database\Eloquent\Builder as IlluminateBuilder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
+use LaravelFreelancerNL\Aranguent\Eloquent\Concerns\QueriesAranguentRelationships;
+use LaravelFreelancerNL\FluentAQL\QueryBuilder as ArangoQueryBuilder;
 
 class Builder extends IlluminateBuilder
 {
+    use QueriesAranguentRelationships;
+
     /**
      * The methods that should be returned from query builder.
      *

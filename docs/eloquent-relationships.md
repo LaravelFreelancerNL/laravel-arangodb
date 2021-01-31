@@ -28,3 +28,8 @@ Aranguent supports the following relationship functions:
 - sync
 - with
 
+## Relationship query clauses
+- withCount
+- has
+- hasMorph 
+- doesntHave

@@ -2,11 +2,13 @@
 
 namespace Tests\Query;
 
+use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Connection as Connection;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 use LaravelFreelancerNL\Aranguent\Query\Grammar;
 use LaravelFreelancerNL\Aranguent\Query\Processor;
 use Mockery as m;
+use Tests\Setup\Models\Character;
 use Tests\TestCase;
 
 class WheresTest extends TestCase
@@ -27,7 +29,7 @@ class WheresTest extends TestCase
     public function testBasicWheres()
     {
         $builder = $this->getBuilder();
-        $builder->select('*')->from('users')->where('_id', '=', 1);
+        $builder = $builder->select('*')->from('users')->where('_id', '=', 1);
 
         $this->assertSame(
             'FOR userDoc IN users FILTER userDoc._id == @'
@@ -35,6 +37,7 @@ class WheresTest extends TestCase
             . '_1 RETURN userDoc',
             $builder->toSql()
         );
+
         $this->assertEquals([$builder->aqb->getQueryId() . '_1' => 1], $builder->getBindings());
     }
 
@@ -410,5 +413,30 @@ class WheresTest extends TestCase
                 $builder->aqb->getQueryId() . '_1' => "11:20:45",
                 $builder->aqb->getQueryId() . '_2' => "%hh:%ii:%ss"
             ], $builder->getBindings());
+    }
+
+    public function testWhereNested()
+    {
+        $builder = $this->getBuilder();
+
+        $query = $builder->select('*')
+            ->from('characters')
+            ->where('surname', '==', 'Lannister')
+            ->where(function ($query) {
+                $query->where('age', '>', 20)
+                    ->orWhere('alive', '=', true);
+            })->toSql();
+
+        $bindKeys = array_keys($builder->aqb->binds);
+
+        $this->assertSame(
+            'FOR characterDoc IN characters FILTER characterDoc.surname == @' . $bindKeys[0]
+            . ' AND (characterDoc.age > @'
+            . $bindKeys[1]
+            . ' OR characterDoc.alive == @'
+            . $bindKeys[2]
+            . ') RETURN characterDoc',
+            $query
+        );
     }
 }

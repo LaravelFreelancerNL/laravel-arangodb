@@ -72,7 +72,7 @@ class BuilderTest extends TestCase
         );
         $builder->getConnection()->shouldReceive('select')->once()->andReturnUsing(
             function ($aqb) {
-                $this->assertSame('FOR userDoc IN users RETURN {"name":userDoc.name}', $aqb->toAql());
+                $this->assertSame('FOR userDoc IN users RETURN userDoc.name', $aqb->toAql());
             }
         );
 
@@ -89,6 +89,19 @@ class BuilderTest extends TestCase
         $this->assertNull($builder->columns);
     }
 
+    public function testBasicSelectWithGetOneColumn()
+    {
+        $builder = $this->getBuilder();
+        $builder->getProcessor()->shouldReceive('processSelect');
+        $builder->getConnection()->shouldReceive('select')->once()->andReturnUsing(
+            function ($aqb) {
+                $this->assertSame('FOR userDoc IN users RETURN userDoc.name', $aqb->toAql());
+            }
+        );
+
+        $builder->from('users')->get('name');
+        $this->assertNull($builder->columns);
+    }
 
     public function testOrderBys()
     {
