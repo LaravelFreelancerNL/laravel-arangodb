@@ -10,17 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        laravel: [^6.0, ^7.0, ^8.0]
+        laravel: [^8.0]
         php: [7.3, 7.4, 8.0]
         arangodb: [3.6, latest]
         include:
-          - laravel: ^6.0
-            testbench: ^4.0
-          - laravel: ^7.0
-            testbench: ^5.0
           - laravel: ^8.0
             testbench: ^6.0
-    name:  Quality checks Laravel ${{ matrix.laravel }} / PHP ${{ matrix.php }} / ArangoDB ${{ matrix.arangodb }} /
+    name:  Quality checks Laravel ${{ matrix.laravel }} / PHP ${{ matrix.php }} / ArangoDB ${{ matrix.arangodb }}
 
     services:
       arangodb:
