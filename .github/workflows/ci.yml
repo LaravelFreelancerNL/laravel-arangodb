@@ -7,16 +7,24 @@ env:
 
 jobs:
   run:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-versions: ['7.3', '7.4']
-        arangodb-versions: ['3.6', 'latest']
-    name:  Quality checks PHP ${{ matrix.php-versions }}
+        laravel: [^6.0, ^7.0, ^8.0]
+        php: [7.3, 7.4, 8.0]
+        arangodb: [3.6, latest]
+        include:
+          - laravel: ^6.0
+            testbench: ^4.0
+          - laravel: ^7.0
+            testbench: ^5.0
+          - laravel: ^8.0
+            testbench: ^6.0
+    name:  Quality checks Laravel ${{ matrix.laravel }} / PHP ${{ matrix.php }} / ArangoDB ${{ matrix.arangodb }} /
 
     services:
       arangodb:
-        image: arangodb:${{ matrix.arangodb-versions }}
+        image: arangodb:${{ matrix.arangodb }}
         ports:
           - 8529:8529
         env:
@@ -26,17 +34,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Cache dependencies
+        uses: actions/cache@v1
+        with:
+          path: ~/.composer/cache/files
+          key: dependencies-composer-${{ hashFiles('composer.json') }}-laravel-${{ matrix.laravel }}-php-${{ matrix.php }}
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php-versions }}
+          php-version: ${{ matrix.php }}
           extensions: mbstring, intl
           ini-values: post_max_size=256M, short_open_tag=On
-          coverage: xdebug
+          coverage: none
           tools: composer:v2
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-suggest
+        run: |
+          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+          composer update --prefer-dist --no-interaction --no-suggest
 
       - name: PHP Code Sniffer
         if: ${{ always() }}
