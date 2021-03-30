@@ -177,11 +177,10 @@ class Builder
     /**
      * Get all of the collection names for the database.
      *
-     * @param  array  $options
-     *
      * @return array
+     * @throws ArangoException
      */
-    public function getAllCollections(array $options = [])
+    public function getAllCollections()
     {
         return $this->schemaManager->getCollections(true);
     }
@@ -190,13 +189,12 @@ class Builder
      * Get all of the table names for the database.
      * Alias for getAllCollections().
      *
-     * @param  array  $options
-     *
      * @return array
+     * @throws ArangoException
      */
-    protected function getAllTables(array $options = [])
+    protected function getAllTables()
     {
-        return $this->getAllCollections($options);
+        return $this->getAllCollections();
     }
 
     /**
