@@ -16,7 +16,7 @@ jobs:
         include:
           - laravel: ^8.0
             testbench: ^6.0
-    name:  Quality checks Laravel ${{ matrix.laravel }} / PHP ${{ matrix.php }} / ArangoDB ${{ matrix.arangodb }}
+    name:  QA L ${{ matrix.laravel }} / P ${{ matrix.php }} / A ${{ matrix.arangodb }}
 
     services:
       arangodb:
