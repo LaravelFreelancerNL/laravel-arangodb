@@ -3,7 +3,7 @@ name: Test Coverage
 on: [workflow_dispatch, push, pull_request]
 
 env:
-  DB_ENDPOINT: 'tcp://127.0.0.1:8529'
+  DB_ENDPOINT: 'http://127.0.0.1:8529'
 
 jobs:
   run:
