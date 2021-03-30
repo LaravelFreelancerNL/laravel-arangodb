@@ -2,7 +2,7 @@
 
 namespace LaravelFreelancerNL\Aranguent\Schema;
 
-use ArangoDBClient\CollectionHandler;
+use ArangoClient\Schema\SchemaManager;
 use Closure;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Fluent;
@@ -54,7 +54,7 @@ class Blueprint
     /**
      * The handler for table manipulation.
      */
-    protected $collectionHandler;
+    protected SchemaManager $schemaManager;
 
     /**
      * The prefix of the table.
@@ -97,15 +97,15 @@ class Blueprint
      * Blueprint constructor.
      *
      * @param string            $table
-     * @param CollectionHandler $collectionHandler
+     * @param SchemaManager     $schemaManager
      * @param Closure|null      $callback
      * @param string            $prefix
      */
-    public function __construct($table, $collectionHandler, Closure $callback = null, $prefix = '')
+    public function __construct($table, $schemaManager, Closure $callback = null, $prefix = '')
     {
         $this->table = $table;
 
-        $this->collectionHandler = $collectionHandler;
+        $this->schemaManager = $schemaManager;
 
         $this->prefix = $prefix;
 
@@ -188,8 +188,8 @@ class Blueprint
             return;
         }
 
-        if (method_exists($this->collectionHandler, $command->method)) {
-            $this->collectionHandler->{$command->method}($command->parameters);
+        if (method_exists($this->schemaManager, $command->method)) {
+            $this->schemaManager->{$command->method}($command->parameters);
         }
     }
 

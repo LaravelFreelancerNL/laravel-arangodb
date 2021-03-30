@@ -2,21 +2,20 @@
 
 namespace LaravelFreelancerNL\Aranguent\Concerns;
 
-use ArangoDBClient\StreamingTransaction;
-use ArangoDBClient\TransactionBase;
 use Closure;
 use Throwable;
 
 trait ManagesTransactions
 {
+    /**
+     * @var int
+     */
     protected $transactions = 0;
-
-    protected $arangoTransaction;
 
     /**
      * Execute a Closure within a transaction.
      *
-     * @param  \Closure  $callback
+     * @param  Closure  $callback
      * @param  int  $attempts
      * @param  array  $collections
      * @return mixed
@@ -49,7 +48,7 @@ trait ManagesTransactions
 
             try {
                 if ($this->transactions == 1) {
-                    $this->commitArangoTransaction();
+                    $this->commit();
                 }
 
                 $this->transactions = max(0, $this->transactions - 1);
@@ -99,21 +98,11 @@ trait ManagesTransactions
             $this->reconnectIfMissingConnection();
 
             try {
-                $this->beginArangoTransaction($collections);
+                $this->arangoClient->begin($collections);
             } catch (Throwable $e) {
                 $this->handleBeginTransactionException($e);
             }
         }
-    }
-
-    protected function beginArangoTransaction($collections = [])
-    {
-        $transactionHandler = $this->getTransactionHandler();
-
-        $this->arangoTransaction = new StreamingTransaction($this->getArangoConnection(), [
-            TransactionBase::ENTRY_COLLECTIONS => $collections
-        ]);
-        $this->arangoTransaction = $transactionHandler->create($this->arangoTransaction);
     }
 
     /**
@@ -126,7 +115,7 @@ trait ManagesTransactions
     public function commit()
     {
         if ($this->transactions == 1) {
-            $this->commitArangoTransaction();
+            $this->arangoClient->commit();
         }
 
         $this->transactions = max(0, $this->transactions - 1);
@@ -135,15 +124,38 @@ trait ManagesTransactions
     }
 
     /**
-     *  Commit the transaction through the ArangoDB driver.
+     * Rollback the active database transaction.
+     *
+     * @param  int|null  $toLevel
+     * @return void
+     *
+     * @throws \Throwable
      */
-    protected function commitArangoTransaction()
+    public function rollBack($toLevel = null)
     {
-        $transactionHandler = $this->getTransactionHandler();
+        // We allow developers to rollback to a certain transaction level. We will verify
+        // that this given transaction level is valid before attempting to rollback to
+        // that level. If it's not we will just return out and not attempt anything.
+        $toLevel = is_null($toLevel)
+            ? $this->transactions - 1
+            : $toLevel;
 
-        $transactionHandler->commit($this->arangoTransaction);
+        if ($toLevel < 0 || $toLevel >= $this->transactions) {
+            return;
+        }
 
-        $this->arangoTransaction = null;
+        // Next, we will actually perform this rollback within this database and fire the
+        // rollback event. We will also set the current transaction level to the given
+        // level that was passed into this method so it will be right from here out.
+        try {
+            $this->performRollBack($toLevel);
+        } catch (Throwable $e) {
+            $this->handleRollBackException($e);
+        }
+
+        $this->transactions = $toLevel;
+
+        $this->fireConnectionEvent('rollingBack');
     }
 
     /**
@@ -152,20 +164,12 @@ trait ManagesTransactions
      * @param  int  $toLevel
      * @return void
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
     protected function performRollBack($toLevel)
     {
         if ($toLevel == 0) {
-            $transactionHandler = $this->getTransactionHandler();
-
-            $transactionHandler->abort($this->arangoTransaction);
-            $this->arangoTransaction = null;
+            $this->arangoClient->abort();
         }
-    }
-
-    public function getArangoTransaction()
-    {
-        return $this->arangoTransaction;
     }
 }

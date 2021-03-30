@@ -2,10 +2,8 @@
 
 namespace LaravelFreelancerNL\Aranguent\Schema;
 
-use ArangoDBClient\ClientException;
-use ArangoDBClient\Collection;
-use ArangoDBClient\Exception;
-use ArangoDBClient\View;
+use ArangoClient\Exceptions\ArangoException;
+use ArangoClient\Schema\SchemaManager;
 use Closure;
 use Illuminate\Support\Fluent;
 use LaravelFreelancerNL\Aranguent\Connection;
@@ -19,11 +17,7 @@ class Builder
      */
     protected $connection;
 
-    protected $collectionHandler;
-
-    protected $graphHandler;
-
-    protected $viewHandler;
+    protected SchemaManager $schemaManager;
 
     /**
      * The schema grammar instance.
@@ -52,11 +46,7 @@ class Builder
 
         $this->grammar = $connection->getSchemaGrammar();
 
-        $this->collectionHandler = $connection->getCollectionHandler();
-
-        $this->graphHandler = $connection->getGraphHandler();
-
-        $this->viewHandler = $connection->getViewHandler();
+        $this->schemaManager = $connection->getArangoClient()->schema();
     }
 
     /**
@@ -94,7 +84,7 @@ class Builder
             return call_user_func($this->resolver, $collection, $callback, $prefix);
         }
 
-        return new Blueprint($collection, $this->collectionHandler, $callback, $prefix);
+        return new Blueprint($collection, $this->schemaManager, $callback, $prefix);
     }
 
     protected function build(Blueprint $blueprint)
@@ -124,7 +114,7 @@ class Builder
      */
     public function collection($collection, Closure $callback)
     {
-        $this->collection($collection, $callback);
+        $this->table($collection, $callback);
     }
 
     /**
@@ -149,7 +139,7 @@ class Builder
      */
     public function drop($collection)
     {
-        $this->collectionHandler->drop($collection);
+        $this->schemaManager->deleteCollection($collection);
     }
 
     public function dropAllCollections()
@@ -157,7 +147,7 @@ class Builder
         $collections = $this->getAllCollections();
 
         foreach ($collections as $name) {
-            $this->collectionHandler->drop($name['name']);
+            $this->schemaManager->deleteCollection($name['name']);
         }
     }
 
@@ -187,40 +177,35 @@ class Builder
     /**
      * Get all of the collection names for the database.
      *
-     * @param  array  $options
-     *
      * @return array
+     * @throws ArangoException
      */
-    public function getAllCollections(array $options = [])
+    public function getAllCollections()
     {
-        if (!isset($options['excludeSystem'])) {
-            $options['excludeSystem'] = true;
-        }
-
-        return $this->collectionHandler->getAllCollections($options);
+        return $this->schemaManager->getCollections(true);
     }
 
     /**
      * Get all of the table names for the database.
      * Alias for getAllCollections().
      *
-     * @param  array  $options
-     *
      * @return array
+     * @throws ArangoException
      */
-    protected function getAllTables(array $options = [])
+    protected function getAllTables()
     {
-        return $this->getAllCollections($options);
+        return $this->getAllCollections();
     }
 
     /**
      * @param  string  $collection
      *
-     * @return Collection
+     * @return array
+     * @throws ArangoException
      */
     protected function getCollection($collection)
     {
-        return $this->collectionHandler->get($collection);
+        return $this->schemaManager->getCollection($collection);
     }
 
     /**
@@ -229,39 +214,38 @@ class Builder
      * @param $from
      * @param $to
      *
-     * @throws Exception
-     *
      * @return bool
+     * @throws ArangoException
+     *
      */
     public function rename($from, $to)
     {
-        return $this->collectionHandler->rename($from, $to);
+        return (bool) $this->schemaManager->renameCollection($from, $to);
     }
 
     /**
      * Determine if the given collection exists.
      *
-     * @param string $collection
-     *
-     * @throws Exception
+     * @param  string  $collection
      *
      * @return bool
+     * @throws ArangoException
      */
-    public function hasCollection(string $collection)
+    public function hasCollection(string $collection): bool
     {
-        return $this->collectionHandler->has($collection);
+        return $this->schemaManager->hasCollection($collection);
     }
 
     /**
      * Alias for hasCollection.
      *
-     * @param string $table
+     * @param  string  $table
      *
-     * @throws Exception
      *
      * @return bool
+     * @throws ArangoException
      */
-    public function hasTable($table)
+    public function hasTable($table): bool
     {
         return $this->hasCollection($table);
     }
@@ -269,12 +253,12 @@ class Builder
     /**
      * Check if any document in the collection has the attribute.
      *
-     * @param string $collection
-     * @param string $attribute
+     * @param  string  $collection
+     * @param  mixed  $attribute
      *
      * @return bool
      */
-    public function hasAttribute($collection, $attribute)
+    public function hasAttribute(string $collection, $attribute): bool
     {
         if (is_string($attribute)) {
             $attribute = [$attribute];
@@ -286,12 +270,12 @@ class Builder
     /**
      * Check if any document in the collection has the attribute.
      *
-     * @param string $collection
-     * @param array  $attributes
+     * @param  string  $collection
+     * @param  array  $attributes
      *
      * @return bool
      */
-    public function hasAttributes($collection, $attributes)
+    public function hasAttributes(string $collection, array $attributes)
     {
         $parameters = [];
         $parameters['name'] = 'hasAttribute';
@@ -307,12 +291,12 @@ class Builder
     /**
      * Alias for hasAttribute.
      *
-     * @param string $table
-     * @param string $column
+     * @param  string  $table
+     * @param  string  $column
      *
      * @return bool
      */
-    public function hasColumn($table, $column)
+    public function hasColumn(string $table, string $column): bool
     {
         return $this->hasAttribute($table, $column);
     }
@@ -320,69 +304,70 @@ class Builder
     /**
      * Alias for hasAttributes.
      *
-     * @param string $table
-     * @param array  $columns
+     * @param  string  $table
+     * @param  array  $columns
      *
      * @return bool
      */
-    public function hasColumns($table, $columns)
+    public function hasColumns(string $table, array $columns): bool
     {
         return $this->hasAttributes($table, $columns);
     }
 
     /**
-     * @param string $name
-     * @param array  $properties
-     * @param string $type
-     *
-     * @throws ClientException
-     * @throws Exception
+     * @param  string  $name
+     * @param  array  $properties
+     * @param  string  $type
+     * @throws ArangoException
      */
-    public function createView($name, array $properties, $type = 'arangosearch')
+    public function createView(string $name, array $properties, $type = 'arangosearch')
     {
-        $view = new View($name, $type);
+        $view = $properties;
+        $view['name'] = $name;
+        $view['type'] = $type;
 
-        $this->viewHandler->create($view);
-        $this->viewHandler->setProperties($view, $properties);
+        $this->schemaManager->createView($view);
     }
 
     /**
-     * @param string $name
-     *
-     * @throws Exception
+     * @param  string  $name
      *
      * @return mixed
+     * @throws ArangoException
      */
     public function getView(string $name)
     {
-        return $this->viewHandler->properties($name);
+        return $this->schemaManager->getView($name);
     }
 
     /**
      * @param  string  $name
      * @param  array  $properties
+     * @throws ArangoException
      */
-    public function editView($name, array $properties)
+    public function editView(string $name, array $properties)
     {
-        $this->viewHandler->setProperties($name, $properties);
+        $this->schemaManager->updateView($name, $properties);
     }
 
     /**
      * @param  string  $from
      * @param  string  $to
      *
+     * @throws ArangoException
      */
     public function renameView(string $from, string $to)
     {
-        $this->viewHandler->rename($from, $to);
+        $this->schemaManager->renameView($from, $to);
     }
 
     /**
      * @param  string  $name
+     * @throws ArangoException
      */
     public function dropView(string $name)
     {
-        $this->viewHandler->drop($name);
+        $this->schemaManager->deleteView($name);
     }
 
     /**

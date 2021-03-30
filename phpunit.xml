@@ -22,4 +22,7 @@
             <directory suffix=".php">tests/Migrations</directory>
         </testsuite>
     </testsuites>
+    <php>
+        <env name="ARANGODB_VERSION" value="3.7"/>
+    </php>
 </phpunit>

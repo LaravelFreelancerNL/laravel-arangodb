@@ -2,8 +2,7 @@
 
 namespace Tests;
 
-use ArangoDBClient\StreamingTransaction;
-use ArangoDBClient\StreamingTransactionHandler;
+use ArangoClient\Transactions\TransactionManager;
 use Illuminate\Support\Facades\DB;
 use Mockery as M;
 use Tests\Setup\Models\Character;
@@ -16,20 +15,26 @@ class TransactionsTest extends TestCase
         M::close();
     }
 
-    public function testGetTransactionHandler()
+    public function testGetTransactionManager()
     {
-        $transactionHandler = $this->connection->getTransactionHandler();
-        $this->assertInstanceOf(StreamingTransactionHandler::class, $transactionHandler);
+        $transactionManager = $this->connection->getArangoClient()->getTransactionManager();
+        $this->assertInstanceOf(TransactionManager::class, $transactionManager);
     }
 
     public function testBeginTransaction()
     {
         $connection = $this->connection;
-        $connection->beginTransaction();
-        $arangoTransaction = $connection->getArangoTransaction();
+        $arangoTransaction = $connection->getArangoClient()->getTransactionManager();
+        $runningTransactions = $arangoTransaction->getTransactions();
+        $this->assertEmpty($runningTransactions);
 
+        $connection->beginTransaction();
+        $arangoTransaction = $connection->getArangoClient()->getTransactionManager();
+        $runningTransactions = $arangoTransaction->getTransactions();
+
+        $this->assertEquals(1, count($runningTransactions));
         $this->assertEquals(1, $connection->transactionLevel());
-        $this->assertInstanceOf(StreamingTransaction::class, $arangoTransaction);
+        $this->assertInstanceOf(TransactionManager::class, $arangoTransaction);
     }
 
     public function testCommitTransaction()
@@ -37,10 +42,11 @@ class TransactionsTest extends TestCase
         $connection = $this->connection;
         $connection->beginTransaction();
         $connection->commit();
-        $arangoTransaction = $connection->getArangoTransaction();
+        $arangoTransaction = $connection->getArangoClient()->getTransactionManager();
+        $runningTransactions = $arangoTransaction->getTransactions();
 
         $this->assertEquals(0, $connection->transactionLevel());
-        $this->assertNull($arangoTransaction);
+        $this->assertEmpty($runningTransactions);
     }
 
     public function testCommitTransactionWithQueries()
@@ -51,7 +57,7 @@ class TransactionsTest extends TestCase
         $connection = $this->connection;
         $connection->beginTransaction(['write' => ['characters', 'locations']]);
 
-        $character = Character::create(
+        Character::create(
             [
                 '_key'    => 'TheonGreyjoy',
                 'name'    => 'Theon',
@@ -61,7 +67,7 @@ class TransactionsTest extends TestCase
                 'traits'  => ['E', 'R', 'K'],
             ]
         );
-        $location = Location::create(
+        Location::create(
             [
                 '_key'       => 'pyke',
                 'name'       => 'Pyke',
@@ -88,7 +94,7 @@ class TransactionsTest extends TestCase
         $connection = $this->connection;
         $connection->beginTransaction(['write' => ['characters', 'locations']]);
 
-        $character = Character::create(
+        Character::create(
             [
                 '_key'    => 'TheonGreyjoy',
                 'name'    => 'Theon',
@@ -98,7 +104,7 @@ class TransactionsTest extends TestCase
                 'traits'  => ['E', 'R', 'K'],
             ]
         );
-        $location = Location::create(
+        Location::create(
             [
                 '_key'       => 'pyke',
                 'name'       => 'Pyke',

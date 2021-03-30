@@ -2,23 +2,32 @@
 
 namespace Tests\Migrations;
 
-use ArangoDBClient\Document;
-use ArangoDBClient\ServerException;
+use ArangoClient\Exceptions\ArangoException;
+use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 use Tests\TestCase;
 
 class MigrationRepositoryTest extends TestCase
 {
+    protected $schemaManager;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->schemaManager = $this->connection->getArangoClient()->schema();
+    }
+
     public function testMigrationsCollectionIsCreated()
     {
         if ($this->databaseMigrationRepository->repositoryExists()) {
-            $this->expectException(ServerException::class);
+            $this->expectException(ArangoException::class);
             $this->withoutExceptionHandling();
         }
 
         $this->databaseMigrationRepository->createRepository();
 
         $this->assertTrue($this->databaseMigrationRepository->repositoryExists());
-        $this->assertTrue($this->collectionHandler->has($this->collection));
+        $this->assertTrue($this->schemaManager->hasCollection($this->collection));
     }
 
     public function testLogCreatesMigrationEntry()
@@ -27,10 +36,14 @@ class MigrationRepositoryTest extends TestCase
         $batch = 40;
         $this->databaseMigrationRepository->log($filename, $batch);
 
-        $this->collectionHandler->setDocumentClass(Document::class);
-        $cursor = $this->collectionHandler->byExample('migrations', ['migration' => $filename, 'batch' => $batch]);
-        $documents = collect($cursor->getAll());
-        $this->assertInstanceOf(Document::class, $documents->first());
+        $qb = (new QueryBuilder())->for('m', 'migrations')
+            ->filter('m.migration', '==', 'logtest.php')
+            ->filter('m.batch', '==', 40)
+            ->return('m')
+            ->get();
+        $results = current($this->connection->select($qb->query));
+
+        $this->assertNotEmpty($results);
     }
 
     public function testGetNumberOfLastBatch()
@@ -62,18 +75,24 @@ class MigrationRepositoryTest extends TestCase
 
         $this->databaseMigrationRepository->log($filename, $batch);
 
-        $this->collectionHandler->setDocumentClass(Document::class);
-        $cursor = $this->collectionHandler->byExample('migrations', ['migration' => $filename, 'batch' => $batch]);
-        $documents = collect($cursor->getAll());
-        $this->assertInstanceOf(Document::class, $documents->first());
+        $qb = (new QueryBuilder())->for('m', 'migrations')
+            ->filter('m.migration', '==', $filename)
+            ->filter('m.batch', '==', $batch)
+            ->return('m')
+            ->get();
+        $results = current($this->connection->select($qb->query));
+        $this->assertNotEmpty($results);
 
         $migration = (object) ['migration' => $filename];
         $this->databaseMigrationRepository->delete($migration);
 
-        $this->collectionHandler->setDocumentClass(Document::class);
-        $cursor = $this->collectionHandler->byExample('migrations', ['migration' => $filename, 'batch' => $batch]);
-        $documents = collect($cursor->getAll());
-        $this->assertNull($documents->first());
+        $qb = (new QueryBuilder())->for('m', 'migrations')
+            ->filter('m.migration', '==', $filename)
+            ->filter('m.batch', '==', $batch)
+            ->return('m')
+            ->get();
+        $results = current($this->connection->select($qb->query));
+        $this->assertEmpty($results);
     }
 
     public function testGetLastMigration()
@@ -85,7 +104,7 @@ class MigrationRepositoryTest extends TestCase
         $lastBatch = $this->databaseMigrationRepository->getLast();
 
         $this->assertEquals(2, count($lastBatch));
-        $this->assertEquals(60001, current($lastBatch)->batch);
+        $this->assertEquals(60001, current($lastBatch)['batch']);
     }
 
     public function testGetMigrationBatches()

@@ -20,9 +20,9 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      * Create a new database migration repository instance.
      *
      * @param IlluminateResolver $resolver
-     * @param table $
+     * @param string $table
      */
-    public function __construct(IlluminateResolver $resolver, $table)
+    public function __construct(IlluminateResolver $resolver, string $table)
     {
         $this->table = $table;
 
@@ -187,13 +187,13 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     public function createRepository()
     {
-        $collectionHandler = $this->getConnection()->getCollectionHandler();
+        $schemaManager = $this->getConnection()->getArangoClient()->schema();
 
-        $collectionHandler->create($this->table);
+        $schemaManager->createCollection($this->table);
 
 //        $schema = $this->getConnection()->getSchemaBuilder();
 //
-//        $schema->create($this->table, function ($table) {
+//        $schema->create($this->table, function ($collection) {
 //            // The migrations collection is responsible for keeping track of which of the
 //            // migrations have actually run for the application. We'll create the
 //            // collection to hold the migration file's path as well as the batch ID.
@@ -210,9 +210,9 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     public function repositoryExists()
     {
-        $collectionHandler = $this->getConnection()->getCollectionHandler();
+        $schemaManager = $this->getConnection()->getArangoClient()->schema();
 
-        return $collectionHandler->has($this->table);
+        return $schemaManager->hasCollection($this->table);
 
 //        $schema = $this->getConnection()->getSchemaBuilder();
 //
@@ -226,7 +226,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     protected function collection()
     {
-        return $this->getConnection()->collection($this->table);
+        return $this->getConnection()->table($this->table);
     }
 
     /**

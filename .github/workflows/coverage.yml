@@ -3,7 +3,7 @@ name: Test Coverage
 on: [workflow_dispatch, push, pull_request]
 
 env:
-  DB_ENDPOINT: 'tcp://127.0.0.1:8529'
+  DB_ENDPOINT: 'http://127.0.0.1:8529'
 
 jobs:
   run:
@@ -26,7 +26,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '7.4'
+          php-version: 7.4
           extensions: mbstring, intl
           ini-values: post_max_size=256M, short_open_tag=On
           coverage: xdebug
