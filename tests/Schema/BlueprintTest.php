@@ -16,19 +16,22 @@ class BlueprintTest extends TestCase
 
     public function testCreateIndex()
     {
+        $schemaManager = $this->connection->getArangoClient()->schema();
+
         Schema::table('characters', function (Blueprint $collection) {
             $collection->index(['name']);
         });
         $name = 'characters_name_persistent';
 
-        $collectionHandler = $this->connection->getCollectionHandler();
-        $index = $collectionHandler->getIndex('characters', $name);
+        $index = $schemaManager->getIndexByName('characters', $name);
 
         $this->assertEquals($name, $index['name']);
     }
 
     public function testDropIndex()
     {
+        $schemaManager = $this->connection->getArangoClient()->schema();
+
         Schema::table('characters', function (Blueprint $collection) {
             $collection->index(['name']);
         });
@@ -36,11 +39,9 @@ class BlueprintTest extends TestCase
         Schema::table('characters', function (Blueprint $collection) {
             $collection->dropIndex('characters_name_persistent');
         });
-        $collectionHandler = $this->connection->getCollectionHandler();
 
-        $this->expectExceptionMessage('index not found');
-
-        $collectionHandler->getIndex('characters', 'characters_name_persistent');
+        $searchResult = $schemaManager->getIndexByName('characters', 'characters_name_persistent');
+        $this->assertFalse($searchResult);
     }
 
     public function testIndexNamesOnlyContainsAlphaNumericCharacters()
@@ -84,11 +85,9 @@ class BlueprintTest extends TestCase
         Schema::table('characters', function (Blueprint $collection) {
             $collection->dropIndex('characters_addresses_array_persistent');
         });
-        $collectionHandler = $this->connection->getCollectionHandler();
 
-        $this->expectExceptionMessage('index not found');
-
-        $collectionHandler->getIndex('characters', 'characters_addresses_array_persistent');
+        $searchResult = $this->schemaManager->getIndexByName('characters', 'characters_addresses_array_persistent');
+        $this->assertFalse($searchResult);
     }
 
     public function testAttributeIgnoreAdditionalArguments()

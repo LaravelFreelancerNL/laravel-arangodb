@@ -156,8 +156,6 @@ trait Indexes
 
     /**
      * @param $command
-     *
-     * @throws Exception
      */
     public function executeIndexCommand($command)
     {
@@ -178,7 +176,7 @@ trait Indexes
             $options = array_merge($options, $command->indexOptions);
         }
 
-        $this->collectionHandler->createIndex($this->table, $options);
+        $this->schemaManager->createIndex($this->table, $options);
     }
 
     /**
@@ -201,7 +199,7 @@ trait Indexes
 
     /**
      * Drop the index by first getting all the indexes on the table; then selecting the matching one
-     * by type and columns.
+     * by name.
      *
      * @param $command
      */
@@ -212,7 +210,11 @@ trait Indexes
 
             return;
         }
-        $this->collectionHandler->dropIndex($this->table, $command->index);
+        $indexes = $this->schemaManager->getIndexes($this->table);
+        $arrayIndex = array_search($command->index, array_column($indexes, 'name'), true);
+        $indexId = $indexes[$arrayIndex]['id'];
+
+        $this->schemaManager->deleteIndex($indexId);
     }
 
     /**

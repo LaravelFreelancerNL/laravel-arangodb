@@ -3,23 +3,18 @@
 namespace Tests\Query;
 
 use Illuminate\Database\ConnectionInterface;
-use Illuminate\Pagination\AbstractPaginator as Paginator;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use LaravelFreelancerNL\Aranguent\Connection as Connection;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 use LaravelFreelancerNL\Aranguent\Query\Grammar;
 use LaravelFreelancerNL\Aranguent\Query\Processor;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder as FluentAQL;
 use Mockery as m;
 use Tests\Setup\Database\Seeds\CharactersSeeder;
-use Tests\Setup\Database\Seeds\ChildrenSeeder;
-use Tests\Setup\Database\Seeds\LocationsSeeder;
 use Tests\TestCase;
 
-class BuilderTest extends TestCase
+class QueryBuilderTest extends TestCase
 {
     public function setUp(): void
     {

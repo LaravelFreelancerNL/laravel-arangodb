@@ -2,7 +2,6 @@
 
 namespace Tests;
 
-use ArangoDBClient\Database;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\AranguentServiceProvider;
@@ -19,7 +18,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 
     protected $connection;
 
-    protected $collectionHandler;
+    protected $schemaManager;
 
     protected $databaseMigrationRepository;
 
@@ -38,23 +37,24 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
      */
     protected function getEnvironmentSetUp($app)
     {
-        $config = require 'Setup/config/database.php';
+        $config = require __DIR__ . '/Setup/config/database.php';
         $app['config']->set('database.connections.arangodb', $config['connections']['arangodb']);
         $app['config']->set('database.default', 'arangodb');
         $app['config']->set('cache.driver', 'array');
 
         $this->connection = DB::connection('arangodb');
+        $this->schemaManager = $this->connection->getArangoClient()->schema();
 
         $this->createDatabase();
         $this->connection->setDatabaseName(
             ($app['config']['database.database']) ? $app['config']['database.database'] : 'aranguent__test'
         );
 
-        $this->collectionHandler = $this->connection->getCollectionHandler();
-        //Remove all collections
-        $collections = $this->collectionHandler->getAllCollections(['excludeSystem' => true]);
+
+        //Truncate all collections
+        $collections = $this->schemaManager->getCollections(true);
         foreach ($collections as $collection) {
-            $this->collectionHandler->truncate($collection['id']);
+            $this->schemaManager->truncateCollection($collection['id']);
         }
     }
 
@@ -66,8 +66,6 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 
         $this->databaseMigrationRepository = new DatabaseMigrationRepository($this->app['db'], $this->collection);
     }
-
-
 
     protected function getPackageProviders($app)
     {
@@ -85,10 +83,8 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 
     protected function createDatabase($database = 'aranguent__test')
     {
-        $databaseHandler = new Database();
-        $response = $databaseHandler->listUserDatabases($this->connection->getArangoConnection());
-        if (!in_array($database, $response['result'])) {
-            $databaseHandler->create($this->connection->getArangoConnection(), $database);
+        if (! $this->schemaManager->hasDatabase($database)) {
+            $this->schemaManager->createDatabase($database);
 
             return true;
         }
@@ -115,8 +111,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 
     private function installMigrateIfNotExists()
     {
-        $collections = $this->collectionHandler->getAllCollections(['excludeSystem' => true]);
-        if (!isset($collections['migrations'])) {
+        if (! $this->schemaManager->hasCollection('migrations')) {
             $this->artisan('migrate:install', [])->run();
         }
     }
@@ -127,5 +122,12 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         $processor = m::mock(Processor::class);
 
         return new Builder(m::mock(Connection::class), $grammar, $processor);
+    }
+
+    protected function skipTestOnArangoVersionsBefore(string $version)
+    {
+        if (version_compare(getenv('ARANGODB_VERSION'), $version, '<')) {
+            $this->markTestSkipped('This test does not support ArangoDB versions before ' . $version);
+        }
     }
 }

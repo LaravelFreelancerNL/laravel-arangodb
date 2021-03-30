@@ -3,7 +3,7 @@ name: CI tests
 on: [workflow_dispatch, push, pull_request]
 
 env:
-  DB_ENDPOINT: 'tcp://127.0.0.1:8529'
+  DB_ENDPOINT: 'http://localhost:8529'
 
 jobs:
   run:
@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         laravel: [^8.0]
-        php: [7.3, 7.4, 8.0]
+        php: [7.4, 8.0]
         arangodb: [3.6, latest]
         include:
           - laravel: ^8.0
@@ -50,18 +50,10 @@ jobs:
           composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
           composer update --prefer-dist --no-interaction --no-suggest
 
-      - name: PHP Code Sniffer
+      - name: Run all QA tests
         if: ${{ always() }}
-        run: vendor/bin/phpcs
-
-      - name: PHP Mess Detector
-        if: ${{ always() }}
-        run: vendor/bin/phpmd src/ text phpmd-ruleset.xml
-
-      - name: PHP Stan
-        if: ${{ always() }}
-        run: vendor/bin/phpstan analyse -c phpstan.neon
-
-      - name: PHP Unit tests
-        if: ${{ always() }}
-        run: vendor/bin/phpunit
+        run: |
+          chmod +x "${GITHUB_WORKSPACE}/bin/qa.sh"
+          "${GITHUB_WORKSPACE}/bin/qa.sh"
+        env:
+          ARANGODB_VERSION: ${{ matrix.arangodb }}

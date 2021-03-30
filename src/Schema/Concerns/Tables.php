@@ -50,9 +50,8 @@ trait Tables
             $options['keyOptions']['autoincrement'] = true;
         }
 
-        $collections = $this->collectionHandler->getAllCollections(['excludeSystem' => true]);
-        if (!isset($collections[$this->table])) {
-            $this->collectionHandler->create($this->table, $options);
+        if (! $this->schemaManager->hasCollection($this->table)) {
+            $this->schemaManager->createCollection($this->table, $options);
         }
     }
 

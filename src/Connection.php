@@ -2,10 +2,7 @@
 
 namespace LaravelFreelancerNL\Aranguent;
 
-use ArangoDBClient\Connection as ArangoConnection;
-use ArangoDBClient\ConnectionOptions as ArangoConnectionOptions;
-use ArangoDBClient\Exception;
-use ArangoDBClient\Statement;
+use ArangoClient\ArangoClient;
 use Illuminate\Database\Connection as IlluminateConnection;
 use Iterator;
 use LaravelFreelancerNL\Aranguent\Concerns\DetectsDeadlocks;
@@ -25,65 +22,31 @@ class Connection extends IlluminateConnection
     use DetectsLostConnections;
     use ManagesTransactions;
 
-    /**
-     * {@inheritdoc}
-     *
-     * @var array
-     */
-    protected $defaultConfig = [
-        ArangoConnectionOptions::OPTION_ENDPOINT    => 'tcp://localhost:8529',
-        ArangoConnectionOptions::OPTION_CONNECTION  => 'Keep-Alive',
-        ArangoConnectionOptions::OPTION_AUTH_USER   => null,
-        ArangoConnectionOptions::OPTION_AUTH_PASSWD => null,
-        'tablePrefix'                               => '',
-    ];
-
-    protected $config;
-
-    protected $arangoConnection;
-
-    protected $reconnector;
+    protected ArangoClient $arangoClient;
 
     protected $database;
-
-    protected $schemaGrammar;
-
-    protected $queryGrammar;
-
-    protected $pretending;
-
-    protected $recordsModified;
-
-    protected $loggingQueries;
-
-    protected $queryLog;
 
     /**
      * The ArangoDB driver name.
      *
      * @var string
      */
-    protected $driverName = 'arangodb';
+    protected string $driverName = 'arangodb';
 
     /**
      * Connection constructor.
      *
      * @param array $config
-     *
-     * @throws Exception
      */
     public function __construct($config = [])
     {
-        $this->config = array_merge($this->defaultConfig, $config);
+        $this->config = $config;
 
-        if (isset($this->config['database'])) {
-            $this->database = $this->config['database'];
-        }
-
-        $this->tablePrefix = $this->config['tablePrefix'];
+        $this->database = (isset($this->config['database'])) ? $this->config['database'] : null;
+        $this->tablePrefix = isset($this->config['tablePrefix']) ? $this->config['tablePrefix'] : null;
 
         // activate and set the database client connection
-        $this->arangoConnection = new ArangoConnection($this->config);
+        $this->arangoClient = new ArangoClient($this->arangoClientConfig($this->config));
 
         // We need to initialize a query grammar and the query post processors
         // which are both very important parts of the database abstractions
@@ -93,12 +56,20 @@ class Connection extends IlluminateConnection
         $this->useDefaultPostProcessor();
     }
 
+    protected function arangoClientConfig(array $config): array
+    {
+        unset($config['name']);
+        unset($config['driver']);
+
+        return $config;
+    }
+
     /**
      * Get a schema builder instance for the connection.
      *
      * @return SchemaBuilder
      */
-    public function getSchemaBuilder()
+    public function getSchemaBuilder(): SchemaBuilder
     {
         if (is_null($this->schemaGrammar)) {
             $this->useDefaultSchemaGrammar();
@@ -112,7 +83,7 @@ class Connection extends IlluminateConnection
      *
      * @return QueryGrammar
      */
-    protected function getDefaultQueryGrammar()
+    protected function getDefaultQueryGrammar(): QueryGrammar
     {
         return new QueryGrammar();
     }
@@ -122,7 +93,7 @@ class Connection extends IlluminateConnection
      *
      * @return Processor
      */
-    protected function getDefaultPostProcessor()
+    protected function getDefaultPostProcessor(): Processor
     {
         return new Processor();
     }
@@ -131,15 +102,12 @@ class Connection extends IlluminateConnection
      * Run a select statement against the database and returns a generator.
      * ($useReadPdo is a dummy to adhere to the interface).
      *
-     * @param string     $query
-     * @param array      $bindings
-     * @param bool       $useReadPdo
-     *
-     * @throws Exception
-     *
+     * @param  string  $query
+     * @param  array  $bindings
+     * @param  bool|null  $useReadPdo
      * @return Iterator|null
      */
-    public function cursor($query, $bindings = [], $useReadPdo = null)
+    public function cursor($query, $bindings = [], $useReadPdo = null): ?Iterator
     {
         // Usage of a separate DB to read date isn't supported at this time
         $useReadPdo = null;
@@ -149,7 +117,7 @@ class Connection extends IlluminateConnection
                 return [];
             }
 
-            $statement = $this->newArangoStatement($query, $bindings);
+            $statement = $this->arangoClient->prepare($query, $bindings);
 
             return $statement->execute();
         });
@@ -163,7 +131,7 @@ class Connection extends IlluminateConnection
      *
      * @return bool
      */
-    public function statement($query, $bindings = [])
+    public function statement($query, $bindings = []): bool
     {
         [$query, $bindings] = $this->handleQueryBuilder(
             $query,
@@ -175,11 +143,11 @@ class Connection extends IlluminateConnection
                 return true;
             }
 
-            $statement = $this->newArangoStatement($query, $bindings);
+            $statement = $this->arangoClient->prepare($query, $bindings);
 
-            $cursor = $statement->execute();
+            $statement->execute();
 
-            $affectedDocumentCount = $cursor->getWritesExecuted();
+            $affectedDocumentCount = $statement->getWritesExecuted();
             $this->recordsHaveBeenModified($changed = $affectedDocumentCount > 0);
 
             return $changed;
@@ -194,7 +162,7 @@ class Connection extends IlluminateConnection
      *
      * @return int
      */
-    public function affectingStatement($query, $bindings = [])
+    public function affectingStatement($query, $bindings = []): int
     {
         [$query, $bindings] = $this->handleQueryBuilder(
             $query,
@@ -209,11 +177,11 @@ class Connection extends IlluminateConnection
             // For update or delete statements, we want to get the number of rows affected
             // by the statement and return that back to the developer. We'll first need
             // to execute the statement and get the executed writes from the extra.
-            $statement = $this->newArangoStatement($query, $bindings);
+            $statement = $this->arangoClient->prepare($query, $bindings);
 
-            $cursor = $statement->execute();
+            $statement->execute();
 
-            $affectedDocumentCount = $cursor->getWritesExecuted();
+            $affectedDocumentCount = $statement->getWritesExecuted();
 
             $this->recordsHaveBeenModified($affectedDocumentCount > 0);
 
@@ -224,23 +192,20 @@ class Connection extends IlluminateConnection
     /**
      * Run a raw, unprepared query against the connection.
      *
-     * @param string $query
+     * @param  string  $query
      *
      * @return bool
      */
-    public function unprepared($query)
+    public function unprepared($query): bool
     {
         return $this->run($query, [], function ($query) {
             if ($this->pretending()) {
                 return true;
             }
 
-            $statement = $this->newArangoStatement($query, []);
-
-            $cursor = $statement->execute();
-
-            $affectedDocumentCount = $cursor->getWritesExecuted();
-
+            $statement = $$this->arangoClient->prepare($query);
+            $statement->execute();
+            $affectedDocumentCount = $statement->getWritesExecuted();
             $change = $affectedDocumentCount > 0;
 
             $this->recordsHaveBeenModified($change);
@@ -252,16 +217,14 @@ class Connection extends IlluminateConnection
     /**
      * Returns the query execution plan. The query will not be executed.
      *
-     * @param string $query
-     * @param array  $bindings
-     *
-     * @throws Exception
+     * @param  string  $query
+     * @param  array  $bindings
      *
      * @return array
      */
-    public function explain($query, $bindings = [])
+    public function explain(string $query, $bindings = []): array
     {
-        $statement = $this->newArangoStatement($query, $bindings);
+        $statement = $this->arangoClient->prepare($query, $bindings);
 
         return $statement->explain();
     }
@@ -274,8 +237,7 @@ class Connection extends IlluminateConnection
      * @param string|FluentAQL $query
      * @param array            $bindings
      * @param bool             $useReadPdo
-     *
-     * @return array
+     * @return mixed
      */
     public function select($query, $bindings = [], $useReadPdo = true)
     {
@@ -288,12 +250,12 @@ class Connection extends IlluminateConnection
      * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      *
      * @param string|FluentAQL $query
-     * @param array            $bindings
+     * @param array<mixed>|null     $bindings
      * @param bool             $useReadPdo
      *
-     * @return array
+     * @return mixed
      */
-    public function execute($query, $bindings = [], $useReadPdo = true)
+    public function execute($query, ?array $bindings = [], $useReadPdo = true)
     {
         // Usage of a separate DB to read date isn't supported at this time
         $useReadPdo = null;
@@ -308,10 +270,10 @@ class Connection extends IlluminateConnection
                 return [];
             }
 
-            $statement = $this->newArangoStatement($query, $bindings);
-            $cursor = $statement->execute();
+            $statement = $this->arangoClient->prepare($query, $bindings);
+            $statement->execute();
 
-            return $cursor->getAll();
+            return $statement->fetchAll();
         });
     }
 
@@ -320,7 +282,7 @@ class Connection extends IlluminateConnection
      *
      * @return QueryBuilder
      */
-    public function query()
+    public function query(): QueryBuilder
     {
         return new QueryBuilder(
             $this,
@@ -334,7 +296,7 @@ class Connection extends IlluminateConnection
      *
      * @return string
      */
-    public function getTablePrefix()
+    public function getTablePrefix(): string
     {
         return $this->tablePrefix;
     }
@@ -348,7 +310,7 @@ class Connection extends IlluminateConnection
     {
         $this->transactions = 0;
 
-        $this->arangoConnection = null;
+        $this->arangoClient = null;
     }
 
     /**
@@ -358,44 +320,26 @@ class Connection extends IlluminateConnection
      */
     protected function reconnectIfMissingConnection()
     {
-        if (is_null($this->arangoConnection)) {
+        if (is_null($this->arangoClient)) {
             $this->reconnect();
         }
     }
 
-    public function getArangoConnection()
+    public function getArangoClient(): ArangoClient
     {
-        return $this->arangoConnection;
+        return $this->arangoClient;
     }
 
     /**
-     * @param $query
-     * @param $bindings
-     * @return Statement
-     * @throws Exception
+     * @param  string  $database
      */
-    protected function newArangoStatement($query, $bindings): Statement
-    {
-        $data = ['query' => $query, 'bindVars' => $bindings];
-
-        if ($this->transactionLevel() > 0) {
-            $data['transaction'] = $this->arangoTransaction;
-        }
-
-        $statement = new Statement($this->arangoConnection, $data);
-        $statement->setDocumentClass(Document::class);
-
-        return $statement;
-    }
-
-
-    public function setDatabaseName($database)
+    public function setDatabaseName($database): void
     {
         $this->database = $database;
-        $this->arangoConnection->setDatabase($database);
+        $this->arangoClient->setDatabase($database);
     }
 
-    public function getDatabaseName()
+    public function getDatabaseName(): string
     {
         return $this->database;
     }
@@ -405,7 +349,7 @@ class Connection extends IlluminateConnection
      * @param  array  $bindings
      * @return array
      */
-    private function handleQueryBuilder($query, array $bindings)
+    private function handleQueryBuilder($query, array $bindings): array
     {
         if ($query instanceof FluentAQL) {
             $bindings = $query->binds;

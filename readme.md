@@ -2,9 +2,14 @@ Aranguent
 ---------
 <p align="center">
 <a href="https://travis-ci.org/LaravelFreelancerNL/aranguent"><img src="https://travis-ci.org/LaravelFreelancerNL/laravel-arangodb.svg?branch=master" alt="Build Status"></a>
+
+![Github CI tests](https://github.com/LaravelFreelancerNL/laravel-arangodb/workflows/CI%20tests/badge.svg)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/LaravelFreelancerNL/laravel-arangodb/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/LaravelFreelancerNL/laravel-arangodb/?branch=master)
+[![Code Coverage](https://scrutinizer-ci.com/g/LaravelFreelancerNL/laravel-arangodb/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/LaravelFreelancerNL/laravel-arangodb/?b=master)
 <a href="https://packagist.org/packages/laravel-freelancer-nl/aranguent"><img src="https://poser.pugx.org/laravel-freelancer-nl/aranguent/v/unstable" alt="Latest Version"></a>
 <a href="https://packagist.org/packages/laravel-freelancer-nl/aranguent"><img src="https://poser.pugx.org/laravel-freelancer-nl/aranguent/downloads" alt="Total Downloads"></a>
 <a href="https://packagist.org/packages/laravel-freelancer-nl/aranguent"><img src="https://poser.pugx.org/laravel-freelancer-nl/aranguent/license" alt="License"></a>
+
 
 [ArangoDB](https://www.arangodb.com) driver for [Laravel](https://laravel.com)  
 <sub>The unguent between the ArangoDB and Laravel</sub>
@@ -20,10 +25,9 @@ You may use composer to install Aranguent:
 ``` composer require laravel-freelancer-nl/aranguent ```
 
 ### Version compatibility
-| Laravel  | ArangoDB            | PHP            | Aranguent         |
-| :------- | :------------------ | :------------------ | :---------------- |
-| ^7.x.x    | ^3.5.x               | ^7.3               | ^0.3             |
-| ^8.x.x    | ^3.6.x               | ^7.3               | ^0.5            |
+| Laravel | ArangoDB | PHP       | Aranguent |
+| :------ | :------- | :-------- | :-------- |
+| ^8.0    | ^3.6     | ^7.4&#124;^8.0 | ^0.7      |
 
 ## Documentation
 1) [Connect to ArangoDB](docs/connect-to-arangodb.md): set up a connection
