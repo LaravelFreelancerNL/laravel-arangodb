@@ -9,6 +9,7 @@ abstract class Model extends IlluminateModel
 {
     use IsAranguentModel;
 
+
     /**
      * The primary key for the model.
      *

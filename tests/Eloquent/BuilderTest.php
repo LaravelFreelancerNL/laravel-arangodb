@@ -46,4 +46,25 @@ class BuilderTest extends TestCase
         $this->assertEquals($ned->en, $character['en']);
         $this->assertInstanceOf(Character::class, $ned);
     }
+
+    public function testUpdateSetsCorrectUpdatedAt()
+    {
+        $character = [
+            'en' => [
+                'titles' => ['Lord of Winterfell', 'Hand of the king'],
+            ],
+            '_key'         => 'NedStark',
+            'name'         => 'Ned',
+            'surname'      => 'Stark',
+            'alive'        => true,
+            'age'          => 41,
+            'location_key' => 'kingslanding',
+        ];
+        Character::insert($character);
+        $retrievedBeforeUpdate = Character::find('NedStark');
+        $retrievedBeforeUpdate->update(['alive' => false]);
+
+        $retrievedAfterUpdate = Character::find('NedStark');
+        $this->assertArrayNotHasKey('characters.updated_at', $retrievedAfterUpdate->toArray());
+    }
 }
