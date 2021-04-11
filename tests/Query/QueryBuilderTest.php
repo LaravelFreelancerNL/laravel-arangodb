@@ -169,6 +169,14 @@ class QueryBuilderTest extends TestCase
         $this->assertEquals(15, count($result['data']));
     }
 
+    public function testPluck()
+    {
+        $results = DB::table('characters')->pluck('name', '_key');
+
+        $this->assertEquals(43, $results->count());
+        $this->assertEquals('Ned', $results['NedStark']);
+    }
+
     /**
      * @return m\MockInterface
      */

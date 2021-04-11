@@ -46,7 +46,7 @@ class Connection extends IlluminateConnection
         $this->tablePrefix = isset($this->config['tablePrefix']) ? $this->config['tablePrefix'] : null;
 
         // activate and set the database client connection
-        $this->arangoClient = new ArangoClient($this->arangoClientConfig($this->config));
+        $this->arangoClient = new ArangoClient($this->config);
 
         // We need to initialize a query grammar and the query post processors
         // which are both very important parts of the database abstractions
@@ -54,14 +54,6 @@ class Connection extends IlluminateConnection
         $this->useDefaultQueryGrammar();
 
         $this->useDefaultPostProcessor();
-    }
-
-    protected function arangoClientConfig(array $config): array
-    {
-        unset($config['name']);
-        unset($config['driver']);
-
-        return $config;
     }
 
     /**

@@ -25,7 +25,7 @@ class Builder extends IlluminateBuilder
     ];
 
     /**
-     * Update a record in the database.
+     * Insert a record in the database.
      *
      * @param array $values
      *
@@ -92,6 +92,31 @@ class Builder extends IlluminateBuilder
 
         $values = array_merge(
             $timestamps,
+            $values
+        );
+        return $values;
+    }
+
+
+    /**
+     * Add the "updated at" column to an array of values.
+     *
+     * @param  array  $values
+     * @return array
+     */
+    protected function addUpdatedAtColumn(array $values): array
+    {
+        if (
+            ! $this->model->usesTimestamps() ||
+            is_null($this->model->getUpdatedAtColumn())
+        ) {
+            return $values;
+        }
+
+        $column = $this->model->getUpdatedAtColumn();
+
+        $values = array_merge(
+            [$column => $this->model->freshTimestampString()],
             $values
         );
 
