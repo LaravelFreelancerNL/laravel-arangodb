@@ -3,8 +3,8 @@ Aranguent
 <p align="center">
 
 ![Github CI tests](https://github.com/LaravelFreelancerNL/laravel-arangodb/workflows/CI%20tests/badge.svg)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/LaravelFreelancerNL/laravel-arangodb/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/LaravelFreelancerNL/laravel-arangodb/?branch=master)
-[![Code Coverage](https://scrutinizer-ci.com/g/LaravelFreelancerNL/laravel-arangodb/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/LaravelFreelancerNL/laravel-arangodb/?b=master)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/LaravelFreelancerNL/laravel-arangodb/badges/quality-score.png?b=next)](https://scrutinizer-ci.com/g/LaravelFreelancerNL/laravel-arangodb/?branch=next)
+[![Code Coverage](https://scrutinizer-ci.com/g/LaravelFreelancerNL/laravel-arangodb/badges/coverage.png?b=next)](https://scrutinizer-ci.com/g/LaravelFreelancerNL/laravel-arangodb/?b=next)
 <a href="https://packagist.org/packages/laravel-freelancer-nl/aranguent"><img src="https://poser.pugx.org/laravel-freelancer-nl/aranguent/v/unstable" alt="Latest Version"></a>
 <a href="https://packagist.org/packages/laravel-freelancer-nl/aranguent"><img src="https://poser.pugx.org/laravel-freelancer-nl/aranguent/downloads" alt="Total Downloads"></a>
 <a href="https://packagist.org/packages/laravel-freelancer-nl/aranguent"><img src="https://poser.pugx.org/laravel-freelancer-nl/aranguent/license" alt="License"></a>
