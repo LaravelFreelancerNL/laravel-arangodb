@@ -134,4 +134,46 @@ class ModelTest extends TestCase
 
         $this->assertEquals('FOR characterDoc IN characters SORT RAND()', $results);
     }
+
+    public function testGetArangoId()
+    {
+        $ned = Character::first();
+        $this->assertEquals('characters/NedStark', $ned->_id);
+    }
+
+    public function testGetId()
+    {
+        $ned = Character::first();
+        $this->assertEquals('NedStark', $ned->id);
+        $this->assertEquals($ned->_key, $ned->id);
+    }
+
+    public function testSetArangoId()
+    {
+        $ned = Character::first();
+        $ned->_id = 'characters/NedStarkIsDead';
+
+        $this->assertEquals('characters/NedStarkIsDead', $ned->_id);
+    }
+
+    public function testSetId()
+    {
+        $ned = Character::first();
+        $ned->id = 'NedStarkIsDead';
+
+        $this->assertEquals('NedStarkIsDead', $ned->_key);
+        $this->assertEquals('characters/NedStarkIsDead', $ned->_id);
+    }
+
+    public function testSetKey()
+    {
+        $ned = Character::first();
+        $ned->_key = 'NedStarkIsDead';
+
+        $this->assertEquals('NedStarkIsDead', $ned->_key);
+        $this->assertEquals('characters/NedStarkIsDead', $ned->_id);
+    }
+
+
+
 }
