@@ -50,8 +50,7 @@ class ConnectionTest extends TestCase
 
         $explanation = $this->connection->explain($query);
 
-        $this->assertIsArray($explanation);
-        $this->assertArrayHasKey('plan', $explanation);
+        $this->assertObjectHasAttribute('plan', $explanation);
     }
 
     public function testErrorHandlingCollectionNotFound()

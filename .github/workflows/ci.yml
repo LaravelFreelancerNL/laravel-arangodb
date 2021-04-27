@@ -11,8 +11,8 @@ jobs:
     strategy:
       matrix:
         laravel: [^8.0]
-        php: [7.4, 8.0]
-        arangodb: [3.6, latest]
+        php: [8.0]
+        arangodb: [3.6, 3.7, latest]
         include:
           - laravel: ^8.0
             testbench: ^6.0

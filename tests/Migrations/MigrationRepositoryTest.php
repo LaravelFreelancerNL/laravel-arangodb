@@ -104,7 +104,7 @@ class MigrationRepositoryTest extends TestCase
         $lastBatch = $this->databaseMigrationRepository->getLast();
 
         $this->assertEquals(2, count($lastBatch));
-        $this->assertEquals(60001, current($lastBatch)['batch']);
+        $this->assertEquals(60001, current($lastBatch)->batch);
     }
 
     public function testGetMigrationBatches()

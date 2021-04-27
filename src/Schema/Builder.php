@@ -147,7 +147,7 @@ class Builder
         $collections = $this->getAllCollections();
 
         foreach ($collections as $name) {
-            $this->schemaManager->deleteCollection($name['name']);
+            $this->schemaManager->deleteCollection($name->name);
         }
     }
 

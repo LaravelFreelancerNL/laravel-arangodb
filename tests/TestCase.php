@@ -54,7 +54,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         //Truncate all collections
         $collections = $this->schemaManager->getCollections(true);
         foreach ($collections as $collection) {
-            $this->schemaManager->truncateCollection($collection['id']);
+            $this->schemaManager->truncateCollection($collection->id);
         }
     }
 

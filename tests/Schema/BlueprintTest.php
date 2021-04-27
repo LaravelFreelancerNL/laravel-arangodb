@@ -25,7 +25,7 @@ class BlueprintTest extends TestCase
 
         $index = $schemaManager->getIndexByName('characters', $name);
 
-        $this->assertEquals($name, $index['name']);
+        $this->assertEquals($name, $index->name);
     }
 
     public function testDropIndex()

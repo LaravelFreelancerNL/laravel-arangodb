@@ -14,6 +14,7 @@ use LaravelFreelancerNL\Aranguent\Query\Grammar as QueryGrammar;
 use LaravelFreelancerNL\Aranguent\Query\Processor;
 use LaravelFreelancerNL\Aranguent\Schema\Builder as SchemaBuilder;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder as FluentAQL;
+use stdClass;
 
 class Connection extends IlluminateConnection
 {
@@ -210,11 +211,11 @@ class Connection extends IlluminateConnection
      * Returns the query execution plan. The query will not be executed.
      *
      * @param  string  $query
-     * @param  array  $bindings
+     * @param  array<mixed>  $bindings
      *
-     * @return array
+     * @return stdClass
      */
-    public function explain(string $query, $bindings = []): array
+    public function explain(string $query, $bindings = []): stdClass
     {
         $statement = $this->arangoClient->prepare($query, $bindings);
 
