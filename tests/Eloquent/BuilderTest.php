@@ -43,7 +43,8 @@ class BuilderTest extends TestCase
         $ned = Character::find('NedStark');
 
         $this->assertEquals('NedStark', $ned->_key);
-        $this->assertEquals($ned->en, $character['en']);
+        $this->assertIsObject($ned->en);
+        $this->assertEquals($character['en'], (array) $ned->en);
         $this->assertInstanceOf(Character::class, $ned);
     }
 

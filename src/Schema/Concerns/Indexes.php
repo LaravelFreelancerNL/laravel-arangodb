@@ -212,7 +212,7 @@ trait Indexes
         }
         $indexes = $this->schemaManager->getIndexes($this->table);
         $arrayIndex = array_search($command->index, array_column($indexes, 'name'), true);
-        $indexId = $indexes[$arrayIndex]['id'];
+        $indexId = $indexes[$arrayIndex]->id;
 
         $this->schemaManager->deleteIndex($indexId);
     }

@@ -38,7 +38,7 @@ class JoinTest extends TestCase
             ->get();
 
         $this->assertCount(15, $characters);
-        $this->assertEquals('NedStark', $characters[0]['_key']);
+        $this->assertEquals('NedStark', $characters[0]->_key);
     }
 
     public function testCrossJoin()
@@ -61,7 +61,7 @@ class JoinTest extends TestCase
             ->get();
 
         $this->assertCount(33, $characters);
-        $this->assertEquals('NedStark', $characters[0]['_key']);
+        $this->assertEquals('NedStark', $characters[0]->_key);
         $this->assertCount(10, $charactersWithoutResidence);
     }
 }

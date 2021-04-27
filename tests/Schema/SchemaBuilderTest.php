@@ -45,7 +45,7 @@ class SchemaBuilderTest extends TestCase
         }
         $view = $schemaManager->getView('search');
 
-        $this->assertEquals('search', $view['name']);
+        $this->assertEquals('search', $view->name);
 
         $schemaManager->deleteView('search');
     }
@@ -58,7 +58,7 @@ class SchemaBuilderTest extends TestCase
         }
         $view = $schemaManager->getView('search');
 
-        $this->assertEquals('search', $view['name']);
+        $this->assertEquals('search', $view->name);
 
         $schemaManager->deleteView('search');
     }
@@ -73,7 +73,7 @@ class SchemaBuilderTest extends TestCase
 
         $properties = $schemaManager->getViewProperties('search');
 
-        $this->assertEquals(5, $properties['consolidationIntervalMsec']);
+        $this->assertEquals(5, $properties->consolidationIntervalMsec);
 
         $schemaManager->deleteView('search');
     }
