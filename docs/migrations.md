@@ -7,7 +7,7 @@ Blueprint commands are executed sequentially and non-transactional(!)
 ## Collections
 You can add ArangoDB's collection config options to the create method.
 
-``` 
+```php
 Schema::create('posts', function (Blueprint $collection) {
     //
 }, [
@@ -53,10 +53,16 @@ attributes in existing documents.
 You can create, edit or delete an ArangoDB view.
 
 ### New view
-```Schema::createView($viewName, $options);  ``` 
+```php
+Schema::createView($viewName, $options);
+``` 
 
 ### Edit view
-```Schema::createView($viewName, $options);  ```
+```php
+Schema::createView($viewName, $options);
+```
 
 ### Delete view
-```Schema::createView($viewName);  ```
+```php
+Schema::createView($viewName);
+```

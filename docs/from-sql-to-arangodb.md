@@ -6,7 +6,9 @@ Migrations can be converted as well as raw queries against the database.
 Existing Illuminate based migration files can be quickly converted to use the Aranguent Schema Builder with the following 
 Artisan command: 
 
-``` php artisan aranguent:convert-migrations  ```
+```php
+ php artisan aranguent:convert-migrations  
+ ```
 
 As ArangoDB is schemaless, column creation methods are ignored. However, index creation on a column is caught and handled: 
 

@@ -11,8 +11,5 @@ echo "Run PHPMD"
 echo "Run PHPStan"
 ./vendor/bin/phpstan analyse -c phpstan.neon
 
-echo "Run Psalm"
-./vendor/bin/psalm  --no-cache
-
 echo "Run PHPUnit"
 ./vendor/bin/phpunit

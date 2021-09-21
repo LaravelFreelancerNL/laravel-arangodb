@@ -34,3 +34,4 @@ You may use composer to install Aranguent:
 4) [Eloquent relationships](docs/eloquent-relationships.md): supported relationships 
 5) [Query Builder](docs/query-functions.md): supported functions 
 6) [Transactions](docs/transactions.md): how to set up ArangoDB transactions
+7) [FluentAQL](docs/fluent-aql.md): Use the AQL query builder directly

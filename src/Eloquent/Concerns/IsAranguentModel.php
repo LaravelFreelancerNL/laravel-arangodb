@@ -5,6 +5,7 @@ namespace LaravelFreelancerNL\Aranguent\Eloquent\Concerns;
 use Illuminate\Support\Str;
 use LaravelFreelancerNL\Aranguent\Eloquent\Builder;
 use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
+use LaravelFreelancerNL\FluentAQL\QueryBuilder as ArangoQueryBuilder;
 
 trait IsAranguentModel
 {
@@ -115,7 +116,7 @@ trait IsAranguentModel
             return;
         }
 
-        $id = preg_replace ( "/[a-zA-Z0-9_-]+\/\K.+/i", $key, $this->attributes['_id']);
+        $id = preg_replace("/[a-zA-Z0-9_-]+\/\K.+/i", $key, $this->attributes['_id']);
         $this->attributes['_id'] = $id;
     }
 
@@ -151,5 +152,17 @@ trait IsAranguentModel
         }
 
         return Str::snake(class_basename($this)) . $keyName;
+    }
+
+    public static function Aqb(): ArangoQueryBuilder
+    {
+        return new ArangoQueryBuilder();
+    }
+
+    protected function execute(ArangoQueryBuilder $aqb)
+    {
+        $connection = $this->getConnection();
+        $results = $connection->execute($aqb->get());
+        return $this->hydrate($results);
     }
 }

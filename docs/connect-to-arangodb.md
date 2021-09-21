@@ -1,7 +1,7 @@
 #Set up a connection to ArangoDB
 1) Add a new database connection to `config/database.php`
 
-```
+```php
         'arangodb' => [
             'name'       => 'arangodb',
             'driver'     => 'arangodb',

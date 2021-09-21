@@ -5,7 +5,7 @@ The basic API for transactions is the same, however there is an important differ
 
 ## Starting a transaction
 As a closure:
-```
+```php
 DB::transaction(function () {
     DB::insert('FOR i IN 1..10 INSERT { _key: CONCAT("test", i) } INTO characters');
     DB::delete('FOR c IN characters FILTER c._key == "test10" REMOVE c IN characters');
@@ -14,7 +14,7 @@ DB::transaction(function () {
 **note:** the number of retries must be explicitly set when registering collections 
 
 Manually:
-```
+```php
 DB::beginTransaction([
     'write' => [
         'characters',
@@ -33,11 +33,11 @@ or it will fail, whereas non-declared collections from which is solely read will
 
 ## Commiting a transaction
 As normal:
-```
+```php
 DB::commit();
 ```
 ## Rolling back a transaction
 As normal:
-```
+```php
 DB::rollBack();
 ```

@@ -68,21 +68,16 @@ class ModelTest extends TestCase
         $this->assertStringContainsString('use LaravelFreelancerNL\Aranguent\Eloquent\Model;', $content);
     }
 
-    public function testInsertModel()
-    {
-        $characters = Character::all();
-        $this->assertCount(2, $characters);
-    }
-
     public function testUpdateModel()
     {
-        $characters = Character::all();
-        foreach ($characters as $character) {
-            $results[] = $character->update(['age' => ($character->age + 1)]);
-        }
+        $character = Character::first();
+        $initialAge = $character->age;
 
-        $characters = Character::all();
-        $this->assertCount(2, $characters);
+        $character->update(['age' => ($character->age + 1)]);
+
+        $fresh = $character->fresh();
+
+        $this->assertSame(($initialAge + 1), $fresh->age);
     }
 
     public function testDeleteModel()
@@ -173,7 +168,4 @@ class ModelTest extends TestCase
         $this->assertEquals('NedStarkIsDead', $ned->_key);
         $this->assertEquals('characters/NedStarkIsDead', $ned->_id);
     }
-
-
-
 }
