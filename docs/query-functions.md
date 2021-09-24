@@ -21,8 +21,9 @@ Aranguent supports the following functions of Laravel's query API.
 ## Return set clauses
 - orderBy
 - inRandomOrder
-- groupBy
 - having
+- orHaving
+- havingBetween
 - limit
 - offset
 

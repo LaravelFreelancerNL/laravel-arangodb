@@ -25,7 +25,6 @@ trait CompilesAggregates
      * Compile AQL for count aggregate.
      *
      * @param Builder $builder
-     * @param $aggregate
      *
      * @return Builder
      */

@@ -30,6 +30,13 @@ trait CompilesColumns
                 continue;
             }
 
+            // Extract groups
+            if (is_array($builder->groups) && in_array($column, $builder->groups)) {
+                $returnAttributes[] = $column;
+
+                continue;
+            }
+
             if ($column != null && $column != '*') {
                 [$column, $alias] = $this->extractAlias($column);
 

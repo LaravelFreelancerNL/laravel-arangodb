@@ -144,22 +144,26 @@ trait HasAliases
     }
 
     /**
-     * @param  IluminateBuilder  $query
+     * @param  Builder  $builder
      * @param $column
      * @param $table
      * @return string
      */
-    protected function normalizeColumn(IluminateBuilder $query, $column, $table = null)
+    protected function normalizeColumn(Builder $builder, $column, $table = null)
     {
         if ($table == null) {
-            $table = $query->from;
+            $table = $builder->from;
         }
 
-        if ((is_string($column) || is_numeric($column)) && key_exists($column, $query->variables)) {
+        if ((is_string($column) || is_numeric($column)) && key_exists($column, $builder->variables)) {
             return $column;
         }
 
         if ($column instanceof QueryBuilder || $column instanceof FunctionExpression) {
+            return $column;
+        }
+
+        if (is_array($builder->groups) && in_array($column, $builder->groups)) {
             return $column;
         }
 

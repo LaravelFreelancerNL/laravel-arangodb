@@ -6,6 +6,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Traits\Macroable;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesAggregates;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesColumns;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesGroups;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesJoins;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesWhereClauses;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\HasAliases;
@@ -22,6 +23,7 @@ class Grammar extends FluentAqlGrammar
     use CompilesAggregates;
     use CompilesColumns;
     use CompilesJoins;
+    use CompilesGroups;
     use CompilesWhereClauses;
     use HasAliases;
     use Macroable;

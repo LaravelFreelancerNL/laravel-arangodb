@@ -154,11 +154,6 @@ trait IsAranguentModel
         return Str::snake(class_basename($this)) . $keyName;
     }
 
-    public static function Aqb(): ArangoQueryBuilder
-    {
-        return new ArangoQueryBuilder();
-    }
-
     protected function execute(ArangoQueryBuilder $aqb)
     {
         $connection = $this->getConnection();

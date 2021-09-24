@@ -856,21 +856,21 @@
         },
         {
             "name": "laravel-freelancer-nl/fluentaql",
-            "version": "1.0.0-beta.7",
+            "version": "1.0.0-beta.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/LaravelFreelancerNL/fluentaql.git",
-                "reference": "5a2c4b6988b292a1cb52776151f405e004ec5f31"
+                "reference": "f8f76ecf63dbb938db3fa8589b19fd742f956561"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/LaravelFreelancerNL/fluentaql/zipball/5a2c4b6988b292a1cb52776151f405e004ec5f31",
-                "reference": "5a2c4b6988b292a1cb52776151f405e004ec5f31",
+                "url": "https://api.github.com/repos/LaravelFreelancerNL/fluentaql/zipball/f8f76ecf63dbb938db3fa8589b19fd742f956561",
+                "reference": "f8f76ecf63dbb938db3fa8589b19fd742f956561",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
-                "php": "^7.4|^8.0"
+                "php": "^8.0"
             },
             "require-dev": {
                 "ergebnis/composer-normalize": "^2.6",
@@ -879,8 +879,9 @@
                 "phpmd/phpmd": "^2.9",
                 "phpstan/phpstan": "^0.12.0@dev",
                 "phpunit/phpunit": "^9.5",
+                "scrutinizer/ocular": "^1.8",
                 "squizlabs/php_codesniffer": "^3.5",
-                "vimeo/psalm": "^4.7"
+                "vimeo/psalm": "^4.10"
             },
             "type": "library",
             "autoload": {
@@ -909,9 +910,15 @@
             ],
             "support": {
                 "issues": "https://github.com/LaravelFreelancerNL/fluentaql/issues",
-                "source": "https://github.com/LaravelFreelancerNL/fluentaql/tree/1.0.0-beta.7"
+                "source": "https://github.com/LaravelFreelancerNL/fluentaql/tree/1.0.0-beta.9"
             },
-            "time": "2021-09-04T14:30:56+00:00"
+            "funding": [
+                {
+                    "url": "https://github.com/LaravelFreelancerNL",
+                    "type": "github"
+                }
+            ],
+            "time": "2021-09-24T10:06:45+00:00"
         },
         {
             "name": "laravel/framework",

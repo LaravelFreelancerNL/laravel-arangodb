@@ -16,6 +16,7 @@ use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsWhereClauses;
 use LaravelFreelancerNL\FluentAQL\Exceptions\BindException;
 use LaravelFreelancerNL\FluentAQL\Expressions\ExpressionInterface as ExpressionInterface;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder;
+use phpDocumentor\Reflection\Types\ArrayKey;
 
 class Builder extends IlluminateQueryBuilder
 {
@@ -41,9 +42,9 @@ class Builder extends IlluminateQueryBuilder
     /**
      * The query variables that should be set.
      *
-     * @var array
+     * @var array<mixed>
      */
-    public $variables = [];
+    public array $variables = [];
 
     /**
      * @override
@@ -149,18 +150,51 @@ class Builder extends IlluminateQueryBuilder
         $this->bindings['select'] = [];
         $columns = is_array($columns) ? $columns : func_get_args();
 
-        foreach ($columns as $as => $column) {
-            if (is_string($as) && $this->isQueryable($column)) {
-                $this->selectSub($column, $as);
-            }
-            if (! is_string($as) || ! $this->isQueryable($column)) {
-                $this->columns[$as] = $column;
-            }
-        }
+        $this->addColumns($columns);
 
         return $this;
     }
 
+    /**
+     * Add a new select column to the query.
+     *
+     * @param  array|mixed  $column
+     * @return $this
+     */
+    public function addSelect($column)
+    {
+        $columns = is_array($column) ? $column : func_get_args();
+
+        $this->addColumns($columns);
+
+        return $this;
+    }
+
+    /**
+     * @param array<mixed> $columns
+     */
+    protected function addColumns(array $columns): void
+    {
+        foreach ($columns as $as => $column) {
+            if (is_string($as) && $this->isQueryable($column)) {
+                if (is_null($this->columns)) {
+                    $this->select($this->from . '.*');
+                }
+
+                $this->selectSub($column, $as);
+
+                continue;
+            }
+
+            if (! is_string($as) || ! $this->isQueryable($column)) {
+                $this->columns[$as] = $column;
+
+                continue;
+            }
+
+            $this->columns[] = $column;
+        }
+    }
 
     /**
      * Get the SQL representation of the query.

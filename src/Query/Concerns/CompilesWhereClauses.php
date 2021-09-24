@@ -13,16 +13,19 @@ trait CompilesWhereClauses
      * Compile the "where" portions of the query.
      *
      * @param Builder $builder
-     *
+     * @param array<mixed> $wheres
+     * @param string $source
      * @return Builder
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    protected function compileWheres(Builder $builder)
+    protected function compileWheres(Builder $builder, array $wheres = [], string $source = 'wheres'): Builder
     {
-        if (is_null($builder->wheres)) {
+        if (is_null($builder->$source)) {
             return $builder;
         }
 
-        $predicates = $this->compileWheresToArray($builder);
+        $predicates = $this->compileWheresToArray($builder, $source);
 
         if (count($predicates) > 0) {
             $builder->aqb = $builder->aqb->filter($predicates);
@@ -34,13 +37,13 @@ trait CompilesWhereClauses
     /**
      * Get an array of all the where clauses for the query.
      *
-     * @param  IluminateBuilder  $query
+     * @param  $builder  $builder
      * @return array
      */
-    protected function compileWheresToArray(IluminateBuilder $query): array
+    protected function compileWheresToArray(Builder $builder, string $source = 'wheres'): array
     {
-        return collect($query->wheres)->map(function ($where) use ($query) {
-            return $this->{"where{$where['type']}"}($query, $where);
+        return collect($builder->$source)->map(function ($where) use ($builder) {
+            return $this->{"where{$where['type']}"}($builder, $where);
         })->all();
     }
 
