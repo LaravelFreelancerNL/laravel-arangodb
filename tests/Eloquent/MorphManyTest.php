@@ -30,22 +30,22 @@ class MorphManyTest extends TestCase
         }
 
         $locations = '[
-            { "_key": "dragonstone", "capturable_id": "DaenerysTargaryen", '
+            { "_key": "dragonstone", "capturable_id": "characters/DaenerysTargaryen", '
             . '"capturable_type": "Tests\\\Setup\\\Models\\\Character", "name": "Dragonstone", '
             . '"coordinate": [ 55.167801, -6.815096 ] },
-            { "_key": "king-s-landing", "capturable_id": "DaenerysTargaryen", '
+            { "_key": "king-s-landing", "capturable_id": "characters/DaenerysTargaryen", '
             . '"capturable_type": "Tests\\\Setup\\\Models\\\Character", "name": "King\'s Landing", '
             . '"coordinate": [ 42.639752, 18.110189 ] },
-            { "_key": "the-red-keep", "capturable_id": "DaenerysTargaryen", '
+            { "_key": "the-red-keep", "capturable_id": "characters/DaenerysTargaryen", '
             . '"capturable_type": "Tests\\\Setup\\\Models\\\Character", "name": "The Red Keep", '
             . '"coordinate": [ 35.896447, 14.446442 ] },
-            { "_key": "yunkai", "capturable_id": "DaenerysTargaryen", '
+            { "_key": "yunkai", "capturable_id": "characters/DaenerysTargaryen", '
             . '"capturable_type": "Tests\\\Setup\\\Models\\\Character", "name": "Yunkai", '
             . '"coordinate": [ 31.046642, -7.129532 ] },
-            { "_key": "astapor", "capturable_id": "DaenerysTargaryen", '
+            { "_key": "astapor", "capturable_id": "characters/DaenerysTargaryen", '
             . '"capturable_type": "Tests\\\Setup\\\Models\\\Character", "name": "Astapor", '
             . '"coordinate": [ 31.50974, -9.774249 ] },
-            { "_key": "winterfell", "capturable_id": "TheonGreyjoy", '
+            { "_key": "winterfell", "capturable_id": "characters/TheonGreyjoy", '
             . '"capturable_type": "Tests\\\Setup\\\Models\\\Character", "name": "Winterfell", '
             . '"coordinate": [ 54.368321, -5.581312 ] },
             { "_key": "vaes-dothrak", "name": "Vaes Dothrak", "coordinate": [ 54.16776, -6.096125 ] },
@@ -69,7 +69,7 @@ class MorphManyTest extends TestCase
 
     public function testRetrieveRelation()
     {
-        $character = Character::find('DaenerysTargaryen');
+        $character = Character::find('characters/DaenerysTargaryen');
 
         $locations = $character->captured;
 
@@ -80,20 +80,20 @@ class MorphManyTest extends TestCase
 
     public function testSave()
     {
-        $location = Location::find('winterfell');
-        $this->assertEquals('TheonGreyjoy', $location->capturable_id);
+        $location = Location::find('locations/winterfell');
+        $this->assertEquals('characters/TheonGreyjoy', $location->capturable_id);
 
-        $character = Character::find('RamsayBolton');
+        $character = Character::find('characters/RamsayBolton');
         $character->captured()->save($location);
 
-        $this->assertEquals($character->_key, $location->capturable_id);
+        $this->assertEquals($character->_id, $location->capturable_id);
         $this->assertCount(1, $character->captured);
         $this->assertInstanceOf(Location::class, $character->captured->first());
     }
 
     public function testWith(): void
     {
-        $character = Character::with('captured')->find('TheonGreyjoy');
+        $character = Character::with('captured')->find('characters/TheonGreyjoy');
 
         $this->assertInstanceOf(Location::class, $character->captured->first());
         $this->assertEquals('winterfell', $character->captured->first()->_key);

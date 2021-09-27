@@ -37,7 +37,7 @@ class MorphOneTest extends TestCase
                     '_key'            => 'winterfell',
                     'name'            => 'Winterfell',
                     'coordinate'      => [54.368321, -5.581312],
-                    'capturable_id'   => 'RamsayBolton',
+                    'capturable_id'   => 'characters/RamsayBolton',
                     'capturable_type' => 'Tests\Setup\Models\Character',
                 ],
             ]
@@ -55,29 +55,29 @@ class MorphOneTest extends TestCase
 
     public function testRetrieveRelation()
     {
-        $character = Character::find('RamsayBolton');
+        $character = Character::find('characters/RamsayBolton');
         $location = $character->conquered;
 
         $this->assertEquals('winterfell', $location->_key);
-        $this->assertEquals($location->capturable_id, $character->_key);
+        $this->assertEquals($location->capturable_id, $character->_id);
         $this->assertInstanceOf(Character::class, $character);
     }
 
     public function testSave()
     {
-        $location = Location::find('winterfell');
-        $character = Character::find('TheonGreyjoy');
+        $location = Location::find('locations/winterfell');
+        $character = Character::find('characters/TheonGreyjoy');
 
         $character->conquered()->save($location);
-        $location = Location::find('winterfell');
+        $location = Location::find('locations/winterfell');
 
-        $this->assertEquals($character->_key, $location->capturable_id);
+        $this->assertEquals($character->_id, $location->capturable_id);
         $this->assertInstanceOf(Location::class, $character->conquered);
     }
 
     public function testWith(): void
     {
-        $character = Character::with('conquered')->find('RamsayBolton');
+        $character = Character::with('conquered')->find('characters/RamsayBolton');
 
         $this->assertInstanceOf(Location::class, $character->conquered);
         $this->assertEquals('winterfell', $character->conquered->_key);

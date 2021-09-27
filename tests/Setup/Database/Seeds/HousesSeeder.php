@@ -18,17 +18,17 @@ class HousesSeeder extends Seeder
            {
               "_key":"targaryan",
               "name":"Targaryan",
-              "location_key":"dragonstone"
+              "location_id":"dragonstone"
            },
            {
               "_key":"stark",
               "name":"Stark",
-              "location_key":"winterfell"
+              "location_id":"winterfell"
            },
            {
               "_key":"lannister",
               "name":"Lannister",
-              "location_key":"king-s-landing"
+              "location_id":"king-s-landing"
            }
         ]';
 

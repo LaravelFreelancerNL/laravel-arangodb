@@ -36,11 +36,11 @@ class BuilderTest extends TestCase
             'surname'      => 'Stark',
             'alive'        => false,
             'age'          => 41,
-            'location_key' => 'kingslanding',
+            'location_id' => 'locations/kingslanding',
         ];
         Character::insert($character);
 
-        $ned = Character::find('NedStark');
+        $ned = Character::find('characters/NedStark');
 
         $this->assertEquals('NedStark', $ned->_key);
         $this->assertIsObject($ned->en);
@@ -59,13 +59,13 @@ class BuilderTest extends TestCase
             'surname'      => 'Stark',
             'alive'        => true,
             'age'          => 41,
-            'location_key' => 'kingslanding',
+            'location_id' => 'locations/kingslanding',
         ];
         Character::insert($character);
-        $retrievedBeforeUpdate = Character::find('NedStark');
+        $retrievedBeforeUpdate = Character::find('characters/NedStark');
         $retrievedBeforeUpdate->update(['alive' => false]);
 
-        $retrievedAfterUpdate = Character::find('NedStark');
+        $retrievedAfterUpdate = Character::find('characters/NedStark');
         $this->assertArrayNotHasKey('characters.updated_at', $retrievedAfterUpdate->toArray());
     }
 }

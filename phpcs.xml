@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 
-<ruleset  name="PHP_CodeSniffer">
-
+<ruleset name="Aranguent">
     <description>PHPCS configuration file.</description>
+
     <file>src</file>
     <file>tests</file>
 

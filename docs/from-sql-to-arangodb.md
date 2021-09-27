@@ -7,7 +7,7 @@ Existing Illuminate based migration files can be quickly converted to use the Ar
 Artisan command: 
 
 ```php
- php artisan aranguent:convert-migrations  
+ php artisan aranguent:convert-migrations; 
  ```
 
 As ArangoDB is schemaless, column creation methods are ignored. However, index creation on a column is caught and handled: 
@@ -15,7 +15,7 @@ As ArangoDB is schemaless, column creation methods are ignored. However, index c
 `$table->string('email')->unique()` creates a unique skiplist index for the 'email' attribute.
 
 The `->autoIncrement()` column modifier and `$table->increments('id');` column definition will set autoincrement on the 
-collections _key if used during collection creation. This is solely for developer expectations management.  
+collections _id if used during collection creation. This is solely for developer expectations management.  
 
 ### Indexes
 Index creation defaults to skiplist indexes. If you solely need exact matching you may want to change your index 

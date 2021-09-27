@@ -22,7 +22,7 @@ class LocationsSeeder extends Seeder
                  55.167801,
                  -6.815096
               ],
-              "led_by":"DaenerysTargaryen"
+              "led_by":"characters/DaenerysTargaryen"
            },
            {
               "_key":"king-s-landing",
@@ -31,7 +31,7 @@ class LocationsSeeder extends Seeder
                  42.639752,
                  18.110189
               ],
-              "led_by":"CerseiLannister"
+              "led_by":"characters/CerseiLannister"
            },
            {
               "_key":"the-red-keep",
@@ -40,7 +40,7 @@ class LocationsSeeder extends Seeder
                  35.896447,
                  14.446442
               ],
-              "led_by":"CerseiLannister"
+              "led_by":"characters/CerseiLannister"
            },
            {
               "_key":"yunkai",
@@ -49,7 +49,7 @@ class LocationsSeeder extends Seeder
                  31.046642,
                  -7.129532
               ],
-              "led_by":"DaenerysTargaryen"
+              "led_by":"characters/DaenerysTargaryen"
            },
            {
               "_key":"astapor",
@@ -58,7 +58,7 @@ class LocationsSeeder extends Seeder
                  31.50974,
                  -9.774249
               ],
-              "led_by":"DaenerysTargaryen"
+              "led_by":"characters/DaenerysTargaryen"
            },
            {
               "_key":"winterfell",
@@ -67,7 +67,7 @@ class LocationsSeeder extends Seeder
                  54.368321,
                  -5.581312
               ],
-              "led_by":"SansaStark"
+              "led_by":"characters/SansaStark"
            },
            {
               "_key":"vaes-dothrak",
@@ -76,7 +76,7 @@ class LocationsSeeder extends Seeder
                  54.16776,
                  -6.096125
               ],
-              "led_by":"DaenerysTargaryen"
+              "led_by":"characters/DaenerysTargaryen"
            },
            {
               "_key":"beyond-the-wall",

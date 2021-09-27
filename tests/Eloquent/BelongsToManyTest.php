@@ -35,7 +35,7 @@ class BelongsToManyTest extends TestCase
 
     public function testRetrieveRelation()
     {
-        $parent = Character::find('NedStark');
+        $parent = Character::find('characters/NedStark');
         $children = $parent->children;
 
         $this->assertEquals(5, count($children));
@@ -47,7 +47,7 @@ class BelongsToManyTest extends TestCase
 
     public function testInverseRelation()
     {
-        $child = Character::find('JonSnow');
+        $child = Character::find('characters/JonSnow');
 
         $parents = $child->parents;
 
@@ -61,7 +61,7 @@ class BelongsToManyTest extends TestCase
 
     public function testAttach()
     {
-        $child = Character::find('JonSnow');
+        $child = Character::find('characters/JonSnow');
 
         $lyannaStark = Character::create(
             [
@@ -70,17 +70,17 @@ class BelongsToManyTest extends TestCase
                 "surname" => "Stark",
                 "alive" => false,
                 "age" => 25,
-                "residence_key" => "winterfell"
+                "residence_id" => "winterfell"
             ]
         );
 
         // Reload from DB
-        $lyannaStark = Character::find('LyannaStark');
+        $lyannaStark = Character::find('characters/LyannaStark');
 
         $child->parents()->attach($lyannaStark);
         $child->save();
 
-        $reloadedChild = Character::find('JonSnow');
+        $reloadedChild = Character::find('characters/JonSnow');
         $parents = $child->parents;
 
         $this->assertEquals('NedStark', $parents[0]->_key);
@@ -89,12 +89,12 @@ class BelongsToManyTest extends TestCase
 
     public function testDetach()
     {
-        $child = Character::find('JonSnow');
+        $child = Character::find('characters/JonSnow');
 
         $child->parents()->detach('characters/NedStark');
         $child->save();
 
-        $reloadedChild = Character::find('JonSnow');
+        $reloadedChild = Character::find('characters/JonSnow');
         $this->assertEquals(0, count($reloadedChild->parents));
     }
 
@@ -107,7 +107,7 @@ class BelongsToManyTest extends TestCase
                 "surname" => "Stark",
                 "alive" => false,
                 "age" => 25,
-                "residence_key" => "winterfell"
+                "residence_id" => "winterfell"
             ]
         );
         $rhaegarTargaryen = Character::create(
@@ -117,14 +117,14 @@ class BelongsToManyTest extends TestCase
                 "surname" => "Targaryen",
                 "alive" => false,
                 "age" => 25,
-                "residence_key" => "dragonstone"
+                "residence_id" => "dragonstone"
             ]
         );
 
-        $child = Character::find('JonSnow');
+        $child = Character::find('characters/JonSnow');
 
         $child->parents()->sync(['characters/LyannaStark', 'characters/RhaegarTargaryen']);
-        $reloadedChild = Character::find('JonSnow');
+        $reloadedChild = Character::find('characters/JonSnow');
 
         $this->assertEquals(2, count($reloadedChild->parents));
         $this->assertEquals('characters/LyannaStark', $reloadedChild->parents[0]->_id);

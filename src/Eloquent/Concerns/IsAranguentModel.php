@@ -12,6 +12,16 @@ trait IsAranguentModel
     use HasAranguentRelationships;
 
     /**
+     * Get the route key for the model.
+     *
+     * @return string
+     */
+    public function getRouteKeyName(): string
+    {
+        return '_key';
+    }
+
+    /**
      * @override
      * Create a new Eloquent query builder for the model.
      *
@@ -43,21 +53,10 @@ trait IsAranguentModel
     public function __get($key)
     {
         // Laravel's accessors don't differentiate between id and _id, so we catch ArangoDB's _id here.
-        if ($key === '_id') {
+        if ($key === 'id') {
             return $this->attributes['_id'];
         }
         return $this->getAttribute($key);
-    }
-
-    /**
-     * Map the id attribute commonly used in Laravel to the primary key for third-party compatibility.
-     * In ArangoDB '_key' is the equivalent of 'id' in sql databases.
-     *
-     * @return string
-     */
-    public function getIdAttribute()
-    {
-        return $this->{$this->primaryKey};
     }
 
     /**
@@ -70,27 +69,12 @@ trait IsAranguentModel
     public function __set($key, $value)
     {
         // Laravel's mutators don't differentiate between id and _id, so we catch ArangoDB's _id here.
-        if ($key === '_id') {
-            $this->attributes[$key] = $value;
+        if ($key === 'id') {
+            $this->attributes['_id'] = $value;
             return;
         }
 
         $this->setAttribute($key, $value);
-    }
-
-    /**
-     * Map the id attribute commonly used in Laravel to the primary key for third-party compatibility.
-     * In ArangoDB '_key' is the equivalent of 'id' in sql databases.
-     *
-     * @param  string  $value
-     * @return void
-     */
-    public function setIdAttribute($value)
-    {
-        $this->attributes[$this->primaryKey] = $value;
-        if ($this->primaryKey === '_key') {
-            $this->updateIdWithKey($value);
-        }
     }
 
     /**
@@ -146,10 +130,10 @@ trait IsAranguentModel
     public function getForeignKey()
     {
         $keyName = $this->getKeyName();
-
-        if ($keyName[0] != '_') {
-            $keyName = '_' . $keyName;
-        }
+//
+//        if ($keyName[0] != '_') {
+//            $keyName = '_' . $keyName;
+//        }
 
         return Str::snake(class_basename($this)) . $keyName;
     }

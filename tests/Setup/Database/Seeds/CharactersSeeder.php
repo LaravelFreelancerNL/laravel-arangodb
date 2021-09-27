@@ -21,14 +21,14 @@ class CharactersSeeder extends Seeder
               "surname":"Stark",
               "alive":true,
               "age":41,
-              "residence_key":"winterfell"
+              "residence_id":"locations/winterfell"
            },
            {
               "_key":"RobertBaratheon",
               "name":"Robert",
               "surname":"Baratheon",
               "alive":false,
-              "residence_key":"winterfell"
+              "residence_id":"locations/winterfell"
            },
            {
               "_key":"JaimeLannister",
@@ -36,7 +36,7 @@ class CharactersSeeder extends Seeder
               "surname":"Lannister",
               "alive":true,
               "age":36,
-              "residence_key":"the-red-keep"
+              "residence_id":"locations/the-red-keep"
            },
            {
               "_key":"CatelynStark",
@@ -44,7 +44,7 @@ class CharactersSeeder extends Seeder
               "surname":"Stark",
               "alive":false,
               "age":40,
-              "residence_key":"winterfell"
+              "residence_id":"locations/winterfell"
            },
            {
               "_key":"CerseiLannister",
@@ -52,7 +52,7 @@ class CharactersSeeder extends Seeder
               "surname":"Lannister",
               "alive":true,
               "age":36,
-              "residence_key":"the-red-keep"
+              "residence_id":"locations/the-red-keep"
            },
            {
               "_key":"DaenerysTargaryen",
@@ -60,28 +60,28 @@ class CharactersSeeder extends Seeder
               "surname":"Targaryen",
               "alive":true,
               "age":16,
-              "residence_key":"winterfell"
+              "residence_id":"locations/winterfell"
            },
            {
               "_key":"JorahMormont",
               "name":"Jorah",
               "surname":"Mormont",
               "alive":false,
-              "residence_key":"winterfell"
+              "residence_id":"locations/winterfell"
            },
            {
               "_key":"PetyrBaelish",
               "name":"Petyr",
               "surname":"Baelish",
               "alive":false,
-              "residence_key":"the-red-keep"
+              "residence_id":"locations/the-red-keep"
            },
            {
               "_key":"ViserysTargaryen",
               "name":"Viserys",
               "surname":"Targaryen",
               "alive":false,
-              "residence_key":null
+              "residence_id":null
            },
            {
               "_key":"JonSnow",
@@ -89,7 +89,7 @@ class CharactersSeeder extends Seeder
               "surname":"Snow",
               "alive":true,
               "age":16,
-              "residence_key":"winterfell"
+              "residence_id":"locations/winterfell"
            },
            {
               "_key":"SansaStark",
@@ -97,7 +97,7 @@ class CharactersSeeder extends Seeder
               "surname":"Stark",
               "alive":true,
               "age":13,
-              "residence_key":"winterfell"
+              "residence_id":"locations/winterfell"
            },
            {
               "_key":"AryaStark",
@@ -105,14 +105,14 @@ class CharactersSeeder extends Seeder
               "surname":"Stark",
               "alive":true,
               "age":11,
-              "residence_key":"winterfell"
+              "residence_id":"locations/winterfell"
            },
            {
               "_key":"RobbStark",
               "name":"Robb",
               "surname":"Stark",
               "alive":false,
-              "residence_key":"winterfell"
+              "residence_id":"locations/winterfell"
            },
            {
               "_key":"TheonGreyjoy",
@@ -120,7 +120,7 @@ class CharactersSeeder extends Seeder
               "surname":"Greyjoy",
               "alive":true,
               "age":16,
-              "residence_key":"winterfell"
+              "residence_id":"locations/winterfell"
            },
            {
               "_key":"BranStark",
@@ -128,7 +128,7 @@ class CharactersSeeder extends Seeder
               "surname":"Stark",
               "alive":true,
               "age":10,
-              "residence_key":"winterfell"
+              "residence_id":"locations/winterfell"
            },
            {
               "_key":"JoffreyBaratheon",
@@ -136,14 +136,14 @@ class CharactersSeeder extends Seeder
               "surname":"Baratheon",
               "alive":false,
               "age":19,
-              "residence_key":"the-red-keep"
+              "residence_id":"locations/the-red-keep"
            },
            {
               "_key":"SandorClegane",
               "name":"Sandor",
               "surname":"Clegane",
               "alive":true,
-              "residence_key":"the-red-keep"
+              "residence_id":"locations/the-red-keep"
            },
            {
               "_key":"TyrionLannister",
@@ -151,21 +151,21 @@ class CharactersSeeder extends Seeder
               "surname":"Lannister",
               "alive":true,
               "age":32,
-              "residence_key":"the-red-keep"
+              "residence_id":"locations/the-red-keep"
            },
            {
               "_key":"KhalDrogo",
               "name":"Khal",
               "surname":"Drogo",
               "alive":false,
-              "residence_key":"winterfell"
+              "residence_id":"locations/winterfell"
            },
            {
               "_key":"TywinLannister",
               "name":"Tywin",
               "surname":"Lannister",
               "alive":false,
-              "residence_key":"the-red-keep"
+              "residence_id":"locations/the-red-keep"
            },
            {
               "_key":"DavosSeaworth",
@@ -173,7 +173,7 @@ class CharactersSeeder extends Seeder
               "surname":"Seaworth",
               "alive":true,
               "age":49,
-              "residence_key":"winterfell"
+              "residence_id":"locations/winterfell"
            },
            {
               "_key":"SamwellTarly",
@@ -181,52 +181,52 @@ class CharactersSeeder extends Seeder
               "surname":"Tarly",
               "alive":true,
               "age":17,
-              "residence_key":"winterfell"
+              "residence_id":"locations/winterfell"
            },
            {
               "_key":"StannisBaratheon",
               "name":"Stannis",
               "surname":"Baratheon",
               "alive":false,
-              "residence_key":"dragonstone"
+              "residence_id":"locations/dragonstone"
            },
            {
               "_key":"Melisandre",
               "name":"Melisandre",
               "alive":true,
-              "residence_key":"dragonstone"
+              "residence_id":"locations/dragonstone"
            },
            {
               "_key":"MargaeryTyrell",
               "name":"Margaery",
               "surname":"Tyrell",
               "alive":false,
-              "residence_key":"winterfell"
+              "residence_id":"locations/winterfell"
            },
            {
               "_key":"JeorMormont",
               "name":"Jeor",
               "surname":"Mormont",
               "alive":false,
-              "residence_key":null
+              "residence_id":null
            },
            {
               "_key":"Bronn",
               "name":"Bronn",
               "alive":true,
-              "residence_key":"king-s-landing"
+              "residence_id":"locations/king-s-landing"
            },
            {
               "_key":"Varys",
               "name":"Varys",
               "alive":true,
-              "residence_key":"the-red-keep"
+              "residence_id":"locations/the-red-keep"
            },
            {
               "_key":"Shae",
               "name":"Shae",
               "alive":false,
-              "residence_key":"the-red-keep"
+              "residence_id":"locations/the-red-keep"
            },
            {
               "_key":"TalisaMaegyr",
@@ -238,26 +238,26 @@ class CharactersSeeder extends Seeder
               "_key":"Gendry",
               "name":"Gendry",
               "alive":false,
-              "residence_key":"king-s-landing"
+              "residence_id":"locations/king-s-landing"
            },
            {
               "_key":"Ygritte",
               "name":"Ygritte",
               "alive":false,
-              "residence_key":"beyond-the-wall"
+              "residence_id":"locations/beyond-the-wall"
            },
            {
               "_key":"TormundGiantsbane",
               "name":"Tormund",
               "surname":"Giantsbane",
               "alive":true,
-              "residence_key":"beyond-the-wall"
+              "residence_id":"locations/beyond-the-wall"
            },
            {
               "_key":"Gilly",
               "name":"Gilly",
               "alive":true,
-              "residence_key":"beyond-the-wall"
+              "residence_id":"locations/beyond-the-wall"
            },
            {
               "_key":"BrienneTarth",
@@ -294,7 +294,7 @@ class CharactersSeeder extends Seeder
               "name":"Tommen",
               "surname":"Baratheon",
               "alive":true,
-              "residence_key":"the-red-keep"
+              "residence_id":"locations/the-red-keep"
            },
            {
               "_key":"JaqenHghar",
@@ -312,7 +312,7 @@ class CharactersSeeder extends Seeder
               "_key":"TheHighSparrow",
               "name":"The High Sparrow",
               "alive":true,
-              "residence_key":"king-s-landing"
+              "residence_id":"locations/king-s-landing"
            }
         ]';
 

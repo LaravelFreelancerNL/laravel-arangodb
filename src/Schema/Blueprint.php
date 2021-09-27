@@ -85,7 +85,7 @@ class Blueprint
     public $temporary = false;
 
     /**
-     * Detect if _key (and thus proxy _id) should autoincrement.
+     * Detect if _id should autoincrement.
      *
      * @var bool
      */

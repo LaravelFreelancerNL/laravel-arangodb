@@ -16,7 +16,7 @@ class CreateHousesTable extends Migration
     {
         Schema::create('houses', function (Blueprint $collection) {
 //            $collection->skiplistIndex('name');
-//            $collection->skiplistIndex('location_key');
+//            $collection->skiplistIndex('location_id');
         });
     }
 

@@ -25,7 +25,7 @@ class HasOneTest extends TestCase
                     'alive'        => false,
                     'age'          => 41,
                     'traits'       => ['A', 'H', 'C', 'N', 'P'],
-                    'location_key' => 'kingslanding',
+                    'location_id' => 'locations/kingslanding',
                 ],
                 [
                     '_key'         => 'SansaStark',
@@ -34,7 +34,7 @@ class HasOneTest extends TestCase
                     'alive'        => true,
                     'age'          => 13,
                     'traits'       => ['D', 'I', 'J'],
-                    'location_key' => 'winterfell',
+                    'location_id' => 'locations/winterfell',
                 ],
                 [
                     '_key'         => 'RobertBaratheon',
@@ -43,7 +43,7 @@ class HasOneTest extends TestCase
                     'alive'        => false,
                     'age'          => null,
                     'traits'       => ['A', 'H', 'C'],
-                    'location_key' => 'dragonstone',
+                    'location_id' => 'locations/dragonstone',
                 ],
             ]
         );
@@ -58,7 +58,7 @@ class HasOneTest extends TestCase
                     '_key'       => 'winterfell',
                     'name'       => 'Winterfell',
                     'coordinate' => [54.368321, -5.581312],
-                    'led_by'     => 'SansaStark',
+                    'led_by'     => 'characters/SansaStark',
                 ],
                 [
                     '_key'       => 'kingslanding',
@@ -80,21 +80,21 @@ class HasOneTest extends TestCase
 
     public function testRetrieveRelation()
     {
-        $location = Location::find('kingslanding');
+        $location = Location::find('locations/kingslanding');
         $character = $location->character;
 
         $this->assertEquals('kingslanding', $location->_key);
-        $this->assertEquals($character->location_key, $location->_key);
+        $this->assertEquals($character->location_id, $location->_id);
         $this->assertInstanceOf(Character::class, $character);
     }
 
     public function testAlternativeRelationshipNameAndKey()
     {
-        $character = Character::find('SansaStark');
+        $character = Character::find('characters/SansaStark');
         $location = $character->leads;
 
         $this->assertEquals('winterfell', $location->_key);
-        $this->assertEquals($character->location_key, $location->_key);
+        $this->assertEquals($character->location_id, $location->_id);
         $this->assertInstanceOf(Location::class, $location);
     }
 
@@ -118,15 +118,15 @@ class HasOneTest extends TestCase
                 'traits'  => ['E', 'R', 'K'],
             ]
         );
-        $character = Character::find('TheonGreyjoy');
+        $character = Character::find('characters/TheonGreyjoy');
         $location->leader()->associate($character);
 
         $location->push();
 
-        $location = Location::find('pyke');
+        $location = Location::find('locations/pyke');
 
         $this->assertEquals('TheonGreyjoy', $location->leader->_key);
-        $this->assertEquals($location->led_by, 'TheonGreyjoy');
+        $this->assertEquals($location->led_by, 'characters/TheonGreyjoy');
         $this->assertInstanceOf(Character::class, $location->leader);
     }
 
@@ -142,7 +142,7 @@ class HasOneTest extends TestCase
                 'traits'  => ['E', 'R', 'K'],
             ]
         );
-        $location = new Location(
+        $location = Location::create(
             [
                 '_key'       => 'pyke',
                 'name'       => 'Pyke',
@@ -155,13 +155,13 @@ class HasOneTest extends TestCase
         $character = $location->character;
 
         $this->assertEquals('TheonGreyjoy', $character->_key);
-        $this->assertEquals($character->location_key, $location->_key);
+        $this->assertEquals($character->location_id, $location->_id);
         $this->assertInstanceOf(Character::class, $character);
     }
 
     public function testWith(): void
     {
-        $character = Character::with('leads')->find('SansaStark');
+        $character = Character::with('leads')->find('characters/SansaStark');
 
         $this->assertInstanceOf(Location::class, $character->leads);
         $this->assertEquals('winterfell', $character->leads->_key);

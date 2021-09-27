@@ -25,7 +25,7 @@ class HasManyTest extends TestCase
                     'alive'         => false,
                     'age'           => 41,
                     'traits'        => ['A', 'H', 'C', 'N', 'P'],
-                    'residence_key' => 'winterfell',
+                    'residence_id' => 'locations/winterfell',
                 ],
                 [
                     '_key'          => 'SansaStark',
@@ -34,7 +34,7 @@ class HasManyTest extends TestCase
                     'alive'         => true,
                     'age'           => 13,
                     'traits'        => ['D', 'I', 'J'],
-                    'residence_key' => 'winterfell',
+                    'residence_id' => 'locations/winterfell',
                 ],
                 [
                     '_key'          => 'RobertBaratheon',
@@ -43,7 +43,7 @@ class HasManyTest extends TestCase
                     'alive'         => false,
                     'age'           => null,
                     'traits'        => ['A', 'H', 'C'],
-                    'residence_key' => 'dragonstone',
+                    'residence_id' => 'locations/dragonstone',
                 ],
             ]
         );
@@ -58,7 +58,7 @@ class HasManyTest extends TestCase
                     '_key'       => 'winterfell',
                     'name'       => 'Winterfell',
                     'coordinate' => [54.368321, -5.581312],
-                    'led_by'     => 'SansaStark',
+                    'led_by'     => 'characters/SansaStark',
                 ],
                 [
                     '_key'       => 'kingslanding',
@@ -80,12 +80,11 @@ class HasManyTest extends TestCase
 
     public function testRetrieveRelation()
     {
-        $location = Location::find('winterfell');
+        $location = Location::find('locations/winterfell');
 
         $inhabitants = $location->inhabitants;
-
         $this->assertCount(2, $inhabitants);
-        $this->assertEquals($inhabitants->first()->residence_key, $location->_key);
+        $this->assertEquals($inhabitants->first()->residence_id, $location->_id);
         $this->assertInstanceOf(Character::class, $inhabitants->first());
     }
 
@@ -110,14 +109,12 @@ class HasManyTest extends TestCase
         );
 
         $location->inhabitants()->save($character);
-
         // Reload
-        $location = Location::findOrFail('pyke');
-
+        $location = Location::findOrFail('locations/pyke');
         $inhabitants = $location->inhabitants;
 
         $this->assertEquals('TheonGreyjoy', $inhabitants->first()->_key);
-        $this->assertEquals($inhabitants->first()->residence_key, $location->_key);
+        $this->assertEquals($inhabitants->first()->residence_id, $location->_id);
         $this->assertInstanceOf(Character::class, $inhabitants->first());
     }
 
@@ -141,19 +138,19 @@ class HasManyTest extends TestCase
                 'traits'  => ['E', 'R', 'K'],
             ]
         );
-        $character = Character::find('TheonGreyjoy');
-        $location = Location::find('pyke');
+        $character = Character::find('characters/TheonGreyjoy');
+        $location = Location::find('locations/pyke');
 
         $this->assertEquals('TheonGreyjoy', $location->inhabitants->first()->_key);
-        $this->assertEquals($character->residence_key, 'pyke');
+        $this->assertEquals($character->residence_id, 'locations/pyke');
         $this->assertInstanceOf(Character::class, $location->inhabitants->first());
     }
 
     public function testWith(): void
     {
-        $location = Location::with('inhabitants')->find('winterfell');
+        $location = Location::with('inhabitants')->find('locations/winterfell');
 
         $this->assertInstanceOf(Character::class, $location->inhabitants->first());
-        $this->assertEquals('NedStark', $location->inhabitants->first()->_key);
+        $this->assertEquals('characters/NedStark', $location->inhabitants->first()->_id);
     }
 }

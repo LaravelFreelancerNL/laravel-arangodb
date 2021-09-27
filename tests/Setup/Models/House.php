@@ -12,7 +12,7 @@ class House extends Model
     protected $fillable = [
         '_key',
         'name',
-        'location_key',
+        'location_id',
     ];
 
     /**

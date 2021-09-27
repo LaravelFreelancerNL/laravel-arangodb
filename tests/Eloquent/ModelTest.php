@@ -139,25 +139,16 @@ class ModelTest extends TestCase
     public function testGetId()
     {
         $ned = Character::first();
-        $this->assertEquals('NedStark', $ned->id);
-        $this->assertEquals($ned->_key, $ned->id);
-    }
-
-    public function testSetArangoId()
-    {
-        $ned = Character::first();
-        $ned->_id = 'characters/NedStarkIsDead';
-
-        $this->assertEquals('characters/NedStarkIsDead', $ned->_id);
+        $this->assertEquals('characters/NedStark', $ned->id);
     }
 
     public function testSetId()
     {
         $ned = Character::first();
-        $ned->id = 'NedStarkIsDead';
+        $ned->id = 'characters/NedStarkIsDead';
 
-        $this->assertEquals('NedStarkIsDead', $ned->_key);
         $this->assertEquals('characters/NedStarkIsDead', $ned->_id);
+        $this->assertEquals('characters/NedStarkIsDead', $ned->id);
     }
 
     public function testSetKey()

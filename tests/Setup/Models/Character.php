@@ -22,8 +22,8 @@ class Character extends Model
         'alive',
         'age',
         'traits',
-        'location_key',
-        'residence_key',
+        'location_id',
+        'residence_id',
     ];
 
     /**
@@ -41,7 +41,7 @@ class Character extends Model
 
     public function residence()
     {
-        return $this->belongsTo(Location::class, 'residence_key');
+        return $this->belongsTo(Location::class, 'residence_id');
     }
 
     public function parents()
@@ -50,9 +50,7 @@ class Character extends Model
             Character::class,
             'children',
             '_to',
-            '_from',
-            '_id',
-            '_id'
+            '_from'
         );
     }
 
@@ -62,9 +60,7 @@ class Character extends Model
             Character::class,
             'children',
             '_from',
-            '_to',
-            '_id',
-            '_id'
+            '_to'
         )->using('Tests\Setup\Models\Child')
             ->withPivot([
                             'created_by',

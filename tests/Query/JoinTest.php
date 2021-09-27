@@ -33,8 +33,8 @@ class JoinTest extends TestCase
     public function testJoin()
     {
         $characters = DB::table('characters')
-            ->join('locations', 'characters.residence_key', '=', 'locations._key')
-            ->where('residence_key', '=', 'winterfell')
+            ->join('locations', 'characters.residence_id', '=', 'locations._id')
+            ->where('residence_id', '=', 'locations/winterfell')
             ->get();
 
         $this->assertCount(15, $characters);
@@ -53,11 +53,11 @@ class JoinTest extends TestCase
     public function testLeftJoin()
     {
         $characters = DB::table('characters')
-            ->leftJoin('locations', 'characters.residence_key', '=', 'locations._key')
+            ->leftJoin('locations', 'characters.residence_id', '=', 'locations._id')
             ->get();
 
         $charactersWithoutResidence = DB::table('characters')
-            ->whereNull('residence_key')
+            ->whereNull('residence_id')
             ->get();
 
         $this->assertCount(33, $characters);

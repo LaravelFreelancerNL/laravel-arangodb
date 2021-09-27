@@ -16,48 +16,48 @@ class TaggablesSeeder extends Seeder
     {
         $taggables = '[
            {
-              "tag_key":"A",
-              "taggable_id":"winterfell",
+              "tag_id":"tags/A",
+              "taggable_id":"locations/winterfell",
               "taggable_type":"Tests\\\Setup\\\Models\\\Location"
            },
           {
-              "tag_key":"S",
-              "taggable_id":"beyond-the-wall",
+              "tag_id":"tags/S",
+              "taggable_id":"locations/beyond-the-wall",
               "taggable_type":"Tests\\\Setup\\\Models\\\Location"
            },
           {
-              "tag_key":"E",
-              "taggable_id":"PetyrBaelish",
+              "tag_id":"tags/E",
+              "taggable_id":"characters/PetyrBaelish",
               "taggable_type":"Tests\\\Setup\\\Models\\\Character"
            },
           {
-              "tag_key":"F",
-              "taggable_id":"PetyrBaelish",
+              "tag_id":"tags/F",
+              "taggable_id":"characters/PetyrBaelish",
               "taggable_type":"Tests\\\Setup\\\Models\\\Character"
            },
           {
-              "tag_key":"G",
-              "taggable_id":"PetyrBaelish",
+              "tag_id":"tags/G",
+              "taggable_id":"characters/PetyrBaelish",
               "taggable_type":"Tests\\\Setup\\\Models\\\Character"
            },
           {
-              "tag_key":"A",
-              "taggable_id":"SandorClegane",
+              "tag_id":"tags/A",
+              "taggable_id":"characters/SandorClegane",
               "taggable_type":"Tests\\\Setup\\\Models\\\Character"
            },
           {
-              "tag_key":"F",
-              "taggable_id":"SandorClegane",
+              "tag_id":"tags/F",
+              "taggable_id":"characters/SandorClegane",
               "taggable_type":"Tests\\\Setup\\\Models\\\Character"
            },
           {
-              "tag_key":"K",
-              "taggable_id":"SandorClegane",
+              "tag_id":"tags/K",
+              "taggable_id":"characters/SandorClegane",
               "taggable_type":"Tests\\\Setup\\\Models\\\Character"
            },
           {
-              "tag_key":"P",
-              "taggable_id":"SandorClegane",
+              "tag_id":"tags/P",
+              "taggable_id":"characters/SandorClegane",
               "taggable_type":"Tests\\\Setup\\\Models\\\Character"
            }
         ]';

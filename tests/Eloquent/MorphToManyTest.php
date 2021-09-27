@@ -39,11 +39,9 @@ class MorphToManyTest extends TestCase
 
     public function testRetrieveRelation()
     {
-        $character = Character::find('SandorClegane');
+        $character = Character::find('characters/SandorClegane');
 
-        DB::connection()->enableQueryLog();
         $tags = $character->tags;
-//        dd(DB::getQueryLog());
 
         $this->assertEquals(4, count($tags));
         $this->assertInstanceOf(Tag::class, $tags[0]);
@@ -51,7 +49,7 @@ class MorphToManyTest extends TestCase
 
     public function testInverseRelation()
     {
-        $tag = Tag::find('A');
+        $tag = Tag::find('tags/A');
 
         $characters = $tag->characters;
         $locations = $tag->locations;
@@ -63,13 +61,13 @@ class MorphToManyTest extends TestCase
 
     public function testAttach()
     {
-        $character = Character::find('Varys');
+        $character = Character::find('characters/Varys');
 
 
-        $character->tags()->attach(['B', 'E', 'J', 'N', 'O']);
+        $character->tags()->attach(['tags/B', 'tags/E', 'tags/J', 'tags/N', 'tags/O']);
         $character->save();
 
-        $reloadedCharacter = Character::find('Varys');
+        $reloadedCharacter = Character::find('characters/Varys');
         $tags = $reloadedCharacter->tags;
 
         $this->assertEquals(5, count($tags));
@@ -78,12 +76,12 @@ class MorphToManyTest extends TestCase
 
     public function testDetach()
     {
-        $character = Character::find('SandorClegane');
+        $character = Character::find('characters/SandorClegane');
 
-        $character->tags()->detach(['F', 'K']);
+        $character->tags()->detach(['tags/F', 'tags/K']);
         $character->save();
 
-        $reloadedCharacter = Character::find('SandorClegane');
+        $reloadedCharacter = Character::find('characters/SandorClegane');
 
         $this->assertEquals(2, count($reloadedCharacter->tags));
         $this->assertEquals('A', $reloadedCharacter->tags[0]->_key);
@@ -92,12 +90,12 @@ class MorphToManyTest extends TestCase
 
     public function testSync(): void
     {
-        $character = Character::find('SandorClegane');
+        $character = Character::find('characters/SandorClegane');
 
-        $character->tags()->sync(['C', 'J']);
+        $character->tags()->sync(['tags/C', 'tags/J']);
         $character->save();
 
-        $reloadedCharacter = Character::find('SandorClegane');
+        $reloadedCharacter = Character::find('characters/SandorClegane');
 
         $this->assertEquals(2, count($reloadedCharacter->tags));
         $this->assertEquals('C', $reloadedCharacter->tags[0]->_key);

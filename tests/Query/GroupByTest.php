@@ -36,15 +36,15 @@ class GroupByTest extends TestCase
     public function testGroupByMultiple()
     {
         $groups = DB::table('characters')
-            ->select('surname', 'residence_key')
-            ->groupBy('surname', 'residence_key')
+            ->select('surname', 'residence_id')
+            ->groupBy('surname', 'residence_id')
             ->get();
 
         $this->assertCount(29, $groups);
         $this->assertEquals(null, $groups[4][0]);
-        $this->assertEquals('the-red-keep', $groups[4][1]);
+        $this->assertEquals('locations/the-red-keep', $groups[4][1]);
         $this->assertEquals('Baelish', $groups[5][0]);
-        $this->assertEquals('the-red-keep', $groups[5][1]);
+        $this->assertEquals('locations/the-red-keep', $groups[5][1]);
     }
 
     public function testHaving()

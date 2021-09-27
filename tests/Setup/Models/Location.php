@@ -39,7 +39,7 @@ class Location extends Model
      */
     public function inhabitants()
     {
-        return $this->hasMany(Character::class, 'residence_key');
+        return $this->hasMany(Character::class, 'residence_id');
     }
 
     public function capturable()

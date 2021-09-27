@@ -129,7 +129,7 @@ class Grammar extends FluentAqlGrammar
         $builder->aqb = $builder->aqb->let('values', $values)
             ->for('value', 'values')
             ->insert('value', $table)
-            ->return('NEW._key');
+            ->return('NEW._id');
 
         return $builder;
     }
