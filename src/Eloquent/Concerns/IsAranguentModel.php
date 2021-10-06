@@ -22,6 +22,26 @@ trait IsAranguentModel
     }
 
     /**
+     * Insert the given attributes and set the ID on the model.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  array  $attributes
+     * @return void
+     */
+    protected function insertAndSetId(\Illuminate\Database\Eloquent\Builder $query, $attributes)
+    {
+        $id = $query->insertGetId($attributes, $keyName = $this->getKeyName());
+
+        $this->setAttribute($keyName, $id);
+        if ($keyName === '_id') {
+            $matches = [];
+            preg_match('/\/(.*)$/', $id, $matches);
+
+            $this->setAttribute('_key', $matches[1]);
+        }
+    }
+
+    /**
      * @override
      * Create a new Eloquent query builder for the model.
      *
