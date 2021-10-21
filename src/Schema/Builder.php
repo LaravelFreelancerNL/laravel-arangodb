@@ -7,6 +7,7 @@ use ArangoClient\Schema\SchemaManager;
 use Closure;
 use Illuminate\Support\Fluent;
 use LaravelFreelancerNL\Aranguent\Connection;
+use stdClass;
 
 class Builder
 {
@@ -52,15 +53,11 @@ class Builder
     /**
      * Create a new collection on the schema.
      *
-     * @param string  $collection
-     * @param Closure $callback
-     * @param array   $config
-     *
-     * @return void
+     * @param array<mixed> $config
      */
-    public function create($collection, Closure $callback, $config = [])
+    public function create(string $table, Closure $callback, array $config = []): void
     {
-        $this->build(tap($this->createBlueprint($collection), function ($blueprint) use ($callback, $config) {
+        $this->build(tap($this->createBlueprint($table), function ($blueprint) use ($callback, $config) {
             $blueprint->create($config);
 
             $callback($blueprint);
@@ -105,19 +102,6 @@ class Builder
     }
 
     /**
-     * Alias for table.
-     *
-     * @param string  $collection
-     * @param Closure $callback
-     *
-     * @return void
-     */
-    public function collection($collection, Closure $callback)
-    {
-        $this->table($collection, $callback);
-    }
-
-    /**
      * Modify a table's schema.
      *
      * @param string  $table
@@ -131,20 +115,23 @@ class Builder
     }
 
     /**
-     * Drop a collection from the schema.
+     * Drop a table (collection) from the schema.
      *
-     * @param  string  $collection
-     *
-     * @return void
+     * @throws ArangoException
      */
-    public function drop($collection)
+    public function drop(string $table)
     {
-        $this->schemaManager->deleteCollection($collection);
+        $this->schemaManager->deleteCollection($table);
     }
 
-    public function dropAllCollections()
+    /**
+     * Drop all tables (collections) from the schema.
+     *
+     * @throws ArangoException
+     */
+    public function dropAllTables(): void
     {
-        $collections = $this->getAllCollections();
+        $collections = $this->getAllTables();
 
         foreach ($collections as $name) {
             $this->schemaManager->deleteCollection($name->name);
@@ -152,64 +139,37 @@ class Builder
     }
 
     /**
-     * Alias for dropAllCollections.
-     *
-     * @return void
+     * @throws ArangoException
      */
-    public function dropAllTables()
+    public function dropIfExists(string $table): void
     {
-        $this->dropAllCollections();
-    }
-
-    /**
-     * @param $collection
-     *
-     * @throws Exception
-     */
-    public function dropIfExists($collection)
-    {
-        $collections = $this->hasCollection($collection);
-        if ($collections) {
-            $this->drop($collection);
+        $tableExists = $this->hasTable($table);
+        if ($tableExists) {
+            $this->drop($table);
         }
     }
 
     /**
-     * Get all of the collection names for the database.
+     * Get all the tables for the database; excluding ArangoDB system collections
      *
-     * @return array
+     * @return array<mixed>
      * @throws ArangoException
      */
-    public function getAllCollections()
+    public function getAllTables(): array
     {
         return $this->schemaManager->getCollections(true);
     }
 
     /**
-     * Get all of the table names for the database.
-     * Alias for getAllCollections().
-     *
-     * @return array
      * @throws ArangoException
      */
-    protected function getAllTables()
+    protected function getTable(string $table): stdClass
     {
-        return $this->getAllCollections();
+        return $this->schemaManager->getCollection($table);
     }
 
     /**
-     * @param  string  $collection
-     *
-     * @return array
-     * @throws ArangoException
-     */
-    protected function getCollection($collection)
-    {
-        return $this->schemaManager->getCollection($collection);
-    }
-
-    /**
-     * Rename a collection.
+     * Rename a table (collection).
      *
      * @param $from
      * @param $to
@@ -224,103 +184,55 @@ class Builder
     }
 
     /**
-     * Determine if the given collection exists.
+     * Determine if the given table (collection) exists.
      *
-     * @param  string  $collection
-     *
-     * @return bool
      * @throws ArangoException
      */
-    public function hasCollection(string $collection): bool
+    public function hasTable(string $table): bool
     {
-        return $this->schemaManager->hasCollection($collection);
+        return $this->schemaManager->hasCollection($table);
     }
 
     /**
-     * Alias for hasCollection.
+     * Check if any row (document) in the table (collection) has the attribute.
      *
      * @param  string  $table
-     *
-     *
-     * @return bool
-     * @throws ArangoException
-     */
-    public function hasTable($table): bool
-    {
-        return $this->hasCollection($table);
-    }
-
-    /**
-     * Check if any document in the collection has the attribute.
-     *
-     * @param  string  $collection
-     * @param  mixed  $attribute
+     * @param  mixed  $column
      *
      * @return bool
      */
-    public function hasAttribute(string $collection, $attribute): bool
+    public function hasColumn(string $table, $column): bool
     {
-        if (is_string($attribute)) {
-            $attribute = [$attribute];
+        if (is_string($column)) {
+            $column = [$column];
         }
 
-        return $this->hasAttributes($collection, $attribute);
+        return $this->hasColumns($table, $column);
     }
 
     /**
      * Check if any document in the collection has the attribute.
      *
-     * @param  string  $collection
-     * @param  array  $attributes
-     *
-     * @return bool
+     * @param  array<mixed>  $columns
      */
-    public function hasAttributes(string $collection, array $attributes)
+    public function hasColumns(string $table, array $columns): bool
     {
         $parameters = [];
         $parameters['name'] = 'hasAttribute';
         $parameters['handler'] = 'aql';
-        $parameters['attribute'] = $attributes;
+        $parameters['attribute'] = $columns;
 
         $command = new Fluent($parameters);
-        $compilation = $this->grammar->compileHasAttribute($collection, $command);
+        $compilation = $this->grammar->compileHasAttribute($table, $command);
 
         return $this->connection->statement($compilation['aql']);
     }
 
     /**
-     * Alias for hasAttribute.
-     *
-     * @param  string  $table
-     * @param  string  $column
-     *
-     * @return bool
-     */
-    public function hasColumn(string $table, string $column): bool
-    {
-        return $this->hasAttribute($table, $column);
-    }
-
-    /**
-     * Alias for hasAttributes.
-     *
-     * @param  string  $table
-     * @param  array  $columns
-     *
-     * @return bool
-     */
-    public function hasColumns(string $table, array $columns): bool
-    {
-        return $this->hasAttributes($table, $columns);
-    }
-
-    /**
-     * @param  string  $name
-     * @param  array  $properties
-     * @param  string  $type
+     * @param  array<mixed> $properties
      * @throws ArangoException
      */
-    public function createView(string $name, array $properties, $type = 'arangosearch')
+    public function createView(string $name, array $properties, string $type = 'arangosearch')
     {
         $view = $properties;
         $view['name'] = $name;
@@ -368,6 +280,20 @@ class Builder
     public function dropView(string $name)
     {
         $this->schemaManager->deleteView($name);
+    }
+
+    /**
+     * Drop all views from the schema.
+     *
+     * @throws ArangoException
+     */
+    public function dropAllViews(): void
+    {
+        $views = $this->schemaManager->getViews();
+
+        foreach ($views as $view) {
+            $this->schemaManager->deleteView($view->name);
+        }
     }
 
     /**

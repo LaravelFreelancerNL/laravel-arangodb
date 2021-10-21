@@ -7,14 +7,14 @@ use Illuminate\Support\Facades\Facade;
 use LaravelFreelancerNL\Aranguent\Schema\Builder;
 
 /**
- * Table handling:.
- *
+ * Table handling:
  * @method static Builder create($collection, Closure $callback, $options = [])
- * @method static Builder getAllCollections()
+ * @method static Builder getAllTables()
  * @method static Builder drop(string $collection)
  * @method static Builder dropIfExists(string $collection)
  * @method static Builder dropAllTables()
  * @method static Builder table(string $table, \Closure $callback)
+ * @method static Builder hasColumn(string $table, $column)
  *
  * View handling:
  * @method static Builder createView($name, array $properties, $type = 'arangosearch')
@@ -22,6 +22,7 @@ use LaravelFreelancerNL\Aranguent\Schema\Builder;
  * @method static Builder editView($name, array $properties)
  * @method static Builder renameView(string $from, string $to)
  * @method static Builder dropView(string $name)
+ * @method static Builder dropAllViews()
  *
  * @see \LaravelFreelancerNL\Aranguent\Schema\Builder
  */

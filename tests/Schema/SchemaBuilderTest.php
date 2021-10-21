@@ -18,7 +18,7 @@ class SchemaBuilderTest extends TestCase
         M::close();
     }
 
-    public function testCollectionHasAttributes()
+    public function testCollectionHasColumns()
     {
         $mockConnection = M::mock(Connection::class);
         $mockArangoClient = M::mock(ArangoClient::class);
@@ -33,8 +33,8 @@ class SchemaBuilderTest extends TestCase
         $mockConnection->shouldReceive('statement')->once()->andReturn(true);
         $mockConnection->shouldReceive('statement')->once()->andReturn(false);
 
-        $this->assertTrue($builder->hasAttribute('users', ['_id', 'firstname']));
-        $this->assertFalse($builder->hasAttribute('users', ['_id', 'not_an_attribute']));
+        $this->assertTrue($builder->hasColumn('users', ['_id', 'firstname']));
+        $this->assertFalse($builder->hasColumn('users', ['_id', 'not_an_attribute']));
     }
 
     public function testCreateView()
@@ -110,16 +110,34 @@ class SchemaBuilderTest extends TestCase
         $schemaManager->getView('search');
     }
 
+
+    public function testDropAllView()
+    {
+        $schemaManager = $this->connection->getArangoClient()->schema();
+        if (! $schemaManager->hasView('products')) {
+            Schema::createView('products', []);
+        }
+        if (! $schemaManager->hasView('pages')) {
+            Schema::createView('pages', []);
+        }
+        Schema::dropAllViews();
+
+        $this->expectExceptionMessage('collection or view not found');
+        $schemaManager->getView('products');
+        $this->expectExceptionMessage('collection or view not found');
+        $schemaManager->getView('search');
+    }
+
     public function testDropAllTables()
     {
-        $initialCollections = Schema::getAllCollections();
+        $initialTables = Schema::getAllTables();
 
         Schema::dropAllTables();
 
-        $collections = Schema::getAllCollections();
+        $tables = Schema::getAllTables();
 
-        $this->assertEquals(10, count($initialCollections));
-        $this->assertEquals(0, count($collections));
+        $this->assertEquals(10, count($initialTables));
+        $this->assertEquals(0, count($tables));
 
         $this->migrate();
     }
