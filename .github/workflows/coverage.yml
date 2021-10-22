@@ -36,6 +36,11 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-suggest
 
+      - name: Prepare test database
+        run: |
+          chmod +x "${GITHUB_WORKSPACE}/bin/prepare-test-db.sh"
+          "${GITHUB_WORKSPACE}/bin/prepare-test-db.sh"
+
       - name: Test coverage
         run: |
           vendor/bin/phpunit --coverage-clover clover.xml --whitelist src

@@ -1,4 +1,5 @@
 .idea
+clover.xml
 composer.phar
 phpunit.phar
 /vendor
