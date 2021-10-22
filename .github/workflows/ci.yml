@@ -12,7 +12,7 @@ jobs:
       matrix:
         laravel: [^8.0]
         php: [8.0]
-        arangodb: [3.6, 3.7, latest]
+        arangodb: [3.6, 3.7, 3.8]
         include:
           - laravel: ^8.0
             testbench: ^6.0

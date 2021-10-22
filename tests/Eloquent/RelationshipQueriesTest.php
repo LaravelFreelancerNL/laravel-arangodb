@@ -15,10 +15,10 @@ use Tests\TestCase;
 
 class RelationshipQueriesTest extends TestCase
 {
-    protected function setUp(): void
+    protected function defineDatabaseMigrations()
     {
-        parent::setUp();
-        Carbon::setTestNow(Carbon::now());
+        $this->loadLaravelMigrations();
+        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
 
         Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
         Artisan::call('db:seed', ['--class' => LocationsSeeder::class]);
@@ -26,12 +26,22 @@ class RelationshipQueriesTest extends TestCase
         Artisan::call('db:seed', ['--class' => TaggablesSeeder::class]);
     }
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Carbon::setTestNow(Carbon::now());
+    }
+
     public function tearDown(): void
     {
         parent::tearDown();
+
         Carbon::setTestNow(null);
         Carbon::resetToStringFormat();
+
         Model::unsetEventDispatcher();
+
         M::close();
     }
 

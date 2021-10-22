@@ -2,69 +2,96 @@
 
 namespace Tests;
 
-use Illuminate\Foundation\Application;
+use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\AranguentServiceProvider;
 use LaravelFreelancerNL\Aranguent\Connection as Connection;
-use LaravelFreelancerNL\Aranguent\Migrations\DatabaseMigrationRepository;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 use LaravelFreelancerNL\Aranguent\Query\Grammar;
 use LaravelFreelancerNL\Aranguent\Query\Processor;
+use LaravelFreelancerNL\Aranguent\Testing\TestCase as AranguentTestCase;
 use Mockery as m;
 
-abstract class TestCase extends \Orchestra\Testbench\TestCase
+abstract class TestCase extends AranguentTestCase implements \Orchestra\Testbench\Contracts\TestCase
 {
-    protected $collection = 'migrations';
+    use OrchestraTestbenchTesting;
 
-    protected $connection;
+    protected ?ConnectionInterface $connection;
 
-    protected $schemaManager;
-
-    protected $databaseMigrationRepository;
-
-    protected $packageMigrationPath;
-
-    protected $aranguentMigrationStubPath;
-
-    protected $laravelMigrationPath;
+    /**
+     * The base URL to use while testing the application.
+     *
+     * @var string
+     */
+    protected $baseUrl = 'http://localhost';
 
     /**
      * Define environment setup.
      *
-     * @param Application $app
+     * @param  \Illuminate\Foundation\Application  $app
+     * @return void
+     */
+    protected function defineEnvironment($app)
+    {
+        $app['config']->set('database.default', 'arangodb');
+        $app['config']->set('database.connections.arangodb', [
+            'name'                                      => 'arangodb',
+            'driver'                                    => 'arangodb',
+            'endpoint'                                  => env('DB_ENDPOINT', 'http://localhost:8529'),
+            'username'                                  => env('DB_USERNAME', 'root'),
+            'password'                                  => env('DB_PASSWORD', null),
+            'database'                                  => env('DB_DATABASE', 'aranguent__test'),
+        ]);
+    }
+
+    /**
+     * Setup the test environment.
      *
      * @return void
      */
-    protected function getEnvironmentSetUp($app)
-    {
-        $config = require __DIR__ . '/Setup/config/database.php';
-        $app['config']->set('database.connections.arangodb', $config['connections']['arangodb']);
-        $app['config']->set('database.default', 'arangodb');
-        $app['config']->set('cache.driver', 'array');
-
-        $this->connection = DB::connection('arangodb');
-        $this->schemaManager = $this->connection->getArangoClient()->schema();
-
-        $this->createDatabase();
-        $this->connection->setDatabaseName(
-            ($app['config']['database.database']) ? $app['config']['database.database'] : 'aranguent__test'
-        );
-
-
-        //Truncate all collections
-        $collections = $this->schemaManager->getCollections(true);
-        foreach ($collections as $collection) {
-            $this->schemaManager->truncateCollection($collection->id);
-        }
-    }
-
     protected function setUp(): void
     {
-        parent::setUp();
+        $this->setUpTheTestEnvironment();
 
-        $this->migrate();
+        $this->connection = DB::connection();
 
-        $this->databaseMigrationRepository = new DatabaseMigrationRepository($this->app['db'], $this->collection);
+        //Convert orchestra migrations
+        $this->artisan(
+            'aranguent:convert-migrations',
+            ['--realpath' => true, '--path' => __DIR__ . '/../vendor/orchestra/testbench-core/laravel/migrations/']
+        )->run();
+    }
+
+    /**
+     * Clean up the testing environment before the next test.
+     *
+     * @return void
+     */
+    protected function tearDown(): void
+    {
+        $this->tearDownTheTestEnvironment();
+    }
+
+    /**
+     * Boot the testing helper traits.
+     *
+     * @return array<string, string>
+     */
+    protected function setUpTraits()
+    {
+        $uses = array_flip(class_uses_recursive(static::class));
+
+        return $this->setUpTheTestEnvironmentTraits($uses);
+    }
+
+    /**
+     * Refresh the application instance.
+     *
+     * @return void
+     */
+    protected function refreshApplication()
+    {
+        $this->app = $this->createApplication();
     }
 
     protected function getPackageProviders($app)
@@ -81,38 +108,10 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         ];
     }
 
-    protected function createDatabase($database = 'aranguent__test')
+    protected function skipTestOnArangoVersionsBefore(string $version)
     {
-        if (! $this->schemaManager->hasDatabase($database)) {
-            $this->schemaManager->createDatabase($database);
-
-            return true;
-        }
-
-        return false;
-    }
-
-    protected function migrate()
-    {
-        //Convert orchestra migrations
-        $this->artisan(
-            'aranguent:convert-migrations',
-            ['--realpath' => true, '--path' => __DIR__ . '/../vendor/orchestra/testbench-core/laravel/migrations/']
-        )
-            ->run();
-
-        $this->installMigrateIfNotExists();
-
-        $this->artisan('migrate', [
-            '--path'     => realpath(__DIR__ . '/Setup/Database/Migrations'),
-            '--realpath' => true,
-        ])->run();
-    }
-
-    private function installMigrateIfNotExists()
-    {
-        if (! $this->schemaManager->hasCollection('migrations')) {
-            $this->artisan('migrate:install', [])->run();
+        if (version_compare(getenv('ARANGODB_VERSION'), $version, '<')) {
+            $this->markTestSkipped('This test does not support ArangoDB versions before ' . $version);
         }
     }
 
@@ -122,12 +121,5 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         $processor = m::mock(Processor::class);
 
         return new Builder(m::mock(Connection::class), $grammar, $processor);
-    }
-
-    protected function skipTestOnArangoVersionsBefore(string $version)
-    {
-        if (version_compare(getenv('ARANGODB_VERSION'), $version, '<')) {
-            $this->markTestSkipped('This test does not support ArangoDB versions before ' . $version);
-        }
     }
 }

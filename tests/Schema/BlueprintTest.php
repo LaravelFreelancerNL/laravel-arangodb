@@ -2,36 +2,45 @@
 
 namespace Tests\Schema;
 
+use ArangoClient\Schema\SchemaManager;
+use Illuminate\Support\Facades\Artisan;
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
-use Mockery as M;
 use Tests\TestCase;
 
 class BlueprintTest extends TestCase
 {
-    public function tearDown(): void
+    protected ?SchemaManager $schemaManager = null;
+
+    protected function defineDatabaseMigrations()
     {
-        M::close();
+        $this->loadLaravelMigrations();
+        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
+
+        Artisan::call('db:seed', ['--class' => \Tests\Setup\Database\Seeds\CharactersSeeder::class]);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->schemaManager = $this->connection->getArangoClient()->schema();
     }
 
     public function testCreateIndex()
     {
-        $schemaManager = $this->connection->getArangoClient()->schema();
-
         Schema::table('characters', function (Blueprint $collection) {
             $collection->index(['name']);
         });
         $name = 'characters_name_persistent';
 
-        $index = $schemaManager->getIndexByName('characters', $name);
+        $index = $this->schemaManager ->getIndexByName('characters', $name);
 
         $this->assertEquals($name, $index->name);
     }
 
     public function testDropIndex()
     {
-        $schemaManager = $this->connection->getArangoClient()->schema();
-
         Schema::table('characters', function (Blueprint $collection) {
             $collection->index(['name']);
         });
@@ -40,7 +49,7 @@ class BlueprintTest extends TestCase
             $collection->dropIndex('characters_name_persistent');
         });
 
-        $searchResult = $schemaManager->getIndexByName('characters', 'characters_name_persistent');
+        $searchResult = $this->schemaManager->getIndexByName('characters', 'characters_name_persistent');
         $this->assertFalse($searchResult);
     }
 

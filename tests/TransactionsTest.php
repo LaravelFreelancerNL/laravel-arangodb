@@ -8,82 +8,47 @@ use Mockery as M;
 use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Location;
 
+/**
+ * @covers \LaravelFreelancerNL\Aranguent\Connection
+ * @covers \LaravelFreelancerNL\Aranguent\Concerns\ManagesTransactions
+ */
 class TransactionsTest extends TestCase
 {
-    public function tearDown(): void
+    protected function defineDatabaseMigrations()
     {
-        M::close();
+        $this->loadLaravelMigrations();
+        $this->loadMigrationsFrom(__DIR__ . '/Setup/Database/Migrations');
     }
 
-    public function testGetTransactionManager()
+    public function tearDown(): void
     {
-        $transactionManager = $this->connection->getArangoClient()->getTransactionManager();
-        $this->assertInstanceOf(TransactionManager::class, $transactionManager);
+        parent::tearDown();
+
+        M::close();
     }
 
     public function testBeginTransaction()
     {
-        $connection = $this->connection;
-        $arangoTransaction = $connection->getArangoClient()->getTransactionManager();
-        $runningTransactions = $arangoTransaction->getTransactions();
-        $this->assertEmpty($runningTransactions);
-
-        $connection->beginTransaction();
-        $arangoTransaction = $connection->getArangoClient()->getTransactionManager();
+        $this->connection->beginTransaction();
+        $arangoTransaction = $this->connection->getArangoClient()->getTransactionManager();
         $runningTransactions = $arangoTransaction->getTransactions();
 
         $this->assertEquals(1, count($runningTransactions));
-        $this->assertEquals(1, $connection->transactionLevel());
+        $this->assertEquals(1, $this->connection->transactionLevel());
         $this->assertInstanceOf(TransactionManager::class, $arangoTransaction);
+
+        $this->connection->rollBack();
     }
 
     public function testCommitTransaction()
     {
-        $connection = $this->connection;
-        $connection->beginTransaction();
-        $connection->commit();
-        $arangoTransaction = $connection->getArangoClient()->getTransactionManager();
+        $this->connection->beginTransaction();
+        $this->connection->commit();
+        $arangoTransaction = $this->connection->getArangoClient()->getTransactionManager();
         $runningTransactions = $arangoTransaction->getTransactions();
 
-        $this->assertEquals(0, $connection->transactionLevel());
+        $this->assertEquals(0, $this->connection->transactionLevel());
         $this->assertEmpty($runningTransactions);
-    }
-
-    public function testCommitTransactionWithQueries()
-    {
-        $startingCharacters = Character::all();
-        $startingLocations = Location::all();
-
-        $connection = $this->connection;
-        $connection->beginTransaction(['write' => ['characters', 'locations']]);
-
-        Character::create(
-            [
-                '_key'    => 'TheonGreyjoy',
-                'name'    => 'Theon',
-                'surname' => 'Greyjoy',
-                'alive'   => true,
-                'age'     => 16,
-                'traits'  => ['E', 'R', 'K'],
-            ]
-        );
-        Location::create(
-            [
-                '_key'       => 'pyke',
-                'name'       => 'Pyke',
-                'coordinate' => [55.8833342, -6.1388807],
-            ]
-        );
-
-        $connection->commit();
-
-        $endingCharacters = Character::all();
-        $endingLocations = Location::all();
-
-        $this->assertEquals(0, $startingCharacters->count());
-        $this->assertEquals(1, $endingCharacters->count());
-        $this->assertEquals(0, $startingLocations->count());
-        $this->assertEquals(1, $endingLocations->count());
     }
 
     public function testRollbackTransaction()
@@ -91,8 +56,7 @@ class TransactionsTest extends TestCase
         $startingCharacters = Character::all();
         $startingLocations = Location::all();
 
-        $connection = $this->connection;
-        $connection->beginTransaction(['write' => ['characters', 'locations']]);
+        $this->connection->beginTransaction(['write' => ['characters', 'locations']]);
 
         Character::create(
             [
@@ -111,8 +75,8 @@ class TransactionsTest extends TestCase
                 'coordinate' => [55.8833342, -6.1388807],
             ]
         );
-        $connection->rollBack();
-        $connection->commit();
+        $this->connection->rollBack();
+        $this->connection->commit();
 
         $endingCharacters = Character::all();
         $endingLocations = Location::all();
@@ -121,6 +85,43 @@ class TransactionsTest extends TestCase
         $this->assertEquals(0, $endingCharacters->count());
         $this->assertEquals(0, $startingLocations->count());
         $this->assertEquals(0, $endingLocations->count());
+    }
+
+
+    public function testCommitTransactionWithQueries()
+    {
+        $startingCharacters = Character::all();
+        $startingLocations = Location::all();
+
+        $this->connection->beginTransaction(['write' => ['characters', 'locations']]);
+
+        Character::create(
+            [
+                '_key'    => 'TheonGreyjoy',
+                'name'    => 'Theon',
+                'surname' => 'Greyjoy',
+                'alive'   => true,
+                'age'     => 16,
+                'traits'  => ['E', 'R', 'K'],
+            ]
+        );
+        Location::create(
+            [
+                '_key'       => 'pyke',
+                'name'       => 'Pyke',
+                'coordinate' => [55.8833342, -6.1388807],
+            ]
+        );
+
+        $this->connection->commit();
+
+        $endingCharacters = Character::all();
+        $endingLocations = Location::all();
+
+        $this->assertEquals(0, $startingCharacters->count());
+        $this->assertEquals(1, $endingCharacters->count());
+        $this->assertEquals(0, $startingLocations->count());
+        $this->assertEquals(1, $endingLocations->count());
     }
 
     public function testClosureTransactions()

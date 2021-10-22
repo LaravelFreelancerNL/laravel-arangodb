@@ -14,22 +14,32 @@ use Tests\TestCase;
 
 class BelongsToManyTest extends TestCase
 {
+    protected function defineDatabaseMigrations()
+    {
+        $this->loadLaravelMigrations();
+        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
+
+        Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
+        Artisan::call('db:seed', ['--class' => ChildrenSeeder::class]);
+        Artisan::call('db:seed', ['--class' => LocationsSeeder::class]);
+    }
+
     public function setUp(): void
     {
         parent::setUp();
-        Carbon::setTestNow(Carbon::now());
 
-        Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
-        Artisan::call('db:seed', ['--class' => LocationsSeeder::class]);
-        Artisan::call('db:seed', ['--class' => ChildrenSeeder::class]);
+        Carbon::setTestNow(Carbon::now());
     }
 
     public function tearDown(): void
     {
         parent::tearDown();
+
         Carbon::setTestNow(null);
         Carbon::resetToStringFormat();
+
         Model::unsetEventDispatcher();
+
         M::close();
     }
 

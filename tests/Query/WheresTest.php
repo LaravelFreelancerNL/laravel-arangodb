@@ -2,19 +2,19 @@
 
 namespace Tests\Query;
 
-use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Connection as Connection;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 use LaravelFreelancerNL\Aranguent\Query\Grammar;
 use LaravelFreelancerNL\Aranguent\Query\Processor;
 use Mockery as m;
-use Tests\Setup\Models\Character;
 use Tests\TestCase;
 
 class WheresTest extends TestCase
 {
     protected function tearDown(): void
     {
+        parent::tearDown();
+
         m::close();
     }
 

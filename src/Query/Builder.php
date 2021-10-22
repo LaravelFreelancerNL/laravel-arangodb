@@ -16,7 +16,6 @@ use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsWhereClauses;
 use LaravelFreelancerNL\FluentAQL\Exceptions\BindException;
 use LaravelFreelancerNL\FluentAQL\Expressions\ExpressionInterface as ExpressionInterface;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder;
-use phpDocumentor\Reflection\Types\ArrayKey;
 
 class Builder extends IlluminateQueryBuilder
 {
@@ -227,12 +226,7 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Insert a new record and get the value of the primary key.
      *
-     * @param array       $values
-     * @param string|null $sequence
-     *
-     * @throws BindException
-     *
-     * @return int
+     * @param array<mixed> $values
      */
     public function insertGetId(array $values, $sequence = null)
     {
@@ -242,6 +236,25 @@ class Builder extends IlluminateQueryBuilder
 
         return (is_array($response)) ? end($response) : $response;
     }
+
+    /**
+     * Insert a new record into the database.
+     *
+     * @param array $values
+     *
+     * @throws BindException
+     *
+     * @return bool
+     */
+    public function insertOrIgnore(array $values): bool
+    {
+        $this->grammar->compileInsertOrIgnore($this, $values)->setAql();
+        $results = $this->getConnection()->insert($this->aqb);
+        $this->aqb = new QueryBuilder();
+
+        return $results;
+    }
+
 
     /**
      * Execute the query as a "select" statement.

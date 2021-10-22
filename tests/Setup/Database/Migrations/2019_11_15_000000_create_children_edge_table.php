@@ -29,6 +29,6 @@ class CreateChildrenEdgeTable extends Migration
      */
     public function down()
     {
-        Schema::drop('children');
+        Schema::dropIfExists('children');
     }
 }

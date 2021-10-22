@@ -13,6 +13,13 @@ use Tests\TestCase;
 
 class SchemaBuilderTest extends TestCase
 {
+    protected function defineDatabaseMigrations()
+    {
+        $this->loadLaravelMigrations();
+        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
+    }
+
+
     public function tearDown(): void
     {
         M::close();
@@ -138,7 +145,5 @@ class SchemaBuilderTest extends TestCase
 
         $this->assertEquals(10, count($initialTables));
         $this->assertEquals(0, count($tables));
-
-        $this->migrate();
     }
 }

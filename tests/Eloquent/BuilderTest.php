@@ -10,18 +10,27 @@ use Tests\TestCase;
 
 class BuilderTest extends TestCase
 {
+    protected function defineDatabaseMigrations()
+    {
+        $this->loadLaravelMigrations();
+        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
+
         Carbon::setTestNow(Carbon::now());
     }
 
     public function tearDown(): void
     {
         parent::tearDown();
+
         Carbon::setTestNow(null);
         Carbon::resetToStringFormat();
         Model::unsetEventDispatcher();
+
         M::close();
     }
 

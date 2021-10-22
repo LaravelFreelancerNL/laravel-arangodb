@@ -6,20 +6,30 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use Mockery as M;
+use Tests\Setup\Database\Seeds\CharactersSeeder;
+use Tests\Setup\Database\Seeds\ChildrenSeeder;
+use Tests\Setup\Database\Seeds\LocationsSeeder;
 use Tests\setup\Models\Character;
 use Tests\Setup\Models\Location;
 use Tests\TestCase;
 
 class BelongsToTest extends TestCase
 {
+    protected function defineDatabaseMigrations()
+    {
+        $this->loadLaravelMigrations();
+        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
+
+        Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
+        Artisan::call('db:seed', ['--class' => ChildrenSeeder::class]);
+        Artisan::call('db:seed', ['--class' => LocationsSeeder::class]);
+    }
+
     public function setUp(): void
     {
         parent::setUp();
-        Carbon::setTestNow(Carbon::now());
 
-        Artisan::call('db:seed', ['--class' => \Tests\Setup\Database\Seeds\CharactersSeeder::class]);
-        Artisan::call('db:seed', ['--class' => \Tests\Setup\Database\Seeds\LocationsSeeder::class]);
-        Artisan::call('db:seed', ['--class' => \Tests\Setup\Database\Seeds\ChildrenSeeder::class]);
+        Carbon::setTestNow(Carbon::now());
     }
 
     public function tearDown(): void

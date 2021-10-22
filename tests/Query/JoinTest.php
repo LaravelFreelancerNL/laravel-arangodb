@@ -7,26 +7,39 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use Mockery as m;
+use Tests\Setup\Database\Seeds\CharactersSeeder;
+use Tests\Setup\Database\Seeds\LocationsSeeder;
+use Tests\Setup\Database\Seeds\TagsSeeder;
 use Tests\TestCase;
 
 class JoinTest extends TestCase
 {
+    protected function defineDatabaseMigrations()
+    {
+        $this->loadLaravelMigrations();
+        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
+
+        Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
+        Artisan::call('db:seed', ['--class' => TagsSeeder::class]);
+        Artisan::call('db:seed', ['--class' => LocationsSeeder::class]);
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
-        Carbon::setTestNow(Carbon::now());
 
-        Artisan::call('db:seed', ['--class' => \Tests\Setup\Database\Seeds\CharactersSeeder::class]);
-        Artisan::call('db:seed', ['--class' => \Tests\Setup\Database\Seeds\TagsSeeder::class]);
-        Artisan::call('db:seed', ['--class' => \Tests\Setup\Database\Seeds\LocationsSeeder::class]);
+        Carbon::setTestNow(Carbon::now());
     }
 
     public function tearDown(): void
     {
         parent::tearDown();
+
         Carbon::setTestNow(null);
         Carbon::resetToStringFormat();
+
         Model::unsetEventDispatcher();
+
         M::close();
     }
 

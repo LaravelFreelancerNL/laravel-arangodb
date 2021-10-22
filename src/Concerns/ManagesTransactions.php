@@ -8,11 +8,6 @@ use Throwable;
 trait ManagesTransactions
 {
     /**
-     * @var int
-     */
-    protected $transactions = 0;
-
-    /**
      * Execute a Closure within a transaction.
      *
      * @param  Closure  $callback
@@ -71,12 +66,10 @@ trait ManagesTransactions
     /**
      * Start a new database transaction.
      *
-     * @param  array  $collections
-     * @return void
-     *
+     * @param array<string, array<string>> $collections
      * @throws Throwable
      */
-    public function beginTransaction($collections = [])
+    public function beginTransaction(array $collections = []): void
     {
         $this->createTransaction($collections);
 
@@ -88,11 +81,10 @@ trait ManagesTransactions
     /**
      * Create a transaction within the database.
      *
-     * @param  array  $collections
-     * @return void
-     *
+     * @param array<string, array<string>> $collections
+     * @throws Throwable
      */
-    protected function createTransaction($collections = [])
+    protected function createTransaction(array $collections = []): void
     {
         if ($this->transactions == 0) {
             $this->reconnectIfMissingConnection();

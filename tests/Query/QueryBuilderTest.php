@@ -16,26 +16,77 @@ use Tests\TestCase;
 
 class QueryBuilderTest extends TestCase
 {
-    public function setUp(): void
+    protected function defineDatabaseMigrations()
     {
-        parent::setUp();
-        Carbon::setTestNow(Carbon::now());
+        $this->loadLaravelMigrations();
+        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
 
         Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
     }
 
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        Carbon::setTestNow(Carbon::now());
+    }
+
     protected function tearDown(): void
     {
+        parent::tearDown();
+
         m::close();
     }
 
-    public function testInsertGetIdMethod()
+    public function testInsertGetId()
     {
         $builder = $this->getBuilder();
         $builder->getConnection()->shouldReceive('execute')->once()->with(FluentAQL::class)->andReturn(1);
         $result = $builder->from('users')->insertGetId(['email' => 'foo']);
         $this->assertEquals(1, $result);
     }
+
+    public function testInsertOrIgnoreInsertsData()
+    {
+        $characterData = [
+            "_key" => "LyannaStark",
+            "name" => "Lyanna",
+            "surname" => "Stark",
+            "alive" => false,
+            "age" => 25,
+            "residence_id" => "winterfell"
+        ];
+
+        DB::table('characters')->insertOrIgnore($characterData);
+
+        $result = DB::table('characters')
+            ->where("name", "==", "Lyanna")
+            ->count();
+
+        $this->assertSame(1, $result);
+    }
+
+    public function testInsertOrIgnoreDoesntErrorOnDuplicates()
+    {
+        $characterData = [
+            "_key" => "LyannaStark",
+            "name" => "Lyanna",
+            "surname" => "Stark",
+            "alive" => false,
+            "age" => 25,
+            "residence_id" => "winterfell"
+        ];
+        DB::table('characters')->insert($characterData);
+
+        DB::table('characters')->insertOrIgnore($characterData);
+
+        $result = DB::table('characters')
+            ->where("name", "==", "Lyanna")
+            ->count();
+
+        $this->assertSame(1, $result);
+    }
+
 
     public function testBasicSelect()
     {

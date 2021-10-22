@@ -14,6 +14,7 @@ use LaravelFreelancerNL\Aranguent\Query\Grammar as QueryGrammar;
 use LaravelFreelancerNL\Aranguent\Query\Processor;
 use LaravelFreelancerNL\Aranguent\Schema\Builder as SchemaBuilder;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder as FluentAQL;
+use Spatie\DataTransferObject\Exceptions\UnknownProperties;
 use stdClass;
 
 class Connection extends IlluminateConnection
@@ -23,7 +24,7 @@ class Connection extends IlluminateConnection
     use DetectsLostConnections;
     use ManagesTransactions;
 
-    protected ArangoClient $arangoClient;
+    protected ?ArangoClient $arangoClient = null;
 
     protected $database;
 
@@ -38,13 +39,14 @@ class Connection extends IlluminateConnection
      * Connection constructor.
      *
      * @param array $config
+     * @throws UnknownProperties
      */
     public function __construct($config = [])
     {
         $this->config = $config;
 
         $this->database = (isset($this->config['database'])) ? $this->config['database'] : null;
-        $this->tablePrefix = isset($this->config['tablePrefix']) ? $this->config['tablePrefix'] : null;
+        $this->tablePrefix = $this->config['tablePrefix'] ?? null;
 
         // activate and set the database client connection
         $this->arangoClient = new ArangoClient($this->config);
@@ -307,7 +309,7 @@ class Connection extends IlluminateConnection
     }
 
     /**
-     * Reconnect to the database if a Arango connection is missing.
+     * Reconnect to the database if an ArangoDB connection is missing.
      *
      * @return void
      */

@@ -4,14 +4,19 @@ namespace Tests\Eloquent;
 
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use LaravelFreelancerNL\Aranguent\Document;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use Mockery as M;
-use Tests\setup\Models\Character;
+use Tests\Setup\Models\Character;
 use Tests\TestCase;
 
 class ModelTest extends TestCase
 {
+    protected function defineDatabaseMigrations()
+    {
+        $this->loadLaravelMigrations();
+        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -42,9 +47,12 @@ class ModelTest extends TestCase
     public function tearDown(): void
     {
         parent::tearDown();
+
         Carbon::setTestNow(null);
         Carbon::resetToStringFormat();
+
         Model::unsetEventDispatcher();
+
         M::close();
     }
 

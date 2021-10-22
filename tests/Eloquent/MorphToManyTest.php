@@ -4,28 +4,34 @@ namespace Tests\Eloquent;
 
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use Mockery as M;
 use Tests\Setup\Database\Seeds\CharactersSeeder;
 use Tests\Setup\Database\Seeds\LocationsSeeder;
 use Tests\Setup\Database\Seeds\TaggablesSeeder;
 use Tests\Setup\Database\Seeds\TagsSeeder;
-use Tests\setup\Models\Character;
+use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Tag;
 use Tests\TestCase;
 
 class MorphToManyTest extends TestCase
 {
-    public function setUp(): void
+    protected function defineDatabaseMigrations()
     {
-        parent::setUp();
-        Carbon::setTestNow(Carbon::now());
+        $this->loadLaravelMigrations();
+        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
 
         Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
         Artisan::call('db:seed', ['--class' => LocationsSeeder::class]);
         Artisan::call('db:seed', ['--class' => TagsSeeder::class]);
         Artisan::call('db:seed', ['--class' => TaggablesSeeder::class]);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        Carbon::setTestNow(Carbon::now());
     }
 
     public function tearDown(): void

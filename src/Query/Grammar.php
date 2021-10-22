@@ -137,17 +137,59 @@ class Grammar extends FluentAqlGrammar
     /**
      * Compile an insert and get ID statement into SQL.
      *
+     * @param array<mixed> $values
+     */
+    public function compileInsertGetId(Builder $builder, $values, $sequence = "_id"): Builder
+    {
+        if (Arr::isAssoc($values)) {
+            $values = [$values];
+        }
+        $table = $this->prefixTable($builder->from);
+
+        if (empty($values)) {
+            $builder->aqb = $builder->aqb->insert('{}', $table)
+                ->return('NEW.' . $sequence);
+
+            return $builder;
+        }
+
+        $builder->aqb = $builder->aqb->let('values', $values)
+            ->for('value', 'values')
+            ->insert('value', $table)
+            ->return('NEW.' . $sequence);
+
+        return $builder;
+    }
+
+    /**
+     * Compile an insert statement into AQL.
+     *
      * @param Builder $builder
-     * @param array   $values
-     *
-     * @throws BindException
-     *
+     * @param array<mixed> $values
      * @return Builder
      */
-    public function compileInsertGetId(Builder $builder, $values)
+    public function compileInsertOrIgnore(Builder $builder, array $values)
     {
-        return $this->compileInsert($builder, $values);
+        if (Arr::isAssoc($values)) {
+            $values = [$values];
+        }
+        $table = $this->prefixTable($builder->from);
+
+        if (empty($values)) {
+            $builder->aqb = $builder->aqb->insert('{}', $table);
+
+            return $builder;
+        }
+
+        $builder->aqb = $builder->aqb->let('values', $values)
+            ->for('value', 'values')
+            ->insert('value', $table)
+            ->options(["ignoreErrors" => true])
+            ->return('NEW._id');
+
+        return $builder;
     }
+
 
     /**
      * Compile a select query into AQL.

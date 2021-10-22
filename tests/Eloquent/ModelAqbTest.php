@@ -3,19 +3,30 @@
 namespace Tests\Eloquent;
 
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Artisan;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder;
-use Tests\Setup\Database\Seeds\CharactersSeeder;
 use Tests\Setup\Models\Character;
 use Tests\TestCase;
 
 class ModelAqbTest extends TestCase
 {
-    public function setUp(): void
+    protected function defineDatabaseMigrations()
     {
-        parent::setUp();
+        $this->loadLaravelMigrations();
+        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
 
-        Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
+        Character::insert(
+            [
+                [
+                    '_key'         => 'NedStark',
+                    'name'         => 'Ned',
+                    'surname'      => 'Stark',
+                    'alive'        => false,
+                    'age'          => 41,
+                    'traits'       => ['A', 'H', 'C', 'N', 'P'],
+                    'location_id' => 'locations/kingslanding',
+                ],
+            ]
+        );
     }
 
     public function testExecuteReturnsCollectionOfModels()

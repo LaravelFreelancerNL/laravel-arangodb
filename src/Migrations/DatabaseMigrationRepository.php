@@ -104,11 +104,6 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
             ->get();
 
         return $this->getConnection()->select($qb->query);
-
-//        return $this->table()
-//                ->orderBy('batch', 'asc')
-//                ->orderBy('migration', 'asc')
-//                ->pluck('batch', 'migration')->all();
     }
 
     /**
@@ -131,20 +126,22 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
     /**
      * Remove a migration from the log.
      *
-     * @param object $migration
+     * @param object|string $migration
      *
      * @return void
      */
     public function delete($migration)
     {
+        if (is_object($migration)) {
+            $migration = $migration->migration;
+        }
+
         $qb = (new QueryBuilder())->for('m', 'migrations')
-                ->filter('m.migration', '==', $migration->migration)
+                ->filter('m.migration', '==', $migration)
                 ->remove('m', 'migrations')
                 ->get();
 
         $this->getConnection()->delete($qb->query, $qb->binds);
-
-//        $this->table()->where('migration', $migration->migration)->delete();
     }
 
     /**

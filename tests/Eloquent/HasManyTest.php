@@ -5,12 +5,18 @@ namespace Tests\Eloquent;
 use Illuminate\Support\Carbon;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use Mockery as M;
-use Tests\setup\Models\Character;
+use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Location;
 use Tests\TestCase;
 
 class HasManyTest extends TestCase
 {
+    protected function defineDatabaseMigrations()
+    {
+        $this->loadLaravelMigrations();
+        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -72,9 +78,12 @@ class HasManyTest extends TestCase
     public function tearDown(): void
     {
         parent::tearDown();
+
         Carbon::setTestNow(null);
         Carbon::resetToStringFormat();
+
         Model::unsetEventDispatcher();
+
         M::close();
     }
 

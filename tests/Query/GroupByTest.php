@@ -9,16 +9,19 @@ use Tests\TestCase;
 
 class GroupByTest extends TestCase
 {
-    protected function setUp(): void
+    protected function defineDatabaseMigrations()
     {
-        parent::setUp();
+        $this->loadLaravelMigrations();
+        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
 
         Artisan::call('db:seed', ['--class' => \Tests\Setup\Database\Seeds\CharactersSeeder::class]);
     }
 
+
     public function tearDown(): void
     {
         parent::tearDown();
+
         M::close();
     }
 

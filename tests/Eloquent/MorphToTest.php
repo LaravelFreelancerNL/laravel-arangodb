@@ -5,15 +5,23 @@ namespace Tests\Eloquent;
 use Illuminate\Support\Carbon;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use Mockery as M;
-use Tests\setup\Models\Character;
+use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Location;
 use Tests\TestCase;
 
 class MorphToTest extends TestCase
 {
+
+    protected function defineDatabaseMigrations()
+    {
+        $this->loadLaravelMigrations();
+        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
+
         Carbon::setTestNow(Carbon::now());
 
         $characters = '[

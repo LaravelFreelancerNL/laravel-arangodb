@@ -7,13 +7,15 @@ use Tests\TestCase;
 
 class ConsoleMigrationCommandsTest extends TestCase
 {
-    protected $packageMigrationPath;
-
     protected $aranguentMigrationStubPath;
+
+    protected $databaseMigrationRepository;
 
     protected $laravelMigrationPath;
 
     protected $migrationPath;
+
+    protected $packageMigrationPath;
 
     protected function setUp(): void
     {

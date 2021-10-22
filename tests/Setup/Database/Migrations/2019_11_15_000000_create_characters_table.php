@@ -16,8 +16,6 @@ class CreateCharactersTable extends Migration
     public function up()
     {
         Schema::create('characters', function (Blueprint $collection) {
-//            $collection->fulltextIndex('name');
-//            $collection->fulltextIndex('surname');
         });
     }
 
@@ -28,6 +26,6 @@ class CreateCharactersTable extends Migration
      */
     public function down()
     {
-        Schema::drop('characters');
+        Schema::dropIfExists('characters');
     }
 }

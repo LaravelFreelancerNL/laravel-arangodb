@@ -3,27 +3,14 @@
 namespace Tests;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Fluent as IlluminateFluent;
-use LaravelFreelancerNL\FluentAQL\QueryBuilder;
-use Mockery as M;
 
 class ConnectionTest extends TestCase
 {
-    public function tearDown(): void
+    public function testConnectionIsMade()
     {
-        M::close();
-    }
+        $connection = DB::connection();
 
-    /**
-     * test connection.
-     *
-     * @test
-     */
-    public function connection()
-    {
-        $this->createDatabase();
-
-        $this->assertInstanceOf('LaravelFreelancerNL\Aranguent\Connection', $this->connection);
+        $this->assertInstanceOf('LaravelFreelancerNL\Aranguent\Connection', $connection);
     }
 
     public function testChangeDatabaseName()
@@ -41,11 +28,7 @@ class ConnectionTest extends TestCase
     {
         $query = '
             FOR i IN 1..1000
-                INSERT {
-                    _key: CONCAT(\'test\', i),
-                    name: "test",
-                    foobar: true
-                    } INTO migrations OPTIONS { ignoreErrors: true }
+                RETURN i
         ';
 
         $explanation = $this->connection->explain($query);
