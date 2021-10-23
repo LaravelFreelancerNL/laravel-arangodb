@@ -21,7 +21,7 @@
   "minimum-stability": "dev",
   "prefer-stable" : true,
   "require": {
-    "composer/composer": ">= 2.1.9",
+    "composer/composer": ">= 1.12.23|>= 2.1.9",
     "php": "^8.0",
     "laravel/framework": ">=8",
     "ext-json": "*",
