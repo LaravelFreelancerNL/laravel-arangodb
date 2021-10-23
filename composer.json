@@ -36,7 +36,8 @@
     "phpstan/phpstan": "^0.12.0",
     "phpmd/phpmd": "dev-master",
     "nunomaduro/larastan": "^0.6",
-    "scrutinizer/ocular": "^1.8"
+    "scrutinizer/ocular": "^1.8",
+    "timacdonald/log-fake": "^1.9"
   },
   "repositories": [ ],
   "autoload": {

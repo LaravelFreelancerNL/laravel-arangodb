@@ -7,6 +7,8 @@ namespace LaravelFreelancerNL\Aranguent\Schema;
 use ArangoClient\Exceptions\ArangoException;
 use ArangoClient\Schema\SchemaManager;
 use Closure;
+use Illuminate\Database\Connection as IlluminateConnection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Fluent;
 use LaravelFreelancerNL\Aranguent\Connection;
 use stdClass;
@@ -16,9 +18,9 @@ class Builder
     /**
      * The database connection instance.
      *
-     * @var \Illuminate\Database\Connection
+     * @var IlluminateConnection
      */
-    protected $connection;
+    protected IlluminateConnection $connection;
 
     protected SchemaManager $schemaManager;
 
@@ -27,7 +29,7 @@ class Builder
      *
      * @var Grammar
      */
-    protected $grammar;
+    protected Grammar $grammar;
 
     /**
      * The Blueprint resolver callback.
@@ -53,20 +55,6 @@ class Builder
     }
 
     /**
-     * Create a new collection on the schema.
-     *
-     * @param array<mixed> $config
-     */
-    public function create(string $table, Closure $callback, array $config = []): void
-    {
-        $this->build(tap($this->createBlueprint($table), function ($blueprint) use ($callback, $config) {
-            $blueprint->create($config);
-
-            $callback($blueprint);
-        }));
-    }
-
-    /**
      * Create a new command set with a Closure.
      *
      * @param string        $collection
@@ -80,15 +68,10 @@ class Builder
         $prefix = null;
 
         if (isset($this->resolver)) {
-            return call_user_func($this->resolver, $collection, $callback, $prefix);
+            return call_user_func($this->resolver, $collection, $this->schemaManager, $callback, $prefix);
         }
 
         return new Blueprint($collection, $this->schemaManager, $callback, $prefix);
-    }
-
-    protected function build(Blueprint $blueprint)
-    {
-        $blueprint->build($this->connection, $this->grammar);
     }
 
     /**
@@ -101,6 +84,25 @@ class Builder
     public function blueprintResolver(Closure $resolver)
     {
         $this->resolver = $resolver;
+    }
+
+    protected function build(Blueprint $blueprint)
+    {
+        $blueprint->build($this->connection, $this->grammar);
+    }
+
+    /**
+     * Create a new collection on the schema.
+     *
+     * @param array<mixed> $config
+     */
+    public function create(string $table, Closure $callback, array $config = []): void
+    {
+        $this->build(tap($this->createBlueprint($table), function ($blueprint) use ($callback, $config) {
+            $blueprint->create($config);
+
+            $callback($blueprint);
+        }));
     }
 
     /**
@@ -117,27 +119,13 @@ class Builder
     }
 
     /**
-     * Drop a table (collection) from the schema.
+     * Determine if the given table (collection) exists.
      *
      * @throws ArangoException
      */
-    public function drop(string $table)
+    public function hasTable(string $table): bool
     {
-        $this->schemaManager->deleteCollection($table);
-    }
-
-    /**
-     * Drop all tables (collections) from the schema.
-     *
-     * @throws ArangoException
-     */
-    public function dropAllTables(): void
-    {
-        $collections = $this->getAllTables();
-
-        foreach ($collections as $name) {
-            $this->schemaManager->deleteCollection($name->name);
-        }
+        return $this->schemaManager->hasCollection($table);
     }
 
     /**
@@ -163,14 +151,6 @@ class Builder
     }
 
     /**
-     * @throws ArangoException
-     */
-    protected function getTable(string $table): stdClass
-    {
-        return $this->schemaManager->getCollection($table);
-    }
-
-    /**
      * Rename a table (collection).
      *
      * @param $from
@@ -186,13 +166,27 @@ class Builder
     }
 
     /**
-     * Determine if the given table (collection) exists.
+     * Drop a table (collection) from the schema.
      *
      * @throws ArangoException
      */
-    public function hasTable(string $table): bool
+    public function drop(string $table)
     {
-        return $this->schemaManager->hasCollection($table);
+        $this->schemaManager->deleteCollection($table);
+    }
+
+    /**
+     * Drop all tables (collections) from the schema.
+     *
+     * @throws ArangoException
+     */
+    public function dropAllTables(): void
+    {
+        $collections = $this->getAllTables();
+
+        foreach ($collections as $name) {
+            $this->schemaManager->deleteCollection($name->name);
+        }
     }
 
     /**
@@ -249,9 +243,17 @@ class Builder
      * @return mixed
      * @throws ArangoException
      */
-    public function getView(string $name)
+    public function getView(string $name): stdClass
     {
         return $this->schemaManager->getView($name);
+    }
+
+    /**
+     * @throws ArangoException
+     */
+    public function getAllViews(): array
+    {
+        return $this->schemaManager->getViews();
     }
 
     /**
@@ -299,6 +301,27 @@ class Builder
     }
 
     /**
+     * Create a database in the schema.
+     */
+    public function createDatabase(string $name): bool
+    {
+        return $this->schemaManager->createDatabase($name);
+    }
+
+    /**
+     * Drop a database from the schema if the database exists.
+     */
+    public function dropDatabaseIfExists(string $name): bool
+    {
+        if ($this->schemaManager->hasDatabase($name)) {
+            return $this->schemaManager->deleteDatabase($name);
+        }
+
+        return true;
+    }
+
+
+    /**
      * Get the database connection instance.
      *
      * @return Connection
@@ -310,14 +333,9 @@ class Builder
 
     /**
      * Silently catch the use of unsupported builder methods.
-     *
-     * @param $method
-     * @param $args
-     *
-     * @return null
      */
-    public function __call($method, $args)
+    public function __call(string $method, mixed $args): void
     {
-        error_log("The Aranguent Schema Builder doesn't support method '$method'\n");
+        Log::warning("The Aranguent Schema Builder doesn't support method '$method'\n");
     }
 }

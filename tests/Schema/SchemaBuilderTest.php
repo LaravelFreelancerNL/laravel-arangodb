@@ -4,12 +4,18 @@ namespace Tests\Schema;
 
 use ArangoClient\ArangoClient;
 use ArangoClient\Schema\SchemaManager;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
+use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
 use LaravelFreelancerNL\Aranguent\Schema\Builder;
 use LaravelFreelancerNL\Aranguent\Schema\Grammar;
 use Mockery as M;
+use Tests\Setup\ClassStubs\CustomBlueprint;
 use Tests\TestCase;
+use TiMacDonald\Log\LogFake;
 
 class SchemaBuilderTest extends TestCase
 {
@@ -19,10 +25,45 @@ class SchemaBuilderTest extends TestCase
         $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
     }
 
-
     public function tearDown(): void
     {
         M::close();
+    }
+
+    public function testCreateWithCustomBlueprint()
+    {
+        $schema = DB::connection()->getSchemaBuilder();
+        $schema->blueprintResolver(function ($table, $callback) {
+            return new CustomBlueprint($table, $callback);
+        });
+        $schema->create('characters', function (Blueprint $collection) {
+            $this->assertInstanceOf(CustomBlueprint::class, $collection);
+        });
+    }
+
+    public function testRename()
+    {
+        $result = Schema::rename('characters', 'people');
+
+        $this->assertTrue($result);
+        $this->assertFalse(Schema::hasTable('characters'));
+        $this->assertTrue(Schema::hasTable('people'));
+
+        $result = Schema::rename('people', 'characters');
+    }
+
+
+
+    public function testDropAllTables()
+    {
+        $initialTables = Schema::getAllTables();
+
+        Schema::dropAllTables();
+
+        $tables = Schema::getAllTables();
+
+        $this->assertEquals(10, count($initialTables));
+        $this->assertEquals(0, count($tables));
     }
 
     public function testCollectionHasColumns()
@@ -40,8 +81,8 @@ class SchemaBuilderTest extends TestCase
         $mockConnection->shouldReceive('statement')->once()->andReturn(true);
         $mockConnection->shouldReceive('statement')->once()->andReturn(false);
 
-        $this->assertTrue($builder->hasColumn('users', ['_id', 'firstname']));
-        $this->assertFalse($builder->hasColumn('users', ['_id', 'not_an_attribute']));
+        $this->assertTrue($builder->hasColumn('users', 'firstname'));
+        $this->assertFalse($builder->hasColumn('users', 'not_an_attribute'));
     }
 
     public function testCreateView()
@@ -63,11 +104,37 @@ class SchemaBuilderTest extends TestCase
         if (! $schemaManager->hasView('search')) {
             Schema::createView('search', []);
         }
-        $view = $schemaManager->getView('search');
+        $view = Schema::getView('search');
 
         $this->assertEquals('search', $view->name);
 
         $schemaManager->deleteView('search');
+    }
+
+
+    public function testGetAllViews()
+    {
+        $schemaManager = $this->connection->getArangoClient()->schema();
+        if (! $schemaManager->hasView('pages')) {
+            Schema::createView('pages', []);
+        }
+        if (! $schemaManager->hasView('products')) {
+            Schema::createView('products', []);
+        }
+        if (! $schemaManager->hasView('search')) {
+            Schema::createView('search', []);
+        }
+
+        $views = Schema::getAllViews();
+
+        $this->assertCount(3, $views);
+        $this->assertSame('pages', $views[0]->name);
+        $this->assertSame('products', $views[1]->name);
+        $this->assertSame('search', $views[2]->name);
+
+        $schemaManager->deleteView('search');
+        $schemaManager->deleteView('pages');
+        $schemaManager->deleteView('products');
     }
 
     public function testEditView()
@@ -118,7 +185,7 @@ class SchemaBuilderTest extends TestCase
     }
 
 
-    public function testDropAllView()
+    public function testDropAllViews()
     {
         $schemaManager = $this->connection->getArangoClient()->schema();
         if (! $schemaManager->hasView('products')) {
@@ -135,15 +202,58 @@ class SchemaBuilderTest extends TestCase
         $schemaManager->getView('search');
     }
 
-    public function testDropAllTables()
+    public function testCreateDatabase()
     {
-        $initialTables = Schema::getAllTables();
+        $schemaManager = $this->connection->getArangoClient()->schema();
 
-        Schema::dropAllTables();
+        $databaseName = 'aranguent__test_dummy';
+        $result = Schema::createDatabase($databaseName);
 
-        $tables = Schema::getAllTables();
+        $this->assertTrue($result);
+        $this->assertTrue($schemaManager->hasDatabase($databaseName));
 
-        $this->assertEquals(10, count($initialTables));
-        $this->assertEquals(0, count($tables));
+        $schemaManager->deleteDatabase($databaseName);
+    }
+
+    public function testDropDatabaseIfExists()
+    {
+        $schemaManager = $this->connection->getArangoClient()->schema();
+
+        $databaseName = 'aranguent__test_dummy';
+        Schema::createDatabase($databaseName);
+
+
+        $result = Schema::dropDatabaseIfExists($databaseName);
+
+        $this->assertTrue($result);
+        $this->assertFalse($schemaManager->hasDatabase($databaseName));
+    }
+
+    public function testDropDatabaseIfExistsNoneExistingDb()
+    {
+        $schemaManager = $this->connection->getArangoClient()->schema();
+        $databaseName = 'aranguent__test_dummy';
+
+        $this->assertFalse($schemaManager->hasDatabase($databaseName));
+
+        $result = Schema::dropDatabaseIfExists($databaseName);
+
+        $this->assertTrue($result);
+    }
+
+    public function testGetConnection()
+    {
+        $this->assertInstanceOf(Connection::class, Schema::getConnection());
+    }
+
+    public function testCallToNoneExistingMethod()
+    {
+        Log::swap(new LogFake());
+
+        Schema::noneExistingMethod('shizzle');
+
+        Log::assertLogged('warning', function ($message, $context) {
+            return Str::contains($message, 'noneExistingMethod');
+        });
     }
 }

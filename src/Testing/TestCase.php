@@ -15,7 +15,15 @@ abstract class TestCase extends IlluminateTestCase
     /**
      * @var array<string, array<string>> $transactionCollections
      */
-    public array $transactionCollections = [];
+    protected array $transactionCollections = [];
+
+    /**
+     * @var array<string, array<string>> $transactionCollections
+     */
+    public function setTransactionCollections(array $transactionCollections): void
+    {
+        $this->transactionCollections = $transactionCollections;
+    }
 
     /**
      * Boot the testing helper traits.
