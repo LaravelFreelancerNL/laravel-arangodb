@@ -58,7 +58,6 @@ class AranguentServiceProvider extends ServiceProvider
                 if (class_exists('Illuminate\Foundation\AliasLoader')) {
                     $loader = \Illuminate\Foundation\AliasLoader::getInstance();
                     $loader->alias('Eloquent', 'LaravelFreelancerNL\Aranguent\Eloquent\Model');
-                    $loader->alias('Schema', 'LaravelFreelancerNL\Aranguent\Facade\Schema');
                 }
             }
         );

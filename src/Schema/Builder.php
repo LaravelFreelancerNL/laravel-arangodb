@@ -13,14 +13,14 @@ use Illuminate\Support\Fluent;
 use LaravelFreelancerNL\Aranguent\Connection;
 use stdClass;
 
-class Builder
+class Builder extends \Illuminate\Database\Schema\Builder
 {
     /**
      * The database connection instance.
      *
      * @var IlluminateConnection
      */
-    protected IlluminateConnection $connection;
+    protected $connection;
 
     protected SchemaManager $schemaManager;
 
@@ -29,7 +29,7 @@ class Builder
      *
      * @var Grammar
      */
-    protected Grammar $grammar;
+    protected $grammar;
 
     /**
      * The Blueprint resolver callback.
@@ -86,7 +86,7 @@ class Builder
         $this->resolver = $resolver;
     }
 
-    protected function build(Blueprint $blueprint)
+    protected function build($blueprint)
     {
         $blueprint->build($this->connection, $this->grammar);
     }
@@ -96,7 +96,7 @@ class Builder
      *
      * @param array<mixed> $config
      */
-    public function create(string $table, Closure $callback, array $config = []): void
+    public function create($table, Closure $callback, array $config = []): void
     {
         $this->build(tap($this->createBlueprint($table), function ($blueprint) use ($callback, $config) {
             $blueprint->create($config);
@@ -119,11 +119,13 @@ class Builder
     }
 
     /**
-     * Determine if the given table (collection) exists.
+     * Determine if the given table exists.
      *
+     * @param string $table
+     * @return bool
      * @throws ArangoException
      */
-    public function hasTable(string $table): bool
+    public function hasTable($table)
     {
         return $this->schemaManager->hasCollection($table);
     }
@@ -131,7 +133,7 @@ class Builder
     /**
      * @throws ArangoException
      */
-    public function dropIfExists(string $table): void
+    public function dropIfExists($table): void
     {
         $tableExists = $this->hasTable($table);
         if ($tableExists) {
@@ -170,7 +172,7 @@ class Builder
      *
      * @throws ArangoException
      */
-    public function drop(string $table)
+    public function drop($table)
     {
         $this->schemaManager->deleteCollection($table);
     }
@@ -190,14 +192,13 @@ class Builder
     }
 
     /**
-     * Check if any row (document) in the table (collection) has the attribute.
+     * Determine if the given table has a given column.
      *
      * @param  string  $table
-     * @param  mixed  $column
-     *
+     * @param  string  $column
      * @return bool
      */
-    public function hasColumn(string $table, $column): bool
+    public function hasColumn($table, $column)
     {
         if (is_string($column)) {
             $column = [$column];
@@ -207,11 +208,13 @@ class Builder
     }
 
     /**
-     * Check if any document in the collection has the attribute.
+     * Determine if the given table has given columns.
      *
-     * @param  array<mixed>  $columns
+     * @param  string  $table
+     * @param  array  $columns
+     * @return bool
      */
-    public function hasColumns(string $table, array $columns): bool
+    public function hasColumns($table, array $columns)
     {
         $parameters = [];
         $parameters['name'] = 'hasAttribute';
@@ -302,16 +305,26 @@ class Builder
 
     /**
      * Create a database in the schema.
+     *
+     * @param  string  $name
+     * @return bool
+     *
+     * @throws \LogicException
      */
-    public function createDatabase(string $name): bool
+    public function createDatabase($name)
     {
         return $this->schemaManager->createDatabase($name);
     }
 
     /**
      * Drop a database from the schema if the database exists.
+     *
+     * @param  string  $name
+     * @return bool
+     *
+     * @throws \LogicException
      */
-    public function dropDatabaseIfExists(string $name): bool
+    public function dropDatabaseIfExists($name)
     {
         if ($this->schemaManager->hasDatabase($name)) {
             return $this->schemaManager->deleteDatabase($name);

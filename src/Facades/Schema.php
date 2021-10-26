@@ -25,6 +25,8 @@ use LaravelFreelancerNL\Aranguent\Schema\Builder;
  * @method static Builder dropAllViews()
  *
  * @see \LaravelFreelancerNL\Aranguent\Schema\Builder
+ *
+ * @deprecated This facade isn't necessary anymore and will be removed at version 1.0
  */
 class Schema extends Facade
 {

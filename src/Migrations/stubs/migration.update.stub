@@ -1,6 +1,5 @@
 <?php
 
-use LaravelFreelancerNL\Aranguent\Facades\Schema;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
@@ -14,7 +13,7 @@ class DummyClass extends Migration
      */
     public function up()
     {
-        Schema::collection('DummyCollection', function (Blueprint $collection) {
+        \Schema::collection('DummyCollection', function (Blueprint $collection) {
             //
         });
     }
@@ -26,7 +25,7 @@ class DummyClass extends Migration
      */
     public function down()
     {
-        Schema::collection('DummyCollection', function (Blueprint $collection) {
+        \Schema::collection('DummyCollection', function (Blueprint $collection) {
             //
         });
     }
