@@ -92,8 +92,12 @@ trait InteractsWithDatabase
      * @param  string|null  $deletedAtColumn
      * @return \Illuminate\Foundation\Testing\Concerns\InteractsWithDatabase
      */
-    protected function assertNotSoftDeleted($table, array $data = [], $connection = null, $deletedAtColumn = 'deleted_at')
-    {
+    protected function assertNotSoftDeleted(
+        $table,
+        array $data = [],
+        $connection = null,
+        $deletedAtColumn = 'deleted_at'
+    ) {
         if ($this->isSoftDeletableModel($table)) {
             return $this->assertNotSoftDeleted(
                 $table->getTable(),

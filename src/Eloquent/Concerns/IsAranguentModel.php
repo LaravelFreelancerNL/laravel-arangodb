@@ -4,6 +4,7 @@ namespace LaravelFreelancerNL\Aranguent\Eloquent\Concerns;
 
 use Closure;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use LaravelFreelancerNL\Aranguent\Eloquent\Builder;
 use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
@@ -163,7 +164,8 @@ trait IsAranguentModel
     protected function fromAqb(ArangoQueryBuilder|Closure $aqb): Collection
     {
         if ($aqb instanceof Closure) {
-            $aqb = $aqb(\DB::aqb());
+            /** @phpstan-ignore-next-line */
+            $aqb = $aqb(DB::aqb());
         }
         $connection = $this->getConnection();
         $results = $connection->execute($aqb->get());

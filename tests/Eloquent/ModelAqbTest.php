@@ -3,6 +3,7 @@
 namespace Tests\Eloquent;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 use Tests\Setup\Models\Character;
 use Tests\TestCase;
 
@@ -31,7 +32,7 @@ class ModelAqbTest extends TestCase
     public function testModelByAqlWithQueryBuilder()
     {
         $results = Character::fromAqb(
-            \DB::aqb()
+            DB::aqb()
                 ->for('characterDoc', 'characters')
                 ->return('characterDoc')
         );

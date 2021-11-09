@@ -6,6 +6,9 @@ namespace LaravelFreelancerNL\Aranguent;
 
 use Illuminate\Database\DatabaseManager as IlluminateDatabaseManager;
 
+/**
+ * @method static aqb():
+ */
 class DatabaseManager extends IlluminateDatabaseManager
 {
 
