@@ -3,7 +3,6 @@
 namespace Tests\Eloquent;
 
 use Illuminate\Database\Eloquent\Collection;
-use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 use Tests\Setup\Models\Character;
 use Tests\TestCase;
 
@@ -29,12 +28,26 @@ class ModelAqbTest extends TestCase
         );
     }
 
-    public function testExecuteReturnsCollectionOfModels()
+    public function testModelByAqlWithQueryBuilder()
     {
-        $aqb = (new QueryBuilder())
-            ->for('characterDoc', 'characters')
-            ->return('characterDoc');
-        $results = Character::execute($aqb);
+        $results = Character::fromAqb(
+            \DB::aqb()
+                ->for('characterDoc', 'characters')
+                ->return('characterDoc')
+        );
+
+        $this->assertInstanceOf(Collection::class, $results);
+        $this->assertInstanceOf(Character::class, $results->first());
+    }
+
+    public function testModelByAqlWithClosure()
+    {
+        $results = Character::fromAqb(
+            function ($aqb) {
+                return $aqb->for('characterDoc', 'characters')
+                    ->return('characterDoc');
+            }
+        );
 
         $this->assertInstanceOf(Collection::class, $results);
         $this->assertInstanceOf(Character::class, $results->first());

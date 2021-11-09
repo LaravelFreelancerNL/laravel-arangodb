@@ -2,6 +2,8 @@
 
 namespace LaravelFreelancerNL\Aranguent\Eloquent\Concerns;
 
+use Closure;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 use LaravelFreelancerNL\Aranguent\Eloquent\Builder;
 use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
@@ -150,16 +152,19 @@ trait IsAranguentModel
     public function getForeignKey()
     {
         $keyName = $this->getKeyName();
-//
-//        if ($keyName[0] != '_') {
-//            $keyName = '_' . $keyName;
-//        }
+
+        if ($keyName[0] != '_') {
+            $keyName = '_' . $keyName;
+        }
 
         return Str::snake(class_basename($this)) . $keyName;
     }
 
-    protected function execute(ArangoQueryBuilder $aqb)
+    protected function fromAqb(ArangoQueryBuilder|Closure $aqb): Collection
     {
+        if ($aqb instanceof Closure) {
+            $aqb = $aqb(\DB::aqb());
+        }
         $connection = $this->getConnection();
         $results = $connection->execute($aqb->get());
         return $this->hydrate($results);
