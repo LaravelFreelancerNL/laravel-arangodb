@@ -2,6 +2,7 @@
 
 namespace LaravelFreelancerNL\Aranguent;
 
+use Illuminate\Database\Connectors\ConnectionFactory;
 use Illuminate\Support\ServiceProvider;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use LaravelFreelancerNL\Aranguent\Schema\Grammar as SchemaGrammar;
@@ -36,6 +37,10 @@ class AranguentServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->singleton('db', function ($app) {
+            return new DatabaseManager($app, $app['db.factory']);
+        });
+
         // Add database driver.
         $this->app->resolving(
             'db',

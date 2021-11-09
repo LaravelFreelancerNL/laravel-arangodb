@@ -12,6 +12,8 @@ use Illuminate\Foundation\Testing\WithoutMiddleware;
 
 abstract class TestCase extends IlluminateTestCase
 {
+    use Concerns\InteractsWithDatabase;
+
     /**
      * @var array<string, array<string>> $transactionCollections
      */

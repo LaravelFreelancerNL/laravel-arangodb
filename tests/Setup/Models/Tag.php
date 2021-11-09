@@ -2,10 +2,13 @@
 
 namespace Tests\Setup\Models;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 
 class Tag extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'tags';
 
     protected $fillable = [

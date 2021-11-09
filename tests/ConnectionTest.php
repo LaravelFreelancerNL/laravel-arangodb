@@ -2,7 +2,9 @@
 
 namespace Tests;
 
+use ArangoClient\ArangoClient;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class ConnectionTest extends TestCase
 {
@@ -46,5 +48,36 @@ class ConnectionTest extends TestCase
     {
         $this->expectExceptionCode(400);
         DB::statement('this aql is malformed');
+    }
+
+    public function testDisconnect()
+    {
+        $connection = DB::connection();
+        $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
+        $connection->disconnect();
+        $this->assertNull($connection->getArangoClient());
+    }
+
+    public function testPurge()
+    {
+        $connection = DB::connection();
+        $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
+        DB::purge();
+        $this->assertNull($connection->getArangoClient());
+    }
+
+    public function testDbCallsFailAfterPurge()
+    {
+        DB::purge();
+        Schema::hasTable('NotATable');
+    }
+
+    public function testReconnect()
+    {
+        $connection = DB::connection();
+        $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
+        DB::purge();
+        $connection->reconnect();
+//        $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
     }
 }

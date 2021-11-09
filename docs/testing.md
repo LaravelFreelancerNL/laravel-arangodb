@@ -1,6 +1,18 @@
 # Testing
 You can test your project with phpunit as normal. For database testing there are a few things to consider.
 
+## Database assertions
+The regular database assertions are supported:
+
+- assertDatabaseHas($table, array $data, $connection = null)
+- assertDatabaseMissing($table, array $data, $connection = null)
+- assertDatabaseCount($table, int $count, $connection = null)
+- assertDeleted($table, array $data = [], $connection = null)
+- assertSoftDeleted($table, array $data = [], $connection = null, $deletedAtColumn = 'deleted_at')
+- assertNotSoftDeleted($table, array $data = [], $connection = null, $deletedAtColumn = 'deleted_at')
+- assertModelExists($model)
+- assertModelMissing($model)
+
 ## Transactions
 ArangoDB requires that you list all collections (tables) involved in write statements at the start of the transaction.
 
@@ -51,19 +63,42 @@ use \LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use \LaravelFreelancerNL\Aranguent\Testing\RefreshDatabase;
 ```
 
+### PestPHP DB transactions
+ArangoDB requires you to declare the collections written to in a transaction at the start of that transaction.
+Within PestPHP test files it is not possible to set this up at the appropriate points in time. You need to do this
+in a TestCase and use that in your test files.
+
+The easiest solution is to just register all collections within one TestCase.
+For example:
+```php
+    protected array $transactionCollections = [
+        'write' => [
+            'failed_jobs',
+            'media',
+            'mediables',
+            'migrations',
+            'model_has_permissions',
+            'model_has_roles',
+            'password_resets',
+            'permissions',
+            'personal_access_tokens',
+            'role_has_permissions',
+            'roles',
+            'sessions',
+            'users',
+        ]
+    ];
+```
+It isn't pretty but gets the job done.
+
 ## Incompatibilities
 There are a few incompatibilities with common Laravel testing practices:
 
-### PestPHP DB writes
-You may use PestPHP however the RefreshDatabase & DatabaseTransactions traits are unusable in combination with PestPHP. 
+### castToJson
+Json is a first class citizen in ArangoDB and thus you don't need to cast your data to it. Proper transmission
+to and from the database is handled by Aranguent.
 
-These require that you set the transactionCollections property on Testcase. At the time of writing there is no option
-to do so. Because these start transactions before the 'beforeEach' method is called. 
-AFAIK this is the only way to reach functions on traits and TestCase.
-
-This means that you either have to set up your own migrations and transactions or just use phpunit.
-
-If you know a solution or want to keep up to date on this issue then check out [this discussion](https://github.com/pestphp/pest/discussions/429)
+If you use this method in your tests you must remove it as it generates SQL and will fail.
 
 ### Parallel testing
 Parallel testing is unsupported at this time.
