@@ -13,7 +13,9 @@ use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 use LaravelFreelancerNL\Aranguent\Query\Grammar as QueryGrammar;
 use LaravelFreelancerNL\Aranguent\Query\Processor;
 use LaravelFreelancerNL\Aranguent\Schema\Builder as SchemaBuilder;
+use LaravelFreelancerNL\FluentAQL\QueryBuilder as ArangoQueryBuilder;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder as FluentAQL;
+use LogicException;
 use Spatie\DataTransferObject\Exceptions\UnknownProperties;
 use stdClass;
 
@@ -217,8 +219,13 @@ class Connection extends IlluminateConnection
      *
      * @return stdClass
      */
-    public function explain(string $query, $bindings = []): stdClass
+    public function explain(string|FluentAQL $query, $bindings = []): stdClass
     {
+        [$query, $bindings] = $this->handleQueryBuilder(
+            $query,
+            $bindings
+        );
+
         $statement = $this->arangoClient->prepare($query, $bindings);
 
         return $statement->explain();
@@ -255,10 +262,10 @@ class Connection extends IlluminateConnection
         // Usage of a separate DB to read date isn't supported at this time
         $useReadPdo = null;
 
-        if ($query instanceof FluentAQL) {
-            $bindings = $query->binds;
-            $query = $query->query;
-        }
+        [$query, $bindings] = $this->handleQueryBuilder(
+            $query,
+            $bindings
+        );
 
         return $this->run($query, $bindings, function () use ($query, $bindings) {
             if ($this->pretending()) {
@@ -303,9 +310,25 @@ class Connection extends IlluminateConnection
      */
     public function disconnect()
     {
-        $this->transactions = 0;
-
         $this->arangoClient = null;
+    }
+
+    /**
+     * Reconnect to the database.
+     *
+     * @return void
+     *
+     * @throws \LogicException
+     */
+    public function reconnect()
+    {
+        if (is_callable($this->reconnector)) {
+            $result = call_user_func($this->reconnector, $this);
+
+            return $result;
+        }
+
+        throw new LogicException('Lost connection and no reconnector available.');
     }
 
     /**
@@ -320,13 +343,13 @@ class Connection extends IlluminateConnection
         }
     }
 
-    public function getArangoClient(): ArangoClient
+    public function getArangoClient(): ArangoClient|null
     {
         return $this->arangoClient;
     }
 
     /**
-     * @param  string  $database
+     * @param  string|null  $database
      */
     public function setDatabaseName($database): void
     {
@@ -351,5 +374,11 @@ class Connection extends IlluminateConnection
             $query = $query->query;
         }
         return [$query, $bindings];
+    }
+
+
+    public static function aqb(): ArangoQueryBuilder
+    {
+        return new ArangoQueryBuilder();
     }
 }
