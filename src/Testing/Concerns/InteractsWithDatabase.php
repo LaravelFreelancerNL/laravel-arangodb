@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace LaravelFreelancerNL\Aranguent\Testing\Concerns;
 
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Testing\Constraints\HasInDatabase;
 use Illuminate\Testing\Constraints\NotSoftDeletedInDatabase;
 use Illuminate\Testing\Constraints\SoftDeletedInDatabase;
@@ -26,7 +24,7 @@ trait InteractsWithDatabase
     {
         $this->assertThat(
             $this->getTable($table),
-            new HasInDatabase($this->getConnection($connection), Arr::dot($data))
+            new HasInDatabase($this->getConnection($connection), associativeFlatten($data))
         );
 
         return $this;
@@ -43,7 +41,7 @@ trait InteractsWithDatabase
     protected function assertDatabaseMissing($table, array $data, $connection = null)
     {
         $constraint = new ReverseConstraint(
-            new HasInDatabase($this->getConnection($connection), Arr::dot($data))
+            new HasInDatabase($this->getConnection($connection), associativeFlatten($data))
         );
 
         $this->assertThat($this->getTable($table), $constraint);
@@ -75,7 +73,7 @@ trait InteractsWithDatabase
             $this->getTable($table),
             new SoftDeletedInDatabase(
                 $this->getConnection($connection),
-                Arr::dot($data),
+                associativeFlatten($data),
                 $deletedAtColumn
             )
         );
@@ -111,11 +109,24 @@ trait InteractsWithDatabase
             $this->getTable($table),
             new NotSoftDeletedInDatabase(
                 $this->getConnection($connection),
-                Arr::dot($data),
+                associativeFlatten($data),
                 $deletedAtColumn
             )
         );
 
         return $this;
+    }
+
+    /**
+     * Cast a JSON string to a database compatible type.
+     * Supported for backwards compatibility in existing projects.
+     * No cast is necessary as json is a first class citizen in ArangoDB.
+     *
+     * @param  array|string  $value
+     * @return array|string
+     */
+    public function castAsJson($value)
+    {
+        return $value;
     }
 }

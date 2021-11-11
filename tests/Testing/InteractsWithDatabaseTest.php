@@ -131,4 +131,14 @@ class InteractsWithDatabaseTest extends TestCase
 
         $this->assertModelMissing($ned);
     }
+
+    public function testCastAsJson()
+    {
+        $value = [
+            'key' => 'value'
+        ];
+        $result = $this->castAsJson($value);
+
+        $this->assertSame($value, $result);
+    }
 }

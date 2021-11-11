@@ -13,6 +13,9 @@ The regular database assertions are supported:
 - assertModelExists($model)
 - assertModelMissing($model)
 
+castToJson is support for backwards compatibility. As Json is a first class citizen in ArangoDB this method now just 
+returns the given value.
+
 ## Transactions
 ArangoDB requires that you list all collections (tables) involved in write statements at the start of the transaction.
 
