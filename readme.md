@@ -36,6 +36,7 @@ You may use composer to install Aranguent:
 6) [Transactions](docs/transactions.md): how to set up ArangoDB transactions
 7) [FluentAQL](docs/fluent-aql.md): Use the AQL query builder directly
 8) [Testing](docs/testing.md): testing your project with Aranguent.
+9) [Compatibility list](docs/compatibility-list.md): overview of DB related compatible methods.
 
 ## Related packages
 * [ArangoDB PHP client](https://github.com/LaravelFreelancerNL/arangodb-php-client)

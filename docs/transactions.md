@@ -24,10 +24,10 @@ DB::beginTransaction([
 ```
 
 ### Registering collections
-$collections must be an array that can have zero or any of the indeces: read, write or exclusive, 
+$collections must be an array that can have zero or any of the keys: read, write or exclusive, 
 each being an array of collection names or a single collection name as string.
 
-Collections that will be written to in the transaction _must_ be declared with the write or exclusive attribute 
+Collections that will be written to in the transaction _must_ be declared with the write or exclusive attribute
 or it will fail, whereas non-declared collections from which is solely read will be added lazily.
 [More information on locking and isolation in ArangoDB](https://www.arangodb.com/docs/stable/transactions-locking-and-isolation.html).
 
