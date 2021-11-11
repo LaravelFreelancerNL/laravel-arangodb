@@ -33,9 +33,9 @@
     "phpunit/phpunit": "^9.5",
     "mockery/mockery": "^1.4.3",
     "squizlabs/php_codesniffer": "^3.5",
-    "phpstan/phpstan": "^0.12.0",
+    "phpstan/phpstan": "^1.0",
     "phpmd/phpmd": "dev-master",
-    "nunomaduro/larastan": "^0.6",
+    "nunomaduro/larastan": "^1.0",
     "scrutinizer/ocular": "^1.8",
     "timacdonald/log-fake": "^1.9"
   },
@@ -43,7 +43,10 @@
   "autoload": {
     "psr-4": {
       "LaravelFreelancerNL\\Aranguent\\": "src/"
-    }
+    },
+    "files": [
+      "src/helpers.php"
+    ]
   },
   "autoload-dev": {
     "psr-4": {
