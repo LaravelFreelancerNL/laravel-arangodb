@@ -10,13 +10,6 @@ class ModelAranguentCommand extends IlluminateModelMakeCommand
     protected $defer = true;
 
     /**
-     * The console command name.
-     *
-     * @var string
-     */
-    protected $name = 'aranguent:model';
-
-    /**
      * Get the stub file for the generator.
      *
      * @return string

@@ -45,7 +45,7 @@ class CommandServiceProvider extends IlluminateMigrationServiceProvider
             [
                 'MigrateMake'                => 'command.migrate.make',
                 'AranguentConvertMigrations' => 'command.aranguent.convert-migrations',
-                'MakeModel'                  => 'command.model.aranguent',
+                'MakeModel'                  => 'command.model.make',
             ]
         );
         $this->registerCommands($commands);
