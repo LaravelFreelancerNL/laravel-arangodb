@@ -21,6 +21,42 @@ class Builder extends IlluminateBuilder
     ];
 
     /**
+     * Get the first record matching the attributes or create it.
+     *
+     * @param  array  $attributes
+     * @param  array  $values
+     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder
+     */
+    public function firstOrCreate(array $attributes = [], array $values = [])
+    {
+        $instance = $this->where(associativeFlatten($attributes))->first();
+        if (! is_null($instance)) {
+            return $instance;
+        }
+
+        return tap($this->newModelInstance(array_merge($attributes, $values)), function ($instance) {
+            $instance->save();
+        });
+    }
+
+    /**
+     * Get the first record matching the attributes or instantiate it.
+     *
+     * @param  array  $attributes
+     * @param  array  $values
+     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder
+     */
+    public function firstOrNew(array $attributes = [], array $values = [])
+    {
+        $instance = $this->where(associativeFlatten($attributes))->first();
+        if (! is_null($instance)) {
+            return $instance;
+        }
+
+        return $this->newModelInstance(array_merge($attributes, $values));
+    }
+
+    /**
      * Insert a record in the database.
      *
      * @param array $values

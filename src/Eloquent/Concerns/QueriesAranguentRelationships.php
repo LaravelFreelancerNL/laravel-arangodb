@@ -105,6 +105,7 @@ trait QueriesAranguentRelationships
                 preg_replace('/[^[:alnum:][:space:]_]/u', '', "$name $function $column")
             );
 
+            /** @phpstan-ignore-next-line */
             $this->selectSub(
                 $result,
                 $alias

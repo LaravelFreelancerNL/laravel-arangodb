@@ -155,6 +155,60 @@ class HasManyTest extends TestCase
         $this->assertInstanceOf(Character::class, $location->inhabitants->first());
     }
 
+    public function testFirstOrCreate()
+    {
+        $location = Location::create(
+            [
+                '_key'       => 'pyke',
+                'name'       => 'Pyke',
+                'coordinate' => [55.8833342, -6.1388807],
+            ]
+        );
+
+        $location->inhabitants()->firstOrCreate(
+            [
+                '_key'    => 'TheonGreyjoy',
+                'name'    => 'Theon',
+                'surname' => 'Greyjoy',
+                'alive'   => true,
+                'age'     => 16,
+                'traits'  => ['E', 'R', 'K'],
+            ]
+        );
+        $character = Character::find('characters/TheonGreyjoy');
+        $location = Location::find('locations/pyke');
+
+        $this->assertEquals('TheonGreyjoy', $location->inhabitants->first()->_key);
+        $this->assertEquals($character->residence_id, 'locations/pyke');
+        $this->assertInstanceOf(Character::class, $location->inhabitants->first());
+    }
+
+    public function testFirstOrNew()
+    {
+        $location = Location::create(
+            [
+                '_key'       => 'pyke',
+                'name'       => 'Pyke',
+                'coordinate' => [55.8833342, -6.1388807],
+            ]
+        );
+
+        $character = $location->inhabitants()->firstOrNew(
+            [
+                '_key'    => 'TheonGreyjoy',
+                'name'    => 'Theon',
+                'surname' => 'Greyjoy',
+                'alive'   => true,
+                'age'     => 16,
+                'traits'  => ['E', 'R', 'K'],
+            ]
+        );
+
+        $this->assertInstanceOf(Character::class, $character);
+        $this->assertEquals('TheonGreyjoy', $character->_key);
+        $this->assertEquals($character->residence_id, 'locations/pyke');
+    }
+
     public function testWith(): void
     {
         $location = Location::with('inhabitants')->find('locations/winterfell');

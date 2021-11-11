@@ -59,7 +59,7 @@ class ModelTest extends TestCase
     public function testCreateAranguentModel()
     {
         $this->artisan(
-            'aranguent:model',
+            'make:model',
             [
                 'name'    => 'Aranguent',
                 '--force' => '',
@@ -88,15 +88,76 @@ class ModelTest extends TestCase
         $this->assertSame(($initialAge + 1), $fresh->age);
     }
 
+    public function testUpdateOrCreate()
+    {
+        $character = Character::first();
+        $initialAge = $character->age;
+        $newAge = ($initialAge + 1);
+
+        $character->updateOrCreate(['age' => $initialAge], ['age' => $newAge]);
+
+        $fresh = $character->fresh();
+
+        $this->assertSame($newAge, $fresh->age);
+    }
+
+    public function testUpsert()
+    {
+        Character::upsert(
+            [
+                [
+                   "_key" => "NedStark",
+                   "name" => "Ned",
+                   "surname" => "Stark",
+                   "alive" => false,
+                   "age" => 41,
+                   "residence_id" => "locations/winterfell"
+                ],
+                [
+                   "_key" => "JaimeLannister",
+                   "name" => "Jaime",
+                   "surname" => "Lannister",
+                   "alive" => false,
+                   "age" => 36,
+                   "residence_id" => "locations/the-red-keep"
+                ],
+            ],
+            ['name', 'surname'],
+            ['alive']
+        );
+
+        $ned = Character::find('characters/NedStark');
+        $jaime = Character::find('characters/JaimeLannister');
+
+        $this->assertFalse($ned->alive);
+        $this->assertFalse($jaime->alive);
+    }
+
     public function testDeleteModel()
     {
         $character = Character::first();
 
         $character->delete();
 
-        $deletedCharacter = Character::firstOrFail();
+        $deletedCharacter = Character::first();
 
         $this->assertNotEquals($character->_key, $deletedCharacter->_key);
+    }
+
+    public function testDestroyModel()
+    {
+        $id = 'characters/NedStark';
+        Character::destroy($id);
+
+        $this->assertDatabaseMissing('characters', ['_id' => $id]);
+    }
+
+
+    public function testTruncateModel()
+    {
+        Character::truncate();
+
+        $this->assertDatabaseCount('characters', 0);
     }
 
     public function testCount()
@@ -129,20 +190,6 @@ class ModelTest extends TestCase
         $this->assertEquals(41, $result);
     }
 
-    public function testOrderByRandom()
-    {
-        $results = DB::table('characters')
-            ->inRandomOrder()
-            ->toSql();
-
-        $this->assertEquals('FOR characterDoc IN characters SORT RAND()', $results);
-    }
-
-    public function testGetArangoId()
-    {
-        $ned = Character::first();
-        $this->assertEquals('characters/NedStark', $ned->_id);
-    }
 
     public function testGetId()
     {

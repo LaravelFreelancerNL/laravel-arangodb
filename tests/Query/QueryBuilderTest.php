@@ -159,6 +159,15 @@ class QueryBuilderTest extends TestCase
         );
     }
 
+    public function testOrderByRandom()
+    {
+        $results = DB::table('characters')
+            ->inRandomOrder()
+            ->toSql();
+
+        $this->assertEquals('FOR characterDoc IN characters SORT RAND()', $results);
+    }
+
     public function testLimitsAndOffsets()
     {
         $builder = $this->getBuilder();
