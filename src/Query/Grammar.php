@@ -3,6 +3,7 @@
 namespace LaravelFreelancerNL\Aranguent\Query;
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Traits\Macroable;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesAggregates;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesColumns;
@@ -218,6 +219,20 @@ class Grammar extends FluentAqlGrammar
     }
 
     /**
+     * Compile a truncate table statement into SQL.
+     *
+     * @param  Builder  $query
+     * @return array
+     */
+    public function compileTruncate(Builder $query)
+    {
+        /** @phpstan-ignore-next-line */
+        $aqb = DB::aqb();
+        $aqb = $aqb->for('doc', $query->from)->remove('doc', $query->from)->get();
+        return [$aqb->query => []];
+    }
+
+    /**
      * Compile the components necessary for a select clause.
      *
      * @param Builder $builder
@@ -381,6 +396,30 @@ class Grammar extends FluentAqlGrammar
         $builder->aqb = $builder->aqb->update($tableAlias, $values, $table);
 
         return $builder;
+    }
+
+    /**
+     * Compile an "upsert" statement into SQL.
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     *
+     * @param Builder $query
+     * @param array $values
+     * @param array $uniqueBy
+     * @param array $update
+     * @return string
+     */
+    public function compileUpsert(Builder $query, array $values, array $uniqueBy, array $update)
+    {
+        /** @phpstan-ignore-next-line */
+        return DB::aqb()
+            ->let('docs', $values)
+            ->for('doc', 'docs')
+            ->insert('doc', $query->from)
+            ->options([
+                "overwriteMode" => "update",
+                "mergeObjects" => false,
+            ])->get();
     }
 
     /**
