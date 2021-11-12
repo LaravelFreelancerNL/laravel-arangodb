@@ -3,7 +3,6 @@
 namespace Tests\Eloquent;
 
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use Mockery as M;
 use Tests\Setup\Models\Character;
@@ -103,6 +102,8 @@ class ModelTest extends TestCase
 
     public function testUpsert()
     {
+        $this->skipTestOnArangoVersionsBefore('3.7');
+
         Character::upsert(
             [
                 [
