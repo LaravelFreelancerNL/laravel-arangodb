@@ -2,7 +2,6 @@
 
 namespace LaravelFreelancerNL\Aranguent;
 
-use Illuminate\Database\Connectors\ConnectionFactory;
 use Illuminate\Support\ServiceProvider;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use LaravelFreelancerNL\Aranguent\Schema\Grammar as SchemaGrammar;
@@ -66,6 +65,7 @@ class AranguentServiceProvider extends ServiceProvider
                 }
             }
         );
+
         $this->app->register('LaravelFreelancerNL\Aranguent\Providers\CommandServiceProvider');
     }
 }

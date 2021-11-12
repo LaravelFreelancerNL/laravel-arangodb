@@ -5,7 +5,7 @@ namespace LaravelFreelancerNL\Aranguent\Providers;
 use Illuminate\Database\MigrationServiceProvider as IlluminateMigrationServiceProvider;
 use LaravelFreelancerNL\Aranguent\Console\Migrations\AranguentConvertMigrationsCommand;
 use LaravelFreelancerNL\Aranguent\Console\Migrations\MigrateMakeCommand;
-use LaravelFreelancerNL\Aranguent\Console\ModelAranguentCommand;
+use LaravelFreelancerNL\Aranguent\Console\ModelMakeCommand;
 use LaravelFreelancerNL\Aranguent\Migrations\DatabaseMigrationRepository;
 use LaravelFreelancerNL\Aranguent\Migrations\MigrationCreator;
 
@@ -24,7 +24,7 @@ class CommandServiceProvider extends IlluminateMigrationServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 MigrateMakeCommand::class,
-                ModelAranguentCommand::class,
+                ModelMakeCommand::class,
             ]);
         }
     }
@@ -43,9 +43,9 @@ class CommandServiceProvider extends IlluminateMigrationServiceProvider
         $commands = array_merge(
             $this->commands,
             [
-                'MigrateMake'                => 'command.migrate.make',
                 'AranguentConvertMigrations' => 'command.aranguent.convert-migrations',
-                'MakeModel'                  => 'command.model.make',
+                'MigrateMake'                => 'command.migrate.make',
+                'ModelMake'                  => 'command.model.aranguent',
             ]
         );
         $this->registerCommands($commands);
@@ -86,17 +86,20 @@ class CommandServiceProvider extends IlluminateMigrationServiceProvider
         });
     }
 
+    protected function registerModelMakeCommand()
+    {
+        $this->app->singleton('command.model.aranguent', function ($app) {
+            return new ModelMakeCommand($app['files']);
+        });
+        $this->app->extend(\Illuminate\Foundation\Console\ModelMakeCommand::class, function ($service, $app) {
+            return new ModelMakeCommand($app['files']);
+        });
+    }
+
     protected function registerAranguentConvertMigrationsCommand()
     {
         $this->app->singleton('command.aranguent.convert-migrations', function ($app) {
             return new AranguentConvertMigrationsCommand($app['migrator']);
-        });
-    }
-
-    protected function registerMakeModelCommand()
-    {
-        $this->app->singleton('command.model.aranguent', function ($app) {
-            return new ModelAranguentCommand($app['files']);
         });
     }
 

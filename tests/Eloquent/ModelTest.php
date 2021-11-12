@@ -59,7 +59,7 @@ class ModelTest extends TestCase
     public function testCreateAranguentModel()
     {
         $this->artisan(
-            'make:model',
+            'aranguent:model',
             [
                 'name'    => 'Aranguent',
                 '--force' => '',

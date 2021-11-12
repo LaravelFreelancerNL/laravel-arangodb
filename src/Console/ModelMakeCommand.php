@@ -4,10 +4,14 @@ namespace LaravelFreelancerNL\Aranguent\Console;
 
 use Illuminate\Foundation\Console\ModelMakeCommand as IlluminateModelMakeCommand;
 
-class ModelAranguentCommand extends IlluminateModelMakeCommand
+class ModelMakeCommand extends IlluminateModelMakeCommand
 {
-    protected $deferred = true;
-    protected $defer = true;
+    /**
+     * The console command name.
+     *
+     * @var string
+     */
+    protected $name = 'aranguent:model';
 
     /**
      * Get the stub file for the generator.
