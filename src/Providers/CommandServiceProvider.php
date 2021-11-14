@@ -91,9 +91,6 @@ class CommandServiceProvider extends IlluminateMigrationServiceProvider
         $this->app->singleton('command.model.aranguent', function ($app) {
             return new ModelMakeCommand($app['files']);
         });
-        $this->app->extend(\Illuminate\Foundation\Console\ModelMakeCommand::class, function ($service, $app) {
-            return new ModelMakeCommand($app['files']);
-        });
     }
 
     protected function registerAranguentConvertMigrationsCommand()

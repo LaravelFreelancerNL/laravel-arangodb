@@ -8,5 +8,4 @@ use Illuminate\Database\DatabaseManager as IlluminateDatabaseManager;
 
 class DatabaseManager extends IlluminateDatabaseManager
 {
-
 }

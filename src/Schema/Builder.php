@@ -11,10 +11,14 @@ use Illuminate\Database\Connection as IlluminateConnection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Fluent;
 use LaravelFreelancerNL\Aranguent\Connection;
+use LaravelFreelancerNL\Aranguent\QueryException;
+use LaravelFreelancerNL\Aranguent\Schema\Concerns\UsesBlueprints;
 use stdClass;
 
 class Builder extends \Illuminate\Database\Schema\Builder
 {
+    use UsesBlueprints;
+
     /**
      * The database connection instance.
      *
@@ -34,7 +38,7 @@ class Builder extends \Illuminate\Database\Schema\Builder
     /**
      * The Blueprint resolver callback.
      *
-     * @var \Closure
+     * @var Closure
      */
     protected $resolver;
 
@@ -55,80 +59,18 @@ class Builder extends \Illuminate\Database\Schema\Builder
     }
 
     /**
-     * Create a new command set with a Closure.
-     *
-     * @param string        $collection
-     * @param \Closure|null $callback
-     *
-     * @return Blueprint
-     */
-    protected function createBlueprint($collection, Closure $callback = null)
-    {
-        //Prefixes are unnamed in ArangoDB
-        $prefix = null;
-
-        if (isset($this->resolver)) {
-            return call_user_func($this->resolver, $collection, $this->schemaManager, $callback, $prefix);
-        }
-
-        return new Blueprint($collection, $this->schemaManager, $callback, $prefix);
-    }
-
-    /**
-     * Set the Schema Blueprint resolver callback.
-     *
-     * @param Closure $resolver
-     *
-     * @return void
-     */
-    public function blueprintResolver(Closure $resolver)
-    {
-        $this->resolver = $resolver;
-    }
-
-    protected function build($blueprint)
-    {
-        $blueprint->build($this->connection, $this->grammar);
-    }
-
-    /**
-     * Create a new collection on the schema.
-     *
-     * @param array<mixed> $config
-     */
-    public function create($table, Closure $callback, array $config = []): void
-    {
-        $this->build(tap($this->createBlueprint($table), function ($blueprint) use ($callback, $config) {
-            $blueprint->create($config);
-
-            $callback($blueprint);
-        }));
-    }
-
-    /**
-     * Modify a table's schema.
-     *
-     * @param string  $table
-     * @param Closure $callback
-     *
-     * @return void
-     */
-    public function table($table, Closure $callback)
-    {
-        $this->build($this->createBlueprint($table, $callback));
-    }
-
-    /**
      * Determine if the given table exists.
      *
      * @param string $table
      * @return bool
-     * @throws ArangoException
      */
     public function hasTable($table)
     {
-        return $this->schemaManager->hasCollection($table);
+        return $this->handleExceptionsAsQueryExceptions(function () use ($table) {
+            return $this->schemaManager->hasCollection($table);
+        });
     }
+
 
     /**
      * @throws ArangoException
@@ -306,10 +248,10 @@ class Builder extends \Illuminate\Database\Schema\Builder
     /**
      * Create a database in the schema.
      *
-     * @param  string  $name
+     * @param string $name
      * @return bool
      *
-     * @throws \LogicException
+     * @throws ArangoException
      */
     public function createDatabase($name)
     {
@@ -319,10 +261,10 @@ class Builder extends \Illuminate\Database\Schema\Builder
     /**
      * Drop a database from the schema if the database exists.
      *
-     * @param  string  $name
+     * @param string $name
      * @return bool
      *
-     * @throws \LogicException
+     * @throws ArangoException
      */
     public function dropDatabaseIfExists($name)
     {
@@ -342,6 +284,15 @@ class Builder extends \Illuminate\Database\Schema\Builder
     public function getConnection()
     {
         return $this->connection;
+    }
+
+    protected function handleExceptionsAsQueryExceptions(Closure $callback)
+    {
+        try {
+            return $callback();
+        } catch (\Exception $e) {
+            throw new QueryException($e->getMessage(), [], $e);
+        }
     }
 
     /**

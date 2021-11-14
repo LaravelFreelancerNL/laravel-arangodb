@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
+use LaravelFreelancerNL\Aranguent\QueryException;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
 use LaravelFreelancerNL\Aranguent\Schema\Builder;
 use LaravelFreelancerNL\Aranguent\Schema\Grammar;
@@ -39,6 +40,23 @@ class SchemaBuilderTest extends TestCase
         $schema->create('characters', function (Blueprint $collection) {
             $this->assertInstanceOf(CustomBlueprint::class, $collection);
         });
+    }
+
+    public function testHasTable()
+    {
+        $this->assertTrue(Schema::hasTable('locations'));
+        $this->assertFalse(Schema::hasTable('dummy'));
+    }
+
+    public function testHasTableThrowsOnNoneExistingDatabase()
+    {
+        DB::purge();
+        $newDatabase = "otherDatabase";
+        config()->set('database.connections.arangodb.database', $newDatabase);
+
+        $this->expectException(QueryException::class);
+
+        Schema::hasTable('dummy');
     }
 
     public function testRename()

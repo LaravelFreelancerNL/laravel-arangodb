@@ -3,6 +3,7 @@
 namespace Tests;
 
 use ArangoClient\ArangoClient;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -77,7 +78,39 @@ class ConnectionTest extends TestCase
         $connection = DB::connection();
         $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
         DB::purge();
+
         $connection->reconnect();
-//        $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
+
+        $connection = DB::connection();
+        $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
+    }
+
+    public function testReconnectToDifferentDatase()
+    {
+        $connection = DB::connection();
+        $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
+
+        DB::purge();
+        $newDatabase = "otherDatabase";
+        config()->set('database.connections.arangodb.database', $newDatabase);
+        $connection->reconnect();
+
+        $connection = DB::connection();
+        $this->assertSame($newDatabase, $connection->getArangoClient()->getDatabase());
+    }
+
+
+    public function testReconnectToDifferentDataseThrows404()
+    {
+        $connection = DB::connection();
+        $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
+        DB::purge();
+
+        $newDatabase = "otherDatabase";
+        config()->set('database.connections.arangodb.database', $newDatabase);
+        $connection->reconnect();
+
+        $this->expectExceptionCode(404);
+            Schema::hasTable('dummy');
     }
 }
