@@ -94,14 +94,3 @@ For example:
 ```
 It isn't pretty but gets the job done.
 
-## Incompatibilities
-There are a few incompatibilities with common Laravel testing practices:
-
-### castToJson
-Json is a first class citizen in ArangoDB and thus you don't need to cast your data to it. Proper transmission
-to and from the database is handled by Aranguent.
-
-If you use this method in your tests you must remove it as it generates SQL and will fail.
-
-### Parallel testing
-Parallel testing is unsupported at this time.

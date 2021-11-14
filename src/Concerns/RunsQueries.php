@@ -151,6 +151,20 @@ trait RunsQueries
     }
 
     /**
+     * @param  ArangoQueryBuilder|string  $query
+     * @param  array  $bindings
+     * @return array
+     */
+    protected function handleQueryBuilder($query, array $bindings): array
+    {
+        if ($query instanceof ArangoQueryBuilder) {
+            $bindings = $query->binds;
+            $query = $query->query;
+        }
+        return [$query, $bindings];
+    }
+
+    /**
      * Run a select statement against the database.
      *
      * @SuppressWarnings(PHPMD.BooleanArgumentFlag)

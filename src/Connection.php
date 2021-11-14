@@ -164,20 +164,6 @@ class Connection extends IlluminateConnection
         return $this->database;
     }
 
-    /**
-     * @param  ArangoQueryBuilder|string  $query
-     * @param  array  $bindings
-     * @return array
-     */
-    private function handleQueryBuilder($query, array $bindings): array
-    {
-        if ($query instanceof ArangoQueryBuilder) {
-            $bindings = $query->binds;
-            $query = $query->query;
-        }
-        return [$query, $bindings];
-    }
-
     public static function aqb(): ArangoQueryBuilder
     {
         return new ArangoQueryBuilder();

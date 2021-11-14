@@ -4,56 +4,11 @@ might work but your mileage may vary.
 
 **_Note_**: This list is limited to database interactions. It lists 'create' but not 'make' etc.
 
-- [Eloquent](#eloquent)
 - [Query Builder](#query-builder)
+- [Eloquent](#eloquent)
 - [Database Connection](#database-connection)
 - [Known Incompatibilities](#known-incompatibilities)
 
-##<a name="eloquent"></a>Eloquent
-The methods listed below are specific to Eloquent. 
-Note that a lot of Eloquent's featured are leveraging the query builder. Those methods are listed in the corresponding
-chapter below.
-
-### Model CRUD
-- all
-- create
-- delete
-- destroy
-- find
-- first
-- firstOr
-- firstOrFail
-- firstOrCreate
-- firstOrNew
-- firstWhere
-- fresh
-- paginate
-- save
-- updateOrCreate
-
-
-### Relationships
-- One To One
-- One To Many
-- Many To Many
-- One To One (Polymorphic)
-- One To Many (Polymorphic)
-- Many To Many (Polymorphic)
-
-Methods:
-- belongsTo
-- belongsToMany
-- doesntHave
-- enforceMorphMap
-- has
-- hasMany
-- hasOne
-- morphedByMany
-- morphMany
-- morphOne
-- morphTo
-- with
-- withCount
 
 ##<a name="query-builder"></a>Query Builder
 - dd
@@ -127,6 +82,53 @@ Methods:
 - min
 - sum
 
+
+##<a name="eloquent"></a>Eloquent
+The methods listed below are specific to Eloquent.
+Note that a lot of Eloquent's featured are leveraging the query builder. Those methods are listed in the corresponding
+chapter below.
+
+### Model CRUD
+- all
+- create
+- delete
+- destroy
+- find
+- first
+- firstOr
+- firstOrFail
+- firstOrCreate
+- firstOrNew
+- firstWhere
+- fresh
+- paginate
+- save
+- updateOrCreate
+
+### Relationships
+- One To One
+- One To Many
+- Many To Many
+- One To One (Polymorphic)
+- One To Many (Polymorphic)
+- Many To Many (Polymorphic)
+
+Methods:
+- belongsTo
+- belongsToMany
+- doesntHave
+- enforceMorphMap
+- has
+- hasMany
+- hasOne
+- morphedByMany
+- morphMany
+- morphOne
+- morphTo
+- with
+- withCount
+
+
 ##<a name="testing"></a>Testing
 - assertDatabaseCount
 - assertDeleted
@@ -136,6 +138,8 @@ Methods:
 - assertModelMissing
 - assertNotSoftDeleted
 - assertSoftDeleted
+- castAsJson (dummy method)
+
 
 ##<a name="known-incompatibilities"></a>Known incompatibilities
 Not all features can be made compatible. Known issues are listed below:

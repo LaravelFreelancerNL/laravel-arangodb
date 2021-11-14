@@ -59,10 +59,10 @@ Schema::createView($viewName, $options);
 
 ### Edit view
 ```php
-Schema::createView($viewName, $options);
+Schema::editView($viewName, $options);
 ```
 
 ### Delete view
 ```php
-Schema::createView($viewName);
+Schema::dropView($viewName);
 ```
