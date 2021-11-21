@@ -145,9 +145,36 @@ Methods:
 Not all features can be made compatible. Known issues are listed below:
 
 - unions
+- rightJoin
+
+## id vs _id
+All ArangoDB documents have a default indexed identifier called '_id' consisting of the collection (table) name and
+a unique string _key. This looks something like: users/12345.
+
+At the moment _id and id aren't transcribed back and forth. So relations and queries that rely on 'id' will fail if they 
+don't retrieve a models keyName. Relevant parts of packages must be overridden.
+
+**Note**: this is high on the list to solve generically. So this behaviour is likely to change in the future.
 
 ### Transactions
-[At the beginning of a transaction you must declare the write/exclusive collections.](transactions.md)
+[At the beginning of a transaction you must declare collections that are used in (write) statements.](transactions.md)
+
+### Locking: sharedLock/lockForUpdate
+These methods don't work as ArangoDB requires you to declare the locking mechanics at the start of a transaction. 
 
 ### Separate read and write connections
 Aranguent currently doesn't support the combination of a separate read and write connection  
+
+### Foreign keys
+ArangoDB doesn't support foreign keys. So if a package depends on that for cascading updates or deletes you'll 
+have to extend those parts of the package. 
+
+You can set up an event listener in the Model's boot method or use an
+observer besides that you want to override any delete action that is performed directly on the database.
+
+Note that you'll want to delete child models before deleting the model itself. This also lets you retrieve
+all child models in case of mass deletion. As you'll be dealing with multiple delete queries it is a good idea to
+wrap it in a transaction.
+
+### Raw SQL
+Any raw SQL needs to be replaced by AQL.
