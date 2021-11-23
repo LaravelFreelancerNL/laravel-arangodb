@@ -3,7 +3,7 @@ echo "Fix coding style"
 ./vendor/bin/phpcbf
 
 echo "Check for remaining coding style errors"
-./vendor/bin/phpcs
+./vendor/bin/phpcs -p --ignore=tests
 
 echo "Run PHPMD"
 ./vendor/bin/phpmd src/ text phpmd-ruleset.xml
