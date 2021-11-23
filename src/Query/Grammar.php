@@ -52,6 +52,7 @@ class Grammar extends FluentAqlGrammar
      */
     protected $selectComponents = [
         'from',
+        'search',
         'variables',
         'joins',
         'wheres',
@@ -465,6 +466,21 @@ class Grammar extends FluentAqlGrammar
     public function compileRandom(Builder $builder)
     {
         return $builder->aqb->rand();
+    }
+
+    /**
+     * @param Builder $builder
+     * @return Builder|\LaravelFreelancerNL\FluentAQL\QueryBuilder|null
+     */
+    public function compileSearch(Builder $builder): Builder
+    {
+        $builder->aqb = $builder->aqb->search($builder->search['predicates']);
+
+        if (isset($builder->search['options'])) {
+            $builder->aqb = $builder->aqb->options($builder->search['options']);
+        }
+
+        return $builder;
     }
 
     /**

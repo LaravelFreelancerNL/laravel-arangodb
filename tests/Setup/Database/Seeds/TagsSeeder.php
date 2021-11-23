@@ -114,7 +114,7 @@ class TagsSeeder extends Seeder
 
         $tags = json_decode($tags, JSON_OBJECT_AS_ARRAY);
         foreach ($tags as $tag) {
-            Tag::insert($tag);
+            Tag::insertOrIgnore($tag);
         }
     }
 }

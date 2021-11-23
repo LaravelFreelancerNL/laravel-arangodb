@@ -65,7 +65,7 @@ class TaggablesSeeder extends Seeder
         $taggables = json_decode($taggables, JSON_OBJECT_AS_ARRAY);
 
         foreach ($taggables as $taggable) {
-            Taggable::insert($taggable);
+            Taggable::insertOrIgnore($taggable);
         }
     }
 }

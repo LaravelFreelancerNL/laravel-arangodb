@@ -36,13 +36,6 @@ class Builder extends \Illuminate\Database\Schema\Builder
     protected $grammar;
 
     /**
-     * The Blueprint resolver callback.
-     *
-     * @var Closure
-     */
-    protected $resolver;
-
-    /**
      * Create a new database Schema manager.
      *
      * Builder constructor.
@@ -193,6 +186,13 @@ class Builder extends \Illuminate\Database\Schema\Builder
         return $this->schemaManager->getView($name);
     }
 
+    public function hasView(string $view): bool
+    {
+        return $this->handleExceptionsAsQueryExceptions(function () use ($view) {
+            return $this->schemaManager->hasView($view);
+        });
+    }
+
     /**
      * @throws ArangoException
      */
@@ -229,6 +229,20 @@ class Builder extends \Illuminate\Database\Schema\Builder
     public function dropView(string $name)
     {
         $this->schemaManager->deleteView($name);
+    }
+
+    /**
+     * @param string $name
+     * @return bool
+     * @throws ArangoException
+     */
+    public function dropViewIfExists(string $name): bool
+    {
+        if ($this->hasView($name)) {
+            $this->schemaManager->deleteView($name);
+        }
+
+        return true;
     }
 
     /**
@@ -286,7 +300,10 @@ class Builder extends \Illuminate\Database\Schema\Builder
         return $this->connection;
     }
 
-    protected function handleExceptionsAsQueryExceptions(Closure $callback)
+    /**
+     * @throws QueryException
+     */
+    protected function handleExceptionsAsQueryExceptions(Closure $callback): mixed
     {
         try {
             return $callback();

@@ -47,7 +47,12 @@ class BuilderTest extends TestCase
             'age'          => 41,
             'location_id' => 'locations/kingslanding',
         ];
-        Character::insert($character);
+        $ned = Character::find('characters/NedStark');
+        if ($ned === null) {
+            Character::insert($character);
+        } else {
+            $ned->update($character);
+        }
 
         $ned = Character::find('characters/NedStark');
 
@@ -70,7 +75,12 @@ class BuilderTest extends TestCase
             'age'          => 41,
             'location_id' => 'locations/kingslanding',
         ];
-        Character::insert($character);
+        $ned = Character::find('characters/NedStark');
+        if ($ned === null) {
+            Character::insert($character);
+        } else {
+            $ned->update($character);
+        }
         $retrievedBeforeUpdate = Character::find('characters/NedStark');
         $retrievedBeforeUpdate->update(['alive' => false]);
 

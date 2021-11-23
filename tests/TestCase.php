@@ -18,6 +18,8 @@ abstract class TestCase extends AranguentTestCase implements \Orchestra\Testbenc
 
     protected ?ConnectionInterface $connection;
 
+    protected bool $dropViews = true;
+
     /**
      * The base URL to use while testing the application.
      *

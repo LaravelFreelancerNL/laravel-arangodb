@@ -319,7 +319,7 @@ class CharactersSeeder extends Seeder
         $characters = json_decode($characters, JSON_OBJECT_AS_ARRAY);
 
         foreach ($characters as $character) {
-            Character::insert($character);
+            Character::insertOrIgnore($character);
         }
     }
 }

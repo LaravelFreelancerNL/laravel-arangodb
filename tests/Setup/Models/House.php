@@ -7,7 +7,7 @@ use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 
 class House extends Model
 {
-    protected $table = 'locations';
+    protected $table = 'houses';
 
     protected $fillable = [
         '_key',

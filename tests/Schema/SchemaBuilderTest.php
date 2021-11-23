@@ -145,10 +145,11 @@ class SchemaBuilderTest extends TestCase
 
         $views = Schema::getAllViews();
 
-        $this->assertCount(3, $views);
-        $this->assertSame('pages', $views[0]->name);
-        $this->assertSame('products', $views[1]->name);
-        $this->assertSame('search', $views[2]->name);
+        $this->assertCount(4, $views);
+        $this->assertSame('house_view', $views[0]->name);
+        $this->assertSame('pages', $views[1]->name);
+        $this->assertSame('products', $views[2]->name);
+        $this->assertSame('search', $views[3]->name);
 
         $schemaManager->deleteView('search');
         $schemaManager->deleteView('pages');

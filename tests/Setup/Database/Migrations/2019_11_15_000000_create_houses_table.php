@@ -15,8 +15,6 @@ class CreateHousesTable extends Migration
     public function up()
     {
         Schema::create('houses', function (Blueprint $collection) {
-//            $collection->skiplistIndex('name');
-//            $collection->skiplistIndex('location_id');
         });
     }
 

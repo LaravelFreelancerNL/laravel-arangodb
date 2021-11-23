@@ -60,7 +60,6 @@ class BelongsToManyTest extends TestCase
         $child = Character::find('characters/JonSnow');
 
         $parents = $child->parents;
-
         $this->assertEquals(1, count($parents));
         $this->assertInstanceOf(Character::class, $parents[0]);
         $this->assertEquals('characters/NedStark', $parents[0]->_id);
@@ -73,7 +72,7 @@ class BelongsToManyTest extends TestCase
     {
         $child = Character::find('characters/JonSnow');
 
-        $lyannaStark = Character::create(
+        $lyannaStark = Character::firstOrCreate(
             [
                 "_key" => "LyannaStark",
                 "name" => "Lyanna",
@@ -95,6 +94,10 @@ class BelongsToManyTest extends TestCase
 
         $this->assertEquals('NedStark', $parents[0]->_key);
         $this->assertEquals('LyannaStark', $parents[1]->_key);
+
+        $child->parents()->detach($lyannaStark);
+        $child->save();
+        $lyannaStark->delete();
     }
 
     public function testDetach()
@@ -110,7 +113,7 @@ class BelongsToManyTest extends TestCase
 
     public function testSync(): void
     {
-        $lyannaStark = Character::create(
+        $lyannaStark = Character::firstOrCreate(
             [
                 "_key" => "LyannaStark",
                 "name" => "Lyanna",
@@ -120,7 +123,7 @@ class BelongsToManyTest extends TestCase
                 "residence_id" => "winterfell"
             ]
         );
-        $rhaegarTargaryen = Character::create(
+        $rhaegarTargaryen = Character::firstOrCreate(
             [
                 "_key" => "RhaegarTargaryen",
                 "name" => "Rhaegar",
@@ -139,5 +142,9 @@ class BelongsToManyTest extends TestCase
         $this->assertEquals(2, count($reloadedChild->parents));
         $this->assertEquals('characters/LyannaStark', $reloadedChild->parents[0]->_id);
         $this->assertEquals('characters/RhaegarTargaryen', $reloadedChild->parents[1]->_id);
+
+        $child->parents()->sync('characters/NedStark');
+        $rhaegarTargaryen->delete();
+        $lyannaStark->delete();
     }
 }

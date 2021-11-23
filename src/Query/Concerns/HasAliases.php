@@ -78,7 +78,7 @@ trait HasAliases
      */
     protected function generateTableAlias($table, $postfix = 'Doc')
     {
-        return Str::singular($table) . $postfix;
+        return Str::camel(Str::singular($table)) . $postfix;
     }
 
     protected function replaceTableForAlias($reference): string

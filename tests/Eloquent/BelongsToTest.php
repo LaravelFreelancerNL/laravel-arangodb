@@ -15,6 +15,7 @@ use Tests\TestCase;
 
 class BelongsToTest extends TestCase
 {
+
     protected function defineDatabaseMigrations()
     {
         $this->loadLaravelMigrations();
@@ -83,6 +84,8 @@ class BelongsToTest extends TestCase
         $this->assertEquals('pyke', $location->_key);
         $this->assertEquals($location->led_by, $character->_id);
         $this->assertInstanceOf(Location::class, $location);
+
+        $location->delete();
     }
 
     public function testDissociate()

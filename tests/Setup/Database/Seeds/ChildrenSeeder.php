@@ -75,7 +75,7 @@ class ChildrenSeeder extends Seeder
 
         $childOf = json_decode($children, JSON_OBJECT_AS_ARRAY);
         foreach ($childOf as $relation) {
-            Child::insert($relation);
+            Child::insertOrIgnore($relation);
         }
     }
 }

@@ -17,6 +17,7 @@ class CreateChildrenEdgeTable extends Migration
         Schema::create(
             'children',
             function (Blueprint $collection) {
+                $collection->unique(['_from', '_to']);
             },
             ['type' => 3]
         );

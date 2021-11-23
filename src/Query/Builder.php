@@ -8,6 +8,7 @@ use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsJoinClauses;
@@ -15,6 +16,7 @@ use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsSubqueries;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsWhereClauses;
 use LaravelFreelancerNL\FluentAQL\Exceptions\BindException;
 use LaravelFreelancerNL\FluentAQL\Expressions\ExpressionInterface as ExpressionInterface;
+use LaravelFreelancerNL\FluentAQL\Expressions\FunctionExpression;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
 class Builder extends IlluminateQueryBuilder
@@ -24,9 +26,9 @@ class Builder extends IlluminateQueryBuilder
     use BuildsWhereClauses;
 
     /**
-     * @var Grammar
+     * @var QueryBuilder|FunctionExpression
      */
-    public $grammar;
+    public QueryBuilder|FunctionExpression $aqb;
 
     /**
      * @var Connection
@@ -34,16 +36,23 @@ class Builder extends IlluminateQueryBuilder
     public $connection;
 
     /**
-     * @var QueryBuilder
+     * @var Grammar
      */
-    public $aqb;
+    public $grammar;
+
+    /**
+     * The current query value bindings.
+     *
+     * @var null|array{predicates: array<mixed>, options: array<string, string>}
+     */
+    public ?array $search = null;
 
     /**
      * The query variables that should be set.
      *
      * @var array<mixed>
      */
-    public array $variables = [];
+    public $variables = [];
 
     /**
      * @override
@@ -131,8 +140,6 @@ class Builder extends IlluminateQueryBuilder
             ->cloneWithoutBindings($this->unions ? ['order'] : ['select', 'order'])
             ->setAggregate('count', $this->withoutSelectAliases($columns))
             ->get()->all();
-
-        $this->aqb = new QueryBuilder();
 
         return $closeResults;
     }
@@ -406,5 +413,31 @@ class Builder extends IlluminateQueryBuilder
         $seed = null;
 
         return $this->orderByRaw($this->grammar->compileRandom($this));
+    }
+
+    /**
+     * Search an ArangoSearch view.
+     *
+     * @param mixed $predicates
+     * @param array|null $options
+     * @return Builder
+     */
+    public function search(mixed $predicates, array $options = null): Builder
+    {
+        if ($predicates instanceof Closure) {
+            /** @phpstan-ignore-next-line */
+            $predicates = $predicates($this->aqb);
+        }
+
+        if (! is_array($predicates)) {
+            $predicates = [$predicates];
+        }
+
+        $this->search = [
+            'predicates' => $predicates,
+            'options' => $options
+        ];
+
+        return $this;
     }
 }

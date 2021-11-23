@@ -91,7 +91,7 @@ class LocationsSeeder extends Seeder
         $locations = json_decode($locations, JSON_OBJECT_AS_ARRAY);
 
         foreach ($locations as $location) {
-            Location::insert($location);
+            Location::insertOrIgnore($location);
         }
     }
 }
