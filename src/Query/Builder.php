@@ -425,7 +425,6 @@ class Builder extends IlluminateQueryBuilder
     public function search(mixed $predicates, array $options = null): Builder
     {
         if ($predicates instanceof Closure) {
-            /** @phpstan-ignore-next-line */
             $predicates = $predicates($this->aqb);
         }
 
