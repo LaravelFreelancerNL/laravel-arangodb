@@ -12,7 +12,7 @@ use LaravelFreelancerNL\FluentAQL\QueryBuilder as ArangoQueryBuilder;
 
 trait IsAranguentModel
 {
-//    use HasAranguentRelationships;
+    use HasAranguentRelationships;
 
     /**
      * Insert the given attributes and set the ID on the model.
