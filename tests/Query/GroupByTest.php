@@ -5,6 +5,7 @@ namespace Tests\Query;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Mockery as m;
+use Tests\Setup\Database\Seeds\CharactersSeeder;
 use Tests\TestCase;
 
 class GroupByTest extends TestCase
@@ -14,7 +15,7 @@ class GroupByTest extends TestCase
         $this->loadLaravelMigrations();
         $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
 
-        Artisan::call('db:seed', ['--class' => \Tests\Setup\Database\Seeds\CharactersSeeder::class]);
+        Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
     }
 
 
@@ -45,9 +46,9 @@ class GroupByTest extends TestCase
 
         $this->assertCount(29, $groups);
         $this->assertEquals(null, $groups[4][0]);
-        $this->assertEquals('locations/the-red-keep', $groups[4][1]);
+        $this->assertEquals('the-red-keep', $groups[4][1]);
         $this->assertEquals('Baelish', $groups[5][0]);
-        $this->assertEquals('locations/the-red-keep', $groups[5][1]);
+        $this->assertEquals('the-red-keep', $groups[5][1]);
     }
 
     public function testHaving()

@@ -262,21 +262,7 @@ class Builder extends IlluminateQueryBuilder
         return $results;
     }
 
-
     /**
-     * Execute the query as a "select" statement.
-     *
-     * @param array|string $columns
-     *
-     * @return Collection
-     */
-    public function get($columns = ['*'])
-    {
-        return collect($this->onceWithColumns(Arr::wrap($columns), function () {
-            return $this->runSelect();
-        }));
-    }
-
     /**
      * Get the current query value bindings in a flattened array.
      *

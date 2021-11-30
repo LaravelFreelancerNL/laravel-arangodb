@@ -44,6 +44,7 @@ trait CompilesColumns
             }
         }
         $values = $this->determineReturnValues($builder, $returnAttributes, $returnDocs);
+
         $builder->aqb = $builder->aqb->return($values, (bool) $builder->distinct);
 
         return $builder;

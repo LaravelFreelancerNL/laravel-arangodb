@@ -107,28 +107,28 @@ class ModelTest extends TestCase
         Character::upsert(
             [
                 [
-                   "_key" => "NedStark",
+                   "id" => "NedStark",
                    "name" => "Ned",
                    "surname" => "Stark",
                    "alive" => false,
                    "age" => 41,
-                   "residence_id" => "locations/winterfell"
+                   "residence_id" => "winterfell"
                 ],
                 [
-                   "_key" => "JaimeLannister",
+                   "id" => "JaimeLannister",
                    "name" => "Jaime",
                    "surname" => "Lannister",
                    "alive" => false,
                    "age" => 36,
-                   "residence_id" => "locations/the-red-keep"
+                   "residence_id" => "the-red-keep"
                 ],
             ],
             ['name', 'surname'],
             ['alive']
         );
 
-        $ned = Character::find('characters/NedStark');
-        $jaime = Character::find('characters/JaimeLannister');
+        $ned = Character::find('NedStark');
+        $jaime = Character::find('JaimeLannister');
 
         $this->assertFalse($ned->alive);
         $this->assertFalse($jaime->alive);
@@ -142,15 +142,15 @@ class ModelTest extends TestCase
 
         $deletedCharacter = Character::first();
 
-        $this->assertNotEquals($character->_key, $deletedCharacter->_key);
+        $this->assertNotEquals($character->id, $deletedCharacter->id);
     }
 
     public function testDestroyModel()
     {
-        $id = 'characters/NedStark';
+        $id = 'NedStark';
         Character::destroy($id);
 
-        $this->assertDatabaseMissing('characters', ['_id' => $id]);
+        $this->assertDatabaseMissing('characters', ['id' => $id]);
     }
 
 
@@ -195,24 +195,24 @@ class ModelTest extends TestCase
     public function testGetId()
     {
         $ned = Character::first();
-        $this->assertEquals('characters/NedStark', $ned->id);
+        $this->assertEquals('NedStark', $ned->id);
+    }
+
+    public function testSetUnderscoreId()
+    {
+        $ned = Character::first();
+        $ned->_id = 'characters/NedStarkIsDead';
+
+        $this->assertEquals('characters/NedStarkIsDead', $ned->_id);
+        $this->assertEquals('NedStarkIsDead', $ned->id);
     }
 
     public function testSetId()
     {
         $ned = Character::first();
-        $ned->id = 'characters/NedStarkIsDead';
+        $ned->id = 'NedStarkIsDead';
 
-        $this->assertEquals('characters/NedStarkIsDead', $ned->_id);
-        $this->assertEquals('characters/NedStarkIsDead', $ned->id);
-    }
-
-    public function testSetKey()
-    {
-        $ned = Character::first();
-        $ned->_key = 'NedStarkIsDead';
-
-        $this->assertEquals('NedStarkIsDead', $ned->_key);
+        $this->assertEquals('NedStarkIsDead', $ned->id);
         $this->assertEquals('characters/NedStarkIsDead', $ned->_id);
     }
 }

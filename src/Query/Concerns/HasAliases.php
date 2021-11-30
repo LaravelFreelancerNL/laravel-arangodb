@@ -2,7 +2,6 @@
 
 namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
-use Illuminate\Database\Query\Builder as IluminateBuilder;
 use Illuminate\Support\Str;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 use LaravelFreelancerNL\FluentAQL\Expressions\FunctionExpression;
@@ -151,20 +150,22 @@ trait HasAliases
      */
     protected function normalizeColumn(Builder $builder, $column, $table = null)
     {
-        if ($table == null) {
-            $table = $builder->from;
+        if ($column instanceof QueryBuilder || $column instanceof FunctionExpression) {
+            return $column;
         }
+
+        $column = $this->convertColumnId($column);
 
         if ((is_string($column) || is_numeric($column)) && key_exists($column, $builder->variables)) {
             return $column;
         }
 
-        if ($column instanceof QueryBuilder || $column instanceof FunctionExpression) {
+        if (is_array($builder->groups) && in_array($column, $builder->groups)) {
             return $column;
         }
 
-        if (is_array($builder->groups) && in_array($column, $builder->groups)) {
-            return $column;
+        if ($table == null) {
+            $table = $builder->from;
         }
 
         // Replace SQL JSON arrow for AQL dot
@@ -197,5 +198,18 @@ trait HasAliases
         }
 
         return $references;
+    }
+
+    /**
+     * @param array<mixed>|string $column
+     * @return array<mixed>|string
+     */
+    protected function convertColumnId(array|string $column): array|string
+    {
+        if (is_string($column) || is_array($column)) {
+            $column = $this->convertIdToKey($column);
+        }
+
+        return $column;
     }
 }

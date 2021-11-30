@@ -10,14 +10,11 @@ use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesColumns;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesGroups;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesJoins;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesWhereClauses;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\ConvertsIdToKey;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\HasAliases;
 use LaravelFreelancerNL\FluentAQL\Exceptions\BindException as BindException;
 use LaravelFreelancerNL\FluentAQL\Expressions\FunctionExpression;
 use LaravelFreelancerNL\FluentAQL\Grammar as FluentAqlGrammar;
-
-/*
- * Provides AQL syntax functions
- */
 
 class Grammar extends FluentAqlGrammar
 {
@@ -26,6 +23,7 @@ class Grammar extends FluentAqlGrammar
     use CompilesJoins;
     use CompilesGroups;
     use CompilesWhereClauses;
+    use ConvertsIdToKey;
     use HasAliases;
     use Macroable;
 
@@ -128,10 +126,15 @@ class Grammar extends FluentAqlGrammar
             return $builder;
         }
 
+        // Convert id to _key
+        foreach ($values as $key => $value) {
+            $values[$key] = $this->convertIdToKey($value);
+        }
+
         $builder->aqb = $builder->aqb->let('values', $values)
             ->for('value', 'values')
             ->insert('value', $table)
-            ->return('NEW._id');
+            ->return('NEW._key');
 
         return $builder;
     }
@@ -141,18 +144,27 @@ class Grammar extends FluentAqlGrammar
      *
      * @param array<mixed> $values
      */
-    public function compileInsertGetId(Builder $builder, $values, $sequence = "_id"): Builder
+    public function compileInsertGetId(Builder $builder, $values, $sequence = "_key"): Builder
     {
         if (Arr::isAssoc($values)) {
             $values = [$values];
         }
         $table = $this->prefixTable($builder->from);
 
+        if (isset($sequence)) {
+            $sequence = $this->convertIdToKey($sequence);
+        }
+
         if (empty($values)) {
             $builder->aqb = $builder->aqb->insert('{}', $table)
                 ->return('NEW.' . $sequence);
 
             return $builder;
+        }
+
+        // Convert id to _key
+        foreach ($values as $key => $value) {
+            $values[$key] = $this->convertIdToKey($value);
         }
 
         $builder->aqb = $builder->aqb->let('values', $values)
@@ -183,11 +195,16 @@ class Grammar extends FluentAqlGrammar
             return $builder;
         }
 
+        // Convert id to _key
+        foreach ($values as $key => $value) {
+            $values[$key] = $this->convertIdToKey($value);
+        }
+
         $builder->aqb = $builder->aqb->let('values', $values)
             ->for('value', 'values')
             ->insert('value', $table)
             ->options(["ignoreErrors" => true])
-            ->return('NEW._id');
+            ->return('NEW._key');
 
         return $builder;
     }
@@ -412,6 +429,19 @@ class Grammar extends FluentAqlGrammar
      */
     public function compileUpsert(Builder $query, array $values, array $uniqueBy, array $update)
     {
+        // Convert id to _key
+        foreach ($values as $key => $value) {
+            $values[$key] = $this->convertIdToKey($value);
+        }
+
+        foreach ($uniqueBy as $key => $value) {
+            $uniqueBy[$key] = $this->convertIdToKey($value);
+        }
+
+        foreach ($update as $key => $value) {
+            $update[$key] = $this->convertIdToKey($value);
+        }
+
         /** @phpstan-ignore-next-line */
         return DB::aqb()
             ->let('docs', $values)

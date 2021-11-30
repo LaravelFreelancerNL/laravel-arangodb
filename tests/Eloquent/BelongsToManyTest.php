@@ -45,7 +45,8 @@ class BelongsToManyTest extends TestCase
 
     public function testRetrieveRelation()
     {
-        $parent = Character::find('characters/NedStark');
+        $parent = Character::find('NedStark');
+
         $children = $parent->children;
 
         $this->assertEquals(5, count($children));
@@ -57,10 +58,10 @@ class BelongsToManyTest extends TestCase
 
     public function testInverseRelation()
     {
-        $child = Character::find('characters/JonSnow');
+        $child = Character::find('JonSnow');
 
         $parents = $child->parents;
-        $this->assertEquals(1, count($parents));
+        $this->assertCount(1, $parents);
         $this->assertInstanceOf(Character::class, $parents[0]);
         $this->assertEquals('characters/NedStark', $parents[0]->_id);
 
@@ -70,11 +71,11 @@ class BelongsToManyTest extends TestCase
 
     public function testAttach()
     {
-        $child = Character::find('characters/JonSnow');
+        $child = Character::find('JonSnow');
 
         $lyannaStark = Character::firstOrCreate(
             [
-                "_key" => "LyannaStark",
+                "id" => "LyannaStark",
                 "name" => "Lyanna",
                 "surname" => "Stark",
                 "alive" => false,
@@ -84,16 +85,16 @@ class BelongsToManyTest extends TestCase
         );
 
         // Reload from DB
-        $lyannaStark = Character::find('characters/LyannaStark');
+        $lyannaStark = Character::find('LyannaStark');
 
         $child->parents()->attach($lyannaStark);
         $child->save();
 
-        $reloadedChild = Character::find('characters/JonSnow');
+        $reloadedChild = Character::find('JonSnow');
         $parents = $child->parents;
 
-        $this->assertEquals('NedStark', $parents[0]->_key);
-        $this->assertEquals('LyannaStark', $parents[1]->_key);
+        $this->assertEquals('NedStark', $parents[0]->id);
+        $this->assertEquals('LyannaStark', $parents[1]->id);
 
         $child->parents()->detach($lyannaStark);
         $child->save();
@@ -102,20 +103,21 @@ class BelongsToManyTest extends TestCase
 
     public function testDetach()
     {
-        $child = Character::find('characters/JonSnow');
+        $child = Character::find('JonSnow');
 
         $child->parents()->detach('characters/NedStark');
         $child->save();
 
-        $reloadedChild = Character::find('characters/JonSnow');
-        $this->assertEquals(0, count($reloadedChild->parents));
+        $child = $child->fresh();
+
+        $this->assertCount(0, $child->parents);
     }
 
     public function testSync(): void
     {
         $lyannaStark = Character::firstOrCreate(
             [
-                "_key" => "LyannaStark",
+                "id" => "LyannaStark",
                 "name" => "Lyanna",
                 "surname" => "Stark",
                 "alive" => false,
@@ -125,7 +127,7 @@ class BelongsToManyTest extends TestCase
         );
         $rhaegarTargaryen = Character::firstOrCreate(
             [
-                "_key" => "RhaegarTargaryen",
+                "id" => "RhaegarTargaryen",
                 "name" => "Rhaegar",
                 "surname" => "Targaryen",
                 "alive" => false,
@@ -134,14 +136,16 @@ class BelongsToManyTest extends TestCase
             ]
         );
 
-        $child = Character::find('characters/JonSnow');
+        $child = Character::find('JonSnow');
 
         $child->parents()->sync(['characters/LyannaStark', 'characters/RhaegarTargaryen']);
-        $reloadedChild = Character::find('characters/JonSnow');
+        $child->fresh();
 
-        $this->assertEquals(2, count($reloadedChild->parents));
-        $this->assertEquals('characters/LyannaStark', $reloadedChild->parents[0]->_id);
-        $this->assertEquals('characters/RhaegarTargaryen', $reloadedChild->parents[1]->_id);
+        $this->assertEquals(2, count($child->parents));
+        $this->assertEquals('characters/LyannaStark', $child->parents[0]->_id);
+        $this->assertEquals('characters/RhaegarTargaryen', $child->parents[1]->_id);
+        $this->assertEquals('LyannaStark', $child->parents[0]->id);
+        $this->assertEquals('RhaegarTargaryen', $child->parents[1]->id);
 
         $child->parents()->sync('characters/NedStark');
         $rhaegarTargaryen->delete();

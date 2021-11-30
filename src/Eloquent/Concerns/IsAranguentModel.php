@@ -15,16 +15,6 @@ trait IsAranguentModel
     use HasAranguentRelationships;
 
     /**
-     * Get the route key for the model.
-     *
-     * @return string
-     */
-    public function getRouteKeyName(): string
-    {
-        return '_key';
-    }
-
-    /**
      * Insert the given attributes and set the ID on the model.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
@@ -68,21 +58,6 @@ trait IsAranguentModel
     }
 
     /**
-     * Dynamically retrieve attributes on the model.
-     *
-     * @param  string  $key
-     * @return mixed
-     */
-    public function __get($key)
-    {
-        // Laravel's accessors don't differentiate between id and _id, so we catch ArangoDB's _id here.
-        if ($key === 'id') {
-            return $this->attributes['_id'];
-        }
-        return $this->getAttribute($key);
-    }
-
-    /**
      * Dynamically set attributes on the model.
      *
      * @param  string  $key
@@ -93,8 +68,11 @@ trait IsAranguentModel
     {
         // Laravel's mutators don't differentiate between id and _id, so we catch ArangoDB's _id here.
         if ($key === 'id') {
-            $this->attributes['_id'] = $value;
-            return;
+            $this->attributes['_id'] = $this->getTable() . '/' . $value;
+        }
+
+        if ($key === '_id') {
+            $this->attributes['id'] = explode('/', $value)[1];
         }
 
         $this->setAttribute($key, $value);

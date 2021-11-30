@@ -30,7 +30,7 @@ class FirstsTest extends TestCase
     {
         $ned = Character::first();
 
-        $this->assertEquals('characters/NedStark', $ned->id);
+        $this->assertEquals('NedStark', $ned->id);
     }
 
     public function testFirstWithColumns()
@@ -62,7 +62,7 @@ class FirstsTest extends TestCase
 
     public function testFirstOrCreate()
     {
-        $ned = Character::find('characters/NedStark');
+        $ned = Character::find('NedStark');
 
         $char = [
             "_key" => "NedStark",
@@ -70,12 +70,13 @@ class FirstsTest extends TestCase
             "surname" => "Stark",
             "alive" => true,
             "age" => 41,
-            "residence_id" => "locations/winterfell"
+            "residence_id" => "winterfell"
         ];
 
         $model = Character::firstOrCreate($char);
 
         $this->assertSame($ned->_id, $model->_id);
+        $this->assertSame($ned->id, $model->id);
     }
 
     public function testFirstOrCreateWithNestedData()
@@ -86,7 +87,7 @@ class FirstsTest extends TestCase
             "surname" => "Stark",
             "alive" => true,
             "age" => 41,
-            "residence_id" => "locations/winterfell",
+            "residence_id" => "winterfell",
             "en" => [
                 "description" => "
                     Lord Eddard Stark, also known as Ned Stark, was the head of House Stark, the Lord of Winterfell, 
@@ -101,7 +102,7 @@ class FirstsTest extends TestCase
             ],
         ];
 
-        $ned = Character::find('characters/NedStark');
+        $ned = Character::find('NedStark');
         $ned->en = $char['en'];
         $ned->save();
 
@@ -119,7 +120,7 @@ class FirstsTest extends TestCase
     {
         $ned = Character::firstOrFail();
 
-        $this->assertEquals('characters/NedStark', $ned->id);
+        $this->assertEquals('NedStark', $ned->id);
     }
 
     public function testFirstOrFailing()
@@ -131,7 +132,7 @@ class FirstsTest extends TestCase
 
     public function testFirstOrNew()
     {
-        $ned = Character::find('characters/NedStark');
+        $ned = Character::find('NedStark');
 
         $char = [
             "_key" => "NedStark",
@@ -139,17 +140,17 @@ class FirstsTest extends TestCase
             "surname" => "Stark",
             "alive" => true,
             "age" => 41,
-            "residence_id" => "locations/winterfell"
+            "residence_id" => "winterfell"
         ];
 
         $model = Character::firstOrNew($char);
 
-        $this->assertSame($ned->_id, $model->_id);
+        $this->assertSame($ned->id, $model->id);
     }
 
     public function testFirstOrNewNoneExisting()
     {
-        $dragonstone = Location::find('locations/dragonstone');
+        $dragonstone = Location::find('dragonstone');
 
         $loc = [
             "_key" => "dragonstone",
@@ -158,13 +159,13 @@ class FirstsTest extends TestCase
                 55.167801,
                 -6.815096
             ],
-            "led_by" => "characters/DaenerysTargaryen"
+            "led_by" => "DaenerysTargaryen"
         ];
 
         $model = Location::firstOrNew($loc);
 
         $this->assertNull($dragonstone);
-        $this->assertObjectNotHasAttribute('_id', $model);
+        $this->assertObjectNotHasAttribute('id', $model);
     }
 
     public function testFirstWhere()

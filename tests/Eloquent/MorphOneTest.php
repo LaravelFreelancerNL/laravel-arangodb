@@ -23,13 +23,13 @@ class MorphOneTest extends TestCase
         Carbon::setTestNow(Carbon::now());
 
         $characters = '[
-            { "_key": "RamsayBolton", "name": "Ramsay", "surname": "Bolton", "alive": true, '
+            { "id": "RamsayBolton", "name": "Ramsay", "surname": "Bolton", "alive": true, '
             . '"traits": ["E","O","G","A"] },
-            { "_key": "SansaStark", "name": "Sansa", "surname": "Stark", "alive": true, "age": 13, '
+            { "id": "SansaStark", "name": "Sansa", "surname": "Stark", "alive": true, "age": 13, '
             . '"traits": ["D","I","J"] },
-            { "_key": "RickonStark", "name": "Bran", "surname": "Stark", "alive": true, "age": 10, '
+            { "id": "RickonStark", "name": "Bran", "surname": "Stark", "alive": true, "age": 10, '
             . '"traits": ["R"] },
-            { "_key": "TheonGreyjoy", "name": "Theon", "surname": "Greyjoy", "alive": true, "age": 16, '
+            { "id": "TheonGreyjoy", "name": "Theon", "surname": "Greyjoy", "alive": true, "age": 16, '
             . '"traits": ["E","R","K"] }
         ]';
         $characters = json_decode($characters, JSON_OBJECT_AS_ARRAY);
@@ -40,10 +40,10 @@ class MorphOneTest extends TestCase
         Location::insert(
             [
                 [
-                    '_key'            => 'winterfell',
+                    'id'            => 'winterfell',
                     'name'            => 'Winterfell',
                     'coordinate'      => [54.368321, -5.581312],
-                    'capturable_id'   => 'characters/RamsayBolton',
+                    'capturable_id'   => 'RamsayBolton',
                     'capturable_type' => 'Tests\Setup\Models\Character',
                 ],
             ]
@@ -61,31 +61,31 @@ class MorphOneTest extends TestCase
 
     public function testRetrieveRelation()
     {
-        $character = Character::find('characters/RamsayBolton');
+        $character = Character::find('RamsayBolton');
         $location = $character->conquered;
 
-        $this->assertEquals('winterfell', $location->_key);
-        $this->assertEquals($location->capturable_id, $character->_id);
+        $this->assertEquals('winterfell', $location->id);
+        $this->assertEquals($location->capturable_id, $character->id);
         $this->assertInstanceOf(Character::class, $character);
     }
 
     public function testSave()
     {
-        $location = Location::find('locations/winterfell');
-        $character = Character::find('characters/TheonGreyjoy');
+        $location = Location::find('winterfell');
+        $character = Character::find('TheonGreyjoy');
 
         $character->conquered()->save($location);
-        $location = Location::find('locations/winterfell');
+        $location = Location::find('winterfell');
 
-        $this->assertEquals($character->_id, $location->capturable_id);
+        $this->assertEquals($character->id, $location->capturable_id);
         $this->assertInstanceOf(Location::class, $character->conquered);
     }
 
     public function testWith(): void
     {
-        $character = Character::with('conquered')->find('characters/RamsayBolton');
+        $character = Character::with('conquered')->find('RamsayBolton');
 
         $this->assertInstanceOf(Location::class, $character->conquered);
-        $this->assertEquals('winterfell', $character->conquered->_key);
+        $this->assertEquals('winterfell', $character->conquered->id);
     }
 }

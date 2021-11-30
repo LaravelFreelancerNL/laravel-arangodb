@@ -46,12 +46,12 @@ class JoinTest extends TestCase
     public function testJoin()
     {
         $characters = DB::table('characters')
-            ->join('locations', 'characters.residence_id', '=', 'locations._id')
-            ->where('residence_id', '=', 'locations/winterfell')
+            ->join('locations', 'characters.residence_id', '=', 'locations.id')
+            ->where('residence_id', '=', 'winterfell')
             ->get();
 
         $this->assertCount(15, $characters);
-        $this->assertEquals('NedStark', $characters[0]->_key);
+        $this->assertEquals('NedStark', $characters[0]->id);
     }
 
     public function testCrossJoin()
@@ -66,7 +66,7 @@ class JoinTest extends TestCase
     public function testLeftJoin()
     {
         $characters = DB::table('characters')
-            ->leftJoin('locations', 'characters.residence_id', '=', 'locations._id')
+            ->leftJoin('locations', 'characters.residence_id', '=', 'locations.id')
             ->get();
 
         $charactersWithoutResidence = DB::table('characters')
@@ -74,7 +74,7 @@ class JoinTest extends TestCase
             ->get();
 
         $this->assertCount(33, $characters);
-        $this->assertEquals('NedStark', $characters[0]->_key);
+        $this->assertEquals('NedStark', $characters[0]->id);
         $this->assertCount(10, $charactersWithoutResidence);
     }
 }

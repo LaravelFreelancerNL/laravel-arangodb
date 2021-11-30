@@ -47,16 +47,16 @@ class BuilderTest extends TestCase
             'age'          => 41,
             'location_id' => 'locations/kingslanding',
         ];
-        $ned = Character::find('characters/NedStark');
+        $ned = Character::find('NedStark');
         if ($ned === null) {
             Character::insert($character);
         } else {
             $ned->update($character);
         }
 
-        $ned = Character::find('characters/NedStark');
+        $ned = Character::find('NedStark');
 
-        $this->assertEquals('NedStark', $ned->_key);
+        $this->assertEquals('NedStark', $ned->id);
         $this->assertIsObject($ned->en);
         $this->assertEquals($character['en'], (array) $ned->en);
         $this->assertInstanceOf(Character::class, $ned);
@@ -81,10 +81,10 @@ class BuilderTest extends TestCase
         } else {
             $ned->update($character);
         }
-        $retrievedBeforeUpdate = Character::find('characters/NedStark');
+        $retrievedBeforeUpdate = Character::find('NedStark');
         $retrievedBeforeUpdate->update(['alive' => false]);
 
-        $retrievedAfterUpdate = Character::find('characters/NedStark');
+        $retrievedAfterUpdate = Character::find('NedStark');
         $this->assertArrayNotHasKey('characters.updated_at', $retrievedAfterUpdate->toArray());
     }
 }

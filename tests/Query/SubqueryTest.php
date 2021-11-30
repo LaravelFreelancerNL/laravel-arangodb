@@ -47,16 +47,16 @@ class SubqueryTest extends TestCase
         $characters = Character::where(function ($query) {
                 $query->select('name')
                     ->from('locations')
-                    ->whereColumn('locations.led_by', 'characters._id')
+                    ->whereColumn('locations.led_by', 'characters.id')
                     ->limit(1);
         }, 'Dragonstone')
             ->get();
-        $this->assertEquals('DaenerysTargaryen', $characters[0]->_key);
+        $this->assertEquals('DaenerysTargaryen', $characters[0]->id);
     }
 
     public function testWhereSub()
     {
-        $characters = Character::where('_id', '==', function ($query) {
+        $characters = Character::where('id', '==', function ($query) {
             $query->select('led_by')
                 ->from('locations')
                 ->where('name', 'Dragonstone')
@@ -64,7 +64,7 @@ class SubqueryTest extends TestCase
         })
             ->get();
 
-        $this->assertEquals('DaenerysTargaryen', $characters[0]->_key);
+        $this->assertEquals('DaenerysTargaryen', $characters[0]->id);
     }
 
     public function testWhereExistsWithMultipleResults()
@@ -72,7 +72,7 @@ class SubqueryTest extends TestCase
         $characters = Character::whereExists(function ($query) {
                 $query->select('name')
                     ->from('locations')
-                    ->whereColumn('locations.led_by', 'characters._id');
+                    ->whereColumn('locations.led_by', 'characters.id');
         })
             ->get();
         $this->assertEquals(3, count($characters));
@@ -83,7 +83,7 @@ class SubqueryTest extends TestCase
         $characters = Character::whereExists(function ($query) {
                 $query->select('name')
                     ->from('locations')
-                    ->whereColumn('locations.led_by', 'characters._id')
+                    ->whereColumn('locations.led_by', 'characters.id')
                     ->limit(1);
         })
             ->get();
@@ -95,7 +95,7 @@ class SubqueryTest extends TestCase
         $characters = Character::whereNotExists(function ($query) {
             $query->select('name')
                 ->from('locations')
-                ->whereColumn('locations.led_by', 'characters._id');
+                ->whereColumn('locations.led_by', 'characters.id');
         })
             ->get();
         $this->assertEquals(40, count($characters));
@@ -106,7 +106,7 @@ class SubqueryTest extends TestCase
         $characters = Character::whereNotExists(function ($query) {
                 $query->select('name')
                     ->from('locations')
-                    ->whereColumn('locations.led_by', 'characters._id')
+                    ->whereColumn('locations.led_by', 'characters.id')
                     ->limit(1);
         })
             ->get();

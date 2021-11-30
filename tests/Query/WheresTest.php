@@ -29,10 +29,10 @@ class WheresTest extends TestCase
     public function testBasicWheres()
     {
         $builder = $this->getBuilder();
-        $builder = $builder->select('*')->from('users')->where('_id', '=', 1);
+        $builder = $builder->select('*')->from('users')->where('id', '=', 1);
 
         $this->assertSame(
-            'FOR userDoc IN users FILTER userDoc._id == @'
+            'FOR userDoc IN users FILTER userDoc._key == @'
               . $builder->aqb->getQueryId()
             . '_1 RETURN userDoc',
             $builder->toSql()
@@ -46,11 +46,11 @@ class WheresTest extends TestCase
         $builder = $this->getBuilder();
         $builder->select('*')
             ->from('users')
-            ->where('_id', '=', 1)
+            ->where('id', '=', 1)
             ->where('email', '=', 'foo');
 
         $this->assertSame(
-            'FOR userDoc IN users FILTER userDoc._id == @'
+            'FOR userDoc IN users FILTER userDoc._key == @'
             . $builder->aqb->getQueryId()
             . '_1 AND userDoc.email == @'
             . $builder->aqb->getQueryId()
@@ -64,11 +64,11 @@ class WheresTest extends TestCase
         $builder = $this->getBuilder();
         $builder->select('*')
             ->from('users')
-            ->where('_id', '==', 1)
+            ->where('id', '==', 1)
             ->orWhere('email', '==', 'foo');
 
         $this->assertSame(
-            'FOR userDoc IN users FILTER userDoc._id == @'
+            'FOR userDoc IN users FILTER userDoc._key == @'
             . $builder->aqb->getQueryId() . '_1 OR userDoc.email == @'
             . $builder->aqb->getQueryId() . '_2 RETURN userDoc',
             $builder->toSql()
@@ -88,7 +88,7 @@ class WheresTest extends TestCase
         $builder->select('*')
             ->from('users')
             ->where('email', '=', 'email@example.com')
-            ->where('_key', '<>', 'keystring');
+            ->where('id', '<>', 'keystring');
 
         $this->assertSame(
             'FOR userDoc IN users '
@@ -233,8 +233,8 @@ class WheresTest extends TestCase
         $builder = $this->getBuilder();
         $builder->select('*')
             ->from('users')
-            ->where('_key', '=', 1)
-            ->orWhereNull('_key');
+            ->where('id', '=', 1)
+            ->orWhereNull('id');
 
         $this->assertSame(
             'FOR userDoc IN users FILTER userDoc._key == @'
@@ -248,15 +248,15 @@ class WheresTest extends TestCase
     public function testWhereNotNulls()
     {
         $builder = $this->getBuilder();
-        $builder->select('*')->from('users')->whereNotNull('_key');
+        $builder->select('*')->from('users')->whereNotNull('id');
         $this->assertSame('FOR userDoc IN users FILTER userDoc._key != null RETURN userDoc', $builder->toSql());
         $this->assertEquals([], $builder->getBindings());
 
         $builder = $this->getBuilder();
         $builder->select('*')
             ->from('users')
-            ->where('_key', '>', 1)
-            ->orWhereNotNull('_key');
+            ->where('id', '>', 1)
+            ->orWhereNotNull('id');
 
         $this->assertSame(
             'FOR userDoc IN users FILTER userDoc._key > @'

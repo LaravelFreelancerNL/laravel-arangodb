@@ -44,7 +44,7 @@ class BelongsToTest extends TestCase
 
     public function testRetrieveRelation()
     {
-        $parent = Character::find('characters/NedStark');
+        $parent = Character::find('NedStark');
         $children = $parent->children;
 
         $this->assertInstanceOf(Character::class, $children[0]);
@@ -54,21 +54,21 @@ class BelongsToTest extends TestCase
 
     public function testAlternativeRelationshipNameAndKey()
     {
-        $location = Location::find('locations/winterfell');
+        $location = Location::find('winterfell');
         $character = $location->leader;
 
-        $this->assertEquals('SansaStark', $character->_key);
-        $this->assertEquals($location->led_by, $character->_id);
+        $this->assertEquals('SansaStark', $character->id);
+        $this->assertEquals($location->led_by, $character->id);
         $this->assertInstanceOf(Character::class, $character);
     }
 
     public function testAssociate()
     {
-        $character = Character::find('characters/TheonGreyjoy');
+        $character = Character::find('TheonGreyjoy');
 
         $location = new Location(
             [
-                "_key" => "pyke",
+                "id" => "pyke",
                 "name" => "Pyke",
                 "coordinate" => [55.8833342, -6.1388807]
             ]
@@ -77,12 +77,12 @@ class BelongsToTest extends TestCase
         $location->leader()->associate($character);
         $location->save();
 
-        $character = Character::find('characters/TheonGreyjoy');
+        $character->fresh();
 
         $location = $character->leads;
 
-        $this->assertEquals('pyke', $location->_key);
-        $this->assertEquals($location->led_by, $character->_id);
+        $this->assertEquals('pyke', $location->id);
+        $this->assertEquals($location->led_by, $character->id);
         $this->assertInstanceOf(Location::class, $location);
 
         $location->delete();
@@ -90,21 +90,21 @@ class BelongsToTest extends TestCase
 
     public function testDissociate()
     {
-        $character = Character::find('characters/NedStark');
-        $this->assertEquals($character->residence_id, 'locations/winterfell');
+        $character = Character::find('NedStark');
+        $this->assertEquals($character->residence_id, 'winterfell');
 
         $character->residence()->dissociate();
         $character->save();
 
-        $character = Character::find('characters/NedStark');
+        $character ->fresh();
         $this->assertNull($character->residence_id);
     }
 
     public function testWith(): void
     {
-        $location = Location::with('leader')->find("locations/winterfell");
+        $location = Location::with('leader')->find("winterfell");
 
         $this->assertInstanceOf(Character::class, $location->leader);
-        $this->assertEquals('SansaStark', $location->leader->_key);
+        $this->assertEquals('SansaStark', $location->leader->id);
     }
 }
