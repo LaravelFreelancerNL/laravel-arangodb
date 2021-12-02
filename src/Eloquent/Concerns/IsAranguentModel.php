@@ -12,7 +12,7 @@ use LaravelFreelancerNL\FluentAQL\QueryBuilder as ArangoQueryBuilder;
 
 trait IsAranguentModel
 {
-//    use HasAranguentRelationships;
+    use HasAranguentRelationships;
 
     /**
      * Insert the given attributes and set the ID on the model.
@@ -33,7 +33,7 @@ trait IsAranguentModel
 
             $this->setAttribute('id', $matches[1]);
         }
-        if ($keyName === 'id' || $keyName === '_key' ) {
+        if ($keyName === 'id' || $keyName === '_key') {
             $this->updateIdWithKey($id);
         }
     }
