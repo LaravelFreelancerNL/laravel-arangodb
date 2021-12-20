@@ -210,10 +210,9 @@ class QueryBuilderTest extends TestCase
 
     public function testFirstMethod()
     {
-        $builder = $this->getBuilder();
-        $builder->getConnection()->shouldReceive('select')->once()->with(FluentAQL::class)->andReturn(1);
-        $result = $builder->from('users')->where('userDoc.email', '=', 'foo')->first();
-        $this->assertEquals(1, $result);
+        $result = \DB::table('characters')->where('characterDoc.id', '=', 'NedStark')->first();
+
+        $this->assertSame('NedStark', $result->id);
     }
 
     public function testAggregates()
@@ -231,7 +230,7 @@ class QueryBuilderTest extends TestCase
 
     public function testPluck()
     {
-        $results = DB::table('characters')->pluck('name', '_key');
+        $results = DB::table('characters')->pluck('name', 'id');
 
         $this->assertEquals(43, $results->count());
         $this->assertEquals('Ned', $results['NedStark']);

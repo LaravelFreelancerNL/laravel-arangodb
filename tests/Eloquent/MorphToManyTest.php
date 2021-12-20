@@ -45,7 +45,7 @@ class MorphToManyTest extends TestCase
 
     public function testRetrieveRelation()
     {
-        $character = Character::find('characters/SandorClegane');
+        $character = Character::find('SandorClegane');
 
         $tags = $character->tags;
 
@@ -55,7 +55,7 @@ class MorphToManyTest extends TestCase
 
     public function testInverseRelation()
     {
-        $tag = Tag::find('tags/A');
+        $tag = Tag::find('A');
 
         $characters = $tag->characters;
         $locations = $tag->locations;
@@ -67,44 +67,44 @@ class MorphToManyTest extends TestCase
 
     public function testAttach()
     {
-        $character = Character::find('characters/Varys');
+        $character = Character::find('Varys');
 
 
-        $character->tags()->attach(['tags/B', 'tags/E', 'tags/J', 'tags/N', 'tags/O']);
+        $character->tags()->attach(['B', 'E', 'J', 'N', 'O']);
         $character->save();
 
-        $reloadedCharacter = Character::find('characters/Varys');
-        $tags = $reloadedCharacter->tags;
+        $character->fresh();
+        $tags = $character->tags;
 
         $this->assertEquals(5, count($tags));
-        $this->assertEquals('B', $reloadedCharacter->tags[0]->_key);
+        $this->assertEquals('B', $character->tags[0]->id);
     }
 
     public function testDetach()
     {
-        $character = Character::find('characters/SandorClegane');
+        $character = Character::find('SandorClegane');
 
-        $character->tags()->detach(['tags/F', 'tags/K']);
+        $character->tags()->detach(['F', 'K']);
         $character->save();
 
-        $reloadedCharacter = Character::find('characters/SandorClegane');
+        $reloadedCharacter = Character::find('SandorClegane');
 
         $this->assertEquals(2, count($reloadedCharacter->tags));
-        $this->assertEquals('A', $reloadedCharacter->tags[0]->_key);
-        $this->assertEquals('P', $reloadedCharacter->tags[1]->_key);
+        $this->assertEquals('A', $reloadedCharacter->tags[0]->id);
+        $this->assertEquals('P', $reloadedCharacter->tags[1]->id);
     }
 
     public function testSync(): void
     {
-        $character = Character::find('characters/SandorClegane');
+        $character = Character::find('SandorClegane');
 
-        $character->tags()->sync(['tags/C', 'tags/J']);
+        $character->tags()->sync(['C', 'J']);
         $character->save();
 
-        $reloadedCharacter = Character::find('characters/SandorClegane');
+        $reloadedCharacter = Character::find('SandorClegane');
 
         $this->assertEquals(2, count($reloadedCharacter->tags));
-        $this->assertEquals('C', $reloadedCharacter->tags[0]->_key);
-        $this->assertEquals('J', $reloadedCharacter->tags[1]->_key);
+        $this->assertEquals('C', $reloadedCharacter->tags[0]->id);
+        $this->assertEquals('J', $reloadedCharacter->tags[1]->id);
     }
 }

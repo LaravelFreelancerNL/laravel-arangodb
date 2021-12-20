@@ -20,7 +20,7 @@ abstract class TestCase extends IlluminateTestCase
     protected array $transactionCollections = [];
 
     /**
-     * @var array<string, array<string>> $transactionCollections
+     * @param array<string, array<string>> $transactionCollections
      */
     public function setTransactionCollections(array $transactionCollections): void
     {

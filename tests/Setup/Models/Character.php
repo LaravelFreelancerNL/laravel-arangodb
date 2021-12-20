@@ -16,7 +16,7 @@ class Character extends Model
     protected $touches = ['location'];
 
     protected $fillable = [
-        '_key',
+        'id',
         'name',
         'surname',
         'alive',
@@ -53,7 +53,9 @@ class Character extends Model
             Character::class,
             'children',
             '_to',
-            '_from'
+            '_from',
+            '_id',
+            '_id',
         );
     }
 
@@ -63,7 +65,9 @@ class Character extends Model
             Character::class,
             'children',
             '_from',
-            '_to'
+            '_to',
+            '_id',
+            '_id',
         )->using('Tests\Setup\Models\Child')
             ->withPivot([
                             'created_by',

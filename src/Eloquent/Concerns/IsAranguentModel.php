@@ -15,16 +15,6 @@ trait IsAranguentModel
     use HasAranguentRelationships;
 
     /**
-     * Get the route key for the model.
-     *
-     * @return string
-     */
-    public function getRouteKeyName(): string
-    {
-        return '_key';
-    }
-
-    /**
      * Insert the given attributes and set the ID on the model.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
@@ -33,14 +23,18 @@ trait IsAranguentModel
      */
     protected function insertAndSetId(\Illuminate\Database\Eloquent\Builder $query, $attributes)
     {
-        $id = $query->insertGetId($attributes, $keyName = $this->getKeyName());
+        $keyName = $this->getKeyName();
+        $id = $query->insertGetId($attributes, $keyName);
 
         $this->setAttribute($keyName, $id);
         if ($keyName === '_id') {
             $matches = [];
             preg_match('/\/(.*)$/', $id, $matches);
 
-            $this->setAttribute('_key', $matches[1]);
+            $this->setAttribute('id', $matches[1]);
+        }
+        if ($keyName === 'id' || $keyName === '_key') {
+            $this->updateIdWithKey($id);
         }
     }
 
@@ -68,21 +62,6 @@ trait IsAranguentModel
     }
 
     /**
-     * Dynamically retrieve attributes on the model.
-     *
-     * @param  string  $key
-     * @return mixed
-     */
-    public function __get($key)
-    {
-        // Laravel's accessors don't differentiate between id and _id, so we catch ArangoDB's _id here.
-        if ($key === 'id') {
-            return $this->attributes['_id'];
-        }
-        return $this->getAttribute($key);
-    }
-
-    /**
      * Dynamically set attributes on the model.
      *
      * @param  string  $key
@@ -93,8 +72,11 @@ trait IsAranguentModel
     {
         // Laravel's mutators don't differentiate between id and _id, so we catch ArangoDB's _id here.
         if ($key === 'id') {
-            $this->attributes['_id'] = $value;
-            return;
+            $this->updateIdWithKey($value);
+        }
+
+        if ($key === '_id') {
+            $this->attributes['id'] = explode('/', $value)[1];
         }
 
         $this->setAttribute($key, $value);
@@ -119,12 +101,7 @@ trait IsAranguentModel
      */
     protected function updateIdWithKey(string $key)
     {
-        if (! isset($this->attributes['_id'])) {
-            return;
-        }
-
-        $id = preg_replace("/[a-zA-Z0-9_-]+\/\K.+/i", $key, $this->attributes['_id']);
-        $this->attributes['_id'] = $id;
+        $this->attributes['_id'] = $this->getTable() . '/' . $key;
     }
 
     /**

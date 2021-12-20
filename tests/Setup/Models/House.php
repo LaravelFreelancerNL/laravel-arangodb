@@ -10,7 +10,7 @@ class House extends Model
     protected $table = 'houses';
 
     protected $fillable = [
-        '_key',
+        'id',
         'name',
         'location_id',
     ];

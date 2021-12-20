@@ -16,97 +16,97 @@ class TagsSeeder extends Seeder
     {
         $tags = '[
            {
-              "_key":"A",
+              "id":"A",
               "en":"strong",
               "de":"stark"
            },
            {
-              "_key":"B",
+              "id":"B",
               "en":"polite",
               "de":"freundlich"
            },
            {
-              "_key":"C",
+              "id":"C",
               "en":"loyal",
               "de":"loyal"
            },
            {
-              "_key":"D",
+              "id":"D",
               "en":"beautiful",
               "de":"schön"
            },
            {
-              "_key":"E",
+              "id":"E",
               "en":"sneaky",
               "de":"hinterlistig"
            },
            {
-              "_key":"F",
+              "id":"F",
               "en":"experienced",
               "de":"erfahren"
            },
            {
-              "_key":"G",
+              "id":"G",
               "en":"corrupt",
               "de":"korrupt"
            },
            {
-              "_key":"H",
+              "id":"H",
               "en":"powerful",
               "de":"einflussreich"
            },
            {
-              "_key":"I",
+              "id":"I",
               "en":"naive",
               "de":"naiv"
            },
            {
-              "_key":"J",
+              "id":"J",
               "en":"unmarried",
               "de":"unverheiratet"
            },
            {
-              "_key":"K",
+              "id":"K",
               "en":"skillful",
               "de":"geschickt"
            },
            {
-              "_key":"L",
+              "id":"L",
               "en":"young",
               "de":"jung"
            },
            {
-              "_key":"M",
+              "id":"M",
               "en":"smart",
               "de":"klug"
            },
            {
-              "_key":"N",
+              "id":"N",
               "en":"rational",
               "de":"rational"
            },
            {
-              "_key":"O",
+              "id":"O",
               "en":"ruthless",
               "de":"skrupellos"
            },
            {
-              "_key":"P",
+              "id":"P",
               "en":"brave",
               "de":"mutig"
            },
            {
-              "_key":"Q",
+              "id":"Q",
               "en":"mighty",
               "de":"mächtig"
            },
            {
-              "_key":"R",
+              "id":"R",
               "en":"weak",
               "de":"schwach"
            },
            {
-              "_key":"S",
+              "id":"S",
               "en":"wild",
               "de":"wild"
            }

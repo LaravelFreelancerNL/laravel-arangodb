@@ -36,3 +36,22 @@ if (! function_exists('associativeFlatten')) {
         return $results;
     }
 }
+
+if (! function_exists('renameArrayKey')) {
+    /**
+     * @param array<mixed> $array
+     * @param string|int $oldKey
+     * @param string|int $newKey
+     * @return array<mixed>
+     */
+    function renameArrayKey(array &$array, string|int $oldKey, string|int $newKey): array
+    {
+        if (array_key_exists($oldKey, $array)) {
+            $keys = array_keys($array);
+            $keys[array_search($oldKey, $keys)] = $newKey;
+            $array = array_combine($keys, $array);
+        }
+
+        return $array;
+    }
+}

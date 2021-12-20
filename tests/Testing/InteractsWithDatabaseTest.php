@@ -3,7 +3,6 @@
 namespace Tests\Testing;
 
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Tests\Setup\Database\Seeds\CharactersSeeder;
 use Tests\Setup\Database\Seeds\TagsSeeder;
@@ -25,24 +24,24 @@ class InteractsWithDatabaseTest extends TestCase
     public function testAssertDatabaseHas()
     {
         $this->assertDatabaseHas('characters', [
-            "_key" => "NedStark",
+            "id" => "NedStark",
             "name" => "Ned",
             "surname" => "Stark",
             "alive" => true,
             "age" => 41,
-            "residence_id" => "locations/winterfell"
+            "residence_id" => "winterfell"
         ]);
     }
 
     public function testAssertDatabaseMissing()
     {
         $this->assertDatabaseMissing('characters', [
-            "_key" => "NedStarkIsDead",
+            "id" => "NedStarkIsDead",
             "name" => "Ned",
             "surname" => "Stark",
             "alive" => true,
             "age" => 41,
-            "residence_id" => "locations/winterfell"
+            "residence_id" => "winterfell"
         ]);
     }
 
@@ -53,48 +52,48 @@ class InteractsWithDatabaseTest extends TestCase
 
     public function testAssertDatabaseDeletedByModel()
     {
-        $ned = Character::find('characters/NedStark');
+        $ned = Character::find('NedStark');
 
         $ned->delete();
 
         $this->assertDeleted($ned);
 
         $this->expectException(ModelNotFoundException::class);
-        Character::findOrFail('characters/NedStark');
+        Character::findOrFail('NedStark');
     }
 
     public function testAssertDatabaseDeletedByData()
     {
-        $ned = Character::find('characters/NedStark');
+        $ned = Character::find('NedStark');
 
         $ned->delete();
 
         $this->assertDeleted('characters', [
-            "_key" => "NedStarkIsDead",
+            "id" => "NedStarkIsDead",
             "name" => "Ned",
             "surname" => "Stark",
             "alive" => true,
             "age" => 41,
-            "residence_id" => "locations/winterfell"
+            "residence_id" => "winterfell"
         ]);
 
         $this->expectException(ModelNotFoundException::class);
-        Character::findOrFail('characters/NedStark');
+        Character::findOrFail('NedStark');
     }
 
     public function testAssertSoftDeletedByModel()
     {
-        $strong = Tag::find("tags/A");
+        $strong = Tag::find("A");
         $strong->delete();
         $this->assertSoftDeleted($strong);
     }
 
     public function testAssertSoftDeletedByData()
     {
-        $strong = Tag::find("tags/A");
+        $strong = Tag::find("A");
         $strong->delete();
         $this->assertSoftDeleted('tags', [
-            "_key" => "A",
+            "id" => "A",
             "en" => "strong",
             "de" => "stark"
         ]);
@@ -102,16 +101,16 @@ class InteractsWithDatabaseTest extends TestCase
 
     public function testAssertNotSoftDeletedByModel()
     {
-        $strong = Tag::find("tags/A");
+        $strong = Tag::find("A");
         $this->assertNotSoftDeleted($strong);
     }
 
     public function testAssertNotSoftDeletedByData()
     {
-        $strong = Tag::find("tags/A");
+        $strong = Tag::find("A");
 
         $this->assertNotSoftDeleted('tags', [
-            "_key" => "A",
+            "id" => "A",
             "en" => "strong",
             "de" => "stark"
         ]);
@@ -119,13 +118,13 @@ class InteractsWithDatabaseTest extends TestCase
 
     public function testAssertModelExists()
     {
-        $ned = Character::find('characters/NedStark');
+        $ned = Character::find('NedStark');
         $this->assertModelExists($ned);
     }
 
     public function testAssertModelMissing()
     {
-        $ned = Character::find('characters/NedStark');
+        $ned = Character::find('NedStark');
 
         $ned->delete();
 
