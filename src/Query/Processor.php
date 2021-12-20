@@ -20,8 +20,9 @@ class Processor extends IlluminateProcessor
     {
         foreach ($results as &$val) {
             if (is_object($val) && isset($val->_key)) {
-                $val->id = $val->_key;
-                unset($val->_key);
+                $val = (array) $val;
+                renameArrayKey($val, '_key', 'id');
+                $val = (object) $val;
             }
         }
         return $results;
