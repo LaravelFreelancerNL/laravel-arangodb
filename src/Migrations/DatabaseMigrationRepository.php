@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace LaravelFreelancerNL\Aranguent\Migrations;
 
 use Illuminate\Database\ConnectionResolverInterface as IlluminateResolver;

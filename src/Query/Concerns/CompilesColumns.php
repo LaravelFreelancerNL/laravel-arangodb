@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
 use LaravelFreelancerNL\Aranguent\Query\Builder;
@@ -23,7 +25,7 @@ trait CompilesColumns
         // Prepare columns
         foreach ($columns as $column) {
             // Extract rows
-            if (substr($column, strlen($column) - 2)  === '.*') {
+            if (is_string($column) && str_ends_with($column, '.*')) {
                 $table = substr($column, 0, strlen($column) - 2);
                 $returnDocs[] = $this->getTableAlias($table);
 

@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace LaravelFreelancerNL\Aranguent\Schema;
 
 use ArangoClient\Schema\SchemaManager;
 use Closure;
-use Illuminate\Database\Connection;
 use Illuminate\Support\Fluent;
 use Illuminate\Support\Traits\Macroable;
+use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Schema\Concerns\Columns;
 use LaravelFreelancerNL\Aranguent\Schema\Concerns\Indexes;
 use LaravelFreelancerNL\Aranguent\Schema\Concerns\Tables;
@@ -118,7 +120,7 @@ class Blueprint
      * Execute the blueprint against the database.
      *
      * @param Connection $connection
-     * @param Grammar    $grammar
+     * @param Grammar|null $grammar
      *
      * @return void
      */
@@ -155,13 +157,23 @@ class Blueprint
     /**
      * Generate the execution method name and call it if the method exists.
      */
-    public function executeCommand(Fluent $command)
+    public function executeCommand(Fluent $command): void
     {
         $executeNamedMethod = 'execute' . ucfirst($command->name) . 'Command';
-        $executeHandlerMethod = 'execute' . ucfirst($command->handler) . 'Command';
         if (method_exists($this, $executeNamedMethod)) {
             $this->$executeNamedMethod($command);
-        } elseif (method_exists($this, $executeHandlerMethod)) {
+            return;
+        }
+        $this->executeCommandByHandler($command);
+    }
+
+    protected function executeCommandByHandler(Fluent $command): void
+    {
+        if (! isset($command->handler)) {
+            return;
+        }
+        $executeHandlerMethod = 'execute' . ucfirst($command->handler) . 'Command';
+        if (method_exists($this, $executeHandlerMethod)) {
             $this->$executeHandlerMethod($command);
         }
     }
@@ -189,15 +201,11 @@ class Blueprint
 
     /**
      * Solely provides feedback to the developer in pretend mode.
-     *
-     * @return null
      */
-    public function executeIgnoreCommand(Fluent $command)
+    public function executeIgnoreCommand(Fluent $command): void
     {
         if ($this->connection->pretending()) {
             $this->connection->logQuery('/* ' . $command->explanation . " */\n", []);
-
-            return;
         }
     }
 

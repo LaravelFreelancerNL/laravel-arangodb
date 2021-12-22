@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace LaravelFreelancerNL\Aranguent\Console\Migrations;
 
 use Illuminate\Console\ConfirmableTrait;

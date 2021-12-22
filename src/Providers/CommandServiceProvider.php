@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace LaravelFreelancerNL\Aranguent\Providers;
 
 use Illuminate\Database\MigrationServiceProvider as IlluminateMigrationServiceProvider;

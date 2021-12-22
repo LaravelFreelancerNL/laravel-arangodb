@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace LaravelFreelancerNL\Aranguent\Query;
 
 use Closure;
-use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Query\Processors\Processor;
+use LaravelFreelancerNL\Aranguent\Connection;
 
 class JoinClause extends Builder
 {
@@ -25,7 +27,7 @@ class JoinClause extends Builder
     /**
      * The connection of the parent query builder.
      *
-     * @var ConnectionInterface
+     * @var Connection
      */
     protected $parentConnection;
 

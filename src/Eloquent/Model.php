@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace LaravelFreelancerNL\Aranguent\Eloquent;
 
 use Illuminate\Database\Eloquent\Model as IlluminateModel;

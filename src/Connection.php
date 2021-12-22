@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace LaravelFreelancerNL\Aranguent;
 
 use ArangoClient\ArangoClient;
@@ -12,6 +14,7 @@ use LaravelFreelancerNL\Aranguent\Concerns\RunsQueries;
 use LaravelFreelancerNL\Aranguent\Query\Grammar as QueryGrammar;
 use LaravelFreelancerNL\Aranguent\Query\Processor;
 use LaravelFreelancerNL\Aranguent\Schema\Builder as SchemaBuilder;
+use LaravelFreelancerNL\Aranguent\Schema\Grammar;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder as ArangoQueryBuilder;
 use LogicException;
 use Spatie\DataTransferObject\Exceptions\UnknownProperties;
@@ -91,6 +94,16 @@ class Connection extends IlluminateConnection
     protected function getDefaultPostProcessor(): Processor
     {
         return new Processor();
+    }
+
+    /**
+     * Get the schema grammar used by the connection.
+     *
+     * @return Grammar
+     */
+    public function getSchemaGrammar()
+    {
+        return $this->schemaGrammar;
     }
 
     /**

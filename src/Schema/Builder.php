@@ -7,13 +7,11 @@ namespace LaravelFreelancerNL\Aranguent\Schema;
 use ArangoClient\Exceptions\ArangoException;
 use ArangoClient\Schema\SchemaManager;
 use Closure;
-use Illuminate\Database\Connection as IlluminateConnection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Fluent;
 use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\QueryException;
 use LaravelFreelancerNL\Aranguent\Schema\Concerns\UsesBlueprints;
-use stdClass;
 
 class Builder extends \Illuminate\Database\Schema\Builder
 {
@@ -22,7 +20,7 @@ class Builder extends \Illuminate\Database\Schema\Builder
     /**
      * The database connection instance.
      *
-     * @var IlluminateConnection
+     * @var Connection
      */
     protected $connection;
 
