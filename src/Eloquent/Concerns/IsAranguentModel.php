@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Eloquent\Builder;
 use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder as ArangoQueryBuilder;
@@ -147,5 +148,15 @@ trait IsAranguentModel
         $connection = $this->getConnection();
         $results = $connection->execute($aqb->get());
         return $this->hydrate($results);
+    }
+
+    /**
+     * Get the database connection for the model.
+     *
+     * @return Connection
+     */
+    public function getConnection()
+    {
+        return static::resolveConnection($this->getConnectionName());
     }
 }

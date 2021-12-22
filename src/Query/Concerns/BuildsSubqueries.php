@@ -5,6 +5,7 @@ namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use InvalidArgumentException;
+use LaravelFreelancerNL\Aranguent\Query\Builder;
 use LaravelFreelancerNL\FluentAQL\Expressions\FunctionExpression;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
@@ -13,7 +14,7 @@ trait BuildsSubqueries
     /**
      * Add a subselect expression to the query.
      *
-     * @param $query
+     * @param Builder $query
      * @param  string  $as
      * @return $this
      *
@@ -37,7 +38,7 @@ trait BuildsSubqueries
     /**
      * Parse the subquery into SQL and bindings.
      *
-     * @param  mixed  $query
+     * @param  Builder|EloquentBuilder|Relation|QueryBuilder|FunctionExpression|string  $query
      * @return array|QueryBuilder
      *
      * @throws \InvalidArgumentException
@@ -50,6 +51,7 @@ trait BuildsSubqueries
 
             if (isset($query->limit) && $query->limit == 1) {
                 //Return the value, not an array of values
+                /** @phpstan-ignore-next-line */
                 return $query->aqb->first($query->aqb);
             }
             return $query->aqb;

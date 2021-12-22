@@ -10,11 +10,11 @@ trait CompilesAggregates
      * Compile an aggregated select clause.
      *
      * @param Builder $builder
-     * @param array   $aggregate
+     * @param array<mixed> $aggregate
      *
      * @return Builder
      */
-    protected function compileAggregate(Builder $builder, $aggregate)
+    protected function compileAggregate(Builder $builder, array $aggregate): Builder
     {
         $method = 'compile' . ucfirst($aggregate['function']);
 
@@ -23,12 +23,8 @@ trait CompilesAggregates
 
     /**
      * Compile AQL for count aggregate.
-     *
-     * @param Builder $builder
-     *
-     * @return Builder
      */
-    protected function compileCount(Builder $builder)
+    protected function compileCount(Builder $builder): Builder
     {
         $builder->aqb = $builder->aqb->collect()->withCount('aggregateResult');
 
@@ -39,11 +35,11 @@ trait CompilesAggregates
      * Compile AQL for max aggregate.
      *
      * @param Builder $builder
-     * @param $aggregate
+     * @param array<mixed> $aggregate
      *
      * @return Builder
      */
-    protected function compileMax(Builder $builder, $aggregate)
+    protected function compileMax(Builder $builder, array $aggregate)
     {
         $column = $this->normalizeColumn($builder, $aggregate['columns'][0]);
 
@@ -55,12 +51,9 @@ trait CompilesAggregates
     /**
      * Compile AQL for min aggregate.
      *
-     * @param Builder $builder
-     * @param $aggregate
-     *
-     * @return Builder
+     * @param array<mixed> $aggregate
      */
-    protected function compileMin(Builder $builder, $aggregate)
+    protected function compileMin(Builder $builder, array $aggregate): Builder
     {
         $column = $this->normalizeColumn($builder, $aggregate['columns'][0]);
 
@@ -72,12 +65,9 @@ trait CompilesAggregates
     /**
      * Compile AQL for average aggregate.
      *
-     * @param Builder $builder
-     * @param $aggregate
-     *
-     * @return Builder
+     * @param array<mixed> $aggregate
      */
-    protected function compileAvg(Builder $builder, $aggregate)
+    protected function compileAvg(Builder $builder, array $aggregate): Builder
     {
         $column = $this->normalizeColumn($builder, $aggregate['columns'][0]);
 
@@ -90,11 +80,11 @@ trait CompilesAggregates
      * Compile AQL for sum aggregate.
      *
      * @param Builder $builder
-     * @param $aggregate
+     * @param array<mixed> $aggregate
      *
      * @return Builder
      */
-    protected function compileSum(Builder $builder, $aggregate)
+    protected function compileSum(Builder $builder, array $aggregate): Builder
     {
         $column = $this->normalizeColumn($builder, $aggregate['columns'][0]);
 

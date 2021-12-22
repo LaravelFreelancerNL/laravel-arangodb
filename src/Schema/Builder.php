@@ -90,14 +90,11 @@ class Builder extends \Illuminate\Database\Schema\Builder
     /**
      * Rename a table (collection).
      *
-     * @param $from
-     * @param $to
-     *
-     * @return bool
+     * @param string $from
+     * @param string $to
      * @throws ArangoException
-     *
      */
-    public function rename($from, $to)
+    public function rename($from, $to): bool
     {
         return (bool) $this->schemaManager->renameCollection($from, $to);
     }
@@ -154,10 +151,10 @@ class Builder extends \Illuminate\Database\Schema\Builder
         $parameters = [];
         $parameters['name'] = 'hasAttribute';
         $parameters['handler'] = 'aql';
-        $parameters['attribute'] = $columns;
+        $parameters['columns'] = $columns;
 
         $command = new Fluent($parameters);
-        $compilation = $this->grammar->compileHasAttribute($table, $command);
+        $compilation = $this->grammar->compileHasColumn($table, $command);
 
         return $this->connection->statement($compilation['aql']);
     }
@@ -176,12 +173,9 @@ class Builder extends \Illuminate\Database\Schema\Builder
     }
 
     /**
-     * @param  string  $name
-     *
-     * @return mixed
      * @throws ArangoException
      */
-    public function getView(string $name): stdClass
+    public function getView(string $name): \stdClass
     {
         return $this->schemaManager->getView($name);
     }

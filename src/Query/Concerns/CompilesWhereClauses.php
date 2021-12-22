@@ -4,8 +4,8 @@ namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
 use Illuminate\Database\Query\Builder as IluminateBuilder;
 use Illuminate\Database\Query\Expression;
-use Illuminate\Database\Query\JoinClause;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
+use LaravelFreelancerNL\FluentAQL\Exceptions\BindException;
 
 trait CompilesWhereClauses
 {
@@ -37,8 +37,9 @@ trait CompilesWhereClauses
     /**
      * Get an array of all the where clauses for the query.
      *
-     * @param  $builder  $builder
-     * @return array
+     * @param Builder $builder
+     * @param string $source
+     * @return array<mixed>
      */
     protected function compileWheresToArray(Builder $builder, string $source = 'wheres'): array
     {
@@ -70,11 +71,11 @@ trait CompilesWhereClauses
     /**
      * Get the appropriate query parameter place-holder for a value.
      *
-     * @param  IluminateBuilder  $query
+     * @param  Builder  $query
      * @param  mixed  $value
      * @return object
      */
-    public function parameter(IluminateBuilder $query, $value)
+    public function parameter(Builder $query, $value)
     {
         return $this->isExpression($value) ? $this->getValue($value) : $query->aqb->bind($value);
     }
@@ -349,11 +350,12 @@ trait CompilesWhereClauses
     /**
      * Compile a "whereJsonContains" clause.
      *
-     * @param  IluminateBuilder  $query
-     * @param  array  $where
+     * @param Builder $query
+     * @param array $where
      * @return string
+     * @throws BindException
      */
-    protected function whereJsonContains(IluminateBuilder $query, $where)
+    protected function whereJsonContains(Builder $query, $where)
     {
         $predicate = [];
 
@@ -370,11 +372,11 @@ trait CompilesWhereClauses
     /**
      * Compile a "whereJsonContains" clause.
      *
-     * @param  IluminateBuilder  $query
+     * @param  Builder  $query
      * @param  array  $where
      * @return array
      */
-    protected function whereJsonLength(IluminateBuilder $query, $where)
+    protected function whereJsonLength(Builder $query, $where)
     {
         $predicate = [];
 
@@ -394,11 +396,11 @@ trait CompilesWhereClauses
     /**
      * Compile a where date clause.
      *
-     * @param  IluminateBuilder  $query
+     * @param  Builder  $query
      * @param  array  $where
      * @return array
      */
-    protected function whereDate(IluminateBuilder $query, $where)
+    protected function whereDate(Builder $query, $where)
     {
         $predicate = [];
 
@@ -415,11 +417,11 @@ trait CompilesWhereClauses
     /**
      * Compile a where year clause.
      *
-     * @param  IluminateBuilder  $query
+     * @param  Builder  $query
      * @param  array  $where
      * @return array
      */
-    protected function whereYear(IluminateBuilder $query, $where)
+    protected function whereYear(Builder $query, $where)
     {
         $predicate = [];
 
@@ -436,11 +438,11 @@ trait CompilesWhereClauses
     /**
      * Compile a where month clause.
      *
-     * @param  IluminateBuilder  $query
+     * @param  Builder  $query
      * @param  array  $where
      * @return array
      */
-    protected function whereMonth(IluminateBuilder $query, $where)
+    protected function whereMonth(Builder $query, $where)
     {
         $predicate = [];
 
@@ -458,11 +460,11 @@ trait CompilesWhereClauses
     /**
      * Compile a where day clause.
      *
-     * @param  IluminateBuilder  $query
+     * @param  Builder  $query
      * @param  array  $where
      * @return array
      */
-    protected function whereDay(IluminateBuilder $query, $where)
+    protected function whereDay(Builder $query, $where)
     {
         $predicate = [];
 
@@ -479,11 +481,11 @@ trait CompilesWhereClauses
     /**
      * Compile a where time clause.
      *
-     * @param  IluminateBuilder  $query
+     * @param  Builder  $query
      * @param  array  $where
      * @return array
      */
-    protected function whereTime(IluminateBuilder $query, $where)
+    protected function whereTime(Builder $query, $where)
     {
         $predicate = [];
 
@@ -500,11 +502,11 @@ trait CompilesWhereClauses
     /**
      * Compile a nested where clause.
      *
-     * @param  IluminateBuilder  $query
+     * @param  Builder  $query
      * @param  array  $where
      * @return string
      */
-    protected function whereNested(IluminateBuilder $query, $where)
+    protected function whereNested(Builder $query, $where)
     {
         $predicates = [];
         $predicates = $this->compileWheresToArray($where['query']);
@@ -518,11 +520,11 @@ trait CompilesWhereClauses
     /**
      * Compile a where condition with a sub-select.
      *
-     * @param  IluminateBuilder  $query
+     * @param  Builder  $query
      * @param  array  $where
      * @return string
      */
-    protected function whereSub(IluminateBuilder $query, $where)
+    protected function whereSub(Builder $query, $where)
     {
         $predicate = [];
 
@@ -541,11 +543,11 @@ trait CompilesWhereClauses
      *
      *  @SuppressWarnings(PHPMD.UnusedFormalParameter)
      *
-     * @param  IluminateBuilder  $query
+     * @param  Builder  $query
      * @param  array  $where
      * @return string
      */
-    protected function whereExists(IluminateBuilder $query, $where)
+    protected function whereExists(Builder $query, $where)
     {
         $predicate = [];
 
@@ -562,11 +564,11 @@ trait CompilesWhereClauses
      *
      *  @SuppressWarnings(PHPMD.UnusedFormalParameter)
      *
-     * @param  IluminateBuilder  $query
+     * @param  Builder  $query
      * @param  array  $where
      * @return string
      */
-    protected function whereNotExists(IluminateBuilder $query, $where)
+    protected function whereNotExists(Builder $query, $where)
     {
         $predicate = [];
 

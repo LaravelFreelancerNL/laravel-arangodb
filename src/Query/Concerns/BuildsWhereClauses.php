@@ -94,10 +94,10 @@ trait BuildsWhereClauses
      *
      * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      *
-     * @param  IlluminateQueryBuilder  $query
+     * @param  Builder  $query
      * @param  string  $boolean
      * @param  bool  $not
-     * @return IlluminateQueryBuilder
+     * @return Builder
      */
     public function addWhereExistsQuery(IlluminateQueryBuilder $query, $boolean = 'and', $not = false)
     {
@@ -129,9 +129,9 @@ trait BuildsWhereClauses
     /**
      * Add an not exists clause to the query.
      *
-     * @param  IlluminateQueryBuilder  $query
+     * @param  Builder  $query
      * @param  string  $boolean
-     * @return IlluminateQueryBuilder
+     * @return Builder
      */
     public function addWhereNotExistsQuery(IlluminateQueryBuilder $query, $boolean = 'and')
     {
@@ -182,7 +182,7 @@ trait BuildsWhereClauses
      * @param  string  $operator
      * @param  \Closure  $callback
      * @param  string  $boolean
-     * @return IlluminateQueryBuilder
+     * @return Builder
      */
     protected function whereSub($column, $operator, Closure $callback, $boolean)
     {

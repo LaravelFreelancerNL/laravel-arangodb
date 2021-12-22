@@ -15,7 +15,6 @@ use Tests\TestCase;
 
 class BelongsToTest extends TestCase
 {
-
     protected function defineDatabaseMigrations()
     {
         $this->loadLaravelMigrations();

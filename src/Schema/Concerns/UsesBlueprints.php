@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace LaravelFreelancerNL\Aranguent\Schema\Concerns;
 
+use Closure;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
 
 trait UsesBlueprints
@@ -12,11 +13,11 @@ trait UsesBlueprints
      * Create a new command set with a Closure.
      *
      * @param string        $collection
-     * @param \Closure|null $callback
+     * @param Closure|null $callback
      *
      * @return Blueprint
      */
-    protected function createBlueprint($collection, \Closure $callback = null)
+    protected function createBlueprint($collection, Closure $callback = null)
     {
         //Prefixes are unnamed in ArangoDB
         $prefix = null;
@@ -35,7 +36,7 @@ trait UsesBlueprints
      *
      * @return void
      */
-    public function blueprintResolver(\Closure $resolver)
+    public function blueprintResolver(Closure $resolver)
     {
         $this->resolver = $resolver;
     }
@@ -50,7 +51,7 @@ trait UsesBlueprints
      *
      * @param array<mixed> $config
      */
-    public function create($table, \Closure $callback, array $config = []): void
+    public function create($table, Closure $callback, array $config = []): void
     {
         $this->build(tap($this->createBlueprint($table), function ($blueprint) use ($callback, $config) {
             $blueprint->create($config);
@@ -63,11 +64,11 @@ trait UsesBlueprints
      * Modify a table's schema.
      *
      * @param string  $table
-     * @param \Closure $callback
+     * @param Closure $callback
      *
      * @return void
      */
-    public function table($table, \Closure $callback)
+    public function table($table, Closure $callback)
     {
         $this->build($this->createBlueprint($table, $callback));
     }

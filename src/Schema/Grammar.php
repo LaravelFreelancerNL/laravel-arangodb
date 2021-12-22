@@ -26,15 +26,16 @@ class Grammar extends IlluminateGrammar
      *
      * @return Fluent
      */
-    public function compileHasAttribute($collection, Fluent $command)
+    public function compileHasColumn($collection, Fluent $command)
     {
-        if (is_string($command->attribute)) {
-            $command->attribute = [$command->attribute];
+        $attributes = $command->getAttributes();
+        if (!isset($attributes['columns'])) {
+            return $command;
         }
 
         $filter = [];
-        foreach ($command->attribute as $attribute) {
-            $filter[] = ['doc.' . $attribute, '!=', null];
+        foreach ($attributes['columns'] as $column) {
+            $filter[] = ['doc.' . $column, '!=', null];
         }
 
         $aqb = (new QueryBuilder())->for('doc', $collection)
@@ -58,9 +59,11 @@ class Grammar extends IlluminateGrammar
      */
     public function compileRenameAttribute($collection, Fluent $command)
     {
+        $attributes = $command->getAttributes();
+
         $filter = [
-            ['doc.' . $command->from, '!=', null],
-            ['doc.' . $command->to, '==', null],
+            ['doc.' . $attributes['from'], '!=', null],
+            ['doc.' . $attributes['to'], '==', null],
         ];
 
         $aqb = (new QueryBuilder())->for('doc', $collection)
@@ -68,8 +71,8 @@ class Grammar extends IlluminateGrammar
             ->update(
                 'doc',
                 [
-                    $command->from => null,
-                    $command->to   => 'doc.' . $command->from,
+                    $attributes['from'] => null,
+                    $attributes['to']   => 'doc.' . $command->from,
                 ],
                 $collection
             )
@@ -92,12 +95,10 @@ class Grammar extends IlluminateGrammar
     public function compileDropAttribute($collection, Fluent $command)
     {
         $filter = [];
-        if (is_string($command->attributes)) {
-            $command->attributes = [$command->attributes];
-        }
+        $attributes = $command->getAttributes();
 
         $data = [];
-        foreach ($command->attributes as $attribute) {
+        foreach ($attributes['attributes'] as $attribute) {
             $filter[] = ['doc.' . $attribute, '!=', null, 'OR'];
             $data[$attribute] = null;
         }
@@ -114,12 +115,8 @@ class Grammar extends IlluminateGrammar
 
     /**
      * Prepare a bindVar for inclusion in an AQL query.
-     *
-     * @param $attribute
-     *
-     * @return string
      */
-    public function wrapBindVar($attribute)
+    public function wrapBindVar(string $attribute): string
     {
         $attribute = trim($attribute);
         if (strpos($attribute, '@') === 0) {

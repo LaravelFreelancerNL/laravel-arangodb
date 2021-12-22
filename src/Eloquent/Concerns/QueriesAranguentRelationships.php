@@ -3,9 +3,11 @@
 namespace LaravelFreelancerNL\Aranguent\Eloquent\Concerns;
 
 use Illuminate\Database\Eloquent\Builder as IlluminateBuilder;
-use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Str;
+use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
+use LaravelFreelancerNL\FluentAQL\Expressions\FunctionExpression;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder as ArangoQueryBuilder;
 
 trait QueriesAranguentRelationships
@@ -20,7 +22,7 @@ trait QueriesAranguentRelationships
      * @return IlluminateBuilder
      */
     protected function addWhereCountQuery(
-        QueryBuilder $query,
+        IlluminateQueryBuilder $query,
         $operator = '>=',
         $count = 1,
         $boolean = 'and'
@@ -115,12 +117,7 @@ trait QueriesAranguentRelationships
         return $this;
     }
 
-    /**
-     * @param $query
-     * @param $function
-     * @return mixed
-     */
-    protected function getAggregateResultQuery($query, $function)
+    protected function getAggregateResultQuery(QueryBuilder $query, string $function): QueryBuilder|FunctionExpression
     {
         if ($function) {
             $query->grammar->compileSelect($query);

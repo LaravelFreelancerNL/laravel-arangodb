@@ -9,7 +9,6 @@ use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
 trait HasAliases
 {
-
     protected $tableAliases = [];
 
     protected $columnAliases = [];
@@ -37,11 +36,7 @@ trait HasAliases
         return in_array($alias, $this->tableAliases);
     }
 
-    /**
-     * @param $table
-     * @return mixed|null
-     */
-    protected function getTableAlias($table)
+    protected function getTableAlias(string $table): string|null
     {
         if (isset($this->tableAliases[$table])) {
             return $this->tableAliases[$table];
@@ -69,13 +64,7 @@ trait HasAliases
         return $results;
     }
 
-    /**
-     * @param $table
-     * @param string $postfix
-     *
-     * @return mixed
-     */
-    protected function generateTableAlias($table, $postfix = 'Doc')
+    protected function generateTableAlias(string $table, string $postfix = 'Doc'): string
     {
         return Str::camel(Str::singular($table)) . $postfix;
     }
@@ -93,12 +82,6 @@ trait HasAliases
         return implode('.', $referenceParts);
     }
 
-    /**
-     * @param string  $target
-     * @param string  $value
-     *
-     * @return Builder
-     */
     protected function prefixAlias(string $target, string $value): string
     {
         $alias = $this->getTableAlias($target);
@@ -129,11 +112,7 @@ trait HasAliases
         return false;
     }
 
-    /**
-     * @param $column
-     * @return mixed
-     */
-    protected function getColumnAlias(string $column)
+    protected function getColumnAlias(string $column): string|null
     {
         if (isset($this->columnAliases[$column])) {
             return $this->columnAliases[$column];
@@ -142,13 +121,7 @@ trait HasAliases
         return null;
     }
 
-    /**
-     * @param  Builder  $builder
-     * @param $column
-     * @param $table
-     * @return string
-     */
-    protected function normalizeColumn(Builder $builder, $column, $table = null)
+    protected function normalizeColumn(Builder $builder, mixed $column, string $table = null): mixed
     {
         if ($column instanceof QueryBuilder || $column instanceof FunctionExpression) {
             return $column;
@@ -181,11 +154,10 @@ trait HasAliases
     }
 
     /**
-     * @param $references
-     * @param  null  $table
-     * @return mixed
+     * @param array<mixed> $references
+     * @return array<mixed>
      */
-    protected function normalizeColumnReferences($references, $table = null)
+    protected function normalizeColumnReferences(array $references, string $table = null): array
     {
         $tableAlias = $this->getTableAlias($references[0]);
         if (isset($tableAlias)) {

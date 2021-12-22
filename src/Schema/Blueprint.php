@@ -141,25 +141,21 @@ class Blueprint
 
     /**
      * Generate the compilation method name and call it if method exists in the Grammar object.
-     *
-     * @param $command
-     *
-     * @return mixed
      */
-    public function compileAqlCommand($command)
+    public function compileAqlCommand(Fluent $command): Fluent
     {
         $compileMethod = 'compile' . ucfirst($command->name);
         if (method_exists($this->grammar, $compileMethod)) {
             return $this->grammar->$compileMethod($this->table, $command);
         }
+
+        return $command;
     }
 
     /**
      * Generate the execution method name and call it if the method exists.
-     *
-     * @param $command
      */
-    public function executeCommand($command)
+    public function executeCommand(Fluent $command)
     {
         $executeNamedMethod = 'execute' . ucfirst($command->name) . 'Command';
         $executeHandlerMethod = 'execute' . ucfirst($command->handler) . 'Command';
@@ -172,15 +168,13 @@ class Blueprint
 
     /**
      * Execute an AQL statement.
-     *
-     * @param $command
      */
-    public function executeAqlCommand($command)
+    public function executeAqlCommand(Fluent $command)
     {
         $this->connection->statement($command->aqb->query, $command->aqb->binds);
     }
 
-    public function executeCollectionCommand($command)
+    public function executeCollectionCommand(Fluent $command): void
     {
         if ($this->connection->pretending()) {
             $this->connection->logQuery('/* ' . $command->explanation . " */\n", []);
@@ -196,11 +190,9 @@ class Blueprint
     /**
      * Solely provides feedback to the developer in pretend mode.
      *
-     * @param $command
-     *
      * @return null
      */
-    public function executeIgnoreCommand($command)
+    public function executeIgnoreCommand(Fluent $command)
     {
         if ($this->connection->pretending()) {
             $this->connection->logQuery('/* ' . $command->explanation . " */\n", []);
@@ -250,12 +242,12 @@ class Blueprint
     /**
      * Silently catch unsupported schema methods. Store columns for backwards compatible fluent index creation.
      *
-     * @param $method
-     * @param $args
+     * @param string $method
+     * @param array<mixed> $args
      *
      * @return Blueprint
      */
-    public function __call($method, $args)
+    public function __call(string $method, array $args = [])
     {
         $columnMethods = [
             'bigIncrements', 'bigInteger', 'binary', 'boolean', 'char', 'date', 'dateTime', 'dateTimeTz', 'decimal',

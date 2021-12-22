@@ -29,7 +29,7 @@ class GrammarTest extends TestCase
     public function testCompileHasAttributeReturnsCorrectData()
     {
         $collection = 'GrammarTestCollection';
-        $attribute = [
+        $attributes = [
             0 => 'firstAttribute',
             1 => 'SecondAttribute',
             2 => '@theThirdAttribute',
@@ -38,15 +38,15 @@ class GrammarTest extends TestCase
         $parameters['name'] = 'hasAttribute';
         $parameters['handler'] = 'aql';
         $parameters['explanation'] = "Checking if any document within the collection has the '"
-            . implode(', ', (array) $attribute) . "' attribute(s).";
-        $parameters['attribute'] = $attribute;
+            . implode(', ', $attributes) . "' attribute(s).";
+        $parameters['columns'] = $attributes;
         $command = new Fluent($parameters);
-        $results = $this->grammar->compileHasAttribute($collection, $command);
+        $results = $this->grammar->compileHasColumn($collection, $command);
 
         $this->assertEquals(
             'FOR doc IN GrammarTestCollection FILTER doc.firstAttribute != null AND doc.SecondAttribute != null '
             . 'AND doc.@theThirdAttribute != null LIMIT 1 RETURN true',
-            $results->aqb->query
+            $results->aqb
         );
     }
 
@@ -70,7 +70,7 @@ class GrammarTest extends TestCase
             . 'OR doc.@theThirdAttribute != null UPDATE doc WITH '
             . '{"firstAttribute":null,"SecondAttribute":null,"@theThirdAttribute":null} '
             . 'IN GrammarTestCollection OPTIONS {"keepNull":false}',
-            $results->aqb->query
+            $results->aqb
         );
         $this->assertEquals([$collection], $results->aqb->collections['write']);
     }

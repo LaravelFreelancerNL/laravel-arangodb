@@ -11,7 +11,6 @@ use Tests\TestCase;
 
 class MorphToTest extends TestCase
 {
-
     protected function defineDatabaseMigrations()
     {
         $this->loadLaravelMigrations();

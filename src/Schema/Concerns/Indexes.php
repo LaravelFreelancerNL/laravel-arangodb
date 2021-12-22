@@ -2,7 +2,7 @@
 
 namespace LaravelFreelancerNL\Aranguent\Schema\Concerns;
 
-use ArangoDBClient\Exception;
+use ArangoClient\Exceptions\ArangoException;
 use Illuminate\Support\Fluent;
 
 trait Indexes
@@ -10,15 +10,19 @@ trait Indexes
     /**
      * Add a new index command to the blueprint.
      *
-     * @param string            $type
-     * @param string|array|null $columns
-     * @param $name
+     * @param string $type
+     * @param string|array<string>|null $columns
+     * @param string|null $name
      * @param array $indexOptions
      *
      * @return Fluent
      */
-    protected function indexCommand($type = '', $columns = null, $name = null, $indexOptions = [])
-    {
+    protected function indexCommand(
+        string $type = '',
+        array|string $columns = null,
+        string $name = null,
+        array $indexOptions = []
+    ): Fluent {
         if ($type == '') {
             $type = $this->mapIndexAlgorithm('persistent');
         }
@@ -67,7 +71,7 @@ trait Indexes
 
     /**
      * @param null|string $column
-     * @param $name
+     * @param string $name
      * @param array $indexOptions
      *
      * @return Fluent
@@ -80,13 +84,13 @@ trait Indexes
     /**
      *  Specify a spatial index for the table.
      *
-     * @param $columns
+     * @param array<mixed>|null $columns
      * @param null  $name
      * @param array $indexOptions
      *
      * @return Fluent
      */
-    public function geoIndex($columns, $name = null, $indexOptions = [])
+    public function geoIndex(array $columns = null, $name = null, $indexOptions = [])
     {
         return $this->indexCommand('geo', $columns, $name, $indexOptions);
     }
@@ -105,18 +109,18 @@ trait Indexes
     }
 
     /**
-     * @param $columns
+     * @param array<mixed>|null$columns
      * @param string|null $name
      * @param array       $indexOptions
      *
      * @return Fluent
      */
-    public function skiplistIndex($columns, $name = null, $indexOptions = [])
+    public function skiplistIndex(array $columns = null, $name = null, $indexOptions = [])
     {
         return $this->indexCommand('skiplist', $columns, $name, $indexOptions);
     }
 
-    public function persistentIndex($columns, $name = null, $indexOptions = [])
+    public function persistentIndex(array $columns = null, string $name = null, array $indexOptions = []): Fluent
     {
         return $this->indexCommand('persistent', $columns, $name, $indexOptions);
     }
@@ -124,13 +128,13 @@ trait Indexes
     /**
      * Create a TTL index for the table.
      *
-     * @param $columns
+     * @param array<string>|null $columns
      * @param null  $name
      * @param array $indexOptions
      *
      * @return Fluent
      */
-    public function ttlIndex($columns, $name = null, $indexOptions = [])
+    public function ttlIndex(array $columns = null, $name = null, $indexOptions = []): Fluent
     {
         return $this->indexCommand('ttl', $columns, $name, $indexOptions);
     }
@@ -144,7 +148,7 @@ trait Indexes
      *
      * @return Fluent
      */
-    public function unique($columns = null, $name = null, $algorithm = null)
+    public function unique($columns = null, $name = null, $algorithm = null): Fluent
     {
         $type = $this->mapIndexAlgorithm($algorithm);
 
@@ -155,9 +159,9 @@ trait Indexes
     }
 
     /**
-     * @param $command
+     * @throws ArangoException
      */
-    public function executeIndexCommand($command)
+    public function executeIndexCommand(Fluent $command)
     {
         if ($this->connection->pretending()) {
             $this->connection->logQuery('/* ' . $command->explanation . " */\n", []);
@@ -181,12 +185,8 @@ trait Indexes
 
     /**
      * Indicate that the given index should be dropped.
-     *
-     * @param $name
-     *
-     * @return Fluent
      */
-    public function dropIndex($name)
+    public function dropIndex(string $name): Fluent
     {
         $parameters = [];
         $parameters['name'] = 'dropIndex';
@@ -200,13 +200,11 @@ trait Indexes
     /**
      * Drop the index by first getting all the indexes on the table; then selecting the matching one
      * by name.
-     *
-     * @param $command
      */
-    public function executeDropIndexCommand($command)
+    public function executeDropIndexCommand(Fluent $command)
     {
         if ($this->connection->pretending()) {
-            $this->connection->logQuery('/* ' . $command->explanation . " */\n", []);
+            $this->connection->logQuery('/* ' . $command->explanation . " */\n", []); // @phpstan-ignore-line
 
             return;
         }
@@ -222,7 +220,7 @@ trait Indexes
      *
      * @return mixed|string
      */
-    protected function mapIndexAlgorithm($algorithm)
+    protected function mapIndexAlgorithm($algorithm): mixed
     {
         $algorithmConversion = [
             'HASH'  => 'hash',
@@ -244,7 +242,7 @@ trait Indexes
      *
      * @return string
      */
-    public function createIndexName($type, array $columns, array $options = [])
+    public function createIndexName($type, array $columns, array $options = []): string
     {
         $nameParts = [];
         $nameParts[] = $this->prefix . $this->table;

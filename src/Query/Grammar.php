@@ -500,7 +500,7 @@ class Grammar extends FluentAqlGrammar
 
     /**
      * @param Builder $builder
-     * @return Builder|\LaravelFreelancerNL\FluentAQL\QueryBuilder|null
+     * @return Builder
      */
     public function compileSearch(Builder $builder): Builder
     {

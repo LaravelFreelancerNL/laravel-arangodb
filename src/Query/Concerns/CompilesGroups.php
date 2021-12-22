@@ -10,10 +10,10 @@ trait CompilesGroups
      * Compile the "group by" portions of the query.
      *
      * @param Builder $builder
-     * @param string[]  $groups
+     * @param array<string> $groups
      * @return Builder
      */
-    protected function compileGroups(Builder $builder, array $groups)
+    protected function compileGroups(Builder $builder, array $groups = []): Builder
     {
         $aqlGroups = [];
         foreach ($groups as $key => $group) {
@@ -29,10 +29,10 @@ trait CompilesGroups
      * Compile the "group by" portions of the query.
      *
      * @param Builder $builder
-     * @param string[]  $groups
+     * @param string[]  $havings
      * @return Builder
      */
-    protected function compileHavings(Builder $builder, array $havings)
+    protected function compileHavings(Builder $builder, array $havings = [])
     {
         return $this->compileWheres($builder, $havings, 'havings');
     }

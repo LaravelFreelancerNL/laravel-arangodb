@@ -8,7 +8,6 @@ use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsJoinClauses;
@@ -57,14 +56,9 @@ class Builder extends IlluminateQueryBuilder
     /**
      * @override
      * Create a new query builder instance.
-     *
-     * @param  ConnectionInterface  $connection
-     * @param  Grammar|null  $grammar
-     * @param  Processor|null  $processor
-     * @param  QueryBuilder|null  $aqb
      */
     public function __construct(
-        ConnectionInterface $connection,
+        Connection $connection,
         Grammar $grammar = null,
         Processor $processor = null,
         QueryBuilder $aqb = null
@@ -297,8 +291,6 @@ class Builder extends IlluminateQueryBuilder
         return $results;
     }
 
-
-
     /**
      * Execute an aggregate function on the database.
      *
@@ -424,5 +416,25 @@ class Builder extends IlluminateQueryBuilder
         ];
 
         return $this;
+    }
+
+    /**
+     * Create a new query instance for a sub-query.
+     *
+     * @return $this
+     */
+    protected function forSubQuery()
+    {
+        return $this->newQuery();
+    }
+
+    /**
+     * Get the database connection instance.
+     *
+     * @return Connection
+     */
+    public function getConnection()
+    {
+        return $this->connection;
     }
 }

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace LaravelFreelancerNL\Aranguent\Testing\Concerns;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Testing\Constraints\HasInDatabase;
 use Illuminate\Testing\Constraints\NotSoftDeletedInDatabase;
 use Illuminate\Testing\Constraints\SoftDeletedInDatabase;
-use LaravelFreelancerNL\Aranguent\Testing\TestCase;
 use PHPUnit\Framework\Constraint\LogicalNot as ReverseConstraint;
 
 trait InteractsWithDatabase
@@ -15,10 +15,10 @@ trait InteractsWithDatabase
     /**
      * Assert that a given where condition exists in the database.
      *
-     * @param  \Illuminate\Database\Eloquent\Model|string  $table
-     * @param  array  $data
-     * @param  string|null  $connection
-     * @return self|TestCase
+     * @param Model|string $table
+     * @param array $data
+     * @param null $connection
+     * @return $this
      */
     protected function assertDatabaseHas($table, array $data, $connection = null)
     {
@@ -33,10 +33,10 @@ trait InteractsWithDatabase
     /**
      * Assert that a given where condition does not exist in the database.
      *
-     * @param  \Illuminate\Database\Eloquent\Model|string  $table
-     * @param  array  $data
-     * @param  string|null  $connection
-     * @return self|TestCase
+     * @param Model|string $table
+     * @param array $data
+     * @param null $connection
+     * @return $this
      */
     protected function assertDatabaseMissing($table, array $data, $connection = null)
     {
@@ -52,19 +52,23 @@ trait InteractsWithDatabase
     /**
      * Assert the given record has been "soft deleted".
      *
-     * @param  \Illuminate\Database\Eloquent\Model|string  $table
-     * @param  array  $data
-     * @param  string|null  $connection
-     * @param  string|null  $deletedAtColumn
-     * @return \Illuminate\Foundation\Testing\Concerns\InteractsWithDatabase
+     * @param Model|string $table
+     * @param array $data
+     * @param null $connection
+     * @param string $deletedAtColumn
+     * @return $this
      */
-    protected function assertSoftDeleted($table, array $data = [], $connection = null, $deletedAtColumn = 'deleted_at')
-    {
+    protected function assertSoftDeleted(
+        $table,
+        array $data = [],
+        $connection = null,
+        $deletedAtColumn = 'deleted_at'
+    ) {
         if ($this->isSoftDeletableModel($table)) {
             return $this->assertSoftDeleted(
                 $table->getTable(),
                 [$table->getKeyName() => $table->getKey()],
-                $table->getConnectionName(),
+                $table->getConnectionName(), /** @phpstan-ignore-next-line */
                 $table->getDeletedAtColumn()
             );
         }
@@ -84,11 +88,11 @@ trait InteractsWithDatabase
     /**
      * Assert the given record has not been "soft deleted".
      *
-     * @param  \Illuminate\Database\Eloquent\Model|string  $table
-     * @param  array  $data
-     * @param  string|null  $connection
-     * @param  string|null  $deletedAtColumn
-     * @return \Illuminate\Foundation\Testing\Concerns\InteractsWithDatabase
+     * @param Model|string $table
+     * @param array<mixed> $data
+     * @param null $connection
+     * @param string $deletedAtColumn
+     * @return $this
      */
     protected function assertNotSoftDeleted(
         $table,
@@ -100,7 +104,7 @@ trait InteractsWithDatabase
             return $this->assertNotSoftDeleted(
                 $table->getTable(),
                 [$table->getKeyName() => $table->getKey()],
-                $table->getConnectionName(),
+                $table->getConnectionName(), /** @phpstan-ignore-next-line */
                 $table->getDeletedAtColumn()
             );
         }
@@ -125,7 +129,7 @@ trait InteractsWithDatabase
      * @param  array|string  $value
      * @return array|string
      */
-    public function castAsJson($value)
+    public function castAsJson($value): array|string
     {
         return $value;
     }

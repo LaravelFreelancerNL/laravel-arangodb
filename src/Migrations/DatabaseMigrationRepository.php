@@ -4,6 +4,7 @@ namespace LaravelFreelancerNL\Aranguent\Migrations;
 
 use Illuminate\Database\ConnectionResolverInterface as IlluminateResolver;
 use Illuminate\Database\Migrations\DatabaseMigrationRepository as IlluminateDatabaseMigrationRepository;
+use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
@@ -32,7 +33,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
     /**
      * Resolve the database connection instance.
      *
-     * @return \Illuminate\Database\ConnectionInterface
+     * @return Connection
      */
     public function getConnection()
     {
