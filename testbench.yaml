@@ -1,0 +1,7 @@
+env:
+  - DB_CONNECTION="arangodb"
+  - DB_USERNAME="root"
+  - DB_PASSWORD=
+
+providers:
+  - LaravelFreelancerNL\Aranguent\AranguentServiceProvider
