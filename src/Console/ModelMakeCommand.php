@@ -20,10 +20,8 @@ class ModelMakeCommand extends IlluminateModelMakeCommand
      */
     protected function getStub()
     {
-        if ($this->option('pivot')) {
-            return __DIR__ . '/stubs/pivot.model.stub';
-        }
-
-        return __DIR__ . '/stubs/model.stub';
+        return $this->option('pivot')
+            ? $this->resolveStubPath(__DIR__ . '/../../stubs/pivot.model.stub')
+            : $this->resolveStubPath(__DIR__ . '/../../stubs/model.stub');
     }
 }

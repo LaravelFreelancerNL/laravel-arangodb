@@ -21,10 +21,16 @@ class ConsoleMigrationCommandsTest extends TestCase
     {
         parent::setUp();
 
-        $this->packageMigrationPath = __DIR__ . '/database/migrations';
-        $this->aranguentMigrationStubPath = __DIR__ . '/../src/Migrations/stubs';
+        $this->packageMigrationPath = __DIR__ . '../Setup/Database/Migrations';
+        $this->aranguentMigrationStubPath = __DIR__ . '/../../stubs';
         $this->laravelMigrationPath = base_path() . '/database/migrations';
 
+
+//        dd(
+//            $this->packageMigrationPath,
+//            $this->aranguentMigrationStubPath,
+//            $this->laravelMigrationPath,
+//            array_filter((array) glob($this->laravelMigrationPath . '/*')));
         // Clear the make migration test stubs
         array_map('unlink', array_filter((array) glob($this->laravelMigrationPath . '/*')));
     }
