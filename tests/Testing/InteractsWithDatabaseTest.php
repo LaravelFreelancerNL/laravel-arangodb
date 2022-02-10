@@ -2,7 +2,6 @@
 
 namespace Tests\Testing;
 
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Artisan;
 use Tests\Setup\Database\Seeds\CharactersSeeder;
 use Tests\Setup\Database\Seeds\TagsSeeder;
@@ -48,37 +47,6 @@ class InteractsWithDatabaseTest extends TestCase
     public function testAssertDatabaseCount()
     {
         $this->assertDatabaseCount('characters', 43);
-    }
-
-    public function testAssertDatabaseDeletedByModel()
-    {
-        $ned = Character::find('NedStark');
-
-        $ned->delete();
-
-        $this->assertDeleted($ned);
-
-        $this->expectException(ModelNotFoundException::class);
-        Character::findOrFail('NedStark');
-    }
-
-    public function testAssertDatabaseDeletedByData()
-    {
-        $ned = Character::find('NedStark');
-
-        $ned->delete();
-
-        $this->assertDeleted('characters', [
-            "id" => "NedStarkIsDead",
-            "name" => "Ned",
-            "surname" => "Stark",
-            "alive" => true,
-            "age" => 41,
-            "residence_id" => "winterfell"
-        ]);
-
-        $this->expectException(ModelNotFoundException::class);
-        Character::findOrFail('NedStark');
     }
 
     public function testAssertSoftDeletedByModel()

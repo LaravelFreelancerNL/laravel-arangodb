@@ -3,7 +3,7 @@
 namespace LaravelFreelancerNL\Aranguent\Facades;
 
 use Closure;
-use Illuminate\Support\Facades\Facade;
+use Illuminate\Support\Facades\Schema as IlluminateSchema;
 use LaravelFreelancerNL\Aranguent\Schema\Builder;
 
 /**
@@ -25,34 +25,7 @@ use LaravelFreelancerNL\Aranguent\Schema\Builder;
  * @method static Builder dropAllViews()
  *
  * @see \LaravelFreelancerNL\Aranguent\Schema\Builder
- *
- * @deprecated This facade isn't necessary anymore and will be removed at version 1.0
  */
-class Schema extends Facade
+class Schema extends IlluminateSchema
 {
-    /**
-     * Get a schema builder instance for a connection.
-     *
-     * @SuppressWarnings(PHPMD.UndefinedVariable)
-     *
-     * @param string $name
-     *
-     * @return \Illuminate\Database\Schema\Builder
-     */
-    public static function connection($name)
-    {
-        return static::$app['db']->connection($name)->getSchemaBuilder();
-    }
-
-    /**
-     * Get the registered name of the component.
-     *
-     * @SuppressWarnings(PHPMD.UndefinedVariable)
-     *
-     * @return string
-     */
-    protected static function getFacadeAccessor()
-    {
-        return static::$app['db']->connection()->getSchemaBuilder();
-    }
 }

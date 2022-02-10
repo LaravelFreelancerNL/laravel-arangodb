@@ -228,6 +228,35 @@ class QueryBuilderTest extends TestCase
         $this->assertEquals(15, count($result['data']));
     }
 
+    public function testPaginateWithFilters()
+    {
+        $result = DB::table('characters')
+            ->where('residence_id', 'winterfell')
+            ->paginate(5)
+            ->toArray();
+        $this->assertEquals(15, $result['total']);
+        $this->assertEquals(5, count($result['data']));
+    }
+
+
+    public function testPaginateWithOptionalFilters()
+    {
+        $residenceId = 'winterfell';
+        $result = DB::table('characters')
+            ->when(
+                $residenceId,
+                function ($query) use ($residenceId) {
+                    return $query->where('residence_id', '==', $residenceId)
+                        ->orWhere('residence_id', '==', $residenceId);
+                }
+            )
+            ->paginate(5)
+            ->toArray();
+
+        $this->assertEquals(15, $result['total']);
+        $this->assertEquals(5, count($result['data']));
+    }
+
     public function testPluck()
     {
         $results = DB::table('characters')->pluck('name', 'id');

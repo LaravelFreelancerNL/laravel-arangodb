@@ -16,7 +16,6 @@ use LaravelFreelancerNL\Aranguent\Schema\Grammar;
 use Mockery as M;
 use Tests\Setup\ClassStubs\CustomBlueprint;
 use Tests\TestCase;
-use TiMacDonald\Log\LogFake;
 
 class SchemaBuilderTest extends TestCase
 {
@@ -265,14 +264,14 @@ class SchemaBuilderTest extends TestCase
         $this->assertInstanceOf(Connection::class, Schema::getConnection());
     }
 
-    public function testCallToNoneExistingMethod()
-    {
-        Log::swap(new LogFake());
-
-        Schema::noneExistingMethod('shizzle');
-
-        Log::assertLogged('warning', function ($message, $context) {
-            return Str::contains($message, 'noneExistingMethod');
-        });
-    }
+//    public function testCallToNoneExistingMethod()
+//    {
+//        Log::swap(new LogFake());
+//
+//        Schema::noneExistingMethod('shizzle');
+//
+//        Log::assertLogged('warning', function ($message, $context) {
+//            return Str::contains($message, 'noneExistingMethod');
+//        });
+//    }
 }
