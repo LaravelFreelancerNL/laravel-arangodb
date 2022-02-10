@@ -1,6 +1,7 @@
 .idea
 clover.xml
 composer.phar
+coverage.yml
 phpunit.phar
 /vendor
 /*.cache
