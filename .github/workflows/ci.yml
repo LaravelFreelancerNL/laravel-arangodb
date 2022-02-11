@@ -10,12 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        laravel: [^8.0]
+        laravel: [^8.0, ^9.0]
         php: [8.0, 8.1]
-        arangodb: [3.7, 3.8]
-        include:
-          - laravel: ^8.0
-            testbench: ^6.0
+        arangodb: [3.7, 3.8, 3.9]
     name:  QA L ${{ matrix.laravel }} / P ${{ matrix.php }} / A ${{ matrix.arangodb }}
 
     services:
