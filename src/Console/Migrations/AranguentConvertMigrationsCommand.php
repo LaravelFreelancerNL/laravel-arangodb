@@ -73,10 +73,6 @@ class AranguentConvertMigrationsCommand extends BaseCommand
         $replacements = [
             'Illuminate\Support\Facades\Schema'    => 'LaravelFreelancerNL\Aranguent\Facades\Schema',
             'Illuminate\Database\Schema\Blueprint' => 'LaravelFreelancerNL\Aranguent\Schema\Blueprint',
-            '$table '                              => '$collection ',
-            '$table,'                              => '$collection,',
-            '$table->'                             => '$collection->',
-            '$table)'                              => '$collection)',
         ];
 
         $content = file_get_contents($filePath);

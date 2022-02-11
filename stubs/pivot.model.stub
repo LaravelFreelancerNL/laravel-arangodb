@@ -4,6 +4,12 @@ namespace DummyNamespace;
 
 use LaravelFreelancerNL\Aranguent\Eloquent\Pivot;
 
+/**
+ * @property string $id
+ * @property string $_id
+ * @property string $_key
+ * @property string $_rev
+ */
 class DummyClass extends Pivot
 {
     //
