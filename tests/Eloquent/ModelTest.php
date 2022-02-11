@@ -60,18 +60,19 @@ class ModelTest extends TestCase
         $this->artisan(
             'aranguent:model',
             [
-                'name'    => 'Aranguent',
+                'name'    => 'AranguentModelTest',
                 '--force' => '',
             ]
         )->run();
 
-        $file = __DIR__ . '/../../vendor/orchestra/testbench-core/laravel/app/Models/Aranguent.php';
+        $file = __DIR__ . '/../../vendor/orchestra/testbench-core/laravel/app/Models/AranguentModelTest.php';
 
         //assert file exists
         $this->assertFileExists($file);
 
         //assert file refers to Aranguent Base Model
         $content = file_get_contents($file);
+//        dd($content);
         $this->assertStringContainsString('use LaravelFreelancerNL\Aranguent\Eloquent\Model;', $content);
     }
 
