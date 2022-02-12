@@ -33,6 +33,9 @@ jobs:
           ini-values: post_max_size=256M, short_open_tag=On
           coverage: xdebug
 
+      - name: Install Ocular globally
+        run: composer global require scrutinizer/ocular
+
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-suggest
 
@@ -45,4 +48,4 @@ jobs:
         run: |
           vendor/bin/phpunit --coverage-clover clover.xml --whitelist src
           echo "Upload results to Scrutinizer-ci"
-          vendor/bin/ocular code-coverage:upload --format=php-clover clover.xml
+          ~/.composer/vendor/bin/ocular code-coverage:upload --format=php-clover clover.xml
