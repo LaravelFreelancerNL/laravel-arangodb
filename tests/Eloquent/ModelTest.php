@@ -72,7 +72,6 @@ class ModelTest extends TestCase
 
         //assert file refers to Aranguent Base Model
         $content = file_get_contents($file);
-//        dd($content);
         $this->assertStringContainsString('use LaravelFreelancerNL\Aranguent\Eloquent\Model;', $content);
     }
 

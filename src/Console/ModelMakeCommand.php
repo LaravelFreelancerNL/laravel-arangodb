@@ -24,4 +24,19 @@ class ModelMakeCommand extends IlluminateModelMakeCommand
             ? $this->resolveStubPath('/../../stubs/pivot.model.stub')
             : $this->resolveStubPath('/../../stubs/model.stub');
     }
+
+    /**
+     * Resolve the fully-qualified path to the stub.
+     *
+     * This method is an exact copy of the original to keep the functionality but reroute __DIR__
+     *
+     * @param  string  $stub
+     * @return string
+     */
+    protected function resolveStubPath($stub)
+    {
+        return file_exists($customPath = $this->laravel->basePath(trim($stub, '/')))
+            ? $customPath
+            : __DIR__ . $stub;
+    }
 }
