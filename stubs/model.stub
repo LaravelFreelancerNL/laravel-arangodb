@@ -7,7 +7,6 @@ use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 /**
  * @property string $id
  * @property string $_id
- * @property string $_key
  * @property string $_rev
  */
 class DummyClass extends Model
