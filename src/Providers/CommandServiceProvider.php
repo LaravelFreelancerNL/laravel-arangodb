@@ -11,14 +11,8 @@ use LaravelFreelancerNL\Aranguent\Migrations\MigrationCreator;
 
 class CommandServiceProvider extends IlluminateMigrationServiceProvider
 {
-    /**
-     * {@inheritdoc}
-     */
     protected $defer = true;
 
-    /**
-     * {@inheritdoc}
-     */
     public function boot()
     {
         if ($this->app->runningInConsole()) {
@@ -30,7 +24,9 @@ class CommandServiceProvider extends IlluminateMigrationServiceProvider
     }
 
     /**
-     * {@inheritdoc}
+     * Register the service provider.
+     *
+     * @return void
      */
     public function register()
     {
@@ -66,7 +62,8 @@ class CommandServiceProvider extends IlluminateMigrationServiceProvider
     protected function registerCreator()
     {
         $this->app->singleton('migration.creator', function ($app) {
-            return new MigrationCreator($app['files']);
+            $customStubPath = __DIR__ . '/../../stubs';
+            return new MigrationCreator($app['files'], $customStubPath);
         });
     }
 

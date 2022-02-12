@@ -11,5 +11,5 @@ echo "Run PHPMD"
 echo "Run PHPStan"
 ./vendor/bin/phpstan analyse -c phpstan.neon
 
-echo "Test package from within testbench"
-./vendor/bin/testbench package:test
+echo "Test package from within phpunit"
+./vendor/bin/phpunit
