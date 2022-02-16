@@ -22,6 +22,14 @@
             <directory suffix=".php">tests/Migrations</directory>
         </testsuite>
     </testsuites>
+    <coverage processUncoveredFiles="true">
+        <include>
+            <directory suffix=".php">./src</directory>
+        </include>
+        <report>
+            <clover outputFile="clover.xml"/>
+        </report>
+    </coverage>
     <php>
         <env name="APP_KEY" value="AckfSECXIvnK5r28GVIWUAxmbBSjTsmF"/>
         <env name="ARANGODB_VERSION" value="3.8"/>

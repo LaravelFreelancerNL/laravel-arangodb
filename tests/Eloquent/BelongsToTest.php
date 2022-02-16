@@ -1,109 +1,86 @@
 <?php
 
-namespace Tests\Eloquent;
-
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Artisan;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
+use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Mockery as M;
-use Tests\Setup\Database\Seeds\CharactersSeeder;
-use Tests\Setup\Database\Seeds\ChildrenSeeder;
-use Tests\Setup\Database\Seeds\LocationsSeeder;
-use Tests\setup\Models\Character;
+use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Location;
 use Tests\TestCase;
 
-class BelongsToTest extends TestCase
-{
-    protected function defineDatabaseMigrations()
-    {
-        $this->loadLaravelMigrations();
-        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
+uses(
+    TestCase::class,
+    DatabaseTransactions::class
+);
 
-        Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
-        Artisan::call('db:seed', ['--class' => ChildrenSeeder::class]);
-        Artisan::call('db:seed', ['--class' => LocationsSeeder::class]);
-    }
+beforeEach(function () {
+    Carbon::setTestNow(Carbon::now());
+});
 
-    public function setUp(): void
-    {
-        parent::setUp();
+afterEach(function () {
+    Carbon::setTestNow(null);
+    Carbon::resetToStringFormat();
+    Model::unsetEventDispatcher();
+    M::close();
+});
 
-        Carbon::setTestNow(Carbon::now());
-    }
+test('retrieve relation', function () {
+    $parent = Character::find('NedStark');
+    $children = $parent->children;
 
-    public function tearDown(): void
-    {
-        parent::tearDown();
-        Carbon::setTestNow(null);
-        Carbon::resetToStringFormat();
-        Model::unsetEventDispatcher();
-        M::close();
-    }
+    expect($children[0])->toBeInstanceOf(Character::class);
 
-    public function testRetrieveRelation()
-    {
-        $parent = Character::find('NedStark');
-        $children = $parent->children;
+    expect(true)->toBeTrue();
+});
 
-        $this->assertInstanceOf(Character::class, $children[0]);
+test('alternative relationship name and key', function () {
+    $location = Location::find('winterfell');
+    $character = $location->leader;
 
-        $this->assertTrue(true);
-    }
+    expect($character->id)->toEqual('SansaStark');
+    expect($character->id)->toEqual($location->led_by);
+    expect($character)->toBeInstanceOf(Character::class);
+});
 
-    public function testAlternativeRelationshipNameAndKey()
-    {
-        $location = Location::find('winterfell');
-        $character = $location->leader;
+test('associate', function () {
+    $character = Character::find('TheonGreyjoy');
 
-        $this->assertEquals('SansaStark', $character->id);
-        $this->assertEquals($location->led_by, $character->id);
-        $this->assertInstanceOf(Character::class, $character);
-    }
+    $location = new Location(
+        [
+            "id" => "pyke",
+            "name" => "Pyke",
+            "coordinate" => [55.8833342, -6.1388807]
+        ]
+    );
 
-    public function testAssociate()
-    {
-        $character = Character::find('TheonGreyjoy');
+    $location->leader()->associate($character);
+    $location->save();
 
-        $location = new Location(
-            [
-                "id" => "pyke",
-                "name" => "Pyke",
-                "coordinate" => [55.8833342, -6.1388807]
-            ]
-        );
+    $character->fresh();
 
-        $location->leader()->associate($character);
-        $location->save();
+    $location = $character->leads;
 
-        $character->fresh();
+    expect($location->id)->toEqual('pyke');
+    expect($character->id)->toEqual($location->led_by);
+    expect($location)->toBeInstanceOf(Location::class);
 
-        $location = $character->leads;
+    $location->delete();
+});
 
-        $this->assertEquals('pyke', $location->id);
-        $this->assertEquals($location->led_by, $character->id);
-        $this->assertInstanceOf(Location::class, $location);
+test('dissociate', function () {
+    $character = Character::find('NedStark');
+    expect('winterfell')->toEqual($character->residence_id);
 
-        $location->delete();
-    }
+    $character->residence()->dissociate();
+    $character->save();
 
-    public function testDissociate()
-    {
-        $character = Character::find('NedStark');
-        $this->assertEquals($character->residence_id, 'winterfell');
+    $character ->fresh();
+    expect($character->residence_id)->toBeNull();
+});
 
-        $character->residence()->dissociate();
-        $character->save();
+test('with', function () {
+    $location = Location::with('leader')->find("winterfell");
 
-        $character ->fresh();
-        $this->assertNull($character->residence_id);
-    }
-
-    public function testWith(): void
-    {
-        $location = Location::with('leader')->find("winterfell");
-
-        $this->assertInstanceOf(Character::class, $location->leader);
-        $this->assertEquals('SansaStark', $location->leader->id);
-    }
-}
+    expect($location->leader)->toBeInstanceOf(Character::class);
+    expect($location->leader->id)->toEqual('SansaStark');
+});

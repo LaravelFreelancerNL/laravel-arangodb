@@ -1,90 +1,67 @@
 <?php
 
-namespace Tests\Query;
-
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use Mockery as m;
-use Tests\Setup\Database\Seeds\CharactersSeeder;
+use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
-class GroupByTest extends TestCase
-{
-    protected function defineDatabaseMigrations()
-    {
-        $this->loadLaravelMigrations();
-        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
+uses(
+    TestCase::class,
+    DatabaseTransactions::class
+);
 
-        Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
-    }
+test('group by', function () {
+    $surnames = DB::table('characters')
+        ->select('surname')
+        ->groupBy('surname')
+        ->get();
 
+    expect($surnames)->toHaveCount(21);
+    expect($surnames[1])->toEqual('Baelish');
+});
 
-    public function tearDown(): void
-    {
-        parent::tearDown();
+test('group by multiple', function () {
+    $groups = DB::table('characters')
+        ->select('surname', 'residence_id')
+        ->groupBy('surname', 'residence_id')
+        ->get();
 
-        M::close();
-    }
+    expect($groups)->toHaveCount(29);
+    expect($groups[4][0])->toEqual(null);
+    expect($groups[4][1])->toEqual('the-red-keep');
+    expect($groups[5][0])->toEqual('Baelish');
+    expect($groups[5][1])->toEqual('the-red-keep');
+});
 
-    public function testGroupBy()
-    {
-        $surnames = DB::table('characters')
-            ->select('surname')
-            ->groupBy('surname')
-            ->get();
+test('having', function () {
+    $surnames = DB::table('characters')
+        ->select('surname')
+        ->groupBy('surname')
+        ->having('surname', 'LIKE', '%S%')
+        ->get();
 
-        $this->assertCount(21, $surnames);
-        $this->assertEquals('Baelish', $surnames[1]);
-    }
+    expect($surnames)->toHaveCount(4);
+    expect($surnames[1])->toEqual('Seaworth');
+});
 
-    public function testGroupByMultiple()
-    {
-        $groups = DB::table('characters')
-            ->select('surname', 'residence_id')
-            ->groupBy('surname', 'residence_id')
-            ->get();
+test('or having', function () {
+    $ages = DB::table('characters')
+        ->select('age')
+        ->groupBy('age')
+        ->having('age', '<', 20)
+        ->orHaving('age', '>', 40)
+        ->get();
 
-        $this->assertCount(29, $groups);
-        $this->assertEquals(null, $groups[4][0]);
-        $this->assertEquals('the-red-keep', $groups[4][1]);
-        $this->assertEquals('Baelish', $groups[5][0]);
-        $this->assertEquals('the-red-keep', $groups[5][1]);
-    }
+    expect($ages)->toHaveCount(9);
+    expect($ages[1])->toEqual(10);
+});
 
-    public function testHaving()
-    {
-        $surnames = DB::table('characters')
-            ->select('surname')
-            ->groupBy('surname')
-            ->having('surname', 'LIKE', '%S%')
-            ->get();
+test('having between', function () {
+    $ages = DB::table('characters')
+        ->select('age')
+        ->groupBy('age')
+        ->havingBetween('age', [20, 40])
+        ->get();
 
-        $this->assertCount(4, $surnames);
-        $this->assertEquals('Seaworth', $surnames[1]);
-    }
-
-    public function testOrHaving()
-    {
-        $ages = DB::table('characters')
-            ->select('age')
-            ->groupBy('age')
-            ->having('age', '<', 20)
-            ->orHaving('age', '>', 40)
-            ->get();
-
-        $this->assertCount(9, $ages);
-        $this->assertEquals(10, $ages[1]);
-    }
-
-    public function testHavingBetween()
-    {
-        $ages = DB::table('characters')
-            ->select('age')
-            ->groupBy('age')
-            ->havingBetween('age', [20, 40])
-            ->get();
-
-        $this->assertCount(3, $ages);
-        $this->assertEquals(36, $ages[1]);
-    }
-}
+    expect($ages)->toHaveCount(3);
+    expect($ages[1])->toEqual(36);
+});

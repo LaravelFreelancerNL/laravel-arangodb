@@ -22,7 +22,9 @@ class LocationsSeeder extends Seeder
                  55.167801,
                  -6.815096
               ],
-              "led_by":"DaenerysTargaryen"
+              "led_by":"DaenerysTargaryen",
+              "capturable_id":"DaenerysTargaryen",
+              "capturable_type": "Tests\\\Setup\\\Models\\\Character"
            },
            {
               "_key":"king-s-landing",
@@ -31,7 +33,9 @@ class LocationsSeeder extends Seeder
                  42.639752,
                  18.110189
               ],
-              "led_by":"CerseiLannister"
+              "led_by":"CerseiLannister",
+              "capturable_id":"DaenerysTargaryen",
+              "capturable_type": "Tests\\\Setup\\\Models\\\Character"
            },
            {
               "_key":"the-red-keep",
@@ -40,7 +44,10 @@ class LocationsSeeder extends Seeder
                  35.896447,
                  14.446442
               ],
-              "led_by":"CerseiLannister"
+              "led_by":"CerseiLannister",
+              "capturable_id":"DaenerysTargaryen",
+              "capturable_type": "Tests\\\Setup\\\Models\\\Character"
+
            },
            {
               "_key":"yunkai",
@@ -49,7 +56,10 @@ class LocationsSeeder extends Seeder
                  31.046642,
                  -7.129532
               ],
-              "led_by":"DaenerysTargaryen"
+              "led_by":"DaenerysTargaryen",
+              "capturable_id":"DaenerysTargaryen",
+              "capturable_type": "Tests\\\Setup\\\Models\\\Character"
+
            },
            {
               "_key":"astapor",
@@ -58,7 +68,10 @@ class LocationsSeeder extends Seeder
                  31.50974,
                  -9.774249
               ],
-              "led_by":"DaenerysTargaryen"
+              "led_by":"DaenerysTargaryen",
+              "capturable_id":"DaenerysTargaryen",
+              "capturable_type": "Tests\\\Setup\\\Models\\\Character"
+
            },
            {
               "_key":"winterfell",
@@ -67,7 +80,10 @@ class LocationsSeeder extends Seeder
                  54.368321,
                  -5.581312
               ],
-              "led_by":"SansaStark"
+              "led_by":"SansaStark",
+              "capturable_id":"TheonGreyjoy",
+              "capturable_type": "Tests\\\Setup\\\Models\\\Character"
+
            },
            {
               "_key":"vaes-dothrak",
@@ -84,6 +100,14 @@ class LocationsSeeder extends Seeder
               "coordinate":[
                  64.265473,
                  -21.094093
+              ]
+           },
+           {
+              "_key":"riverrun",
+              "name":"Riverrun",
+              "coordinate":[
+                54.311011,
+                -6.5214502
               ]
            }
         ]';

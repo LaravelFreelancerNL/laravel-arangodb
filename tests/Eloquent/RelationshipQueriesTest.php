@@ -1,81 +1,39 @@
 <?php
 
-namespace Tests\Query;
-
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Artisan;
-use LaravelFreelancerNL\Aranguent\Eloquent\Model;
-use Mockery as m;
-use Tests\Setup\Database\Seeds\CharactersSeeder;
-use Tests\Setup\Database\Seeds\LocationsSeeder;
-use Tests\Setup\Database\Seeds\TaggablesSeeder;
-use Tests\Setup\Database\Seeds\TagsSeeder;
+use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\Setup\Models\Character;
 use Tests\TestCase;
 
-class RelationshipQueriesTest extends TestCase
-{
-    protected function defineDatabaseMigrations()
-    {
-        $this->loadLaravelMigrations();
-        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
+uses(
+    TestCase::class,
+    DatabaseTransactions::class
+);
 
-        Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
-        Artisan::call('db:seed', ['--class' => LocationsSeeder::class]);
-        Artisan::call('db:seed', ['--class' => TagsSeeder::class]);
-        Artisan::call('db:seed', ['--class' => TaggablesSeeder::class]);
-    }
+test('has', function () {
+    $characters = Character::has('leads')->get();
+    expect(count($characters))->toEqual(3);
+});
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+test('has with minimum relation count', function () {
+    $characters = Character::has('leads', '>=', 3)->get();
+    expect(count($characters))->toEqual(1);
+});
 
-        Carbon::setTestNow(Carbon::now());
-    }
+test('has morph', function () {
+    $characters = Character::has('tags')->get();
 
-    public function tearDown(): void
-    {
-        parent::tearDown();
+    expect(count($characters))->toEqual(2);
+});
 
-        Carbon::setTestNow(null);
-        Carbon::resetToStringFormat();
+test('doesnt have', function () {
+    $characters = Character::doesntHave('leads')->get();
+    expect(count($characters))->toEqual(40);
+});
 
-        Model::unsetEventDispatcher();
+test('with count', function () {
+    $characters = Character::withCount('leads')
+        ->where('leads_count', '>', 0)
+        ->get();
 
-        M::close();
-    }
-
-    public function testHas()
-    {
-        $characters = Character::has('leads')->get();
-        $this->assertEquals(3, count($characters));
-    }
-
-    public function testHasWithMinimumRelationCount()
-    {
-        $characters = Character::has('leads', '>=', 3)->get();
-        $this->assertEquals(1, count($characters));
-    }
-
-    public function testHasMorph()
-    {
-        $characters = Character::has('tags')->get();
-
-        $this->assertEquals(2, count($characters));
-    }
-
-    public function testDoesntHave()
-    {
-        $characters = Character::doesntHave('leads')->get();
-        $this->assertEquals(40, count($characters));
-    }
-
-    public function testWithCount()
-    {
-        $characters = Character::withCount('leads')
-            ->where('leads_count', '>', 0)
-            ->get();
-
-        $this->assertEquals(3, count($characters));
-    }
-}
+    expect(count($characters))->toEqual(3);
+});

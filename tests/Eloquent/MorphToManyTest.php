@@ -1,110 +1,70 @@
 <?php
 
-namespace Tests\Eloquent;
-
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Artisan;
-use LaravelFreelancerNL\Aranguent\Eloquent\Model;
-use Mockery as M;
-use Tests\Setup\Database\Seeds\CharactersSeeder;
-use Tests\Setup\Database\Seeds\LocationsSeeder;
-use Tests\Setup\Database\Seeds\TaggablesSeeder;
-use Tests\Setup\Database\Seeds\TagsSeeder;
+use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Tag;
 use Tests\TestCase;
 
-class MorphToManyTest extends TestCase
-{
-    protected function defineDatabaseMigrations()
-    {
-        $this->loadLaravelMigrations();
-        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
+uses(
+    TestCase::class,
+    DatabaseTransactions::class
+);
 
-        Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
-        Artisan::call('db:seed', ['--class' => LocationsSeeder::class]);
-        Artisan::call('db:seed', ['--class' => TagsSeeder::class]);
-        Artisan::call('db:seed', ['--class' => TaggablesSeeder::class]);
-    }
+test('retrieve relation', function () {
+    $character = Character::find('SandorClegane');
 
-    public function setUp(): void
-    {
-        parent::setUp();
+    $tags = $character->tags;
 
-        Carbon::setTestNow(Carbon::now());
-    }
+    expect(count($tags))->toEqual(4);
+    expect($tags[0])->toBeInstanceOf(Tag::class);
+});
 
-    public function tearDown(): void
-    {
-        parent::tearDown();
-        Carbon::setTestNow(null);
-        Carbon::resetToStringFormat();
-        Model::unsetEventDispatcher();
-        M::close();
-    }
+test('inverse relation', function () {
+    $tag = Tag::find('A');
 
-    public function testRetrieveRelation()
-    {
-        $character = Character::find('SandorClegane');
+    $characters = $tag->characters;
+    $locations = $tag->locations;
 
-        $tags = $character->tags;
+    expect(count($characters))->toEqual(1);
+    expect(count($locations))->toEqual(1);
+});
 
-        $this->assertEquals(4, count($tags));
-        $this->assertInstanceOf(Tag::class, $tags[0]);
-    }
-
-    public function testInverseRelation()
-    {
-        $tag = Tag::find('A');
-
-        $characters = $tag->characters;
-        $locations = $tag->locations;
-
-        $this->assertEquals(1, count($characters));
-        $this->assertEquals(1, count($locations));
-    }
+test('attach', function () {
+    $character = Character::find('Varys');
 
 
-    public function testAttach()
-    {
-        $character = Character::find('Varys');
+    $character->tags()->attach(['B', 'E', 'J', 'N', 'O']);
+    $character->save();
 
+    $character->fresh();
+    $tags = $character->tags;
 
-        $character->tags()->attach(['B', 'E', 'J', 'N', 'O']);
-        $character->save();
+    expect(count($tags))->toEqual(5);
+    expect($character->tags[0]->id)->toEqual('B');
+});
 
-        $character->fresh();
-        $tags = $character->tags;
+test('detach', function () {
+    $character = Character::find('SandorClegane');
 
-        $this->assertEquals(5, count($tags));
-        $this->assertEquals('B', $character->tags[0]->id);
-    }
+    $character->tags()->detach(['F', 'K']);
+    $character->save();
 
-    public function testDetach()
-    {
-        $character = Character::find('SandorClegane');
+    $reloadedCharacter = Character::find('SandorClegane');
 
-        $character->tags()->detach(['F', 'K']);
-        $character->save();
+    expect(count($reloadedCharacter->tags))->toEqual(2);
+    expect($reloadedCharacter->tags[0]->id)->toEqual('A');
+    expect($reloadedCharacter->tags[1]->id)->toEqual('P');
+});
 
-        $reloadedCharacter = Character::find('SandorClegane');
+test('sync', function () {
+    $character = Character::find('SandorClegane');
 
-        $this->assertEquals(2, count($reloadedCharacter->tags));
-        $this->assertEquals('A', $reloadedCharacter->tags[0]->id);
-        $this->assertEquals('P', $reloadedCharacter->tags[1]->id);
-    }
+    $character->tags()->sync(['C', 'J']);
+    $character->save();
 
-    public function testSync(): void
-    {
-        $character = Character::find('SandorClegane');
+    $reloadedCharacter = Character::find('SandorClegane');
 
-        $character->tags()->sync(['C', 'J']);
-        $character->save();
-
-        $reloadedCharacter = Character::find('SandorClegane');
-
-        $this->assertEquals(2, count($reloadedCharacter->tags));
-        $this->assertEquals('C', $reloadedCharacter->tags[0]->id);
-        $this->assertEquals('J', $reloadedCharacter->tags[1]->id);
-    }
-}
+    expect(count($reloadedCharacter->tags))->toEqual(2);
+    expect($reloadedCharacter->tags[0]->id)->toEqual('C');
+    expect($reloadedCharacter->tags[1]->id)->toEqual('J');
+});

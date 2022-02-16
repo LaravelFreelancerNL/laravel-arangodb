@@ -1,154 +1,128 @@
 <?php
 
-namespace Tests\Eloquent;
-
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Artisan;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
+use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Mockery as M;
-use Tests\Setup\Database\Seeds\CharactersSeeder;
-use Tests\Setup\Database\Seeds\ChildrenSeeder;
-use Tests\Setup\Database\Seeds\LocationsSeeder;
-use Tests\setup\Models\Character;
+use Tests\Setup\Models\Character;
 use Tests\TestCase;
 
-class BelongsToManyTest extends TestCase
-{
-    protected function defineDatabaseMigrations()
-    {
-        $this->loadLaravelMigrations();
-        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
+uses(
+    TestCase::class,
+    DatabaseTransactions::class
+);
 
-        Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
-        Artisan::call('db:seed', ['--class' => ChildrenSeeder::class]);
-        Artisan::call('db:seed', ['--class' => LocationsSeeder::class]);
-    }
+beforeEach(function () {
+    Carbon::setTestNow(Carbon::now());
+});
 
-    public function setUp(): void
-    {
-        parent::setUp();
+afterEach(function () {
+    Carbon::setTestNow(null);
+    Carbon::resetToStringFormat();
 
-        Carbon::setTestNow(Carbon::now());
-    }
+    Model::unsetEventDispatcher();
 
-    public function tearDown(): void
-    {
-        parent::tearDown();
+    M::close();
+});
 
-        Carbon::setTestNow(null);
-        Carbon::resetToStringFormat();
+test('retrieve relation', function () {
+    $parent = Character::find('NedStark');
+    $children = $parent->children;
 
-        Model::unsetEventDispatcher();
+    expect(count($children))->toEqual(5);
+    expect($children[0])->toBeInstanceOf(Character::class);
+    expect($children[0]->pivot->_from)->toEqual('characters/NedStark');
 
-        M::close();
-    }
+    expect(true)->toBeTrue();
+});
 
-    public function testRetrieveRelation()
-    {
-        $parent = Character::find('NedStark');
+test('inverse relation', function () {
+    $child = Character::find('JonSnow');
 
-        $children = $parent->children;
+    $parents = $child->parents;
+    expect($parents)->toHaveCount(1);
+    expect($parents[0])->toBeInstanceOf(Character::class);
+    expect($parents[0]->_id)->toEqual('characters/NedStark');
 
-        $this->assertEquals(5, count($children));
-        $this->assertInstanceOf(Character::class, $children[0]);
-        $this->assertEquals('characters/NedStark', $children[0]->pivot->_from);
+    expect(true)->toBeTrue();
+});
 
-        $this->assertTrue(true);
-    }
+test('attach', function () {
+    $child = Character::find('JonSnow');
 
-    public function testInverseRelation()
-    {
-        $child = Character::find('JonSnow');
+    $lyannaStark = Character::firstOrCreate(
+        [
+            "id" => "LyannaStark",
+            "name" => "Lyanna",
+            "surname" => "Stark",
+            "alive" => false,
+            "age" => 25,
+            "residence_id" => "winterfell"
+        ]
+    );
 
-        $parents = $child->parents;
-        $this->assertCount(1, $parents);
-        $this->assertInstanceOf(Character::class, $parents[0]);
-        $this->assertEquals('characters/NedStark', $parents[0]->_id);
+    // Reload from DB
+    $lyannaStark = Character::find('LyannaStark');
 
-        $this->assertTrue(true);
-    }
+    $child->parents()->attach($lyannaStark);
+    $child->save();
 
+    $reloadedChild = Character::find('JonSnow');
+    $parents = $child->parents;
 
-    public function testAttach()
-    {
-        $child = Character::find('JonSnow');
+    expect($parents[0]->id)->toEqual('NedStark');
+    expect($parents[1]->id)->toEqual('LyannaStark');
 
-        $lyannaStark = Character::firstOrCreate(
-            [
-                "id" => "LyannaStark",
-                "name" => "Lyanna",
-                "surname" => "Stark",
-                "alive" => false,
-                "age" => 25,
-                "residence_id" => "winterfell"
-            ]
-        );
+    $child->parents()->detach($lyannaStark);
+    $child->save();
+    $lyannaStark->delete();
+});
 
-        // Reload from DB
-        $lyannaStark = Character::find('LyannaStark');
+test('detach', function () {
+    $child = Character::find('JonSnow');
 
-        $child->parents()->attach($lyannaStark);
-        $child->save();
+    $child->parents()->detach('characters/NedStark');
+    $child->save();
 
-        $reloadedChild = Character::find('JonSnow');
-        $parents = $child->parents;
+    $child = $child->fresh();
 
-        $this->assertEquals('NedStark', $parents[0]->id);
-        $this->assertEquals('LyannaStark', $parents[1]->id);
+    expect($child->parents)->toHaveCount(0);
+});
 
-        $child->parents()->detach($lyannaStark);
-        $child->save();
-        $lyannaStark->delete();
-    }
+test('sync', function () {
+    $lyannaStark = Character::firstOrCreate(
+        [
+            "id" => "LyannaStark",
+            "name" => "Lyanna",
+            "surname" => "Stark",
+            "alive" => false,
+            "age" => 25,
+            "residence_id" => "winterfell"
+        ]
+    );
+    $rhaegarTargaryen = Character::firstOrCreate(
+        [
+            "id" => "RhaegarTargaryen",
+            "name" => "Rhaegar",
+            "surname" => "Targaryen",
+            "alive" => false,
+            "age" => 25,
+            "residence_id" => "dragonstone"
+        ]
+    );
 
-    public function testDetach()
-    {
-        $child = Character::find('JonSnow');
+    $child = Character::find('JonSnow');
 
-        $child->parents()->detach('characters/NedStark');
-        $child->save();
+    $child->parents()->sync(['characters/LyannaStark', 'characters/RhaegarTargaryen']);
+    $child->fresh();
 
-        $child = $child->fresh();
+    expect(count($child->parents))->toEqual(2);
+    expect($child->parents[0]->_id)->toEqual('characters/LyannaStark');
+    expect($child->parents[1]->_id)->toEqual('characters/RhaegarTargaryen');
+    expect($child->parents[0]->id)->toEqual('LyannaStark');
+    expect($child->parents[1]->id)->toEqual('RhaegarTargaryen');
 
-        $this->assertCount(0, $child->parents);
-    }
-
-    public function testSync(): void
-    {
-        $lyannaStark = Character::firstOrCreate(
-            [
-                "id" => "LyannaStark",
-                "name" => "Lyanna",
-                "surname" => "Stark",
-                "alive" => false,
-                "age" => 25,
-                "residence_id" => "winterfell"
-            ]
-        );
-        $rhaegarTargaryen = Character::firstOrCreate(
-            [
-                "id" => "RhaegarTargaryen",
-                "name" => "Rhaegar",
-                "surname" => "Targaryen",
-                "alive" => false,
-                "age" => 25,
-                "residence_id" => "dragonstone"
-            ]
-        );
-
-        $child = Character::find('JonSnow');
-
-        $child->parents()->sync(['characters/LyannaStark', 'characters/RhaegarTargaryen']);
-        $child->fresh();
-
-        $this->assertEquals(2, count($child->parents));
-        $this->assertEquals('characters/LyannaStark', $child->parents[0]->_id);
-        $this->assertEquals('characters/RhaegarTargaryen', $child->parents[1]->_id);
-        $this->assertEquals('LyannaStark', $child->parents[0]->id);
-        $this->assertEquals('RhaegarTargaryen', $child->parents[1]->id);
-
-        $child->parents()->sync('characters/NedStark');
-        $rhaegarTargaryen->delete();
-        $lyannaStark->delete();
-    }
-}
+    $child->parents()->sync('characters/NedStark');
+    $rhaegarTargaryen->delete();
+    $lyannaStark->delete();
+});

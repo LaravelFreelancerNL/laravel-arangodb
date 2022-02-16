@@ -1,90 +1,45 @@
 <?php
 
-namespace Tests\Eloquent;
-
 use Illuminate\Support\Carbon;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
+use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Mockery as M;
 use Tests\Setup\Models\Character;
 use Tests\TestCase;
 
-class BuilderTest extends TestCase
-{
-    protected function defineDatabaseMigrations()
-    {
-        $this->loadLaravelMigrations();
-        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
-    }
+uses(
+    TestCase::class,
+    DatabaseTransactions::class
+);
+beforeEach(function () {
+    Carbon::setTestNow(Carbon::now());
+});
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+afterEach(function () {
+    Carbon::setTestNow(null);
+    Carbon::resetToStringFormat();
+    Model::unsetEventDispatcher();
 
-        Carbon::setTestNow(Carbon::now());
-    }
+    M::close();
+});
 
-    public function tearDown(): void
-    {
-        parent::tearDown();
+test('insert handles array attributes', function ($character) {
+    Character::insert($character);
 
-        Carbon::setTestNow(null);
-        Carbon::resetToStringFormat();
-        Model::unsetEventDispatcher();
+    $characterModel = Character::find($character['id']);
 
-        M::close();
-    }
+    expect($characterModel->id)->toEqual('EdmureTully');
+    expect($characterModel->en)->toBeObject();
+    expect((array) $characterModel->en)->toEqual($character['en']);
+    expect($characterModel)->toBeInstanceOf(Character::class);
+})->with('character');
 
-    public function testInsertHandlesArrayAttributes()
-    {
-        $character = [
-            'en' => [
-                'titles' => ['Lord of Winterfell', 'Hand of the king'],
-            ],
-            '_key'         => 'NedStark',
-            'name'         => 'Ned',
-            'surname'      => 'Stark',
-            'alive'        => false,
-            'age'          => 41,
-            'location_id' => 'locations/kingslanding',
-        ];
-        $ned = Character::find('NedStark');
-        if ($ned === null) {
-            Character::insert($character);
-        } else {
-            $ned->update($character);
-        }
+test('update sets correct updated at', function ($character) {
+    Character::insert($character);
 
-        $ned = Character::find('NedStark');
+    $retrievedBeforeUpdate = Character::find($character['id']);
+    $retrievedBeforeUpdate->update(['alive' => false]);
 
-        $this->assertEquals('NedStark', $ned->id);
-        $this->assertIsObject($ned->en);
-        $this->assertEquals($character['en'], (array) $ned->en);
-        $this->assertInstanceOf(Character::class, $ned);
-    }
-
-    public function testUpdateSetsCorrectUpdatedAt()
-    {
-        $character = [
-            'en' => [
-                'titles' => ['Lord of Winterfell', 'Hand of the king'],
-            ],
-            '_key'         => 'NedStark',
-            'name'         => 'Ned',
-            'surname'      => 'Stark',
-            'alive'        => true,
-            'age'          => 41,
-            'location_id' => 'locations/kingslanding',
-        ];
-        $ned = Character::find('characters/NedStark');
-        if ($ned === null) {
-            Character::insert($character);
-        } else {
-            $ned->update($character);
-        }
-        $retrievedBeforeUpdate = Character::find('NedStark');
-        $retrievedBeforeUpdate->update(['alive' => false]);
-
-        $retrievedAfterUpdate = Character::find('NedStark');
-        $this->assertArrayNotHasKey('characters.updated_at', $retrievedAfterUpdate->toArray());
-    }
-}
+    $retrievedAfterUpdate = Character::find($character['id']);
+    $this->assertArrayNotHasKey('characters.updated_at', $retrievedAfterUpdate->toArray());
+})->with('character');

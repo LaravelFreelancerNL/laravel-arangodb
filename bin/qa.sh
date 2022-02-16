@@ -12,4 +12,5 @@ echo "Run PHPStan"
 ./vendor/bin/phpstan analyse -c phpstan.neon
 
 echo "Test package from within phpunit"
-./vendor/bin/phpunit
+./vendor/bin/testbench migrate:fresh --path=tests/Setup/Database/Migrations --realpath --seed --seeder=Tests\\Setup\\Database\\Seeds\\DatabaseSeeder
+./vendor/bin/testbench package:test

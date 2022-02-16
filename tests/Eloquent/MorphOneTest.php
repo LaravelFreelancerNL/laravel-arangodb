@@ -1,91 +1,38 @@
 <?php
 
-namespace Tests\Eloquent;
-
-use Illuminate\Support\Carbon;
-use LaravelFreelancerNL\Aranguent\Eloquent\Model;
-use Mockery as M;
+use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Location;
 use Tests\TestCase;
 
-class MorphOneTest extends TestCase
-{
-    protected function defineDatabaseMigrations()
-    {
-        $this->loadLaravelMigrations();
-        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
-    }
+uses(
+    TestCase::class,
+    DatabaseTransactions::class
+);
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        Carbon::setTestNow(Carbon::now());
+test('retrieve relation', function () {
+    $character = Character::find('TheonGreyjoy');
+    $location = $character->conquered;
 
-        $characters = '[
-            { "id": "RamsayBolton", "name": "Ramsay", "surname": "Bolton", "alive": true, '
-            . '"traits": ["E","O","G","A"] },
-            { "id": "SansaStark", "name": "Sansa", "surname": "Stark", "alive": true, "age": 13, '
-            . '"traits": ["D","I","J"] },
-            { "id": "RickonStark", "name": "Bran", "surname": "Stark", "alive": true, "age": 10, '
-            . '"traits": ["R"] },
-            { "id": "TheonGreyjoy", "name": "Theon", "surname": "Greyjoy", "alive": true, "age": 16, '
-            . '"traits": ["E","R","K"] }
-        ]';
-        $characters = json_decode($characters, JSON_OBJECT_AS_ARRAY);
-        foreach ($characters as $character) {
-            Character::insert($character);
-        }
+    expect($location->id)->toEqual('winterfell');
+    expect($character->id)->toEqual($location->capturable_id);
+    expect($character)->toBeInstanceOf(Character::class);
+});
 
-        Location::insert(
-            [
-                [
-                    'id'            => 'winterfell',
-                    'name'            => 'Winterfell',
-                    'coordinate'      => [54.368321, -5.581312],
-                    'capturable_id'   => 'RamsayBolton',
-                    'capturable_type' => 'Tests\Setup\Models\Character',
-                ],
-            ]
-        );
-    }
+test('save', function () {
+    $location = Location::find('winterfell');
+    $character = Character::find('RamsayBolton');
 
-    public function tearDown(): void
-    {
-        parent::tearDown();
-        Carbon::setTestNow(null);
-        Carbon::resetToStringFormat();
-        Model::unsetEventDispatcher();
-        M::close();
-    }
+    $character->conquered()->save($location);
+    $location = Location::find('winterfell');
 
-    public function testRetrieveRelation()
-    {
-        $character = Character::find('RamsayBolton');
-        $location = $character->conquered;
+    expect($location->capturable_id)->toEqual($character->id);
+    expect($character->conquered)->toBeInstanceOf(Location::class);
+});
 
-        $this->assertEquals('winterfell', $location->id);
-        $this->assertEquals($location->capturable_id, $character->id);
-        $this->assertInstanceOf(Character::class, $character);
-    }
+test('with', function () {
+    $character = Character::with('conquered')->find('TheonGreyjoy');
 
-    public function testSave()
-    {
-        $location = Location::find('winterfell');
-        $character = Character::find('TheonGreyjoy');
-
-        $character->conquered()->save($location);
-        $location = Location::find('winterfell');
-
-        $this->assertEquals($character->id, $location->capturable_id);
-        $this->assertInstanceOf(Location::class, $character->conquered);
-    }
-
-    public function testWith(): void
-    {
-        $character = Character::with('conquered')->find('RamsayBolton');
-
-        $this->assertInstanceOf(Location::class, $character->conquered);
-        $this->assertEquals('winterfell', $character->conquered->id);
-    }
-}
+    expect($character->conquered)->toBeInstanceOf(Location::class);
+    expect($character->conquered->id)->toEqual('winterfell');
+});

@@ -11,9 +11,9 @@ class MigrationCreator extends IlluminateMigrationCreator
      * Create a new migration creator instance.
      *
      * @param Filesystem $files
-     * @param string|null $customStubPath
+     * @param string $customStubPath
      */
-    public function __construct(Filesystem $files, $customStubPath = null)
+    public function __construct(Filesystem $files, $customStubPath)
     {
         $this->files = $files;
         $this->customStubPath = $customStubPath;

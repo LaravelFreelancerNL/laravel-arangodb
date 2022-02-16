@@ -3,11 +3,8 @@
 namespace LaravelFreelancerNL\Aranguent\Query;
 
 use Closure;
-use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Database\Query\Expression;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 use InvalidArgumentException;
 use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsJoinClauses;

@@ -1,218 +1,154 @@
 <?php
 
-namespace Tests\Eloquent;
-
-use Illuminate\Support\Carbon;
-use LaravelFreelancerNL\Aranguent\Eloquent\Model;
-use Mockery as M;
+use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\Setup\Models\Character;
 use Tests\TestCase;
 
-class ModelTest extends TestCase
-{
-    protected function defineDatabaseMigrations()
-    {
-        $this->loadLaravelMigrations();
-        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
-    }
+uses(
+    TestCase::class,
+    DatabaseTransactions::class
+);
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        Carbon::setTestNow(Carbon::now());
+test('create aranguent model', function () {
+    $this->artisan(
+        'aranguent:model',
+        [
+            'name'    => 'AranguentModelTest',
+            '--force' => '',
+        ]
+    )->run();
 
-        Character::insert(
+    $file = __DIR__ . '/../../vendor/orchestra/testbench-core/laravel/app/Models/AranguentModelTest.php';
+
+    //assert file exists
+    expect($file)->toBeFile();
+
+    //assert file refers to Aranguent Base Model
+    $content = file_get_contents($file);
+    expect($content)->toContain('use LaravelFreelancerNL\Aranguent\Eloquent\Model;');
+});
+
+test('update model', function () {
+    $character = Character::first();
+    $initialAge = $character->age;
+
+    $character->update(['age' => ($character->age + 1)]);
+
+    $fresh = $character->fresh();
+
+    expect($fresh->age)->toBe(($initialAge + 1));
+});
+
+test('update or create', function () {
+    $character = Character::first();
+    $initialAge = $character->age;
+    $newAge = ($initialAge + 1);
+
+    $character->updateOrCreate(['age' => $initialAge], ['age' => $newAge]);
+
+    $fresh = $character->fresh();
+
+    expect($fresh->age)->toBe($newAge);
+});
+
+test('upsert', function () {
+    $this->skipTestOnArangoVersionsBefore('3.7');
+
+    Character::upsert(
+        [
             [
-                [
-                    '_key'    => 'NedStark',
-                    'name'    => 'Ned',
-                    'surname' => 'Stark',
-                    'alive'   => false,
-                    'age'     => 41,
-                    'traits'  => ['A', 'H', 'C', 'N', 'P'],
-                ],
-                [
-                    '_key'    => 'RobertBaratheon',
-                    'name'    => 'Robert',
-                    'surname' => 'Baratheon',
-                    'alive'   => false,
-                    'age'     => null,
-                    'traits'  => ['A', 'H', 'C'],
-                ],
-            ]
-        );
-    }
-
-    public function tearDown(): void
-    {
-        parent::tearDown();
-
-        Carbon::setTestNow(null);
-        Carbon::resetToStringFormat();
-
-        Model::unsetEventDispatcher();
-
-        M::close();
-    }
-
-    public function testCreateAranguentModel()
-    {
-        $this->artisan(
-            'aranguent:model',
-            [
-                'name'    => 'AranguentModelTest',
-                '--force' => '',
-            ]
-        )->run();
-
-        $file = __DIR__ . '/../../vendor/orchestra/testbench-core/laravel/app/Models/AranguentModelTest.php';
-
-        //assert file exists
-        $this->assertFileExists($file);
-
-        //assert file refers to Aranguent Base Model
-        $content = file_get_contents($file);
-        $this->assertStringContainsString('use LaravelFreelancerNL\Aranguent\Eloquent\Model;', $content);
-    }
-
-    public function testUpdateModel()
-    {
-        $character = Character::first();
-        $initialAge = $character->age;
-
-        $character->update(['age' => ($character->age + 1)]);
-
-        $fresh = $character->fresh();
-
-        $this->assertSame(($initialAge + 1), $fresh->age);
-    }
-
-    public function testUpdateOrCreate()
-    {
-        $character = Character::first();
-        $initialAge = $character->age;
-        $newAge = ($initialAge + 1);
-
-        $character->updateOrCreate(['age' => $initialAge], ['age' => $newAge]);
-
-        $fresh = $character->fresh();
-
-        $this->assertSame($newAge, $fresh->age);
-    }
-
-    public function testUpsert()
-    {
-        $this->skipTestOnArangoVersionsBefore('3.7');
-
-        Character::upsert(
-            [
-                [
-                   "id" => "NedStark",
-                   "name" => "Ned",
-                   "surname" => "Stark",
-                   "alive" => false,
-                   "age" => 41,
-                   "residence_id" => "winterfell"
-                ],
-                [
-                   "id" => "JaimeLannister",
-                   "name" => "Jaime",
-                   "surname" => "Lannister",
-                   "alive" => false,
-                   "age" => 36,
-                   "residence_id" => "the-red-keep"
-                ],
+               "id" => "NedStark",
+               "name" => "Ned",
+               "surname" => "Stark",
+               "alive" => false,
+               "age" => 41,
+               "residence_id" => "winterfell"
             ],
-            ['name', 'surname'],
-            ['alive']
-        );
+            [
+               "id" => "JaimeLannister",
+               "name" => "Jaime",
+               "surname" => "Lannister",
+               "alive" => false,
+               "age" => 36,
+               "residence_id" => "the-red-keep"
+            ],
+        ],
+        ['name', 'surname'],
+        ['alive']
+    );
 
-        $ned = Character::find('NedStark');
-        $jaime = Character::find('JaimeLannister');
+    $ned = Character::find('NedStark');
+    $jaime = Character::find('JaimeLannister');
 
-        $this->assertFalse($ned->alive);
-        $this->assertFalse($jaime->alive);
-    }
+    expect($ned->alive)->toBeFalse();
+    expect($jaime->alive)->toBeFalse();
+});
 
-    public function testDeleteModel()
-    {
-        $character = Character::first();
+test('delete model', function () {
+    $character = Character::first();
 
-        $character->delete();
+    $character->delete();
 
-        $deletedCharacter = Character::first();
+    $deletedCharacter = Character::first();
 
-        $this->assertNotEquals($character->id, $deletedCharacter->id);
-    }
+    $this->assertNotEquals($character->id, $deletedCharacter->id);
+});
 
-    public function testDestroyModel()
-    {
-        $id = 'NedStark';
-        Character::destroy($id);
+test('destroy model', function () {
+    $id = 'NedStark';
+    Character::destroy($id);
 
-        $this->assertDatabaseMissing('characters', ['id' => $id]);
-    }
+    $this->assertDatabaseMissing('characters', ['id' => $id]);
+});
 
+test('truncate model', function () {
+    Character::truncate();
 
-    public function testTruncateModel()
-    {
-        Character::truncate();
+    $this->assertDatabaseCount('characters', 0);
+});
 
-        $this->assertDatabaseCount('characters', 0);
-    }
+test('count', function () {
+    $result = Character::count();
+    expect($result)->toEqual(43);
+});
 
-    public function testCount()
-    {
-        $result = Character::count();
-        $this->assertEquals(2, $result);
-    }
+test('max', function () {
+    $result = Character::max('age');
+    expect($result)->toEqual(49);
+});
 
-    public function testMax()
-    {
-        $result = Character::max('age');
-        $this->assertEquals(41, $result);
-    }
+test('min', function () {
+    $result = Character::min('age');
+    expect($result)->toEqual(10);
+});
 
-    public function testMin()
-    {
-        $result = Character::min('age');
-        $this->assertEquals(41, $result);
-    }
+test('average', function () {
+    $result = Character::average('age');
+    expect($result)->toEqual(25.6);
+});
 
-    public function testAverage()
-    {
-        $result = Character::average('age');
-        $this->assertEquals(41, $result);
-    }
+test('sum', function () {
+    $result = Character::sum('age');
+    expect($result)->toEqual(384);
+});
 
-    public function testSum()
-    {
-        $result = Character::sum('age');
-        $this->assertEquals(41, $result);
-    }
+test('get id', function () {
+    $ned = Character::first();
+    expect($ned->id)->toEqual('NedStark');
+});
 
+test('set underscore id', function () {
+    $ned = Character::first();
+    $ned->_id = 'characters/NedStarkIsDead';
 
-    public function testGetId()
-    {
-        $ned = Character::first();
-        $this->assertEquals('NedStark', $ned->id);
-    }
+    expect($ned->_id)->toEqual('characters/NedStarkIsDead');
+    expect($ned->id)->toEqual('NedStarkIsDead');
+});
 
-    public function testSetUnderscoreId()
-    {
-        $ned = Character::first();
-        $ned->_id = 'characters/NedStarkIsDead';
+test('set id', function () {
+    $ned = Character::first();
+    $ned->id = 'NedStarkIsDead';
 
-        $this->assertEquals('characters/NedStarkIsDead', $ned->_id);
-        $this->assertEquals('NedStarkIsDead', $ned->id);
-    }
-
-    public function testSetId()
-    {
-        $ned = Character::first();
-        $ned->id = 'NedStarkIsDead';
-
-        $this->assertEquals('NedStarkIsDead', $ned->id);
-        $this->assertEquals('characters/NedStarkIsDead', $ned->_id);
-    }
-}
+    expect($ned->id)->toEqual('NedStarkIsDead');
+    expect($ned->_id)->toEqual('characters/NedStarkIsDead');
+});

@@ -1,111 +1,92 @@
 <?php
 
-namespace Tests\Testing;
+declare(strict_types=1);
 
-use Illuminate\Support\Facades\Artisan;
-use Tests\Setup\Database\Seeds\CharactersSeeder;
-use Tests\Setup\Database\Seeds\TagsSeeder;
+use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Tag;
 use Tests\TestCase;
 
-class InteractsWithDatabaseTest extends TestCase
-{
-    protected function defineDatabaseMigrations()
-    {
-        $this->loadLaravelMigrations();
-        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
+uses(
+    TestCase::class,
+    DatabaseTransactions::class
+);
 
-        Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
-        Artisan::call('db:seed', ['--class' => TagsSeeder::class]);
-    }
+test('assert database has', function () {
+    $this->assertDatabaseHas('characters', [
+        "id" => "NedStark",
+        "name" => "Ned",
+        "surname" => "Stark",
+        "alive" => true,
+        "age" => 41,
+        "residence_id" => "winterfell"
+    ]);
+});
 
-    public function testAssertDatabaseHas()
-    {
-        $this->assertDatabaseHas('characters', [
-            "id" => "NedStark",
-            "name" => "Ned",
-            "surname" => "Stark",
-            "alive" => true,
-            "age" => 41,
-            "residence_id" => "winterfell"
-        ]);
-    }
+test('assert database missing', function () {
+    $this->assertDatabaseMissing('characters', [
+        "id" => "NedStarkIsDead",
+        "name" => "Ned",
+        "surname" => "Stark",
+        "alive" => true,
+        "age" => 41,
+        "residence_id" => "winterfell"
+    ]);
+});
 
-    public function testAssertDatabaseMissing()
-    {
-        $this->assertDatabaseMissing('characters', [
-            "id" => "NedStarkIsDead",
-            "name" => "Ned",
-            "surname" => "Stark",
-            "alive" => true,
-            "age" => 41,
-            "residence_id" => "winterfell"
-        ]);
-    }
+test('assert database count', function () {
+    $this->assertDatabaseCount('characters', 43);
+});
 
-    public function testAssertDatabaseCount()
-    {
-        $this->assertDatabaseCount('characters', 43);
-    }
+test('assert soft deleted by model', function () {
+    $strong = Tag::find("A");
+    $strong->delete();
+    $this->assertSoftDeleted($strong);
+});
 
-    public function testAssertSoftDeletedByModel()
-    {
-        $strong = Tag::find("A");
-        $strong->delete();
-        $this->assertSoftDeleted($strong);
-    }
+test('assert soft deleted by data', function () {
+    $strong = Tag::find("A");
+    $strong->delete();
+    $this->assertSoftDeleted('tags', [
+        "id" => "A",
+        "en" => "strong",
+        "de" => "stark"
+    ]);
+});
 
-    public function testAssertSoftDeletedByData()
-    {
-        $strong = Tag::find("A");
-        $strong->delete();
-        $this->assertSoftDeleted('tags', [
-            "id" => "A",
-            "en" => "strong",
-            "de" => "stark"
-        ]);
-    }
+test('assert not soft deleted by model', function () {
+    $strong = Tag::find("A");
+    $this->assertNotSoftDeleted($strong);
+});
 
-    public function testAssertNotSoftDeletedByModel()
-    {
-        $strong = Tag::find("A");
-        $this->assertNotSoftDeleted($strong);
-    }
+test('assert not soft deleted by data', function () {
+    $strong = Tag::find("A");
 
-    public function testAssertNotSoftDeletedByData()
-    {
-        $strong = Tag::find("A");
+    $this->assertNotSoftDeleted('tags', [
+        "id" => "A",
+        "en" => "strong",
+        "de" => "stark"
+    ]);
+});
 
-        $this->assertNotSoftDeleted('tags', [
-            "id" => "A",
-            "en" => "strong",
-            "de" => "stark"
-        ]);
-    }
+test('assert model exists', function () {
+    $ned = Character::find('NedStark');
+    $this->assertModelExists($ned);
+});
 
-    public function testAssertModelExists()
-    {
-        $ned = Character::find('NedStark');
-        $this->assertModelExists($ned);
-    }
+test('assert model missing', function () {
+    $ned = Character::find('NedStark');
 
-    public function testAssertModelMissing()
-    {
-        $ned = Character::find('NedStark');
+    $ned->delete();
 
-        $ned->delete();
+    $this->assertModelMissing($ned);
+});
 
-        $this->assertModelMissing($ned);
-    }
+test('cast as json', function () {
+    $value = [
+        'key' => 'value'
+    ];
+    $result = $this->castAsJson($value);
 
-    public function testCastAsJson()
-    {
-        $value = [
-            'key' => 'value'
-        ];
-        $result = $this->castAsJson($value);
-
-        $this->assertSame($value, $result);
-    }
-}
+    expect($result)->toBe($value);
+});

@@ -2,131 +2,113 @@
 
 declare(strict_types=1);
 
-namespace Tests\Query;
-
-use Illuminate\Support\Facades\Artisan;
-use Tests\Setup\Database\Seeds\HousesSeeder;
+use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\Setup\Models\House;
 use Tests\TestCase;
 
-class SearchTest extends TestCase
-{
-    protected function defineDatabaseMigrations()
-    {
-        $this->loadLaravelMigrations();
-        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
+uses(
+    TestCase::class,
+    DatabaseTransactions::class
+);
 
-        Artisan::call('db:seed', ['--class' => HousesSeeder::class]);
-    }
+test('search', function () {
+    $builder = getBuilder();
+    $builder->select('*')
+        ->from('page_view')
+        ->search(true);
 
-    public function testSearch()
-    {
-        $builder = $this->getBuilder();
-        $builder->select('*')
-            ->from('page_view')
-            ->search(true);
+    $this->assertSame(
+        'FOR pageViewDoc IN page_view SEARCH true RETURN pageViewDoc',
+        $builder->toSql()
+    );
+});
 
-        $this->assertSame(
-            'FOR pageViewDoc IN page_view SEARCH true RETURN pageViewDoc',
-            $builder->toSql()
+test('search full predicate', function () {
+    $builder = getBuilder();
+    $builder->select('*')
+        ->from('user_view')
+        ->search(['userViewDoc.age', '==', 20]);
+
+    $this->assertSame(
+        'FOR userViewDoc IN user_view SEARCH userViewDoc.age == 20 RETURN userViewDoc',
+        $builder->toSql()
+    );
+});
+
+test('search multiple predicates', function () {
+    $builder = getBuilder();
+    $builder->select('*')
+        ->from('user_view')
+        ->search([['userViewDoc.age', '>=', 20], ['userViewDoc.age', '<=', 30]]);
+
+    $this->assertSame(
+        'FOR userViewDoc IN user_view SEARCH userViewDoc.age >= 20 AND userViewDoc.age <= 30 RETURN userViewDoc',
+        $builder->toSql()
+    );
+});
+
+test('search with options', function () {
+    $builder = getBuilder();
+    $builder->select('*')
+        ->from('user_view')
+        ->search(
+            [['userViewDoc.age', '>=', 20], ['userViewDoc.age', '<=', 30]],
+            [
+                'conditionOptimization' => 'none',
+                'countApproximate' => 'cost'
+            ]
         );
-    }
 
-    public function testSearchFullPredicate()
-    {
-        $builder = $this->getBuilder();
-        $builder->select('*')
-            ->from('user_view')
-            ->search(['userViewDoc.age', '==', 20]);
+    $this->assertSame(
+        'FOR userViewDoc IN user_view'
+        . ' SEARCH userViewDoc.age >= 20 AND userViewDoc.age <= 30'
+        . ' OPTIONS {"conditionOptimization":"none","countApproximate":"cost"}'
+        . ' RETURN userViewDoc',
+        $builder->toSql()
+    );
+});
 
-        $this->assertSame(
-            'FOR userViewDoc IN user_view SEARCH userViewDoc.age == 20 RETURN userViewDoc',
-            $builder->toSql()
-        );
-    }
+test('search with aqb method', function () {
+    $builder = getBuilder();
+    $builder->select('*')
+        ->from('page_view')
+        ->search($builder->aqb->analyzer('pageViewDoc.en.body_copy', '==', 'my search string', 'text_en'));
 
-    public function testSearchMultiplePredicates()
-    {
-        $builder = $this->getBuilder();
-        $builder->select('*')
-            ->from('user_view')
-            ->search([['userViewDoc.age', '>=', 20], ['userViewDoc.age', '<=', 30]]);
+    $this->assertSame(
+        'FOR pageViewDoc IN page_view'
+        . ' SEARCH ANALYZER(pageViewDoc.en.body_copy == @' . $builder->aqb->getQueryId() . '_1,'
+        . ' @' . $builder->aqb->getQueryId() . '_2)'
+        . ' RETURN pageViewDoc',
+        $builder->toSql()
+    );
+});
 
-        $this->assertSame(
-            'FOR userViewDoc IN user_view SEARCH userViewDoc.age >= 20 AND userViewDoc.age <= 30 RETURN userViewDoc',
-            $builder->toSql()
-        );
-    }
+test('search against db', function () {
+    $query = \DB::table('house_view');
+    $query = $query->search(
+        function ($aqb) {
+            return $aqb->analyzer('houseViewDoc.en.description', '==', 'war', 'text_en');
+        }
+    )->orderBy($query->aqb->bm25('houseViewDoc'), 'desc');
 
-    public function testSearchWithOptions()
-    {
-        $builder = $this->getBuilder();
-        $builder->select('*')
-            ->from('user_view')
-            ->search(
-                [['userViewDoc.age', '>=', 20], ['userViewDoc.age', '<=', 30]],
-                [
-                    'conditionOptimization' => 'none',
-                    'countApproximate' => 'cost'
-                ]
-            );
+    $results = $query->paginate();
 
-        $this->assertSame(
-            'FOR userViewDoc IN user_view'
-            . ' SEARCH userViewDoc.age >= 20 AND userViewDoc.age <= 30'
-            . ' OPTIONS {"conditionOptimization":"none","countApproximate":"cost"}'
-            . ' RETURN userViewDoc',
-            $builder->toSql()
-        );
-    }
+    expect($results)->toHaveCount(2);
+    expect($results[0]->_id)->toBe("houses/lannister");
+    expect($results[1]->_id)->toBe("houses/stark");
+});
 
-    public function testSearchWithAqbMethod()
-    {
-        $builder = $this->getBuilder();
-        $builder->select('*')
-            ->from('page_view')
-            ->search($builder->aqb->analyzer('pageViewDoc.en.body_copy', '==', 'my search string', 'text_en'));
+test('search from model', function () {
+    $results = House::from('house_view')->search(
+        function ($aqb) {
+            return $aqb->analyzer('houseViewDoc.en.description', '==', 'war', 'text_en');
+        }
+    )
+        ->paginate();
 
-        $this->assertSame(
-            'FOR pageViewDoc IN page_view'
-            . ' SEARCH ANALYZER(pageViewDoc.en.body_copy == @' . $builder->aqb->getQueryId() . '_1,'
-            . ' @' . $builder->aqb->getQueryId() . '_2)'
-            . ' RETURN pageViewDoc',
-            $builder->toSql()
-        );
-    }
-
-    public function testSearchAgainstDb()
-    {
-        $query = \DB::table('house_view');
-        $query = $query->search(
-            function ($aqb) {
-                return $aqb->analyzer('houseViewDoc.en.description', '==', 'war', 'text_en');
-            },
-            ['waitForSync' => true]
-        )->orderBy($query->aqb->bm25('houseViewDoc'), 'desc');
-
-        $results = $query->paginate();
-
-        $this->assertCount(2, $results);
-        $this->assertSame("houses/lannister", $results[0]->_id);
-        $this->assertSame("houses/stark", $results[1]->_id);
-    }
-
-    public function testSearchFromModel()
-    {
-        $results = House::from('house_view')->search(
-            function ($aqb) {
-                return $aqb->analyzer('houseViewDoc.en.description', '==', 'war', 'text_en');
-            },
-            ['waitForSync' => true]
-        )
-            ->paginate();
-
-        $this->assertCount(2, $results);
-        $this->assertSame("houses/lannister", $results[0]->_id);
-        $this->assertInstanceOf(House::class, $results[0]);
-        $this->assertSame("houses/stark", $results[1]->_id);
-        $this->assertInstanceOf(House::class, $results[1]);
-    }
-}
+    expect($results)->toHaveCount(2);
+    expect($results[0]->_id)->toBe("houses/lannister");
+    expect($results[0])->toBeInstanceOf(House::class);
+    expect($results[1]->_id)->toBe("houses/stark");
+    expect($results[1])->toBeInstanceOf(House::class);
+});

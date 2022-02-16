@@ -1,80 +1,42 @@
 <?php
 
-namespace Tests\Query;
-
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use LaravelFreelancerNL\Aranguent\Eloquent\Model;
-use Mockery as m;
-use Tests\Setup\Database\Seeds\CharactersSeeder;
-use Tests\Setup\Database\Seeds\LocationsSeeder;
-use Tests\Setup\Database\Seeds\TagsSeeder;
+use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
-class JoinTest extends TestCase
-{
-    protected function defineDatabaseMigrations()
-    {
-        $this->loadLaravelMigrations();
-        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
+uses(
+    TestCase::class,
+    DatabaseTransactions::class
+);
 
-        Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
-        Artisan::call('db:seed', ['--class' => TagsSeeder::class]);
-        Artisan::call('db:seed', ['--class' => LocationsSeeder::class]);
-    }
+test('join', function () {
+    $characters = DB::table('characters')
+        ->join('locations', 'characters.residence_id', '=', 'locations.id')
+        ->where('residence_id', '=', 'winterfell')
+        ->get();
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+    expect($characters)->toHaveCount(15);
+    expect($characters[0]->id)->toEqual('NedStark');
+});
 
-        Carbon::setTestNow(Carbon::now());
-    }
+test('cross join', function () {
+    $characters = DB::table('characters')
+        ->crossJoin('locations')
+        ->get();
 
-    public function tearDown(): void
-    {
-        parent::tearDown();
+    expect($characters)->toHaveCount(387);
+});
 
-        Carbon::setTestNow(null);
-        Carbon::resetToStringFormat();
+test('left join', function () {
+    $characters = DB::table('characters')
+        ->leftJoin('locations', 'characters.residence_id', '=', 'locations.id')
+        ->get();
 
-        Model::unsetEventDispatcher();
+    $charactersWithoutResidence = DB::table('characters')
+        ->whereNull('residence_id')
+        ->get();
 
-        M::close();
-    }
-
-    public function testJoin()
-    {
-        $characters = DB::table('characters')
-            ->join('locations', 'characters.residence_id', '=', 'locations.id')
-            ->where('residence_id', '=', 'winterfell')
-            ->get();
-
-        $this->assertCount(15, $characters);
-        $this->assertEquals('NedStark', $characters[0]->id);
-    }
-
-    public function testCrossJoin()
-    {
-        $characters = DB::table('characters')
-            ->crossJoin('locations')
-            ->get();
-
-        $this->assertCount(344, $characters);
-    }
-
-    public function testLeftJoin()
-    {
-        $characters = DB::table('characters')
-            ->leftJoin('locations', 'characters.residence_id', '=', 'locations.id')
-            ->get();
-
-        $charactersWithoutResidence = DB::table('characters')
-            ->whereNull('residence_id')
-            ->get();
-
-        $this->assertCount(33, $characters);
-        $this->assertEquals('NedStark', $characters[0]->id);
-        $this->assertCount(10, $charactersWithoutResidence);
-    }
-}
+    expect($characters)->toHaveCount(33);
+    expect($characters[0]->id)->toEqual('NedStark');
+    expect($charactersWithoutResidence)->toHaveCount(10);
+});

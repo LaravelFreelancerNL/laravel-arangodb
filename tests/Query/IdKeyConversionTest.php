@@ -1,147 +1,127 @@
 <?php
 
-namespace Tests\Query;
-
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use Tests\Setup\Database\Seeds\CharactersSeeder;
+use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\Setup\Models\Character;
 use Tests\TestCase;
 
-class IdKeyConversionTest extends TestCase
-{
-    protected function defineDatabaseMigrations()
-    {
-        $this->loadLaravelMigrations();
-        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
+uses(
+    TestCase::class,
+    DatabaseTransactions::class
+);
 
-        Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
-    }
+test('output conversion with whole document', function () {
+    $result = DB::table('characters')->get();
 
-    public function testOutputConversionWithWholeDocument()
-    {
-        $result = DB::table('characters')->get();
+    $this->assertObjectHasAttribute('id', $result->first());
+});
 
-        $this->assertObjectHasAttribute('id', $result->first());
-    }
+test('output conversion with limited attributes', function () {
+    $result = DB::table('characters')->get(['_id', '_key', 'name']);
 
-    public function testOutputConversionWithLimitedAttributes()
-    {
-        $result = DB::table('characters')->get(['_id', '_key', 'name']);
+    $this->assertObjectHasAttribute('id', $result->first());
+    $this->assertCount(3, (array)$result->first());
+});
 
-        $this->assertObjectHasAttribute('id', $result->first());
-        $this->assertCount(3, (array)$result->first());
-    }
+test('output conversion without key', function () {
+    $result = DB::table('characters')->get(['_id','name']);
 
-    public function testOutputConversionWithoutKey()
-    {
-        $result = DB::table('characters')->get(['_id','name']);
+    $this->assertObjectNotHasAttribute('id', $result->first());
+    $this->assertObjectHasAttribute('_id', $result->first());
+    $this->assertCount(2, (array)$result->first());
+});
 
-        $this->assertObjectNotHasAttribute('id', $result->first());
-        $this->assertObjectHasAttribute('_id', $result->first());
-        $this->assertCount(2, (array)$result->first());
-    }
+test('get id conversion single attribute', function () {
+    $builder = getBuilder();
+    $builder = $builder->select('id')->from('users');
 
-    public function testGetIdConversionSingleAttribute()
-    {
-        $builder = $this->getBuilder();
-        $builder = $builder->select('id')->from('users');
+    $this->assertSame(
+        'FOR userDoc IN users RETURN userDoc._key',
+        $builder->toSql()
+    );
+});
 
-        $this->assertSame(
-            'FOR userDoc IN users RETURN userDoc._key',
-            $builder->toSql()
-        );
-    }
+test('get id conversion multiple attributed', function () {
+    $query = DB::table('characters')->select('id', 'name');
 
-    public function testGetIdConversionMultipleAttributed()
-    {
-        $query = DB::table('characters')->select('id', 'name');
+    $results = $query->get();
 
-        $results = $query->get();
+    $this->assertSame(
+        'FOR characterDoc IN characters RETURN {"id":characterDoc._key,"name":characterDoc.name}',
+        $query->toSql()
+    );
+    $this->assertObjectNotHasAttribute('_key', $results->first());
+    $this->assertObjectHasAttribute('id', $results->first());
+    $this->assertCount(2, (array)$results->first());
+});
 
-        $this->assertSame(
-            'FOR characterDoc IN characters RETURN {"id":characterDoc._key,"name":characterDoc.name}',
-            $query->toSql()
-        );
-        $this->assertObjectNotHasAttribute('_key', $results->first());
-        $this->assertObjectHasAttribute('id', $results->first());
-        $this->assertCount(2, (array)$results->first());
-    }
+test('get id conversion with alias', function () {
+    $query = DB::table('characters')->select('id as i', 'name');
 
-    public function testGetIdConversionWithAlias()
-    {
-        $query = DB::table('characters')->select('id as i', 'name');
+    $results = $query->get();
 
-        $results = $query->get();
+    $this->assertSame(
+        'FOR characterDoc IN characters RETURN {"i":characterDoc._key,"name":characterDoc.name}',
+        $query->toSql()
+    );
+    $this->assertObjectNotHasAttribute('_key', $results->first());
+    $this->assertObjectNotHasAttribute('id', $results->first());
+    $this->assertObjectHasAttribute('i', $results->first());
+    $this->assertCount(2, (array)$results->first());
+});
 
-        $this->assertSame(
-            'FOR characterDoc IN characters RETURN {"i":characterDoc._key,"name":characterDoc.name}',
-            $query->toSql()
-        );
-        $this->assertObjectNotHasAttribute('_key', $results->first());
-        $this->assertObjectNotHasAttribute('id', $results->first());
-        $this->assertObjectHasAttribute('i', $results->first());
-        $this->assertCount(2, (array)$results->first());
-    }
+test('get id conversion with multiple ids', function () {
+    $query = DB::table('characters')->select('id', 'id as i', 'name');
 
-    public function testGetIdConversionWithMultipleIds()
-    {
-        $query = DB::table('characters')->select('id', 'id as i', 'name');
+    $results = $query->get();
 
-        $results = $query->get();
+    $this->assertSame(
+        'FOR characterDoc IN characters RETURN {"id":characterDoc._key,"i":characterDoc._key,"name":characterDoc.name}',
+        $query->toSql()
+    );
+    $this->assertObjectNotHasAttribute('_key', $results->first());
+    $this->assertObjectHasAttribute('id', $results->first());
+    $this->assertObjectHasAttribute('i', $results->first());
+    $this->assertCount(3, (array)$results->first());
+});
 
-        $this->assertSame(
-            'FOR characterDoc IN characters RETURN {"id":characterDoc._key,"i":characterDoc._key,"name":characterDoc.name}',
-            $query->toSql()
-        );
-        $this->assertObjectNotHasAttribute('_key', $results->first());
-        $this->assertObjectHasAttribute('id', $results->first());
-        $this->assertObjectHasAttribute('i', $results->first());
-        $this->assertCount(3, (array)$results->first());
-    }
+test('get id conversion with multiple aliases', function () {
+    $query = DB::table('characters')->select('id as i', 'id as i2', 'name');
 
-    public function testGetIdConversionWithMultipleAliases()
-    {
-        $query = DB::table('characters')->select('id as i', 'id as i2', 'name');
+    $results = $query->get();
 
-        $results = $query->get();
+    $this->assertSame(
+        'FOR characterDoc IN characters RETURN {"i":characterDoc._key,"i2":characterDoc._key,"name":characterDoc.name}',
+        $query->toSql()
+    );
+    $this->assertObjectNotHasAttribute('_key', $results->first());
+    $this->assertObjectNotHasAttribute('id', $results->first());
+    $this->assertObjectHasAttribute('i', $results->first());
+    $this->assertObjectHasAttribute('i2', $results->first());
+    $this->assertCount(3, (array)$results->first());
+});
 
-        $this->assertSame(
-            'FOR characterDoc IN characters RETURN {"i":characterDoc._key,"i2":characterDoc._key,"name":characterDoc.name}',
-            $query->toSql()
-        );
-        $this->assertObjectNotHasAttribute('_key', $results->first());
-        $this->assertObjectNotHasAttribute('id', $results->first());
-        $this->assertObjectHasAttribute('i', $results->first());
-        $this->assertObjectHasAttribute('i2', $results->first());
-        $this->assertCount(3, (array)$results->first());
-    }
+test('get id conversion with wheres', function () {
+    $query = DB::table('characters')
+        ->where('id', 'NedStark');
 
-    public function testGetIdConversionWithWheres()
-    {
-        $query = DB::table('characters')
-            ->where('id', 'NedStark');
+    $results = $query->get();
 
-        $results = $query->get();
+    $this->assertSame(
+        'FOR characterDoc IN characters FILTER characterDoc._key == @' . $query->aqb->getQueryId() . '_1',
+        $query->toSql()
+    );
 
-        $this->assertSame(
-            'FOR characterDoc IN characters FILTER characterDoc._key == @' . $query->aqb->getQueryId() . '_1',
-            $query->toSql()
-        );
+    $this->assertObjectNotHasAttribute('_key', $results->first());
+    $this->assertObjectHasAttribute('id', $results->first());
+    expect($results->first()->id)->toBe('NedStark');
+    expect($results)->toHaveCount(1);
+});
 
-        $this->assertObjectNotHasAttribute('_key', $results->first());
-        $this->assertObjectHasAttribute('id', $results->first());
-        $this->assertSame('NedStark', $results->first()->id);
-        $this->assertCount(1, $results);
-    }
+test('model has correct ids', function () {
+    $results = Character::all();
 
-
-    public function testModelHasCorrectIds()
-    {
-        $results = Character::all();
-
-        $this->assertSame('NedStark', $results->first()->id);
-        $this->assertSame('characters/NedStark', $results->first()->_id);
-        $this->assertNull($results->first()->_key);
-    }
-}
+    expect($results->first()->id)->toBe('NedStark');
+    expect($results->first()->_id)->toBe('characters/NedStark');
+    expect($results->first()->_key)->toBeNull();
+});

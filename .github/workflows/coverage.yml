@@ -46,6 +46,7 @@ jobs:
 
       - name: Test coverage
         run: |
-          vendor/bin/phpunit --coverage-clover clover.xml --whitelist src
+          ./vendor/bin/testbench migrate:fresh --path=tests/Setup/Database/Migrations --realpath --seed --seeder=Tests\\Setup\\Database\\Seeds\\DatabaseSeeder
+          ./vendor/bin/testbench package:test --coverage
           echo "Upload results to Scrutinizer-ci"
           ~/.composer/vendor/bin/ocular code-coverage:upload --format=php-clover clover.xml

@@ -102,9 +102,15 @@ trait CompilesColumns
     protected function mergeJoinResults($builder, $baseTable)
     {
         $tablesToJoin = [];
-        foreach ($builder->joins as $join) {
-            $tablesToJoin[] = $this->getTableAlias($join->table);
+        foreach ($builder->joins as $key => $join) {
+            $tableAlias = $this->getTableAlias($join->table);
+
+            if (! isset($tableAlias)) {
+                $tableAlias = $this->generateTableAlias($join->table);
+            }
+            $tablesToJoin[$key] = $tableAlias;
         }
+
         $tablesToJoin = array_reverse($tablesToJoin);
         $tablesToJoin[] = $baseTable;
 

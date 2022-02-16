@@ -1,141 +1,118 @@
 <?php
 
-namespace Tests\Schema;
+declare(strict_types=1);
 
-use ArangoClient\Schema\SchemaManager;
-use Illuminate\Support\Facades\Artisan;
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
 use Tests\TestCase;
 
-class BlueprintTest extends TestCase
-{
-    protected ?SchemaManager $schemaManager = null;
+uses(
+    TestCase::class,
+);
 
-    protected function defineDatabaseMigrations()
-    {
-        $this->loadLaravelMigrations();
-        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
+beforeEach(function () {
+    $this->schemaManager = $this->connection->getArangoClient()->schema();
+});
 
-        Artisan::call('db:seed', ['--class' => \Tests\Setup\Database\Seeds\CharactersSeeder::class]);
-    }
+test('create index', function () {
+    Schema::table('characters', function (Blueprint $collection) {
+        $collection->index(['name']);
+    });
+    $name = 'characters_name_persistent';
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+    $index = $this->schemaManager ->getIndexByName('characters', $name);
 
-        $this->schemaManager = $this->connection->getArangoClient()->schema();
-    }
+    expect($index->name)->toEqual($name);
+});
 
-    public function testCreateIndex()
-    {
-        Schema::table('characters', function (Blueprint $collection) {
-            $collection->index(['name']);
-        });
-        $name = 'characters_name_persistent';
+test('drop index', function () {
+    Schema::table('characters', function (Blueprint $collection) {
+        $collection->index(['name']);
+    });
 
-        $index = $this->schemaManager ->getIndexByName('characters', $name);
+    Schema::table('characters', function (Blueprint $collection) {
+        $collection->dropIndex('characters_name_persistent');
+    });
 
-        $this->assertEquals($name, $index->name);
-    }
+    $searchResult = $this->schemaManager->getIndexByName('characters', 'characters_name_persistent');
+    expect($searchResult)->toBeFalse();
+});
 
-    public function testDropIndex()
-    {
-        Schema::table('characters', function (Blueprint $collection) {
-            $collection->index(['name']);
-        });
+test('index names only contains alpha numeric characters', function () {
+    Schema::table('characters', function (Blueprint $collection) {
+        $indexName = $collection->createIndexName('persistent', ['addresses[*]']);
+        expect($indexName)->toEqual('characters_addresses_array_persistent');
+    });
+});
 
-        Schema::table('characters', function (Blueprint $collection) {
-            $collection->dropIndex('characters_name_persistent');
-        });
+test('index names include options', function () {
+    Schema::table('characters', function (Blueprint $collection) {
+        $options = [
+            'unique' => true,
+            'sparse' => true
+        ];
 
-        $searchResult = $this->schemaManager->getIndexByName('characters', 'characters_name_persistent');
-        $this->assertFalse($searchResult);
-    }
+        $indexName = $collection->createIndexName('persistent', ['address'], $options);
 
-    public function testIndexNamesOnlyContainsAlphaNumericCharacters()
-    {
-        Schema::table('characters', function (Blueprint $collection) {
-            $indexName = $collection->createIndexName('persistent', ['addresses[*]']);
-            $this->assertEquals('characters_addresses_array_persistent', $indexName);
-        });
-    }
+        expect($indexName)->toEqual('characters_address_persistent_unique_sparse');
+    });
+});
 
-    public function testIndexNamesIncludeOptions()
-    {
-        Schema::table('characters', function (Blueprint $collection) {
-            $options = [
-                'unique' => true,
-                'sparse' => true
-            ];
+test('create index with array', function () {
+    Schema::table('characters', function (Blueprint $collection) {
+        $collection->index(['addresses[*]']);
+    });
+    Schema::table('characters', function (Blueprint $collection) {
+        $collection->dropIndex('characters_addresses_array_persistent');
+    });
+});
 
-            $indexName = $collection->createIndexName('persistent', ['address'], $options);
+test('drop index with array', function () {
+    Schema::table('characters', function (Blueprint $collection) {
+        $collection->index(['addresses[*]']);
+    });
 
-            $this->assertEquals('characters_address_persistent_unique_sparse', $indexName);
-        });
-    }
+    Schema::table('characters', function (Blueprint $collection) {
+        $collection->dropIndex('characters_addresses_array_persistent');
+    });
 
-    public function testCreateIndexWithArray()
-    {
-        Schema::table('characters', function (Blueprint $collection) {
-            $collection->index(['addresses[*]']);
-        });
-        Schema::table('characters', function (Blueprint $collection) {
-            $collection->dropIndex('characters_addresses_array_persistent');
-        });
-    }
+    $searchResult = $this->schemaManager->getIndexByName('characters', 'characters_addresses_array_persistent');
+    expect($searchResult)->toBeFalse();
+});
 
-    public function testDropIndexWithArray()
-    {
-        Schema::table('characters', function (Blueprint $collection) {
-            $collection->index(['addresses[*]']);
-        });
+test('attribute ignore additional arguments', function () {
+    Schema::table('characters', function (Blueprint $collection) {
+        $collection->string('token', 64)->index();
 
-        Schema::table('characters', function (Blueprint $collection) {
-            $collection->dropIndex('characters_addresses_array_persistent');
-        });
+        $commands = $collection->getCommands();
+        expect(count($commands))->toEqual(2);
+        expect(count($commands[1]['columns']))->toEqual(1);
+    });
+});
 
-        $searchResult = $this->schemaManager->getIndexByName('characters', 'characters_addresses_array_persistent');
-        $this->assertFalse($searchResult);
-    }
+test('foreign id is excluded', function () {
+    Schema::table('characters', function (Blueprint $collection) {
+        $collection->foreignId('user_id')->index();
 
-    public function testAttributeIgnoreAdditionalArguments()
-    {
-        Schema::table('characters', function (Blueprint $collection) {
-            $collection->string('token', 64)->index();
+        $commands = $collection->getCommands();
 
-            $commands = $collection->getCommands();
-            $this->assertEquals(2, count($commands));
-            $this->assertEquals(1, count($commands[1]['columns']));
-        });
-    }
+        expect(count($commands))->toEqual(2);
+        expect($commands[0]['name'])->toEqual('ignore');
+        expect($commands[0]['method'])->toEqual('foreignId');
+        expect($commands[1]['columns'][0])->toEqual('user_id');
+    });
+});
 
-    public function testForeignIdIsExcluded()
-    {
-        Schema::table('characters', function (Blueprint $collection) {
-            $collection->foreignId('user_id')->index();
+test('default', function () {
+    Schema::table('characters', function (Blueprint $collection) {
+        $collection->string('name')->default('John Doe');
 
-            $commands = $collection->getCommands();
+        $commands = $collection->getCommands();
 
-            $this->assertEquals(2, count($commands));
-            $this->assertEquals('ignore', $commands[0]['name']);
-            $this->assertEquals('foreignId', $commands[0]['method']);
-            $this->assertEquals('user_id', $commands[1]['columns'][0]);
-        });
-    }
-
-    public function testDefault()
-    {
-        Schema::table('characters', function (Blueprint $collection) {
-            $collection->string('name')->default('John Doe');
-
-            $commands = $collection->getCommands();
-
-            $this->assertEquals(2, count($commands));
-            $this->assertEquals('ignore', $commands[0]['name']);
-            $this->assertEquals('string', $commands[0]['method']);
-            $this->assertEquals('ignore', $commands[1]['name']);
-            $this->assertEquals('default', $commands[1]['method']);
-        });
-    }
-}
+        expect(count($commands))->toEqual(2);
+        expect($commands[0]['name'])->toEqual('ignore');
+        expect($commands[0]['method'])->toEqual('string');
+        expect($commands[1]['name'])->toEqual('ignore');
+        expect($commands[1]['method'])->toEqual('default');
+    });
+});

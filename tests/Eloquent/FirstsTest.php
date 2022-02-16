@@ -2,177 +2,139 @@
 
 declare(strict_types=1);
 
-namespace Tests\Eloquent;
-
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Artisan;
-use Tests\Setup\Database\Seeds\CharactersSeeder;
+use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Location;
 use Tests\TestCase;
 
-class FirstsTest extends TestCase
-{
-    protected function defineDatabaseMigrations()
-    {
-        $this->loadLaravelMigrations();
-        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
-    }
+uses(
+    TestCase::class,
+    DatabaseTransactions::class
+);
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+test('first', function () {
+    $ned = Character::first();
 
-        Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
-    }
+    expect($ned->id)->toEqual('NedStark');
+});
 
-    public function testFirst()
-    {
-        $ned = Character::first();
+test('first with columns', function () {
+    $ned = Character::first(["_id", "name"]);
 
-        $this->assertEquals('NedStark', $ned->id);
-    }
+    expect($ned->name)->toEqual('Ned');
+    expect($ned->toArray())->toHaveCount(2);
+});
 
-    public function testFirstWithColumns()
-    {
-        $ned = Character::first(["_id", "name"]);
+test('first or', function () {
+    $ned = Character::firstOr(function () {
+        return false;
+    });
 
-        $this->assertEquals('Ned', $ned->name);
-        $this->assertCount(2, $ned->toArray());
-    }
+    expect($ned->name)->toEqual('Ned');
+});
 
-    public function testFirstOr()
-    {
-        $ned = Character::firstOr(function () {
-            return false;
-        });
+test('first or trigger or', function () {
+    $location = Location::where('id', 'free-cities')->firstOr(function () {
+        return false;
+    });
 
-        $this->assertEquals('Ned', $ned->name);
-    }
+    expect($location)->toBeFalse();
+});
 
-    public function testFirstOrTriggerOr()
-    {
-        $location = Location::firstOr(function () {
-            return false;
-        });
+test('first or create', function () {
+    $ned = Character::find('NedStark');
 
-        $this->assertFalse($location);
-    }
+    $char = [
+        "_key" => "NedStark",
+        "name" => "Ned",
+        "surname" => "Stark",
+        "alive" => true,
+        "age" => 41,
+        "residence_id" => "winterfell"
+    ];
 
+    $model = Character::firstOrCreate($char);
 
-    public function testFirstOrCreate()
-    {
-        $ned = Character::find('NedStark');
+    expect($model->_id)->toBe($ned->_id);
+    expect($model->id)->toBe($ned->id);
+});
 
-        $char = [
-            "_key" => "NedStark",
-            "name" => "Ned",
-            "surname" => "Stark",
-            "alive" => true,
-            "age" => 41,
-            "residence_id" => "winterfell"
-        ];
-
-        $model = Character::firstOrCreate($char);
-
-        $this->assertSame($ned->_id, $model->_id);
-        $this->assertSame($ned->id, $model->id);
-    }
-
-    public function testFirstOrCreateWithNestedData()
-    {
-        $char = [
-            "_key" => "NedStark",
-            "name" => "Ned",
-            "surname" => "Stark",
-            "alive" => true,
-            "age" => 41,
-            "residence_id" => "winterfell",
-            "en" => [
-                "description" => "
-                    Lord Eddard Stark, also known as Ned Stark, was the head of House Stark, the Lord of Winterfell, 
-                    Lord Paramount and Warden of the North, and later Hand of the King to King Robert I Baratheon. 
-                    He was the older brother of Benjen, Lyanna and the younger brother of Brandon Stark. He is the 
-                    father of Robb, Sansa, Arya, Bran, and Rickon by his wife, Catelyn Tully, and uncle of Jon Snow, 
-                    who he raised as his bastard son. He was a dedicated husband and father, a loyal friend, 
-                    and an honorable lord.",
-                "quotes" => [
-                    "When the snows fall and the white winds blow, the lone wolf dies, but the pack survives."
-                ],
+test('first or create with nested data', function () {
+    $char = [
+        "_key" => "NedStark",
+        "name" => "Ned",
+        "surname" => "Stark",
+        "alive" => true,
+        "age" => 41,
+        "residence_id" => "winterfell",
+        "en" => [
+            "description" => "
+                Lord Eddard Stark, also known as Ned Stark, was the head of House Stark, the Lord of Winterfell, 
+                Lord Paramount and Warden of the North, and later Hand of the King to King Robert I Baratheon. 
+                He was the older brother of Benjen, Lyanna and the younger brother of Brandon Stark. He is the 
+                father of Robb, Sansa, Arya, Bran, and Rickon by his wife, Catelyn Tully, and uncle of Jon Snow, 
+                who he raised as his bastard son. He was a dedicated husband and father, a loyal friend, 
+                and an honorable lord.",
+            "quotes" => [
+                "When the snows fall and the white winds blow, the lone wolf dies, but the pack survives."
             ],
-        ];
+        ],
+    ];
 
-        $ned = Character::find('NedStark');
-        $ned->en = $char['en'];
-        $ned->save();
+    $ned = Character::find('NedStark');
+    $ned->en = $char['en'];
+    $ned->save();
 
-        $model = Character::firstOrCreate(
-            $char,
-            $char
-        );
+    $model = Character::firstOrCreate(
+        $char,
+        $char
+    );
 
-        $this->assertSame($ned->_id, $model->_id);
-        $this->assertSame($char['en']['description'], $model->en->description);
-        $this->assertSame($char['en']['quotes'], $model->en->quotes);
-    }
+    expect($model->_id)->toBe($ned->_id);
+    expect($model->en->description)->toBe($char['en']['description']);
+    expect($model->en->quotes)->toBe($char['en']['quotes']);
+});
 
-    public function testFirstOrFail()
-    {
-        $ned = Character::firstOrFail();
+test('first or fail', function () {
+    $ned = Character::firstOrFail();
 
-        $this->assertEquals('NedStark', $ned->id);
-    }
+    expect($ned->id)->toEqual('NedStark');
+});
 
-    public function testFirstOrFailing()
-    {
-        $this->expectException(ModelNotFoundException::class);
+test('first or failing', function () {
+    Location::where('id', 'free-cities')->firstOrFail();
+})->throws(ModelNotFoundException::class);
 
-        Location::firstOrFail();
-    }
+test('first or new', function () {
+    $ned = Character::find('NedStark');
 
-    public function testFirstOrNew()
-    {
-        $ned = Character::find('NedStark');
+    $char = [
+        "_key" => "NedStark",
+        "name" => "Ned",
+        "surname" => "Stark",
+        "alive" => true,
+        "age" => 41,
+        "residence_id" => "winterfell"
+    ];
 
-        $char = [
-            "_key" => "NedStark",
-            "name" => "Ned",
-            "surname" => "Stark",
-            "alive" => true,
-            "age" => 41,
-            "residence_id" => "winterfell"
-        ];
+    $model = Character::firstOrNew($char);
 
-        $model = Character::firstOrNew($char);
+    expect($model->id)->toBe($ned->id);
+});
 
-        $this->assertSame($ned->id, $model->id);
-    }
+test('first or new none existing', function ($character) {
+    $edmure = Character::find('EdmureTully');
 
-    public function testFirstOrNewNoneExisting()
-    {
-        $dragonstone = Location::find('dragonstone');
+    $model = Character::firstOrNew($character);
 
-        $loc = [
-            "_key" => "dragonstone",
-            "name" => "Dragonstone",
-            "coordinate" => [
-                55.167801,
-                -6.815096
-            ],
-            "led_by" => "DaenerysTargaryen"
-        ];
+    expect($edmure)->toBeNull();
+    $this->assertObjectNotHasAttribute('id', $model);
+})->with('character');
 
-        $model = Location::firstOrNew($loc);
+test('first where', function () {
+    $result = Character::firstWhere('name', 'Jorah');
 
-        $this->assertNull($dragonstone);
-        $this->assertObjectNotHasAttribute('id', $model);
-    }
-
-    public function testFirstWhere()
-    {
-        $result = Character::firstWhere('name', 'Jorah');
-
-        $this->assertInstanceOf(Character::class, $result);
-        $this->assertSame('Jorah', $result->name);
-    }
-}
+    expect($result)->toBeInstanceOf(Character::class);
+    expect($result->name)->toBe('Jorah');
+});
