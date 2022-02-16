@@ -1,6 +1,9 @@
 <?php
 
 use Mockery as M;
+use Tests\TestCase;
+
+uses(TestCase::class);
 
 beforeEach(function () {
     $this->packageMigrationPath = __DIR__ . '/../Setup/Database/Migrations';

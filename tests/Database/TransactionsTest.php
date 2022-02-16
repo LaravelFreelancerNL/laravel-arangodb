@@ -1,17 +1,21 @@
 <?php
 
+/**
+ * @covers \LaravelFreelancerNL\Aranguent\Connection
+ * @covers \LaravelFreelancerNL\Aranguent\Concerns\ManagesTransactions
+ */
+
+declare(strict_types=1);
+
 use ArangoClient\Transactions\TransactionManager;
 use Illuminate\Support\Facades\DB;
 use Mockery as M;
 use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Location;
+use Tests\TestCase;
 
 uses(TestCase::class);
 
-/**
- * @covers \LaravelFreelancerNL\Aranguent\Connection
- * @covers \LaravelFreelancerNL\Aranguent\Concerns\ManagesTransactions
- */
 afterEach(function () {
     M::close();
 });
@@ -46,31 +50,29 @@ test('rollback transaction', function () {
 
     Character::create(
         [
-            '_key'    => 'TheonGreyjoy',
-            'name'    => 'Theon',
-            'surname' => 'Greyjoy',
+            'id'    => 'QuaitheOfTheShadow',
+            'name'    => 'Quaithe',
+            'surname' => 'of the Shaadow',
             'alive'   => true,
-            'age'     => 16,
-            'traits'  => ['E', 'R', 'K'],
+            'age'     => null,
         ]
     );
     Location::create(
         [
-            '_key'       => 'pyke',
+            'id'       => 'pyke',
             'name'       => 'Pyke',
             'coordinate' => [55.8833342, -6.1388807],
         ]
     );
     $this->connection->rollBack();
-    $this->connection->commit();
 
     $endingCharacters = Character::all();
     $endingLocations = Location::all();
 
-    expect($startingCharacters->count())->toEqual(0);
-    expect($endingCharacters->count())->toEqual(0);
-    expect($startingLocations->count())->toEqual(0);
-    expect($endingLocations->count())->toEqual(0);
+    expect($startingCharacters->count())->toEqual(43);
+    expect($endingCharacters->count())->toEqual(43);
+    expect($startingLocations->count())->toEqual(9);
+    expect($endingLocations->count())->toEqual(9);
 });
 
 test('commit transaction with queries', function () {
@@ -81,17 +83,16 @@ test('commit transaction with queries', function () {
 
     Character::create(
         [
-            '_key'    => 'TheonGreyjoy',
-            'name'    => 'Theon',
-            'surname' => 'Greyjoy',
+            'id'    => 'QuaitheOfTheShadow',
+            'name'    => 'Quaithe',
+            'surname' => 'of the Shaadow',
             'alive'   => true,
-            'age'     => 16,
-            'traits'  => ['E', 'R', 'K'],
+            'age'     => null,
         ]
     );
     Location::create(
         [
-            '_key'       => 'pyke',
+            'id'       => 'pyke',
             'name'       => 'Pyke',
             'coordinate' => [55.8833342, -6.1388807],
         ]
@@ -102,10 +103,14 @@ test('commit transaction with queries', function () {
     $endingCharacters = Character::all();
     $endingLocations = Location::all();
 
-    expect($startingCharacters->count())->toEqual(0);
-    expect($endingCharacters->count())->toEqual(1);
-    expect($startingLocations->count())->toEqual(0);
-    expect($endingLocations->count())->toEqual(1);
+    expect($startingCharacters->count())->toEqual(43);
+    expect($endingCharacters->count())->toEqual(44);
+    expect($startingLocations->count())->toEqual(9);
+    expect($endingLocations->count())->toEqual(10);
+
+    // cleanup
+    DB::delete('FOR doc IN characters FILTER doc._key == "QuaitheOfTheShadow" REMOVE doc IN characters');
+    DB::delete('FOR doc IN locations FILTER doc._key == "pyke" REMOVE doc IN locations');
 });
 
 test('closure transactions', function () {
@@ -116,12 +121,7 @@ test('closure transactions', function () {
     }, 5, ['write' => ['characters']]);
 
     $characters = Character::all();
-    expect($characters->count())->toEqual(9);
-});
+    expect($characters->count())->toEqual(52);
 
-// Helpers
-function defineDatabaseMigrations()
-{
-    test()->loadLaravelMigrations();
-    test()->loadMigrationsFrom(__DIR__ . '/Setup/Database/Migrations');
-}
+    DB::delete('FOR doc IN characters FILTER doc._key LIKE "test%" REMOVE doc IN characters');
+});

@@ -1,6 +1,6 @@
 <?php
 
-uses(TestCase::class);
+declare(strict_types=1);
 
 test('associative flatten with nested data', function () {
     $data = [

@@ -2,12 +2,17 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Artisan;
-use Tests\Setup\Database\Seeds\HousesSeeder;
+use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\Setup\Models\House;
+use Tests\TestCase;
+
+uses(
+    TestCase::class,
+    DatabaseTransactions::class
+);
 
 test('search', function () {
-    $builder = $this->getBuilder();
+    $builder = getBuilder();
     $builder->select('*')
         ->from('page_view')
         ->search(true);
@@ -19,7 +24,7 @@ test('search', function () {
 });
 
 test('search full predicate', function () {
-    $builder = $this->getBuilder();
+    $builder = getBuilder();
     $builder->select('*')
         ->from('user_view')
         ->search(['userViewDoc.age', '==', 20]);
@@ -31,7 +36,7 @@ test('search full predicate', function () {
 });
 
 test('search multiple predicates', function () {
-    $builder = $this->getBuilder();
+    $builder = getBuilder();
     $builder->select('*')
         ->from('user_view')
         ->search([['userViewDoc.age', '>=', 20], ['userViewDoc.age', '<=', 30]]);
@@ -43,7 +48,7 @@ test('search multiple predicates', function () {
 });
 
 test('search with options', function () {
-    $builder = $this->getBuilder();
+    $builder = getBuilder();
     $builder->select('*')
         ->from('user_view')
         ->search(
@@ -64,7 +69,7 @@ test('search with options', function () {
 });
 
 test('search with aqb method', function () {
-    $builder = $this->getBuilder();
+    $builder = getBuilder();
     $builder->select('*')
         ->from('page_view')
         ->search($builder->aqb->analyzer('pageViewDoc.en.body_copy', '==', 'my search string', 'text_en'));
@@ -83,8 +88,7 @@ test('search against db', function () {
     $query = $query->search(
         function ($aqb) {
             return $aqb->analyzer('houseViewDoc.en.description', '==', 'war', 'text_en');
-        },
-        ['waitForSync' => true]
+        }
     )->orderBy($query->aqb->bm25('houseViewDoc'), 'desc');
 
     $results = $query->paginate();
@@ -98,8 +102,7 @@ test('search from model', function () {
     $results = House::from('house_view')->search(
         function ($aqb) {
             return $aqb->analyzer('houseViewDoc.en.description', '==', 'war', 'text_en');
-        },
-        ['waitForSync' => true]
+        }
     )
         ->paginate();
 
@@ -109,12 +112,3 @@ test('search from model', function () {
     expect($results[1]->_id)->toBe("houses/stark");
     expect($results[1])->toBeInstanceOf(House::class);
 });
-
-// Helpers
-function defineDatabaseMigrations()
-{
-    test()->loadLaravelMigrations();
-    test()->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
-
-    Artisan::call('db:seed', ['--class' => HousesSeeder::class]);
-}

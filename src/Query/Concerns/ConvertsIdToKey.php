@@ -38,6 +38,9 @@ trait ConvertsIdToKey
     protected function convertIdInArrayKeys(array $data): array
     {
         foreach ($data as $key => $value) {
+            if (! is_string($key)) {
+                continue;
+            }
             $newKey = $this->convertIdInString($key);
             $data[$newKey] = $value;
             if ($key !== $newKey) {

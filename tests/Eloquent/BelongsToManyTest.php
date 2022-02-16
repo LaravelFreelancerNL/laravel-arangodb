@@ -1,13 +1,16 @@
 <?php
 
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Artisan;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
+use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Mockery as M;
-use Tests\Setup\Database\Seeds\CharactersSeeder;
-use Tests\Setup\Database\Seeds\ChildrenSeeder;
-use Tests\Setup\Database\Seeds\LocationsSeeder;
-use Tests\setup\Models\Character;
+use Tests\Setup\Models\Character;
+use Tests\TestCase;
+
+uses(
+    TestCase::class,
+    DatabaseTransactions::class
+);
 
 beforeEach(function () {
     Carbon::setTestNow(Carbon::now());
@@ -24,7 +27,6 @@ afterEach(function () {
 
 test('retrieve relation', function () {
     $parent = Character::find('NedStark');
-
     $children = $parent->children;
 
     expect(count($children))->toEqual(5);
@@ -124,14 +126,3 @@ test('sync', function () {
     $rhaegarTargaryen->delete();
     $lyannaStark->delete();
 });
-
-// Helpers
-function defineDatabaseMigrations()
-{
-    test()->loadLaravelMigrations();
-    test()->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
-
-    Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
-    Artisan::call('db:seed', ['--class' => ChildrenSeeder::class]);
-    Artisan::call('db:seed', ['--class' => LocationsSeeder::class]);
-}

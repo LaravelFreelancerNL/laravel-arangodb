@@ -6,3 +6,4 @@ env:
 providers:
   - LaravelFreelancerNL\Aranguent\AranguentServiceProvider
   - LaravelFreelancerNL\Aranguent\Providers\CommandServiceProvider
+  - Tests\Setup\AranguentTestServiceProvider

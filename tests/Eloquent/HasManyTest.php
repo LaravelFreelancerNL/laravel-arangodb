@@ -2,64 +2,19 @@
 
 use Illuminate\Support\Carbon;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
+use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Mockery as M;
 use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Location;
+use Tests\TestCase;
+
+uses(
+    TestCase::class,
+    DatabaseTransactions::class
+);
 
 beforeEach(function () {
     Carbon::setTestNow(Carbon::now());
-
-    Character::insert(
-        [
-            [
-                '_key'          => 'NedStark',
-                'name'          => 'Ned',
-                'surname'       => 'Stark',
-                'alive'         => false,
-                'age'           => 41,
-                'traits'        => ['A', 'H', 'C', 'N', 'P'],
-                'residence_id' => 'winterfell',
-            ],
-            [
-                '_key'          => 'SansaStark',
-                'name'          => 'Sansa',
-                'surname'       => 'Stark',
-                'alive'         => true,
-                'age'           => 13,
-                'traits'        => ['D', 'I', 'J'],
-                'residence_id' => 'winterfell',
-            ],
-            [
-                '_key'          => 'RobertBaratheon',
-                'name'          => 'Robert',
-                'surname'       => 'Baratheon',
-                'alive'         => false,
-                'age'           => null,
-                'traits'        => ['A', 'H', 'C'],
-                'residence_id' => 'dragonstone',
-            ],
-        ]
-    );
-    Location::insert(
-        [
-            [
-                '_key'       => 'dragonstone',
-                'name'       => 'Dragonstone',
-                'coordinate' => [55.167801, -6.815096],
-            ],
-            [
-                '_key'       => 'winterfell',
-                'name'       => 'Winterfell',
-                'coordinate' => [54.368321, -5.581312],
-                'led_by'     => 'SansaStark',
-            ],
-            [
-                '_key'       => 'kingslanding',
-                'name'       => "King's Landing",
-                'coordinate' => [42.639752, 18.110189],
-            ],
-        ]
-    );
 });
 
 afterEach(function () {
@@ -75,119 +30,60 @@ test('retrieve relation', function () {
     $location = Location::find('winterfell');
 
     $inhabitants = $location->inhabitants;
-    expect($inhabitants)->toHaveCount(2);
+    expect($inhabitants)->toHaveCount(15);
     expect($location->id)->toEqual($inhabitants->first()->residence_id);
     expect($inhabitants->first())->toBeInstanceOf(Character::class);
 });
 
-test('save', function () {
-    $character = Character::create(
-        [
-            'id'    => 'TheonGreyjoy',
-            'name'    => 'Theon',
-            'surname' => 'Greyjoy',
-            'alive'   => true,
-            'age'     => 16,
-            'traits'  => ['E', 'R', 'K'],
-        ]
-    );
-    $location = Location::create(
-        [
-            'id'       => 'pyke',
-            'name'       => 'Pyke',
-            'coordinate' => [55.8833342, -6.1388807],
-        ]
-    );
+test('save', function ($character) {
+    $character = Character::create($character);
+    $location = Location::find('riverrun');
+
     $location->inhabitants()->save($character);
-    // Reload
+
     $location->fresh();
 
     $inhabitants = $location->inhabitants;
 
     expect($inhabitants)->toHaveCount(1);
-    expect($inhabitants->first()->id)->toEqual('TheonGreyjoy');
+    expect($inhabitants->first()->id)->toEqual('EdmureTully');
     expect($location->id)->toEqual($inhabitants->first()->residence_id);
     expect($inhabitants->first())->toBeInstanceOf(Character::class);
-});
+})->with('character');
 
-test('create', function () {
-    $location = Location::create(
-        [
-            'id'       => 'pyke',
-            'name'       => 'Pyke',
-            'coordinate' => [55.8833342, -6.1388807],
-        ]
-    );
+test('create', function ($character) {
+    $location = Location::find('riverrun');
 
-    $location->inhabitants()->create(
-        [
-            'id'    => 'TheonGreyjoy',
-            'name'    => 'Theon',
-            'surname' => 'Greyjoy',
-            'alive'   => true,
-            'age'     => 16,
-            'traits'  => ['E', 'R', 'K'],
-        ]
-    );
-    $character = Character::find('TheonGreyjoy');
-    $location = Location::find('pyke');
+    $location->inhabitants()->create($character);
+    $character = Character::find('EdmureTully');
+    $location->fresh();
 
-    expect($location->inhabitants->first()->id)->toEqual('TheonGreyjoy');
-    expect('pyke')->toEqual($character->residence_id);
+    expect($location->inhabitants->first()->id)->toEqual('EdmureTully');
+    expect($character->residence_id)->toEqual('riverrun');
     expect($location->inhabitants->first())->toBeInstanceOf(Character::class);
-});
+})->with('character');
 
-test('first or create', function () {
-    $location = Location::create(
-        [
-            'id'       => 'pyke',
-            'name'       => 'Pyke',
-            'coordinate' => [55.8833342, -6.1388807],
-        ]
-    );
+test('first or create', function ($character) {
+    $location = Location::find('riverrun');
 
-    $location->inhabitants()->firstOrCreate(
-        [
-            'id'    => 'TheonGreyjoy',
-            'name'    => 'Theon',
-            'surname' => 'Greyjoy',
-            'alive'   => true,
-            'age'     => 16,
-            'traits'  => ['E', 'R', 'K'],
-        ]
-    );
-    $character = Character::find('TheonGreyjoy');
-    $location = Location::find('pyke');
+    $location->inhabitants()->firstOrCreate($character);
+    $character = Character::find('EdmureTully');
+    $location->fresh();
 
-    expect($location->inhabitants->first()->id)->toEqual('TheonGreyjoy');
-    expect('pyke')->toEqual($character->residence_id);
+    expect($location->inhabitants->first()->id)->toEqual('EdmureTully');
+    expect($character->residence_id)->toEqual('riverrun');
     expect($location->inhabitants->first())->toBeInstanceOf(Character::class);
-});
+})->with('character');
 
-test('first or new', function () {
-    $location = Location::create(
-        [
-            'id'       => 'pyke',
-            'name'       => 'Pyke',
-            'coordinate' => [55.8833342, -6.1388807],
-        ]
-    );
+test('first or new', function ($character) {
+    $location = Location::find('riverrun');
 
-    $character = $location->inhabitants()->firstOrNew(
-        [
-            'id'    => 'TheonGreyjoy',
-            'name'    => 'Theon',
-            'surname' => 'Greyjoy',
-            'alive'   => true,
-            'age'     => 16,
-            'traits'  => ['E', 'R', 'K'],
-        ]
-    );
+    $character = $location->inhabitants()->firstOrNew($character);
 
     expect($character)->toBeInstanceOf(Character::class);
-    expect($character->id)->toEqual('TheonGreyjoy');
-    expect('pyke')->toEqual($character->residence_id);
-});
+    expect($character->id)->toEqual($character['id']);
+    expect($character->residence_id)->toEqual('riverrun');
+})->with('character');
 
 test('with', function () {
     $location = Location::with('inhabitants')->find('winterfell');
@@ -195,10 +91,3 @@ test('with', function () {
     expect($location->inhabitants->first())->toBeInstanceOf(Character::class);
     expect($location->inhabitants->first()->id)->toEqual('NedStark');
 });
-
-// Helpers
-function defineDatabaseMigrations()
-{
-    test()->loadLaravelMigrations();
-    test()->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
-}

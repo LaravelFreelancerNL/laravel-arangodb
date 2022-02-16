@@ -21,15 +21,17 @@ class CharactersSeeder extends Seeder
               "surname":"Stark",
               "alive":true,
               "age":41,
-              "residence_id":"winterfell"
+              "residence_id":"winterfell",
+              "location_id":"king-s-landing"
            },
            {
               "_key":"RobertBaratheon",
               "name":"Robert",
               "surname":"Baratheon",
               "alive":false,
-              "residence_id":"winterfell"
-           },
+              "residence_id":"winterfell",
+              "location_id":"dragonstone"
+       },
            {
               "_key":"JaimeLannister",
               "name":"Jaime",
@@ -97,7 +99,8 @@ class CharactersSeeder extends Seeder
               "surname":"Stark",
               "alive":true,
               "age":13,
-              "residence_id":"winterfell"
+              "residence_id":"winterfell",
+              "location_id":"winterfell"
            },
            {
               "_key":"AryaStark",

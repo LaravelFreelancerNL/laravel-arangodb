@@ -2,7 +2,14 @@
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\Setup\Models\Character;
+use Tests\TestCase;
+
+uses(
+    TestCase::class,
+    DatabaseTransactions::class
+);
 
 test('model by aql with query builder', function () {
     $results = Character::fromAqb(
@@ -26,24 +33,3 @@ test('model by aql with closure', function () {
     expect($results)->toBeInstanceOf(Collection::class);
     expect($results->first())->toBeInstanceOf(Character::class);
 });
-
-// Helpers
-function defineDatabaseMigrations()
-{
-    test()->loadLaravelMigrations();
-    test()->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
-
-    Character::insert(
-        [
-            [
-                '_key'         => 'NedStark',
-                'name'         => 'Ned',
-                'surname'      => 'Stark',
-                'alive'        => false,
-                'age'          => 41,
-                'traits'       => ['A', 'H', 'C', 'N', 'P'],
-                'location_id' => 'locations/kingslanding',
-            ],
-        ]
-    );
-}

@@ -1,13 +1,13 @@
 <?php
 
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use Mockery as m;
-use Tests\Setup\Database\Seeds\CharactersSeeder;
+use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
+use Tests\TestCase;
 
-afterEach(function () {
-    M::close();
-});
+uses(
+    TestCase::class,
+    DatabaseTransactions::class
+);
 
 test('group by', function () {
     $surnames = DB::table('characters')
@@ -65,12 +65,3 @@ test('having between', function () {
     expect($ages)->toHaveCount(3);
     expect($ages[1])->toEqual(36);
 });
-
-// Helpers
-function defineDatabaseMigrations()
-{
-    test()->loadLaravelMigrations();
-    test()->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
-
-    Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
-}

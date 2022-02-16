@@ -1,14 +1,17 @@
 <?php
 
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Artisan;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
+use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Mockery as M;
-use Tests\Setup\Database\Seeds\CharactersSeeder;
-use Tests\Setup\Database\Seeds\ChildrenSeeder;
-use Tests\Setup\Database\Seeds\LocationsSeeder;
-use Tests\setup\Models\Character;
+use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Location;
+use Tests\TestCase;
+
+uses(
+    TestCase::class,
+    DatabaseTransactions::class
+);
 
 beforeEach(function () {
     Carbon::setTestNow(Carbon::now());
@@ -81,14 +84,3 @@ test('with', function () {
     expect($location->leader)->toBeInstanceOf(Character::class);
     expect($location->leader->id)->toEqual('SansaStark');
 });
-
-// Helpers
-function defineDatabaseMigrations()
-{
-    test()->loadLaravelMigrations();
-    test()->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
-
-    Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
-    Artisan::call('db:seed', ['--class' => ChildrenSeeder::class]);
-    Artisan::call('db:seed', ['--class' => LocationsSeeder::class]);
-}

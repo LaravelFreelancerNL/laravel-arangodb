@@ -1,9 +1,14 @@
 <?php
 
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use Tests\Setup\Database\Seeds\CharactersSeeder;
+use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\Setup\Models\Character;
+use Tests\TestCase;
+
+uses(
+    TestCase::class,
+    DatabaseTransactions::class
+);
 
 test('output conversion with whole document', function () {
     $result = DB::table('characters')->get();
@@ -27,7 +32,7 @@ test('output conversion without key', function () {
 });
 
 test('get id conversion single attribute', function () {
-    $builder = $this->getBuilder();
+    $builder = getBuilder();
     $builder = $builder->select('id')->from('users');
 
     $this->assertSame(
@@ -120,12 +125,3 @@ test('model has correct ids', function () {
     expect($results->first()->_id)->toBe('characters/NedStark');
     expect($results->first()->_key)->toBeNull();
 });
-
-// Helpers
-function defineDatabaseMigrations()
-{
-    test()->loadLaravelMigrations();
-    test()->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
-
-    Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
-}

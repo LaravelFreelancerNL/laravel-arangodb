@@ -5,12 +5,8 @@ namespace Tests;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\AranguentServiceProvider;
-use LaravelFreelancerNL\Aranguent\Connection as Connection;
-use LaravelFreelancerNL\Aranguent\Query\Builder;
-use LaravelFreelancerNL\Aranguent\Query\Grammar;
-use LaravelFreelancerNL\Aranguent\Query\Processor;
 use LaravelFreelancerNL\Aranguent\Testing\TestCase as AranguentTestCase;
-use Mockery as m;
+use Tests\Setup\TestConfig;
 
 abstract class TestCase extends AranguentTestCase implements \Orchestra\Testbench\Contracts\TestCase
 {
@@ -27,6 +23,17 @@ abstract class TestCase extends AranguentTestCase implements \Orchestra\Testbenc
      */
     protected $baseUrl = 'http://localhost';
 
+    protected array $transactionCollections = [
+        'write' => [
+            'characters',
+            'children',
+            'houses',
+            'locations',
+            'tags',
+            'taggables',
+        ]
+    ];
+
     /**
      * Define environment setup.
      *
@@ -35,15 +42,31 @@ abstract class TestCase extends AranguentTestCase implements \Orchestra\Testbenc
      */
     protected function defineEnvironment($app)
     {
-        $app['config']->set('database.default', 'arangodb');
-        $app['config']->set('database.connections.arangodb', [
-            'name'                                      => 'arangodb',
-            'driver'                                    => 'arangodb',
-            'endpoint'                                  => env('DB_ENDPOINT', 'http://localhost:8529'),
-            'username'                                  => env('DB_USERNAME', 'root'),
-            'password'                                  => env('DB_PASSWORD', null),
-            'database'                                  => env('DB_DATABASE', 'aranguent__test'),
-        ]);
+        TestConfig::set($app);
+    }
+
+    protected function getPackageAliases($app)
+    {
+        return [
+            'Aranguent' => 'LaravelFreelancerNL\Aranguent',
+        ];
+    }
+
+    protected function getPackageProviders($app)
+    {
+        return [
+            AranguentServiceProvider::class,
+        ];
+    }
+
+    /**
+     * Refresh the application instance.
+     *
+     * @return void
+     */
+    protected function refreshApplication()
+    {
+        $this->app = $this->createApplication();
     }
 
     /**
@@ -65,16 +88,6 @@ abstract class TestCase extends AranguentTestCase implements \Orchestra\Testbenc
     }
 
     /**
-     * Clean up the testing environment before the next test.
-     *
-     * @return void
-     */
-    protected function tearDown(): void
-    {
-        $this->tearDownTheTestEnvironment();
-    }
-
-    /**
      * Boot the testing helper traits.
      *
      * @return array<string, string>
@@ -87,27 +100,13 @@ abstract class TestCase extends AranguentTestCase implements \Orchestra\Testbenc
     }
 
     /**
-     * Refresh the application instance.
+     * Clean up the testing environment before the next test.
      *
      * @return void
      */
-    protected function refreshApplication()
+    protected function tearDown(): void
     {
-        $this->app = $this->createApplication();
-    }
-
-    protected function getPackageProviders($app)
-    {
-        return [
-            AranguentServiceProvider::class,
-        ];
-    }
-
-    protected function getPackageAliases($app)
-    {
-        return [
-            'Aranguent' => 'LaravelFreelancerNL\Aranguent',
-        ];
+        $this->tearDownTheTestEnvironment();
     }
 
     protected function skipTestOnArangoVersionsBefore(string $version)
@@ -115,13 +114,5 @@ abstract class TestCase extends AranguentTestCase implements \Orchestra\Testbenc
         if (version_compare(getenv('ARANGODB_VERSION'), $version, '<')) {
             $this->markTestSkipped('This test does not support ArangoDB versions before ' . $version);
         }
-    }
-
-    protected function getBuilder()
-    {
-        $grammar = new Grammar();
-        $processor = m::mock(Processor::class);
-
-        return new Builder(m::mock(Connection::class), $grammar, $processor);
     }
 }

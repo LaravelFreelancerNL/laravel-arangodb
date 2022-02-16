@@ -3,14 +3,15 @@
 declare(strict_types=1);
 
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Artisan;
-use Tests\Setup\Database\Seeds\CharactersSeeder;
+use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Location;
+use Tests\TestCase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
-});
+uses(
+    TestCase::class,
+    DatabaseTransactions::class
+);
 
 test('first', function () {
     $ned = Character::first();
@@ -34,7 +35,7 @@ test('first or', function () {
 });
 
 test('first or trigger or', function () {
-    $location = Location::firstOr(function () {
+    $location = Location::where('id', 'free-cities')->firstOr(function () {
         return false;
     });
 
@@ -102,10 +103,8 @@ test('first or fail', function () {
 });
 
 test('first or failing', function () {
-    $this->expectException(ModelNotFoundException::class);
-
-    Location::firstOrFail();
-});
+    Location::where('id', 'free-cities')->firstOrFail();
+})->throws(ModelNotFoundException::class);
 
 test('first or new', function () {
     $ned = Character::find('NedStark');
@@ -124,24 +123,14 @@ test('first or new', function () {
     expect($model->id)->toBe($ned->id);
 });
 
-test('first or new none existing', function () {
-    $dragonstone = Location::find('dragonstone');
+test('first or new none existing', function ($character) {
+    $edmure = Character::find('EdmureTully');
 
-    $loc = [
-        "_key" => "dragonstone",
-        "name" => "Dragonstone",
-        "coordinate" => [
-            55.167801,
-            -6.815096
-        ],
-        "led_by" => "DaenerysTargaryen"
-    ];
+    $model = Character::firstOrNew($character);
 
-    $model = Location::firstOrNew($loc);
-
-    expect($dragonstone)->toBeNull();
+    expect($edmure)->toBeNull();
     $this->assertObjectNotHasAttribute('id', $model);
-});
+})->with('character');
 
 test('first where', function () {
     $result = Character::firstWhere('name', 'Jorah');
@@ -149,10 +138,3 @@ test('first where', function () {
     expect($result)->toBeInstanceOf(Character::class);
     expect($result->name)->toBe('Jorah');
 });
-
-// Helpers
-function defineDatabaseMigrations()
-{
-    test()->loadLaravelMigrations();
-    test()->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
-}

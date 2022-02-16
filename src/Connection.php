@@ -123,7 +123,7 @@ class Connection extends IlluminateConnection
     public function reconnect()
     {
         if (is_callable($this->reconnector)) {
-            $this->arangoClient = null;
+//            $this->arangoClient = null;
 
             $result = call_user_func($this->reconnector, $this);
 

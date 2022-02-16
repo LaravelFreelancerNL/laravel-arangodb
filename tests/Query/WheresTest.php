@@ -1,14 +1,12 @@
 <?php
 
-use LaravelFreelancerNL\Aranguent\Connection as Connection;
-use LaravelFreelancerNL\Aranguent\Query\Builder;
-use LaravelFreelancerNL\Aranguent\Query\Grammar;
-use LaravelFreelancerNL\Aranguent\Query\Processor;
-use Mockery as m;
+use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
+use Tests\TestCase;
 
-afterEach(function () {
-    m::close();
-});
+uses(
+    TestCase::class,
+    DatabaseTransactions::class
+);
 
 test('basic wheres', function () {
     $builder = getBuilder();
@@ -399,12 +397,3 @@ test('where nested', function () {
         $query
     );
 });
-
-// Helpers
-function getBuilder()
-{
-    $grammar = new Grammar();
-    $processor = m::mock(Processor::class);
-
-    return new Builder(m::mock(Connection::class), $grammar, $processor);
-}

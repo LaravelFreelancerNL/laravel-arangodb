@@ -1,43 +1,13 @@
 <?php
 
-use Illuminate\Support\Carbon;
-use LaravelFreelancerNL\Aranguent\Eloquent\Model;
-use Mockery as M;
+use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\Setup\Models\Character;
+use Tests\TestCase;
 
-beforeEach(function () {
-    Carbon::setTestNow(Carbon::now());
-
-    Character::insert(
-        [
-            [
-                '_key'    => 'NedStark',
-                'name'    => 'Ned',
-                'surname' => 'Stark',
-                'alive'   => false,
-                'age'     => 41,
-                'traits'  => ['A', 'H', 'C', 'N', 'P'],
-            ],
-            [
-                '_key'    => 'RobertBaratheon',
-                'name'    => 'Robert',
-                'surname' => 'Baratheon',
-                'alive'   => false,
-                'age'     => null,
-                'traits'  => ['A', 'H', 'C'],
-            ],
-        ]
-    );
-});
-
-afterEach(function () {
-    Carbon::setTestNow(null);
-    Carbon::resetToStringFormat();
-
-    Model::unsetEventDispatcher();
-
-    M::close();
-});
+uses(
+    TestCase::class,
+    DatabaseTransactions::class
+);
 
 test('create aranguent model', function () {
     $this->artisan(
@@ -139,27 +109,27 @@ test('truncate model', function () {
 
 test('count', function () {
     $result = Character::count();
-    expect($result)->toEqual(2);
+    expect($result)->toEqual(43);
 });
 
 test('max', function () {
     $result = Character::max('age');
-    expect($result)->toEqual(41);
+    expect($result)->toEqual(49);
 });
 
 test('min', function () {
     $result = Character::min('age');
-    expect($result)->toEqual(41);
+    expect($result)->toEqual(10);
 });
 
 test('average', function () {
     $result = Character::average('age');
-    expect($result)->toEqual(41);
+    expect($result)->toEqual(25.6);
 });
 
 test('sum', function () {
     $result = Character::sum('age');
-    expect($result)->toEqual(41);
+    expect($result)->toEqual(384);
 });
 
 test('get id', function () {
@@ -182,10 +152,3 @@ test('set id', function () {
     expect($ned->id)->toEqual('NedStarkIsDead');
     expect($ned->_id)->toEqual('characters/NedStarkIsDead');
 });
-
-// Helpers
-function defineDatabaseMigrations()
-{
-    test()->loadLaravelMigrations();
-    test()->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
-}

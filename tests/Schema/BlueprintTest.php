@@ -1,8 +1,14 @@
 <?php
 
-use Illuminate\Support\Facades\Artisan;
+declare(strict_types=1);
+
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
+use Tests\TestCase;
+
+uses(
+    TestCase::class,
+);
 
 beforeEach(function () {
     $this->schemaManager = $this->connection->getArangoClient()->schema();
@@ -110,12 +116,3 @@ test('default', function () {
         expect($commands[1]['method'])->toEqual('default');
     });
 });
-
-// Helpers
-function defineDatabaseMigrations()
-{
-    test()->loadLaravelMigrations();
-    test()->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
-
-    Artisan::call('db:seed', ['--class' => \Tests\Setup\Database\Seeds\CharactersSeeder::class]);
-}

@@ -1,6 +1,14 @@
 <?php
 
-uses(\Tests\TestCase::class)->in('tests', 'Console', 'Eloquent', 'Migrations', 'Query', 'Schema', 'Setup', 'Testing');
+use Illuminate\Support\Facades\Artisan;
+use LaravelFreelancerNL\Aranguent\Connection as Connection;
+use LaravelFreelancerNL\Aranguent\Query\Builder;
+use LaravelFreelancerNL\Aranguent\Query\Grammar;
+use LaravelFreelancerNL\Aranguent\Query\Processor;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\NullOutput;
+use Mockery as m;
+use Tests\Setup\Database\Seeds\DatabaseSeeder;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,3 +48,30 @@ uses(\Tests\TestCase::class)->in('tests', 'Console', 'Eloquent', 'Migrations', '
 */
 
 /** @link https://pestphp.com/docs/helpers */
+
+function getBuilder()
+{
+    $grammar = new Grammar();
+    $processor = m::mock(Processor::class);
+
+    return new Builder(m::mock(Connection::class), $grammar, $processor);
+}
+
+function refreshDatabase()
+{
+    //migrate & seed
+    Artisan::call('migrate:fresh', [
+        '--path' => [
+            database_path('migrations'),
+            'tests/Setup/Database/Migrations'
+        ],
+        '--realpath' => true,
+        '--seed' => true,
+        '--seeder' => DatabaseSeeder::class,
+    ]);
+}
+
+function runCommand($command, $input = [])
+{
+    return $command->run(new ArrayInput($input), new NullOutput());
+}

@@ -3,11 +3,22 @@
 use ArangoClient\Exceptions\ArangoException;
 use LaravelFreelancerNL\Aranguent\Migrations\DatabaseMigrationRepository;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder;
+use Tests\TestCase;
+
+uses(
+    TestCase::class,
+);
 
 beforeEach(function () {
-    $this->databaseMigrationRepository = new DatabaseMigrationRepository(app()['db'], $this->collection);
+    $this->databaseMigrationRepository = new DatabaseMigrationRepository(app('db'), 'migrations');
 
     $this->schemaManager = $this->connection->getArangoClient()->schema();
+
+    //Drop all collections (possible migrations excepted)
+});
+
+afterAll(function () {
+    // migrate & seed
 });
 
 test('migrations collection is created', function () {
@@ -41,7 +52,7 @@ test('log creates migration entry', function () {
 });
 
 test('get number of last batch', function () {
-    $this->connection->getArangoClient()->schema()->truncateCollection($this->collection);
+    $this->connection->getArangoClient()->schema()->truncateCollection('migrations');
 
     $this->databaseMigrationRepository->log('getLastBatchNumberTest', 666);
     $this->databaseMigrationRepository->log('getLastBatchNumberTest', 667);
@@ -56,7 +67,7 @@ test('get number of last batch', function () {
 });
 
 test('get all ran migrationfiles', function () {
-    $this->connection->getArangoClient()->schema()->truncateCollection($this->collection);
+    $this->connection->getArangoClient()->schema()->truncateCollection('migrations');
 
     $this->databaseMigrationRepository->log('getRanMigration1', 50);
     $this->databaseMigrationRepository->log('getRanMigration2', 53);
@@ -98,7 +109,7 @@ test('delete migration', function () {
 });
 
 test('get last migration', function () {
-    $this->connection->getArangoClient()->schema()->truncateCollection($this->collection);
+    $this->connection->getArangoClient()->schema()->truncateCollection('migrations');
 
     $this->databaseMigrationRepository->log('getLastMigration1', 60000);
     $this->databaseMigrationRepository->log('getLastMigration2', 60001);
@@ -115,7 +126,7 @@ test('get last migration', function () {
 });
 
 test('get migration batches', function () {
-    $this->connection->getArangoClient()->schema()->truncateCollection($this->collection);
+    $this->connection->getArangoClient()->schema()->truncateCollection('migrations');
 
     $this->databaseMigrationRepository->log('getMigrationBatches1', 32);
     $this->databaseMigrationRepository->log('getMigrationBatches2', 33);
@@ -132,7 +143,7 @@ test('get migration batches', function () {
 });
 
 test('get migrations', function () {
-    $this->connection->getArangoClient()->schema()->truncateCollection($this->collection);
+    $this->connection->getArangoClient()->schema()->truncateCollection('migrations');
 
     $this->databaseMigrationRepository->log('getMigrationBatches1', 42);
     $this->databaseMigrationRepository->log('getMigrationBatches2', 43);

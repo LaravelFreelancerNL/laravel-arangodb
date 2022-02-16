@@ -1,26 +1,13 @@
 <?php
 
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use LaravelFreelancerNL\Aranguent\Eloquent\Model;
-use Mockery as m;
-use Tests\Setup\Database\Seeds\CharactersSeeder;
-use Tests\Setup\Database\Seeds\LocationsSeeder;
-use Tests\Setup\Database\Seeds\TagsSeeder;
+use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
+use Tests\TestCase;
 
-beforeEach(function () {
-    Carbon::setTestNow(Carbon::now());
-});
-
-afterEach(function () {
-    Carbon::setTestNow(null);
-    Carbon::resetToStringFormat();
-
-    Model::unsetEventDispatcher();
-
-    M::close();
-});
+uses(
+    TestCase::class,
+    DatabaseTransactions::class
+);
 
 test('join', function () {
     $characters = DB::table('characters')
@@ -37,7 +24,7 @@ test('cross join', function () {
         ->crossJoin('locations')
         ->get();
 
-    expect($characters)->toHaveCount(344);
+    expect($characters)->toHaveCount(387);
 });
 
 test('left join', function () {
@@ -53,14 +40,3 @@ test('left join', function () {
     expect($characters[0]->id)->toEqual('NedStark');
     expect($charactersWithoutResidence)->toHaveCount(10);
 });
-
-// Helpers
-function defineDatabaseMigrations()
-{
-    test()->loadLaravelMigrations();
-    test()->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
-
-    Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
-    Artisan::call('db:seed', ['--class' => TagsSeeder::class]);
-    Artisan::call('db:seed', ['--class' => LocationsSeeder::class]);
-}

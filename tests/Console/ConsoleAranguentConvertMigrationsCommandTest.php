@@ -3,8 +3,6 @@
 use Illuminate\Database\Migrations\Migrator;
 use LaravelFreelancerNL\Aranguent\Console\Migrations\AranguentConvertMigrationsCommand;
 use Mockery as M;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\NullOutput;
 use Tests\Setup\ClassStubs\ApplicationDatabaseMigrationStub;
 
 beforeEach(function () {
@@ -42,9 +40,3 @@ test('illuminate usage is replaced by aranguent in migration files', function ()
     expect($occurenceOfAranguent)->toEqual(2);
     expect($occurenceOfIlluminate)->toEqual(1);
 });
-
-// Helpers
-function runCommand($command, $input = [])
-{
-    return $command->run(new ArrayInput($input), new NullOutput());
-}

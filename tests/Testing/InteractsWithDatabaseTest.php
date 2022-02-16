@@ -1,10 +1,16 @@
 <?php
 
-use Illuminate\Support\Facades\Artisan;
-use Tests\Setup\Database\Seeds\CharactersSeeder;
-use Tests\Setup\Database\Seeds\TagsSeeder;
+declare(strict_types=1);
+
+use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Tag;
+use Tests\TestCase;
+
+uses(
+    TestCase::class,
+    DatabaseTransactions::class
+);
 
 test('assert database has', function () {
     $this->assertDatabaseHas('characters', [
@@ -84,13 +90,3 @@ test('cast as json', function () {
 
     expect($result)->toBe($value);
 });
-
-// Helpers
-function defineDatabaseMigrations()
-{
-    test()->loadLaravelMigrations();
-    test()->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
-
-    Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);
-    Artisan::call('db:seed', ['--class' => TagsSeeder::class]);
-}
