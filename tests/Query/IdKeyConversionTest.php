@@ -112,16 +112,16 @@ test('get id conversion with wheres', function () {
 
     $this->assertObjectNotHasAttribute('_key', $results->first());
     $this->assertObjectHasAttribute('id', $results->first());
-    $this->assertSame('NedStark', $results->first()->id);
-    $this->assertCount(1, $results);
+    expect($results->first()->id)->toBe('NedStark');
+    expect($results)->toHaveCount(1);
 });
 
 test('model has correct ids', function () {
     $results = Character::all();
 
-    $this->assertSame('NedStark', $results->first()->id);
-    $this->assertSame('characters/NedStark', $results->first()->_id);
-    $this->assertNull($results->first()->_key);
+    expect($results->first()->id)->toBe('NedStark');
+    expect($results->first()->_id)->toBe('characters/NedStark');
+    expect($results->first()->_key)->toBeNull();
 });
 
 // Helpers

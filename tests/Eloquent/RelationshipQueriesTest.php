@@ -28,23 +28,23 @@ afterEach(function () {
 
 test('has', function () {
     $characters = Character::has('leads')->get();
-    $this->assertEquals(3, count($characters));
+    expect(count($characters))->toEqual(3);
 });
 
 test('has with minimum relation count', function () {
     $characters = Character::has('leads', '>=', 3)->get();
-    $this->assertEquals(1, count($characters));
+    expect(count($characters))->toEqual(1);
 });
 
 test('has morph', function () {
     $characters = Character::has('tags')->get();
 
-    $this->assertEquals(2, count($characters));
+    expect(count($characters))->toEqual(2);
 });
 
 test('doesnt have', function () {
     $characters = Character::doesntHave('leads')->get();
-    $this->assertEquals(40, count($characters));
+    expect(count($characters))->toEqual(40);
 });
 
 test('with count', function () {
@@ -52,7 +52,7 @@ test('with count', function () {
         ->where('leads_count', '>', 0)
         ->get();
 
-    $this->assertEquals(3, count($characters));
+    expect(count($characters))->toEqual(3);
 });
 
 // Helpers

@@ -43,8 +43,8 @@ test('illuminate usage is replaced by aranguent in migration files', function ()
     $content = file_get_contents($this->conversionMigration);
     $occurenceOfAranguent = substr_count($content, 'LaravelFreelancerNL\Aranguent');
     $occurenceOfIlluminate = substr_count($content, 'Illuminate\Database');
-    $this->assertEquals(2, $occurenceOfAranguent);
-    $this->assertEquals(1, $occurenceOfIlluminate);
+    expect($occurenceOfAranguent)->toEqual(2);
+    expect($occurenceOfIlluminate)->toEqual(1);
 });
 
 // Helpers

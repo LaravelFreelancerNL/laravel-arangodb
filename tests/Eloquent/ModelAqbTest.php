@@ -14,8 +14,8 @@ test('model by aql with query builder', function () {
             ->return('characterDoc')
     );
 
-    $this->assertInstanceOf(Collection::class, $results);
-    $this->assertInstanceOf(Character::class, $results->first());
+    expect($results)->toBeInstanceOf(Collection::class);
+    expect($results->first())->toBeInstanceOf(Character::class);
 });
 
 test('model by aql with closure', function () {
@@ -26,8 +26,8 @@ test('model by aql with closure', function () {
         }
     );
 
-    $this->assertInstanceOf(Collection::class, $results);
-    $this->assertInstanceOf(Character::class, $results->first());
+    expect($results)->toBeInstanceOf(Collection::class);
+    expect($results->first())->toBeInstanceOf(Character::class);
 });
 
 // Helpers

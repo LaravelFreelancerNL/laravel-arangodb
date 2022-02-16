@@ -78,9 +78,9 @@ test('retrieve relation', function () {
     $location = Location::find('winterfell');
 
     $inhabitants = $location->inhabitants;
-    $this->assertCount(2, $inhabitants);
-    $this->assertEquals($inhabitants->first()->residence_id, $location->id);
-    $this->assertInstanceOf(Character::class, $inhabitants->first());
+    expect($inhabitants)->toHaveCount(2);
+    expect($location->id)->toEqual($inhabitants->first()->residence_id);
+    expect($inhabitants->first())->toBeInstanceOf(Character::class);
 });
 
 test('save', function () {
@@ -107,10 +107,10 @@ test('save', function () {
 
     $inhabitants = $location->inhabitants;
 
-    $this->assertCount(1, $inhabitants);
-    $this->assertEquals('TheonGreyjoy', $inhabitants->first()->id);
-    $this->assertEquals($inhabitants->first()->residence_id, $location->id);
-    $this->assertInstanceOf(Character::class, $inhabitants->first());
+    expect($inhabitants)->toHaveCount(1);
+    expect($inhabitants->first()->id)->toEqual('TheonGreyjoy');
+    expect($location->id)->toEqual($inhabitants->first()->residence_id);
+    expect($inhabitants->first())->toBeInstanceOf(Character::class);
 });
 
 test('create', function () {
@@ -135,9 +135,9 @@ test('create', function () {
     $character = Character::find('TheonGreyjoy');
     $location = Location::find('pyke');
 
-    $this->assertEquals('TheonGreyjoy', $location->inhabitants->first()->id);
-    $this->assertEquals($character->residence_id, 'pyke');
-    $this->assertInstanceOf(Character::class, $location->inhabitants->first());
+    expect($location->inhabitants->first()->id)->toEqual('TheonGreyjoy');
+    expect('pyke')->toEqual($character->residence_id);
+    expect($location->inhabitants->first())->toBeInstanceOf(Character::class);
 });
 
 test('first or create', function () {
@@ -162,9 +162,9 @@ test('first or create', function () {
     $character = Character::find('TheonGreyjoy');
     $location = Location::find('pyke');
 
-    $this->assertEquals('TheonGreyjoy', $location->inhabitants->first()->id);
-    $this->assertEquals($character->residence_id, 'pyke');
-    $this->assertInstanceOf(Character::class, $location->inhabitants->first());
+    expect($location->inhabitants->first()->id)->toEqual('TheonGreyjoy');
+    expect('pyke')->toEqual($character->residence_id);
+    expect($location->inhabitants->first())->toBeInstanceOf(Character::class);
 });
 
 test('first or new', function () {
@@ -187,16 +187,16 @@ test('first or new', function () {
         ]
     );
 
-    $this->assertInstanceOf(Character::class, $character);
-    $this->assertEquals('TheonGreyjoy', $character->id);
-    $this->assertEquals($character->residence_id, 'pyke');
+    expect($character)->toBeInstanceOf(Character::class);
+    expect($character->id)->toEqual('TheonGreyjoy');
+    expect('pyke')->toEqual($character->residence_id);
 });
 
 test('with', function () {
     $location = Location::with('inhabitants')->find('winterfell');
 
-    $this->assertInstanceOf(Character::class, $location->inhabitants->first());
-    $this->assertEquals('NedStark', $location->inhabitants->first()->id);
+    expect($location->inhabitants->first())->toBeInstanceOf(Character::class);
+    expect($location->inhabitants->first()->id)->toEqual('NedStark');
 });
 
 // Helpers

@@ -26,7 +26,7 @@ test('insert get id', function () {
     $builder = $this->getBuilder();
     $builder->getConnection()->shouldReceive('execute')->once()->with(FluentAQL::class)->andReturn(1);
     $result = $builder->from('users')->insertGetId(['email' => 'foo']);
-    $this->assertEquals(1, $result);
+    expect($result)->toEqual(1);
 });
 
 test('insert or ignore inserts data', function () {
@@ -45,7 +45,7 @@ test('insert or ignore inserts data', function () {
         ->where("name", "==", "Lyanna")
         ->count();
 
-    $this->assertSame(1, $result);
+    expect($result)->toBe(1);
 });
 
 test('insert or ignore doesnt error on duplicates', function () {
@@ -65,17 +65,17 @@ test('insert or ignore doesnt error on duplicates', function () {
         ->where("name", "==", "Lyanna")
         ->count();
 
-    $this->assertSame(1, $result);
+    expect($result)->toBe(1);
 });
 
 test('basic select', function () {
     $builder = $this->getBuilder();
     $builder->select('*')->from('users');
-    $this->assertSame('FOR userDoc IN users RETURN userDoc', $builder->toSql());
+    expect($builder->toSql())->toBe('FOR userDoc IN users RETURN userDoc');
 
     $builder = $this->getBuilder();
     $builder->select(['name', 'email'])->from('users');
-    $this->assertSame('FOR userDoc IN users RETURN {"name":userDoc.name,"email":userDoc.email}', $builder->toSql());
+    expect($builder->toSql())->toBe('FOR userDoc IN users RETURN {"name":userDoc.name,"email":userDoc.email}');
 });
 
 test('basic select with get columns', function () {
@@ -83,7 +83,7 @@ test('basic select with get columns', function () {
     $builder->getProcessor()->shouldReceive('processSelect');
     $builder->getConnection()->shouldReceive('select')->once()->andReturnUsing(
         function ($aqb) {
-            $this->assertSame('FOR userDoc IN users RETURN userDoc', $aqb->toAql());
+            expect($aqb->toAql())->toBe('FOR userDoc IN users RETURN userDoc');
         }
     );
     $builder->getConnection()->shouldReceive('select')->once()->andReturnUsing(
@@ -96,21 +96,21 @@ test('basic select with get columns', function () {
     );
     $builder->getConnection()->shouldReceive('select')->once()->andReturnUsing(
         function ($aqb) {
-            $this->assertSame('FOR userDoc IN users RETURN userDoc.name', $aqb->toAql());
+            expect($aqb->toAql())->toBe('FOR userDoc IN users RETURN userDoc.name');
         }
     );
 
     $builder->from('users')->get();
-    $this->assertNull($builder->columns);
+    expect($builder->columns)->toBeNull();
 
     $builder->from('users')->get(['name', 'email']);
-    $this->assertNull($builder->columns);
+    expect($builder->columns)->toBeNull();
 
     $builder->from('users')->get('name');
-    $this->assertNull($builder->columns);
+    expect($builder->columns)->toBeNull();
 
-    $this->assertSame('FOR userDoc IN users', $builder->toSql());
-    $this->assertNull($builder->columns);
+    expect($builder->toSql())->toBe('FOR userDoc IN users');
+    expect($builder->columns)->toBeNull();
 });
 
 test('basic select with get one column', function () {
@@ -118,12 +118,12 @@ test('basic select with get one column', function () {
     $builder->getProcessor()->shouldReceive('processSelect');
     $builder->getConnection()->shouldReceive('select')->once()->andReturnUsing(
         function ($aqb) {
-            $this->assertSame('FOR userDoc IN users RETURN userDoc.name', $aqb->toAql());
+            expect($aqb->toAql())->toBe('FOR userDoc IN users RETURN userDoc.name');
         }
     );
 
     $builder->from('users')->get('name');
-    $this->assertNull($builder->columns);
+    expect($builder->columns)->toBeNull();
 });
 
 test('order bys', function () {
@@ -140,61 +140,61 @@ test('order by random', function () {
         ->inRandomOrder()
         ->toSql();
 
-    $this->assertEquals('FOR characterDoc IN characters SORT RAND()', $results);
+    expect($results)->toEqual('FOR characterDoc IN characters SORT RAND()');
 });
 
 test('limits and offsets', function () {
     $builder = $this->getBuilder();
     $builder->select('*')->from('users')->offset(5)->limit(10);
-    $this->assertSame('FOR userDoc IN users LIMIT 5, 10 RETURN userDoc', $builder->toSql());
+    expect($builder->toSql())->toBe('FOR userDoc IN users LIMIT 5, 10 RETURN userDoc');
 
     $builder = $this->getBuilder();
     $builder->select('*')->from('users')->skip(5)->take(10);
-    $this->assertSame('FOR userDoc IN users LIMIT 5, 10 RETURN userDoc', $builder->toSql());
+    expect($builder->toSql())->toBe('FOR userDoc IN users LIMIT 5, 10 RETURN userDoc');
 
     $builder = $this->getBuilder();
     $builder->select('*')->from('users')->skip(0)->take(0);
-    $this->assertSame('FOR userDoc IN users LIMIT 0, 0 RETURN userDoc', $builder->toSql());
+    expect($builder->toSql())->toBe('FOR userDoc IN users LIMIT 0, 0 RETURN userDoc');
 
     $builder = $this->getBuilder();
     $builder->select('*')->from('users')->skip(-5)->take(-10);
-    $this->assertSame('FOR userDoc IN users RETURN userDoc', $builder->toSql());
+    expect($builder->toSql())->toBe('FOR userDoc IN users RETURN userDoc');
 });
 
 test('update method', function () {
     $builder = $this->getBuilder();
     $builder->getConnection()->shouldReceive('update')->once()->with(FluentAQL::class)->andReturn(1);
     $result = $builder->from('users')->where('userDoc._id', '=', 1)->update(['email' => 'foo', 'name' => 'bar']);
-    $this->assertEquals(1, $result);
+    expect($result)->toEqual(1);
 });
 
 test('delete method', function () {
     $builder = $this->getBuilder();
     $builder->getConnection()->shouldReceive('delete')->once()->with(FluentAQL::class)->andReturn(1);
     $result = $builder->from('users')->where('userDoc.email', '=', 'foo')->delete();
-    $this->assertEquals(1, $result);
+    expect($result)->toEqual(1);
 
     $builder = $this->getBuilder();
     $builder->getConnection()->shouldReceive('delete')->once()->with(FluentAQL::class)->andReturn(1);
     $result = $builder->from('users')->delete(1);
-    $this->assertEquals(1, $result);
+    expect($result)->toEqual(1);
 });
 
 test('first method', function () {
     $result = \DB::table('characters')->where('characterDoc.id', '=', 'NedStark')->first();
 
-    $this->assertSame('NedStark', $result->id);
+    expect($result->id)->toBe('NedStark');
 });
 
 test('aggregates', function () {
     $results = DB::table('characters')->count();
-    $this->assertEquals(43, $results);
+    expect($results)->toEqual(43);
 });
 
 test('paginate', function () {
     $result = DB::table('characters')->paginate(15)->toArray();
-    $this->assertEquals(43, $result['total']);
-    $this->assertEquals(15, count($result['data']));
+    expect($result['total'])->toEqual(43);
+    expect(count($result['data']))->toEqual(15);
 });
 
 test('paginate with filters', function () {
@@ -202,8 +202,8 @@ test('paginate with filters', function () {
         ->where('residence_id', 'winterfell')
         ->paginate(5)
         ->toArray();
-    $this->assertEquals(15, $result['total']);
-    $this->assertEquals(5, count($result['data']));
+    expect($result['total'])->toEqual(15);
+    expect(count($result['data']))->toEqual(5);
 });
 
 test('paginate with optional filters', function () {
@@ -219,15 +219,15 @@ test('paginate with optional filters', function () {
         ->paginate(5)
         ->toArray();
 
-    $this->assertEquals(15, $result['total']);
-    $this->assertEquals(5, count($result['data']));
+    expect($result['total'])->toEqual(15);
+    expect(count($result['data']))->toEqual(5);
 });
 
 test('pluck', function () {
     $results = DB::table('characters')->pluck('name', 'id');
 
-    $this->assertEquals(43, $results->count());
-    $this->assertEquals('Ned', $results['NedStark']);
+    expect($results->count())->toEqual(43);
+    expect($results['NedStark'])->toEqual('Ned');
 });
 
 // Helpers

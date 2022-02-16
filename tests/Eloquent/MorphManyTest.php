@@ -66,28 +66,28 @@ test('retrieve relation', function () {
 
     $locations = $character->captured;
 
-    $this->assertInstanceOf(Location::class, $locations->first());
-    $this->assertCount(5, $locations);
-    $this->assertEquals($locations->first()->capturable->id, $character->id);
+    expect($locations->first())->toBeInstanceOf(Location::class);
+    expect($locations)->toHaveCount(5);
+    expect($character->id)->toEqual($locations->first()->capturable->id);
 });
 
 test('save', function () {
     $location = Location::find('winterfell');
-    $this->assertEquals('TheonGreyjoy', $location->capturable_id);
+    expect($location->capturable_id)->toEqual('TheonGreyjoy');
 
     $character = Character::find('RamsayBolton');
     $character->captured()->save($location);
 
-    $this->assertEquals($character->id, $location->capturable_id);
-    $this->assertCount(1, $character->captured);
-    $this->assertInstanceOf(Location::class, $character->captured->first());
+    expect($location->capturable_id)->toEqual($character->id);
+    expect($character->captured)->toHaveCount(1);
+    expect($character->captured->first())->toBeInstanceOf(Location::class);
 });
 
 test('with', function () {
     $character = Character::with('captured')->find('TheonGreyjoy');
 
-    $this->assertInstanceOf(Location::class, $character->captured->first());
-    $this->assertEquals('winterfell', $character->captured->first()->id);
+    expect($character->captured->first())->toBeInstanceOf(Location::class);
+    expect($character->captured->first()->id)->toEqual('winterfell');
 });
 
 // Helpers

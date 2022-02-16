@@ -21,8 +21,8 @@ test('migrations collection is created', function () {
 
     $this->databaseMigrationRepository->createRepository();
 
-    $this->assertTrue($this->databaseMigrationRepository->repositoryExists());
-    $this->assertTrue($this->schemaManager->hasCollection($this->collection));
+    expect($this->databaseMigrationRepository->repositoryExists())->toBeTrue();
+    expect($this->schemaManager->hasCollection($this->collection))->toBeTrue();
 });
 
 test('log creates migration entry', function () {
@@ -38,7 +38,7 @@ test('log creates migration entry', function () {
     $results = current($this->connection->select($qb->query));
 
     $this->assertNotEmpty($results);
-    $this->assertSame($batch, $results->batch);
+    expect($results->batch)->toBe($batch);
 
     $this->databaseMigrationRepository->delete($filename);
 });
@@ -51,8 +51,8 @@ test('get number of last batch', function () {
 
     $result = $this->databaseMigrationRepository->getLastBatchNumber();
 
-    $this->assertIsNumeric($result);
-    $this->assertEquals(667, $result);
+    expect($result)->toBeNumeric();
+    expect($result)->toEqual(667);
 
     $this->databaseMigrationRepository->delete('getLastBatchNumberTest');
     $this->databaseMigrationRepository->delete('getLastBatchNumberTest');
@@ -67,7 +67,7 @@ test('get all ran migrationfiles', function () {
 
     $result = $this->databaseMigrationRepository->getRan();
 
-    $this->assertEquals(3, count($result));
+    expect(count($result))->toEqual(3);
 
     $this->databaseMigrationRepository->delete('getRanMigration1');
     $this->databaseMigrationRepository->delete('getRanMigration2');
@@ -97,7 +97,7 @@ test('delete migration', function () {
         ->return('m')
         ->get();
     $results = current($this->connection->select($qb->query));
-    $this->assertEmpty($results);
+    expect($results)->toBeEmpty();
 });
 
 test('get last migration', function () {
@@ -109,8 +109,8 @@ test('get last migration', function () {
 
     $lastBatch = $this->databaseMigrationRepository->getLast();
 
-    $this->assertEquals(2, count($lastBatch));
-    $this->assertEquals(60001, current($lastBatch)->batch);
+    expect(count($lastBatch))->toEqual(2);
+    expect(current($lastBatch)->batch)->toEqual(60001);
 
     $this->databaseMigrationRepository->delete('getLastMigration1');
     $this->databaseMigrationRepository->delete('getLastMigration2');
@@ -126,8 +126,8 @@ test('get migration batches', function () {
 
     $batches = $this->databaseMigrationRepository->getMigrationBatches();
 
-    $this->assertIsArray($batches);
-    $this->assertEquals(3, count($batches));
+    expect($batches)->toBeArray();
+    expect(count($batches))->toEqual(3);
 
     $this->databaseMigrationRepository->delete('getMigrationBatches1');
     $this->databaseMigrationRepository->delete('getMigrationBatches2');
@@ -143,8 +143,8 @@ test('get migrations', function () {
 
     $migrations = $this->databaseMigrationRepository->getMigrations(2);
 
-    $this->assertIsArray($migrations);
-    $this->assertEquals(2, count($migrations));
+    expect($migrations)->toBeArray();
+    expect(count($migrations))->toEqual(2);
 
     $this->databaseMigrationRepository->delete('getMigrationBatches1');
     $this->databaseMigrationRepository->delete('getMigrationBatches2');

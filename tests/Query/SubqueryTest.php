@@ -32,7 +32,7 @@ test('subquery where', function () {
                 ->limit(1);
     }, 'Dragonstone')
         ->get();
-    $this->assertEquals('DaenerysTargaryen', $characters[0]->id);
+    expect($characters[0]->id)->toEqual('DaenerysTargaryen');
 });
 
 test('where sub', function () {
@@ -44,7 +44,7 @@ test('where sub', function () {
     })
         ->get();
 
-    $this->assertEquals('DaenerysTargaryen', $characters[0]->id);
+    expect($characters[0]->id)->toEqual('DaenerysTargaryen');
 });
 
 test('where exists with multiple results', function () {
@@ -54,7 +54,7 @@ test('where exists with multiple results', function () {
                 ->whereColumn('locations.led_by', 'characters.id');
     })
         ->get();
-    $this->assertEquals(3, count($characters));
+    expect(count($characters))->toEqual(3);
 });
 
 test('where exists with limit', function () {
@@ -65,7 +65,7 @@ test('where exists with limit', function () {
                 ->limit(1);
     })
         ->get();
-    $this->assertEquals(3, count($characters));
+    expect(count($characters))->toEqual(3);
 });
 
 test('where not exists with multiple results', function () {
@@ -75,7 +75,7 @@ test('where not exists with multiple results', function () {
             ->whereColumn('locations.led_by', 'characters.id');
     })
         ->get();
-    $this->assertEquals(40, count($characters));
+    expect(count($characters))->toEqual(40);
 });
 
 test('where not exists with limit', function () {
@@ -86,7 +86,7 @@ test('where not exists with limit', function () {
                 ->limit(1);
     })
         ->get();
-    $this->assertEquals(40, count($characters));
+    expect(count($characters))->toEqual(40);
 });
 
 // Helpers

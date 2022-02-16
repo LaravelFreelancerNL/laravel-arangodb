@@ -30,22 +30,22 @@ test('retrieve relation', function () {
 
     $children = $parent->children;
 
-    $this->assertEquals(5, count($children));
-    $this->assertInstanceOf(Character::class, $children[0]);
-    $this->assertEquals('characters/NedStark', $children[0]->pivot->_from);
+    expect(count($children))->toEqual(5);
+    expect($children[0])->toBeInstanceOf(Character::class);
+    expect($children[0]->pivot->_from)->toEqual('characters/NedStark');
 
-    $this->assertTrue(true);
+    expect(true)->toBeTrue();
 });
 
 test('inverse relation', function () {
     $child = Character::find('JonSnow');
 
     $parents = $child->parents;
-    $this->assertCount(1, $parents);
-    $this->assertInstanceOf(Character::class, $parents[0]);
-    $this->assertEquals('characters/NedStark', $parents[0]->_id);
+    expect($parents)->toHaveCount(1);
+    expect($parents[0])->toBeInstanceOf(Character::class);
+    expect($parents[0]->_id)->toEqual('characters/NedStark');
 
-    $this->assertTrue(true);
+    expect(true)->toBeTrue();
 });
 
 test('attach', function () {
@@ -71,8 +71,8 @@ test('attach', function () {
     $reloadedChild = Character::find('JonSnow');
     $parents = $child->parents;
 
-    $this->assertEquals('NedStark', $parents[0]->id);
-    $this->assertEquals('LyannaStark', $parents[1]->id);
+    expect($parents[0]->id)->toEqual('NedStark');
+    expect($parents[1]->id)->toEqual('LyannaStark');
 
     $child->parents()->detach($lyannaStark);
     $child->save();
@@ -87,7 +87,7 @@ test('detach', function () {
 
     $child = $child->fresh();
 
-    $this->assertCount(0, $child->parents);
+    expect($child->parents)->toHaveCount(0);
 });
 
 test('sync', function () {
@@ -117,11 +117,11 @@ test('sync', function () {
     $child->parents()->sync(['characters/LyannaStark', 'characters/RhaegarTargaryen']);
     $child->fresh();
 
-    $this->assertEquals(2, count($child->parents));
-    $this->assertEquals('characters/LyannaStark', $child->parents[0]->_id);
-    $this->assertEquals('characters/RhaegarTargaryen', $child->parents[1]->_id);
-    $this->assertEquals('LyannaStark', $child->parents[0]->id);
-    $this->assertEquals('RhaegarTargaryen', $child->parents[1]->id);
+    expect(count($child->parents))->toEqual(2);
+    expect($child->parents[0]->_id)->toEqual('characters/LyannaStark');
+    expect($child->parents[1]->_id)->toEqual('characters/RhaegarTargaryen');
+    expect($child->parents[0]->id)->toEqual('LyannaStark');
+    expect($child->parents[1]->id)->toEqual('RhaegarTargaryen');
 
     $child->parents()->sync('characters/NedStark');
     $rhaegarTargaryen->delete();

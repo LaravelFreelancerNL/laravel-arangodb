@@ -85,7 +85,7 @@ test('cast as json', function () {
     ];
     $result = $this->castAsJson($value);
 
-    $this->assertSame($value, $result);
+    expect($result)->toBe($value);
 });
 
 // Helpers

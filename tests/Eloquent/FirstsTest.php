@@ -18,14 +18,14 @@ beforeEach(function () {
 test('first', function () {
     $ned = Character::first();
 
-    $this->assertEquals('NedStark', $ned->id);
+    expect($ned->id)->toEqual('NedStark');
 });
 
 test('first with columns', function () {
     $ned = Character::first(["_id", "name"]);
 
-    $this->assertEquals('Ned', $ned->name);
-    $this->assertCount(2, $ned->toArray());
+    expect($ned->name)->toEqual('Ned');
+    expect($ned->toArray())->toHaveCount(2);
 });
 
 test('first or', function () {
@@ -33,7 +33,7 @@ test('first or', function () {
         return false;
     });
 
-    $this->assertEquals('Ned', $ned->name);
+    expect($ned->name)->toEqual('Ned');
 });
 
 test('first or trigger or', function () {
@@ -41,7 +41,7 @@ test('first or trigger or', function () {
         return false;
     });
 
-    $this->assertFalse($location);
+    expect($location)->toBeFalse();
 });
 
 test('first or create', function () {
@@ -58,8 +58,8 @@ test('first or create', function () {
 
     $model = Character::firstOrCreate($char);
 
-    $this->assertSame($ned->_id, $model->_id);
-    $this->assertSame($ned->id, $model->id);
+    expect($model->_id)->toBe($ned->_id);
+    expect($model->id)->toBe($ned->id);
 });
 
 test('first or create with nested data', function () {
@@ -93,15 +93,15 @@ test('first or create with nested data', function () {
         $char
     );
 
-    $this->assertSame($ned->_id, $model->_id);
-    $this->assertSame($char['en']['description'], $model->en->description);
-    $this->assertSame($char['en']['quotes'], $model->en->quotes);
+    expect($model->_id)->toBe($ned->_id);
+    expect($model->en->description)->toBe($char['en']['description']);
+    expect($model->en->quotes)->toBe($char['en']['quotes']);
 });
 
 test('first or fail', function () {
     $ned = Character::firstOrFail();
 
-    $this->assertEquals('NedStark', $ned->id);
+    expect($ned->id)->toEqual('NedStark');
 });
 
 test('first or failing', function () {
@@ -124,7 +124,7 @@ test('first or new', function () {
 
     $model = Character::firstOrNew($char);
 
-    $this->assertSame($ned->id, $model->id);
+    expect($model->id)->toBe($ned->id);
 });
 
 test('first or new none existing', function () {
@@ -142,15 +142,15 @@ test('first or new none existing', function () {
 
     $model = Location::firstOrNew($loc);
 
-    $this->assertNull($dragonstone);
+    expect($dragonstone)->toBeNull();
     $this->assertObjectNotHasAttribute('id', $model);
 });
 
 test('first where', function () {
     $result = Character::firstWhere('name', 'Jorah');
 
-    $this->assertInstanceOf(Character::class, $result);
-    $this->assertSame('Jorah', $result->name);
+    expect($result)->toBeInstanceOf(Character::class);
+    expect($result->name)->toBe('Jorah');
 });
 
 // Helpers

@@ -41,10 +41,10 @@ test('insert handles array attributes', function () {
 
     $ned = Character::find('NedStark');
 
-    $this->assertEquals('NedStark', $ned->id);
-    $this->assertIsObject($ned->en);
-    $this->assertEquals($character['en'], (array) $ned->en);
-    $this->assertInstanceOf(Character::class, $ned);
+    expect($ned->id)->toEqual('NedStark');
+    expect($ned->en)->toBeObject();
+    expect((array) $ned->en)->toEqual($character['en']);
+    expect($ned)->toBeInstanceOf(Character::class);
 });
 
 test('update sets correct updated at', function () {

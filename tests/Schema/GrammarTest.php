@@ -59,7 +59,7 @@ test('compile drop attribute returns correct data', function () {
         . 'IN GrammarTestCollection OPTIONS {"keepNull":false}',
         $results->aqb
     );
-    $this->assertEquals([$collection], $results->aqb->collections['write']);
+    expect($results->aqb->collections['write'])->toEqual([$collection]);
 });
 
 test('compile rename attribute returns correct data', function () {
@@ -80,7 +80,7 @@ test('compile rename attribute returns correct data', function () {
         . 'IN GrammarTestCollection OPTIONS {"keepNull":true}',
         $results->aqb->query
     );
-    $this->assertEquals($collection, $results->aqb->collections['write'][0]);
+    expect($results->aqb->collections['write'][0])->toEqual($collection);
 });
 
 test('attributes are wrapped correctly', function () {
@@ -90,6 +90,6 @@ test('attributes are wrapped correctly', function () {
     ];
     foreach (array_keys($attributes) as $attribute) {
         $wrappedAttribute = $this->grammar->wrapBindVar($attribute);
-        $this->assertEquals($attributes[$attribute], $wrappedAttribute);
+        expect($wrappedAttribute)->toEqual($attributes[$attribute]);
     }
 });

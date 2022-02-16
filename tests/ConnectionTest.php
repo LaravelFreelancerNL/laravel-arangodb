@@ -10,7 +10,7 @@ uses(TestCase::class);
 test('connection is made', function () {
     $connection = DB::connection();
 
-    $this->assertInstanceOf('LaravelFreelancerNL\Aranguent\Connection', $connection);
+    expect($connection)->toBeInstanceOf('LaravelFreelancerNL\Aranguent\Connection');
 });
 
 test('change database name', function () {
@@ -20,7 +20,7 @@ test('change database name', function () {
     $currentName = $this->connection->getDatabaseName();
 
     $this->assertNotEquals($initialName, $currentName);
-    $this->assertEquals($newName, $currentName);
+    expect($currentName)->toEqual($newName);
 });
 
 test('explain query', function () {
@@ -46,16 +46,16 @@ test('error handling malformed aql', function () {
 
 test('disconnect', function () {
     $connection = DB::connection();
-    $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
+    expect($connection->getArangoClient())->toBeInstanceOf(ArangoClient::class);
     $connection->disconnect();
-    $this->assertNull($connection->getArangoClient());
+    expect($connection->getArangoClient())->toBeNull();
 });
 
 test('purge', function () {
     $connection = DB::connection();
-    $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
+    expect($connection->getArangoClient())->toBeInstanceOf(ArangoClient::class);
     DB::purge();
-    $this->assertNull($connection->getArangoClient());
+    expect($connection->getArangoClient())->toBeNull();
 });
 
 test('db calls fail after purge', function () {
@@ -65,18 +65,18 @@ test('db calls fail after purge', function () {
 
 test('reconnect', function () {
     $connection = DB::connection();
-    $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
+    expect($connection->getArangoClient())->toBeInstanceOf(ArangoClient::class);
     DB::purge();
 
     $connection->reconnect();
 
     $connection = DB::connection();
-    $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
+    expect($connection->getArangoClient())->toBeInstanceOf(ArangoClient::class);
 });
 
 test('reconnect to different datase', function () {
     $connection = DB::connection();
-    $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
+    expect($connection->getArangoClient())->toBeInstanceOf(ArangoClient::class);
 
     DB::purge();
     $newDatabase = "otherDatabase";
@@ -84,12 +84,12 @@ test('reconnect to different datase', function () {
     $connection->reconnect();
 
     $connection = DB::connection();
-    $this->assertSame($newDatabase, $connection->getArangoClient()->getDatabase());
+    expect($connection->getArangoClient()->getDatabase())->toBe($newDatabase);
 });
 
 test('reconnect to different datase throws404', function () {
     $connection = DB::connection();
-    $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
+    expect($connection->getArangoClient())->toBeInstanceOf(ArangoClient::class);
     DB::purge();
 
     $newDatabase = "otherDatabase";

@@ -78,18 +78,18 @@ test('retrieve relation', function () {
     $location = Location::find('kingslanding');
     $character = $location->character;
 
-    $this->assertEquals('kingslanding', $location->id);
-    $this->assertEquals($character->location_id, $location->id);
-    $this->assertInstanceOf(Character::class, $character);
+    expect($location->id)->toEqual('kingslanding');
+    expect($location->id)->toEqual($character->location_id);
+    expect($character)->toBeInstanceOf(Character::class);
 });
 
 test('alternative relationship name and key', function () {
     $character = Character::find('SansaStark');
     $location = $character->leads;
 
-    $this->assertEquals('winterfell', $location->id);
-    $this->assertEquals($character->location_id, $location->id);
-    $this->assertInstanceOf(Location::class, $location);
+    expect($location->id)->toEqual('winterfell');
+    expect($location->id)->toEqual($character->location_id);
+    expect($location)->toBeInstanceOf(Location::class);
 });
 
 test('create', function () {
@@ -118,9 +118,9 @@ test('create', function () {
 
     $location = Location::find('pyke');
 
-    $this->assertEquals('TheonGreyjoy', $location->leader->id);
-    $this->assertEquals($location->led_by, 'TheonGreyjoy');
-    $this->assertInstanceOf(Character::class, $location->leader);
+    expect($location->leader->id)->toEqual('TheonGreyjoy');
+    expect('TheonGreyjoy')->toEqual($location->led_by);
+    expect($location->leader)->toBeInstanceOf(Character::class);
 });
 
 test('save', function () {
@@ -146,16 +146,16 @@ test('save', function () {
 
     $character = $location->character;
 
-    $this->assertEquals('TheonGreyjoy', $character->id);
-    $this->assertEquals($character->location_id, $location->id);
-    $this->assertInstanceOf(Character::class, $character);
+    expect($character->id)->toEqual('TheonGreyjoy');
+    expect($location->id)->toEqual($character->location_id);
+    expect($character)->toBeInstanceOf(Character::class);
 });
 
 test('with', function () {
     $character = Character::with('leads')->find('SansaStark');
 
-    $this->assertInstanceOf(Location::class, $character->leads);
-    $this->assertEquals('winterfell', $character->leads->id);
+    expect($character->leads)->toBeInstanceOf(Location::class);
+    expect($character->leads->id)->toEqual('winterfell');
 });
 
 // Helpers

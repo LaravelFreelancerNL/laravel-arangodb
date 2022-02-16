@@ -29,7 +29,7 @@ test('associative flatten with nested data', function () {
     $this->assertArrayNotHasKey('en', $result);
     $this->assertArrayHasKey('en.description', $result);
     $this->assertArrayHasKey('en.quotes', $result);
-    $this->assertIsArray($result['en.quotes']);
+    expect($result['en.quotes'])->toBeArray();
 });
 
 test('associative flatten with list', function () {
@@ -44,5 +44,5 @@ test('associative flatten with list', function () {
 
     $result = associativeFlatten($data);
 
-    $this->assertSame($data, $result);
+    expect($result)->toBe($data);
 });

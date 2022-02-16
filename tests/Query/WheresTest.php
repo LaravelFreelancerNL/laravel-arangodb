@@ -24,7 +24,7 @@ test('basic wheres', function () {
         $builder->toSql()
     );
 
-    $this->assertEquals([$builder->aqb->getQueryId() . '_1' => 1], $builder->getBindings());
+    expect($builder->getBindings())->toEqual([$builder->aqb->getQueryId() . '_1' => 1]);
 });
 
 test('basic wheres with multiple predicates', function () {
@@ -201,8 +201,8 @@ test('where column without operator', function () {
 test('where nulls', function () {
     $builder = getBuilder();
     $builder->select('*')->from('users')->whereNull('_key');
-    $this->assertSame('FOR userDoc IN users FILTER userDoc._key == null RETURN userDoc', $builder->toSql());
-    $this->assertEquals([], $builder->getBindings());
+    expect($builder->toSql())->toBe('FOR userDoc IN users FILTER userDoc._key == null RETURN userDoc');
+    expect($builder->getBindings())->toEqual([]);
 
     $builder = getBuilder();
     $builder->select('*')
@@ -216,14 +216,14 @@ test('where nulls', function () {
         . '_1 OR userDoc._key == null RETURN userDoc',
         $builder->toSql()
     );
-    $this->assertEquals([$builder->aqb->getQueryId() . '_1' => 1], $builder->getBindings());
+    expect($builder->getBindings())->toEqual([$builder->aqb->getQueryId() . '_1' => 1]);
 });
 
 test('where not nulls', function () {
     $builder = getBuilder();
     $builder->select('*')->from('users')->whereNotNull('id');
-    $this->assertSame('FOR userDoc IN users FILTER userDoc._key != null RETURN userDoc', $builder->toSql());
-    $this->assertEquals([], $builder->getBindings());
+    expect($builder->toSql())->toBe('FOR userDoc IN users FILTER userDoc._key != null RETURN userDoc');
+    expect($builder->getBindings())->toEqual([]);
 
     $builder = getBuilder();
     $builder->select('*')
@@ -237,7 +237,7 @@ test('where not nulls', function () {
         . '_1 OR userDoc._key != null RETURN userDoc',
         $builder->toSql()
     );
-    $this->assertEquals([$builder->aqb->getQueryId() . '_1' => 1], $builder->getBindings());
+    expect($builder->getBindings())->toEqual([$builder->aqb->getQueryId() . '_1' => 1]);
 });
 
 test('where in', function () {
@@ -329,7 +329,7 @@ test('where year', function () {
         $builder->toSql()
     );
 
-    $this->assertEquals([$builder->aqb->getQueryId() . '_1' => "2016"], $builder->getBindings());
+    expect($builder->getBindings())->toEqual([$builder->aqb->getQueryId() . '_1' => "2016"]);
 });
 
 test('where month', function () {
@@ -343,7 +343,7 @@ test('where month', function () {
         $builder->toSql()
     );
 
-    $this->assertEquals([$builder->aqb->getQueryId() . '_1' => "12"], $builder->getBindings());
+    expect($builder->getBindings())->toEqual([$builder->aqb->getQueryId() . '_1' => "12"]);
 });
 
 test('where day', function () {
@@ -357,7 +357,7 @@ test('where day', function () {
         $builder->toSql()
     );
 
-    $this->assertEquals([$builder->aqb->getQueryId() . '_1' => "31"], $builder->getBindings());
+    expect($builder->getBindings())->toEqual([$builder->aqb->getQueryId() . '_1' => "31"]);
 });
 
 test('where time', function () {

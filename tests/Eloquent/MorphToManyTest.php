@@ -30,8 +30,8 @@ test('retrieve relation', function () {
 
     $tags = $character->tags;
 
-    $this->assertEquals(4, count($tags));
-    $this->assertInstanceOf(Tag::class, $tags[0]);
+    expect(count($tags))->toEqual(4);
+    expect($tags[0])->toBeInstanceOf(Tag::class);
 });
 
 test('inverse relation', function () {
@@ -40,8 +40,8 @@ test('inverse relation', function () {
     $characters = $tag->characters;
     $locations = $tag->locations;
 
-    $this->assertEquals(1, count($characters));
-    $this->assertEquals(1, count($locations));
+    expect(count($characters))->toEqual(1);
+    expect(count($locations))->toEqual(1);
 });
 
 test('attach', function () {
@@ -54,8 +54,8 @@ test('attach', function () {
     $character->fresh();
     $tags = $character->tags;
 
-    $this->assertEquals(5, count($tags));
-    $this->assertEquals('B', $character->tags[0]->id);
+    expect(count($tags))->toEqual(5);
+    expect($character->tags[0]->id)->toEqual('B');
 });
 
 test('detach', function () {
@@ -66,9 +66,9 @@ test('detach', function () {
 
     $reloadedCharacter = Character::find('SandorClegane');
 
-    $this->assertEquals(2, count($reloadedCharacter->tags));
-    $this->assertEquals('A', $reloadedCharacter->tags[0]->id);
-    $this->assertEquals('P', $reloadedCharacter->tags[1]->id);
+    expect(count($reloadedCharacter->tags))->toEqual(2);
+    expect($reloadedCharacter->tags[0]->id)->toEqual('A');
+    expect($reloadedCharacter->tags[1]->id)->toEqual('P');
 });
 
 test('sync', function () {
@@ -79,9 +79,9 @@ test('sync', function () {
 
     $reloadedCharacter = Character::find('SandorClegane');
 
-    $this->assertEquals(2, count($reloadedCharacter->tags));
-    $this->assertEquals('C', $reloadedCharacter->tags[0]->id);
-    $this->assertEquals('J', $reloadedCharacter->tags[1]->id);
+    expect(count($reloadedCharacter->tags))->toEqual(2);
+    expect($reloadedCharacter->tags[0]->id)->toEqual('C');
+    expect($reloadedCharacter->tags[1]->id)->toEqual('J');
 });
 
 // Helpers

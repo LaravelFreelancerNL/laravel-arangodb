@@ -54,11 +54,11 @@ test('create aranguent model', function () {
     $file = __DIR__ . '/../../vendor/orchestra/testbench-core/laravel/app/Models/AranguentModelTest.php';
 
     //assert file exists
-    $this->assertFileExists($file);
+    expect($file)->toBeFile();
 
     //assert file refers to Aranguent Base Model
     $content = file_get_contents($file);
-    $this->assertStringContainsString('use LaravelFreelancerNL\Aranguent\Eloquent\Model;', $content);
+    expect($content)->toContain('use LaravelFreelancerNL\Aranguent\Eloquent\Model;');
 });
 
 test('update model', function () {
@@ -69,7 +69,7 @@ test('update model', function () {
 
     $fresh = $character->fresh();
 
-    $this->assertSame(($initialAge + 1), $fresh->age);
+    expect($fresh->age)->toBe(($initialAge + 1));
 });
 
 test('update or create', function () {
@@ -81,7 +81,7 @@ test('update or create', function () {
 
     $fresh = $character->fresh();
 
-    $this->assertSame($newAge, $fresh->age);
+    expect($fresh->age)->toBe($newAge);
 });
 
 test('upsert', function () {
@@ -113,8 +113,8 @@ test('upsert', function () {
     $ned = Character::find('NedStark');
     $jaime = Character::find('JaimeLannister');
 
-    $this->assertFalse($ned->alive);
-    $this->assertFalse($jaime->alive);
+    expect($ned->alive)->toBeFalse();
+    expect($jaime->alive)->toBeFalse();
 });
 
 test('delete model', function () {
@@ -142,48 +142,48 @@ test('truncate model', function () {
 
 test('count', function () {
     $result = Character::count();
-    $this->assertEquals(2, $result);
+    expect($result)->toEqual(2);
 });
 
 test('max', function () {
     $result = Character::max('age');
-    $this->assertEquals(41, $result);
+    expect($result)->toEqual(41);
 });
 
 test('min', function () {
     $result = Character::min('age');
-    $this->assertEquals(41, $result);
+    expect($result)->toEqual(41);
 });
 
 test('average', function () {
     $result = Character::average('age');
-    $this->assertEquals(41, $result);
+    expect($result)->toEqual(41);
 });
 
 test('sum', function () {
     $result = Character::sum('age');
-    $this->assertEquals(41, $result);
+    expect($result)->toEqual(41);
 });
 
 test('get id', function () {
     $ned = Character::first();
-    $this->assertEquals('NedStark', $ned->id);
+    expect($ned->id)->toEqual('NedStark');
 });
 
 test('set underscore id', function () {
     $ned = Character::first();
     $ned->_id = 'characters/NedStarkIsDead';
 
-    $this->assertEquals('characters/NedStarkIsDead', $ned->_id);
-    $this->assertEquals('NedStarkIsDead', $ned->id);
+    expect($ned->_id)->toEqual('characters/NedStarkIsDead');
+    expect($ned->id)->toEqual('NedStarkIsDead');
 });
 
 test('set id', function () {
     $ned = Character::first();
     $ned->id = 'NedStarkIsDead';
 
-    $this->assertEquals('NedStarkIsDead', $ned->id);
-    $this->assertEquals('characters/NedStarkIsDead', $ned->_id);
+    expect($ned->id)->toEqual('NedStarkIsDead');
+    expect($ned->_id)->toEqual('characters/NedStarkIsDead');
 });
 
 // Helpers

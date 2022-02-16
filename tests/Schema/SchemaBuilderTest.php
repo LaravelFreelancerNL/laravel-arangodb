@@ -27,13 +27,13 @@ test('create with custom blueprint', function () {
         return new CustomBlueprint($table, $callback);
     });
     $schema->create('characters', function (Blueprint $collection) {
-        $this->assertInstanceOf(CustomBlueprint::class, $collection);
+        expect($collection)->toBeInstanceOf(CustomBlueprint::class);
     });
 });
 
 test('has table', function () {
-    $this->assertTrue(Schema::hasTable('locations'));
-    $this->assertFalse(Schema::hasTable('dummy'));
+    expect(Schema::hasTable('locations'))->toBeTrue();
+    expect(Schema::hasTable('dummy'))->toBeFalse();
 });
 
 test('has table throws on none existing database', function () {
@@ -49,9 +49,9 @@ test('has table throws on none existing database', function () {
 test('rename', function () {
     $result = Schema::rename('characters', 'people');
 
-    $this->assertTrue($result);
-    $this->assertFalse(Schema::hasTable('characters'));
-    $this->assertTrue(Schema::hasTable('people'));
+    expect($result)->toBeTrue();
+    expect(Schema::hasTable('characters'))->toBeFalse();
+    expect(Schema::hasTable('people'))->toBeTrue();
 
     $result = Schema::rename('people', 'characters');
 });
@@ -63,8 +63,8 @@ test('drop all tables', function () {
 
     $tables = Schema::getAllTables();
 
-    $this->assertEquals(10, count($initialTables));
-    $this->assertEquals(0, count($tables));
+    expect(count($initialTables))->toEqual(10);
+    expect(count($tables))->toEqual(0);
 });
 
 test('collection has columns', function () {
@@ -81,8 +81,8 @@ test('collection has columns', function () {
     $mockConnection->shouldReceive('statement')->once()->andReturn(true);
     $mockConnection->shouldReceive('statement')->once()->andReturn(false);
 
-    $this->assertTrue($builder->hasColumn('users', 'firstname'));
-    $this->assertFalse($builder->hasColumn('users', 'not_an_attribute'));
+    expect($builder->hasColumn('users', 'firstname'))->toBeTrue();
+    expect($builder->hasColumn('users', 'not_an_attribute'))->toBeFalse();
 });
 
 test('create view', function () {
@@ -92,7 +92,7 @@ test('create view', function () {
     }
     $view = $schemaManager->getView('search');
 
-    $this->assertEquals('search', $view->name);
+    expect($view->name)->toEqual('search');
 
     $schemaManager->deleteView('search');
 });
@@ -104,7 +104,7 @@ test('get view', function () {
     }
     $view = Schema::getView('search');
 
-    $this->assertEquals('search', $view->name);
+    expect($view->name)->toEqual('search');
 
     $schemaManager->deleteView('search');
 });
@@ -123,11 +123,11 @@ test('get all views', function () {
 
     $views = Schema::getAllViews();
 
-    $this->assertCount(4, $views);
-    $this->assertSame('house_view', $views[0]->name);
-    $this->assertSame('pages', $views[1]->name);
-    $this->assertSame('products', $views[2]->name);
-    $this->assertSame('search', $views[3]->name);
+    expect($views)->toHaveCount(4);
+    expect($views[0]->name)->toBe('house_view');
+    expect($views[1]->name)->toBe('pages');
+    expect($views[2]->name)->toBe('products');
+    expect($views[3]->name)->toBe('search');
 
     $schemaManager->deleteView('search');
     $schemaManager->deleteView('pages');
@@ -143,7 +143,7 @@ test('edit view', function () {
 
     $properties = $schemaManager->getViewProperties('search');
 
-    $this->assertEquals(5, $properties->consolidationIntervalMsec);
+    expect($properties->consolidationIntervalMsec)->toEqual(5);
 
     $schemaManager->deleteView('search');
 });
@@ -161,7 +161,7 @@ test('rename view', function () {
     $this->expectExceptionMessage('collection or view not found');
     $schemaManager->getView('search');
 
-    $this->assertEquals('find', $view->getName());
+    expect($view->getName())->toEqual('find');
 
     $schemaManager->deleteView('search');
 });
@@ -200,8 +200,8 @@ test('create database', function () {
     $databaseName = 'aranguent__test_dummy';
     $result = Schema::createDatabase($databaseName);
 
-    $this->assertTrue($result);
-    $this->assertTrue($schemaManager->hasDatabase($databaseName));
+    expect($result)->toBeTrue();
+    expect($schemaManager->hasDatabase($databaseName))->toBeTrue();
 
     $schemaManager->deleteDatabase($databaseName);
 });
@@ -215,23 +215,23 @@ test('drop database if exists', function () {
 
     $result = Schema::dropDatabaseIfExists($databaseName);
 
-    $this->assertTrue($result);
-    $this->assertFalse($schemaManager->hasDatabase($databaseName));
+    expect($result)->toBeTrue();
+    expect($schemaManager->hasDatabase($databaseName))->toBeFalse();
 });
 
 test('drop database if exists none existing db', function () {
     $schemaManager = $this->connection->getArangoClient()->schema();
     $databaseName = 'aranguent__test_dummy';
 
-    $this->assertFalse($schemaManager->hasDatabase($databaseName));
+    expect($schemaManager->hasDatabase($databaseName))->toBeFalse();
 
     $result = Schema::dropDatabaseIfExists($databaseName);
 
-    $this->assertTrue($result);
+    expect($result)->toBeTrue();
 });
 
 test('get connection', function () {
-    $this->assertInstanceOf(Connection::class, Schema::getConnection());
+    expect(Schema::getConnection())->toBeInstanceOf(Connection::class);
 });
 
 // Helpers

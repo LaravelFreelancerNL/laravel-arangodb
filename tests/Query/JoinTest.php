@@ -31,8 +31,8 @@ test('join', function () {
         ->where('residence_id', '=', 'winterfell')
         ->get();
 
-    $this->assertCount(15, $characters);
-    $this->assertEquals('NedStark', $characters[0]->id);
+    expect($characters)->toHaveCount(15);
+    expect($characters[0]->id)->toEqual('NedStark');
 });
 
 test('cross join', function () {
@@ -40,7 +40,7 @@ test('cross join', function () {
         ->crossJoin('locations')
         ->get();
 
-    $this->assertCount(344, $characters);
+    expect($characters)->toHaveCount(344);
 });
 
 test('left join', function () {
@@ -52,9 +52,9 @@ test('left join', function () {
         ->whereNull('residence_id')
         ->get();
 
-    $this->assertCount(33, $characters);
-    $this->assertEquals('NedStark', $characters[0]->id);
-    $this->assertCount(10, $charactersWithoutResidence);
+    expect($characters)->toHaveCount(33);
+    expect($characters[0]->id)->toEqual('NedStark');
+    expect($charactersWithoutResidence)->toHaveCount(10);
 });
 
 // Helpers

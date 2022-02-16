@@ -21,9 +21,9 @@ test('begin transaction', function () {
     $arangoTransaction = $this->connection->getArangoClient()->getTransactionManager();
     $runningTransactions = $arangoTransaction->getTransactions();
 
-    $this->assertEquals(1, count($runningTransactions));
-    $this->assertEquals(1, $this->connection->transactionLevel());
-    $this->assertInstanceOf(TransactionManager::class, $arangoTransaction);
+    expect(count($runningTransactions))->toEqual(1);
+    expect($this->connection->transactionLevel())->toEqual(1);
+    expect($arangoTransaction)->toBeInstanceOf(TransactionManager::class);
 
     $this->connection->rollBack();
 });
@@ -34,8 +34,8 @@ test('commit transaction', function () {
     $arangoTransaction = $this->connection->getArangoClient()->getTransactionManager();
     $runningTransactions = $arangoTransaction->getTransactions();
 
-    $this->assertEquals(0, $this->connection->transactionLevel());
-    $this->assertEmpty($runningTransactions);
+    expect($this->connection->transactionLevel())->toEqual(0);
+    expect($runningTransactions)->toBeEmpty();
 });
 
 test('rollback transaction', function () {
@@ -67,10 +67,10 @@ test('rollback transaction', function () {
     $endingCharacters = Character::all();
     $endingLocations = Location::all();
 
-    $this->assertEquals(0, $startingCharacters->count());
-    $this->assertEquals(0, $endingCharacters->count());
-    $this->assertEquals(0, $startingLocations->count());
-    $this->assertEquals(0, $endingLocations->count());
+    expect($startingCharacters->count())->toEqual(0);
+    expect($endingCharacters->count())->toEqual(0);
+    expect($startingLocations->count())->toEqual(0);
+    expect($endingLocations->count())->toEqual(0);
 });
 
 test('commit transaction with queries', function () {
@@ -102,10 +102,10 @@ test('commit transaction with queries', function () {
     $endingCharacters = Character::all();
     $endingLocations = Location::all();
 
-    $this->assertEquals(0, $startingCharacters->count());
-    $this->assertEquals(1, $endingCharacters->count());
-    $this->assertEquals(0, $startingLocations->count());
-    $this->assertEquals(1, $endingLocations->count());
+    expect($startingCharacters->count())->toEqual(0);
+    expect($endingCharacters->count())->toEqual(1);
+    expect($startingLocations->count())->toEqual(0);
+    expect($endingLocations->count())->toEqual(1);
 });
 
 test('closure transactions', function () {
@@ -116,7 +116,7 @@ test('closure transactions', function () {
     }, 5, ['write' => ['characters']]);
 
     $characters = Character::all();
-    $this->assertEquals(9, $characters->count());
+    expect($characters->count())->toEqual(9);
 });
 
 // Helpers

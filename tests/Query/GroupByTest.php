@@ -18,8 +18,8 @@ test('group by', function () {
         ->groupBy('surname')
         ->get();
 
-    $this->assertCount(21, $surnames);
-    $this->assertEquals('Baelish', $surnames[1]);
+    expect($surnames)->toHaveCount(21);
+    expect($surnames[1])->toEqual('Baelish');
 });
 
 test('group by multiple', function () {
@@ -28,11 +28,11 @@ test('group by multiple', function () {
         ->groupBy('surname', 'residence_id')
         ->get();
 
-    $this->assertCount(29, $groups);
-    $this->assertEquals(null, $groups[4][0]);
-    $this->assertEquals('the-red-keep', $groups[4][1]);
-    $this->assertEquals('Baelish', $groups[5][0]);
-    $this->assertEquals('the-red-keep', $groups[5][1]);
+    expect($groups)->toHaveCount(29);
+    expect($groups[4][0])->toEqual(null);
+    expect($groups[4][1])->toEqual('the-red-keep');
+    expect($groups[5][0])->toEqual('Baelish');
+    expect($groups[5][1])->toEqual('the-red-keep');
 });
 
 test('having', function () {
@@ -42,8 +42,8 @@ test('having', function () {
         ->having('surname', 'LIKE', '%S%')
         ->get();
 
-    $this->assertCount(4, $surnames);
-    $this->assertEquals('Seaworth', $surnames[1]);
+    expect($surnames)->toHaveCount(4);
+    expect($surnames[1])->toEqual('Seaworth');
 });
 
 test('or having', function () {
@@ -54,8 +54,8 @@ test('or having', function () {
         ->orHaving('age', '>', 40)
         ->get();
 
-    $this->assertCount(9, $ages);
-    $this->assertEquals(10, $ages[1]);
+    expect($ages)->toHaveCount(9);
+    expect($ages[1])->toEqual(10);
 });
 
 test('having between', function () {
@@ -65,8 +65,8 @@ test('having between', function () {
         ->havingBetween('age', [20, 40])
         ->get();
 
-    $this->assertCount(3, $ages);
-    $this->assertEquals(36, $ages[1]);
+    expect($ages)->toHaveCount(3);
+    expect($ages[1])->toEqual(36);
 });
 
 // Helpers

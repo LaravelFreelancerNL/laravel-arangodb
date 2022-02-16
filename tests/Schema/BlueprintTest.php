@@ -20,7 +20,7 @@ test('create index', function () {
 
     $index = $this->schemaManager ->getIndexByName('characters', $name);
 
-    $this->assertEquals($name, $index->name);
+    expect($index->name)->toEqual($name);
 });
 
 test('drop index', function () {
@@ -33,13 +33,13 @@ test('drop index', function () {
     });
 
     $searchResult = $this->schemaManager->getIndexByName('characters', 'characters_name_persistent');
-    $this->assertFalse($searchResult);
+    expect($searchResult)->toBeFalse();
 });
 
 test('index names only contains alpha numeric characters', function () {
     Schema::table('characters', function (Blueprint $collection) {
         $indexName = $collection->createIndexName('persistent', ['addresses[*]']);
-        $this->assertEquals('characters_addresses_array_persistent', $indexName);
+        expect($indexName)->toEqual('characters_addresses_array_persistent');
     });
 });
 
@@ -52,7 +52,7 @@ test('index names include options', function () {
 
         $indexName = $collection->createIndexName('persistent', ['address'], $options);
 
-        $this->assertEquals('characters_address_persistent_unique_sparse', $indexName);
+        expect($indexName)->toEqual('characters_address_persistent_unique_sparse');
     });
 });
 
@@ -75,7 +75,7 @@ test('drop index with array', function () {
     });
 
     $searchResult = $this->schemaManager->getIndexByName('characters', 'characters_addresses_array_persistent');
-    $this->assertFalse($searchResult);
+    expect($searchResult)->toBeFalse();
 });
 
 test('attribute ignore additional arguments', function () {
@@ -83,8 +83,8 @@ test('attribute ignore additional arguments', function () {
         $collection->string('token', 64)->index();
 
         $commands = $collection->getCommands();
-        $this->assertEquals(2, count($commands));
-        $this->assertEquals(1, count($commands[1]['columns']));
+        expect(count($commands))->toEqual(2);
+        expect(count($commands[1]['columns']))->toEqual(1);
     });
 });
 
@@ -94,10 +94,10 @@ test('foreign id is excluded', function () {
 
         $commands = $collection->getCommands();
 
-        $this->assertEquals(2, count($commands));
-        $this->assertEquals('ignore', $commands[0]['name']);
-        $this->assertEquals('foreignId', $commands[0]['method']);
-        $this->assertEquals('user_id', $commands[1]['columns'][0]);
+        expect(count($commands))->toEqual(2);
+        expect($commands[0]['name'])->toEqual('ignore');
+        expect($commands[0]['method'])->toEqual('foreignId');
+        expect($commands[1]['columns'][0])->toEqual('user_id');
     });
 });
 
@@ -107,11 +107,11 @@ test('default', function () {
 
         $commands = $collection->getCommands();
 
-        $this->assertEquals(2, count($commands));
-        $this->assertEquals('ignore', $commands[0]['name']);
-        $this->assertEquals('string', $commands[0]['method']);
-        $this->assertEquals('ignore', $commands[1]['name']);
-        $this->assertEquals('default', $commands[1]['method']);
+        expect(count($commands))->toEqual(2);
+        expect($commands[0]['name'])->toEqual('ignore');
+        expect($commands[0]['method'])->toEqual('string');
+        expect($commands[1]['name'])->toEqual('ignore');
+        expect($commands[1]['method'])->toEqual('default');
     });
 });
 

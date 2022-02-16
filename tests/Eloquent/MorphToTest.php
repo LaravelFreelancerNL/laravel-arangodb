@@ -51,9 +51,9 @@ test('retrieve relation', function () {
     $location = Location::find('winterfell');
     $character = $location->capturable;
 
-    $this->assertEquals('winterfell', $location->id);
-    $this->assertEquals($location->capturable_id, $character->id);
-    $this->assertInstanceOf(Character::class, $character);
+    expect($location->id)->toEqual('winterfell');
+    expect($character->id)->toEqual($location->capturable_id);
+    expect($character)->toBeInstanceOf(Character::class);
 });
 
 test('associate', function () {
@@ -64,15 +64,15 @@ test('associate', function () {
     $location->save();
     $location = Location::find('winterfell');
 
-    $this->assertEquals($character->id, $location->capturable_id);
-    $this->assertInstanceOf(Character::class, $location->capturable);
+    expect($location->capturable_id)->toEqual($character->id);
+    expect($location->capturable)->toBeInstanceOf(Character::class);
 });
 
 test('with', function () {
     $location = Location::with('capturable')->find('winterfell');
 
-    $this->assertInstanceOf(Character::class, $location->capturable);
-    $this->assertEquals('RamsayBolton', $location->capturable->id);
+    expect($location->capturable)->toBeInstanceOf(Character::class);
+    expect($location->capturable->id)->toEqual('RamsayBolton');
 });
 
 // Helpers

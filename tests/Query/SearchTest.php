@@ -92,9 +92,9 @@ test('search against db', function () {
 
     $results = $query->paginate();
 
-    $this->assertCount(2, $results);
-    $this->assertSame("houses/lannister", $results[0]->_id);
-    $this->assertSame("houses/stark", $results[1]->_id);
+    expect($results)->toHaveCount(2);
+    expect($results[0]->_id)->toBe("houses/lannister");
+    expect($results[1]->_id)->toBe("houses/stark");
 });
 
 test('search from model', function () {
@@ -106,11 +106,11 @@ test('search from model', function () {
     )
         ->paginate();
 
-    $this->assertCount(2, $results);
-    $this->assertSame("houses/lannister", $results[0]->_id);
-    $this->assertInstanceOf(House::class, $results[0]);
-    $this->assertSame("houses/stark", $results[1]->_id);
-    $this->assertInstanceOf(House::class, $results[1]);
+    expect($results)->toHaveCount(2);
+    expect($results[0]->_id)->toBe("houses/lannister");
+    expect($results[0])->toBeInstanceOf(House::class);
+    expect($results[1]->_id)->toBe("houses/stark");
+    expect($results[1])->toBeInstanceOf(House::class);
 });
 
 // Helpers

@@ -28,18 +28,18 @@ test('retrieve relation', function () {
     $parent = Character::find('NedStark');
     $children = $parent->children;
 
-    $this->assertInstanceOf(Character::class, $children[0]);
+    expect($children[0])->toBeInstanceOf(Character::class);
 
-    $this->assertTrue(true);
+    expect(true)->toBeTrue();
 });
 
 test('alternative relationship name and key', function () {
     $location = Location::find('winterfell');
     $character = $location->leader;
 
-    $this->assertEquals('SansaStark', $character->id);
-    $this->assertEquals($location->led_by, $character->id);
-    $this->assertInstanceOf(Character::class, $character);
+    expect($character->id)->toEqual('SansaStark');
+    expect($character->id)->toEqual($location->led_by);
+    expect($character)->toBeInstanceOf(Character::class);
 });
 
 test('associate', function () {
@@ -60,29 +60,29 @@ test('associate', function () {
 
     $location = $character->leads;
 
-    $this->assertEquals('pyke', $location->id);
-    $this->assertEquals($location->led_by, $character->id);
-    $this->assertInstanceOf(Location::class, $location);
+    expect($location->id)->toEqual('pyke');
+    expect($character->id)->toEqual($location->led_by);
+    expect($location)->toBeInstanceOf(Location::class);
 
     $location->delete();
 });
 
 test('dissociate', function () {
     $character = Character::find('NedStark');
-    $this->assertEquals($character->residence_id, 'winterfell');
+    expect('winterfell')->toEqual($character->residence_id);
 
     $character->residence()->dissociate();
     $character->save();
 
     $character ->fresh();
-    $this->assertNull($character->residence_id);
+    expect($character->residence_id)->toBeNull();
 });
 
 test('with', function () {
     $location = Location::with('leader')->find("winterfell");
 
-    $this->assertInstanceOf(Character::class, $location->leader);
-    $this->assertEquals('SansaStark', $location->leader->id);
+    expect($location->leader)->toBeInstanceOf(Character::class);
+    expect($location->leader->id)->toEqual('SansaStark');
 });
 
 // Helpers
