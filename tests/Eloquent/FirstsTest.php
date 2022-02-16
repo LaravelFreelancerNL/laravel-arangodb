@@ -7,8 +7,6 @@ use Illuminate\Support\Facades\Artisan;
 use Tests\Setup\Database\Seeds\CharactersSeeder;
 use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Location;
-use Tests\TestCase;
-
 
 beforeEach(function () {
     Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);

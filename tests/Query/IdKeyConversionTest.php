@@ -4,8 +4,6 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Tests\Setup\Database\Seeds\CharactersSeeder;
 use Tests\Setup\Models\Character;
-use Tests\TestCase;
-
 
 test('output conversion with whole document', function () {
     $result = DB::table('characters')->get();

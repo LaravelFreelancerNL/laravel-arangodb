@@ -8,8 +8,6 @@ use Mockery as m;
 use Tests\Setup\Database\Seeds\CharactersSeeder;
 use Tests\Setup\Database\Seeds\LocationsSeeder;
 use Tests\Setup\Database\Seeds\TagsSeeder;
-use Tests\TestCase;
-
 
 beforeEach(function () {
     Carbon::setTestNow(Carbon::now());

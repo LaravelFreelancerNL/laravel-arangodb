@@ -1,14 +1,11 @@
 <?php
 
 use Illuminate\Database\Migrations\Migrator;
-use Illuminate\Foundation\Application;
 use LaravelFreelancerNL\Aranguent\Console\Migrations\AranguentConvertMigrationsCommand;
 use Mockery as M;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
 use Tests\Setup\ClassStubs\ApplicationDatabaseMigrationStub;
-use Tests\TestCase;
-
 
 beforeEach(function () {
     //Copy a stub with Illuminate usage to migrations directory

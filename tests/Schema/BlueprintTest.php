@@ -1,11 +1,8 @@
 <?php
 
-use ArangoClient\Schema\SchemaManager;
 use Illuminate\Support\Facades\Artisan;
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
-use Tests\TestCase;
-
 
 beforeEach(function () {
     $this->schemaManager = $this->connection->getArangoClient()->schema();

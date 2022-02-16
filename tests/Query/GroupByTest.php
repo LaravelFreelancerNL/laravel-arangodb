@@ -4,8 +4,6 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Mockery as m;
 use Tests\Setup\Database\Seeds\CharactersSeeder;
-use Tests\TestCase;
-
 
 afterEach(function () {
     M::close();

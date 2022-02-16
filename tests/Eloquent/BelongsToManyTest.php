@@ -8,8 +8,6 @@ use Tests\Setup\Database\Seeds\CharactersSeeder;
 use Tests\Setup\Database\Seeds\ChildrenSeeder;
 use Tests\Setup\Database\Seeds\LocationsSeeder;
 use Tests\setup\Models\Character;
-use Tests\TestCase;
-
 
 beforeEach(function () {
     Carbon::setTestNow(Carbon::now());

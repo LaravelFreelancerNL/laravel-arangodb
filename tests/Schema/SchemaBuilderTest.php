@@ -3,8 +3,6 @@
 use ArangoClient\ArangoClient;
 use ArangoClient\Schema\SchemaManager;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
 use LaravelFreelancerNL\Aranguent\QueryException;
@@ -13,8 +11,6 @@ use LaravelFreelancerNL\Aranguent\Schema\Builder;
 use LaravelFreelancerNL\Aranguent\Schema\Grammar;
 use Mockery as M;
 use Tests\Setup\ClassStubs\CustomBlueprint;
-use Tests\TestCase;
-
 
 afterEach(function () {
     M::close();

@@ -5,8 +5,6 @@ use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use Mockery as M;
 use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Location;
-use Tests\TestCase;
-
 
 beforeEach(function () {
     Carbon::setTestNow(Carbon::now());

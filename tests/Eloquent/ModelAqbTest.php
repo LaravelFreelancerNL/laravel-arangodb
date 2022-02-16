@@ -3,8 +3,6 @@
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Tests\Setup\Models\Character;
-use Tests\TestCase;
-
 
 test('model by aql with query builder', function () {
     $results = Character::fromAqb(

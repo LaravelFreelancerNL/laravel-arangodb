@@ -3,8 +3,6 @@
 use Illuminate\Support\Fluent;
 use LaravelFreelancerNL\Aranguent\Schema\Grammar;
 use Mockery as M;
-use Tests\TestCase;
-
 
 beforeEach(function () {
     $this->grammar = new Grammar();

@@ -5,8 +5,6 @@ use LaravelFreelancerNL\Aranguent\Query\Builder;
 use LaravelFreelancerNL\Aranguent\Query\Grammar;
 use LaravelFreelancerNL\Aranguent\Query\Processor;
 use Mockery as m;
-use Tests\TestCase;
-
 
 afterEach(function () {
     m::close();

@@ -5,8 +5,6 @@ use Tests\Setup\Database\Seeds\CharactersSeeder;
 use Tests\Setup\Database\Seeds\TagsSeeder;
 use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Tag;
-use Tests\TestCase;
-
 
 test('assert database has', function () {
     $this->assertDatabaseHas('characters', [

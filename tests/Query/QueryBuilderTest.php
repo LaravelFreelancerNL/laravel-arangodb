@@ -10,8 +10,6 @@ use LaravelFreelancerNL\Aranguent\Query\Processor;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder as FluentAQL;
 use Mockery as m;
 use Tests\Setup\Database\Seeds\CharactersSeeder;
-use Tests\TestCase;
-
 
 beforeEach(function () {
     Carbon::setTestNow(Carbon::now());

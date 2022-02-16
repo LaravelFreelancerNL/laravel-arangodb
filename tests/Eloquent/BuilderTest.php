@@ -4,8 +4,6 @@ use Illuminate\Support\Carbon;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use Mockery as M;
 use Tests\Setup\Models\Character;
-use Tests\TestCase;
-
 
 beforeEach(function () {
     Carbon::setTestNow(Carbon::now());
