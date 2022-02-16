@@ -1,218 +1,194 @@
 <?php
 
-namespace Tests\Eloquent;
-
 use Illuminate\Support\Carbon;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use Mockery as M;
 use Tests\Setup\Models\Character;
 use Tests\TestCase;
 
-class ModelTest extends TestCase
-{
-    protected function defineDatabaseMigrations()
-    {
-        $this->loadLaravelMigrations();
-        $this->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
-    }
+uses(TestCase::class);
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        Carbon::setTestNow(Carbon::now());
+beforeEach(function () {
+    Carbon::setTestNow(Carbon::now());
 
-        Character::insert(
+    Character::insert(
+        [
             [
-                [
-                    '_key'    => 'NedStark',
-                    'name'    => 'Ned',
-                    'surname' => 'Stark',
-                    'alive'   => false,
-                    'age'     => 41,
-                    'traits'  => ['A', 'H', 'C', 'N', 'P'],
-                ],
-                [
-                    '_key'    => 'RobertBaratheon',
-                    'name'    => 'Robert',
-                    'surname' => 'Baratheon',
-                    'alive'   => false,
-                    'age'     => null,
-                    'traits'  => ['A', 'H', 'C'],
-                ],
-            ]
-        );
-    }
-
-    public function tearDown(): void
-    {
-        parent::tearDown();
-
-        Carbon::setTestNow(null);
-        Carbon::resetToStringFormat();
-
-        Model::unsetEventDispatcher();
-
-        M::close();
-    }
-
-    public function testCreateAranguentModel()
-    {
-        $this->artisan(
-            'aranguent:model',
-            [
-                'name'    => 'AranguentModelTest',
-                '--force' => '',
-            ]
-        )->run();
-
-        $file = __DIR__ . '/../../vendor/orchestra/testbench-core/laravel/app/Models/AranguentModelTest.php';
-
-        //assert file exists
-        $this->assertFileExists($file);
-
-        //assert file refers to Aranguent Base Model
-        $content = file_get_contents($file);
-        $this->assertStringContainsString('use LaravelFreelancerNL\Aranguent\Eloquent\Model;', $content);
-    }
-
-    public function testUpdateModel()
-    {
-        $character = Character::first();
-        $initialAge = $character->age;
-
-        $character->update(['age' => ($character->age + 1)]);
-
-        $fresh = $character->fresh();
-
-        $this->assertSame(($initialAge + 1), $fresh->age);
-    }
-
-    public function testUpdateOrCreate()
-    {
-        $character = Character::first();
-        $initialAge = $character->age;
-        $newAge = ($initialAge + 1);
-
-        $character->updateOrCreate(['age' => $initialAge], ['age' => $newAge]);
-
-        $fresh = $character->fresh();
-
-        $this->assertSame($newAge, $fresh->age);
-    }
-
-    public function testUpsert()
-    {
-        $this->skipTestOnArangoVersionsBefore('3.7');
-
-        Character::upsert(
-            [
-                [
-                   "id" => "NedStark",
-                   "name" => "Ned",
-                   "surname" => "Stark",
-                   "alive" => false,
-                   "age" => 41,
-                   "residence_id" => "winterfell"
-                ],
-                [
-                   "id" => "JaimeLannister",
-                   "name" => "Jaime",
-                   "surname" => "Lannister",
-                   "alive" => false,
-                   "age" => 36,
-                   "residence_id" => "the-red-keep"
-                ],
+                '_key'    => 'NedStark',
+                'name'    => 'Ned',
+                'surname' => 'Stark',
+                'alive'   => false,
+                'age'     => 41,
+                'traits'  => ['A', 'H', 'C', 'N', 'P'],
             ],
-            ['name', 'surname'],
-            ['alive']
-        );
+            [
+                '_key'    => 'RobertBaratheon',
+                'name'    => 'Robert',
+                'surname' => 'Baratheon',
+                'alive'   => false,
+                'age'     => null,
+                'traits'  => ['A', 'H', 'C'],
+            ],
+        ]
+    );
+});
 
-        $ned = Character::find('NedStark');
-        $jaime = Character::find('JaimeLannister');
+afterEach(function () {
+    Carbon::setTestNow(null);
+    Carbon::resetToStringFormat();
 
-        $this->assertFalse($ned->alive);
-        $this->assertFalse($jaime->alive);
-    }
+    Model::unsetEventDispatcher();
 
-    public function testDeleteModel()
-    {
-        $character = Character::first();
+    M::close();
+});
 
-        $character->delete();
+test('create aranguent model', function () {
+    $this->artisan(
+        'aranguent:model',
+        [
+            'name'    => 'AranguentModelTest',
+            '--force' => '',
+        ]
+    )->run();
 
-        $deletedCharacter = Character::first();
+    $file = __DIR__ . '/../../vendor/orchestra/testbench-core/laravel/app/Models/AranguentModelTest.php';
 
-        $this->assertNotEquals($character->id, $deletedCharacter->id);
-    }
+    //assert file exists
+    $this->assertFileExists($file);
 
-    public function testDestroyModel()
-    {
-        $id = 'NedStark';
-        Character::destroy($id);
+    //assert file refers to Aranguent Base Model
+    $content = file_get_contents($file);
+    $this->assertStringContainsString('use LaravelFreelancerNL\Aranguent\Eloquent\Model;', $content);
+});
 
-        $this->assertDatabaseMissing('characters', ['id' => $id]);
-    }
+test('update model', function () {
+    $character = Character::first();
+    $initialAge = $character->age;
 
+    $character->update(['age' => ($character->age + 1)]);
 
-    public function testTruncateModel()
-    {
-        Character::truncate();
+    $fresh = $character->fresh();
 
-        $this->assertDatabaseCount('characters', 0);
-    }
+    $this->assertSame(($initialAge + 1), $fresh->age);
+});
 
-    public function testCount()
-    {
-        $result = Character::count();
-        $this->assertEquals(2, $result);
-    }
+test('update or create', function () {
+    $character = Character::first();
+    $initialAge = $character->age;
+    $newAge = ($initialAge + 1);
 
-    public function testMax()
-    {
-        $result = Character::max('age');
-        $this->assertEquals(41, $result);
-    }
+    $character->updateOrCreate(['age' => $initialAge], ['age' => $newAge]);
 
-    public function testMin()
-    {
-        $result = Character::min('age');
-        $this->assertEquals(41, $result);
-    }
+    $fresh = $character->fresh();
 
-    public function testAverage()
-    {
-        $result = Character::average('age');
-        $this->assertEquals(41, $result);
-    }
+    $this->assertSame($newAge, $fresh->age);
+});
 
-    public function testSum()
-    {
-        $result = Character::sum('age');
-        $this->assertEquals(41, $result);
-    }
+test('upsert', function () {
+    $this->skipTestOnArangoVersionsBefore('3.7');
 
+    Character::upsert(
+        [
+            [
+               "id" => "NedStark",
+               "name" => "Ned",
+               "surname" => "Stark",
+               "alive" => false,
+               "age" => 41,
+               "residence_id" => "winterfell"
+            ],
+            [
+               "id" => "JaimeLannister",
+               "name" => "Jaime",
+               "surname" => "Lannister",
+               "alive" => false,
+               "age" => 36,
+               "residence_id" => "the-red-keep"
+            ],
+        ],
+        ['name', 'surname'],
+        ['alive']
+    );
 
-    public function testGetId()
-    {
-        $ned = Character::first();
-        $this->assertEquals('NedStark', $ned->id);
-    }
+    $ned = Character::find('NedStark');
+    $jaime = Character::find('JaimeLannister');
 
-    public function testSetUnderscoreId()
-    {
-        $ned = Character::first();
-        $ned->_id = 'characters/NedStarkIsDead';
+    $this->assertFalse($ned->alive);
+    $this->assertFalse($jaime->alive);
+});
 
-        $this->assertEquals('characters/NedStarkIsDead', $ned->_id);
-        $this->assertEquals('NedStarkIsDead', $ned->id);
-    }
+test('delete model', function () {
+    $character = Character::first();
 
-    public function testSetId()
-    {
-        $ned = Character::first();
-        $ned->id = 'NedStarkIsDead';
+    $character->delete();
 
-        $this->assertEquals('NedStarkIsDead', $ned->id);
-        $this->assertEquals('characters/NedStarkIsDead', $ned->_id);
-    }
+    $deletedCharacter = Character::first();
+
+    $this->assertNotEquals($character->id, $deletedCharacter->id);
+});
+
+test('destroy model', function () {
+    $id = 'NedStark';
+    Character::destroy($id);
+
+    $this->assertDatabaseMissing('characters', ['id' => $id]);
+});
+
+test('truncate model', function () {
+    Character::truncate();
+
+    $this->assertDatabaseCount('characters', 0);
+});
+
+test('count', function () {
+    $result = Character::count();
+    $this->assertEquals(2, $result);
+});
+
+test('max', function () {
+    $result = Character::max('age');
+    $this->assertEquals(41, $result);
+});
+
+test('min', function () {
+    $result = Character::min('age');
+    $this->assertEquals(41, $result);
+});
+
+test('average', function () {
+    $result = Character::average('age');
+    $this->assertEquals(41, $result);
+});
+
+test('sum', function () {
+    $result = Character::sum('age');
+    $this->assertEquals(41, $result);
+});
+
+test('get id', function () {
+    $ned = Character::first();
+    $this->assertEquals('NedStark', $ned->id);
+});
+
+test('set underscore id', function () {
+    $ned = Character::first();
+    $ned->_id = 'characters/NedStarkIsDead';
+
+    $this->assertEquals('characters/NedStarkIsDead', $ned->_id);
+    $this->assertEquals('NedStarkIsDead', $ned->id);
+});
+
+test('set id', function () {
+    $ned = Character::first();
+    $ned->id = 'NedStarkIsDead';
+
+    $this->assertEquals('NedStarkIsDead', $ned->id);
+    $this->assertEquals('characters/NedStarkIsDead', $ned->_id);
+});
+
+// Helpers
+function defineDatabaseMigrations()
+{
+    test()->loadLaravelMigrations();
+    test()->loadMigrationsFrom(__DIR__ . '/../Setup/Database/Migrations');
 }

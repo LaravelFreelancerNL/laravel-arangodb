@@ -1,116 +1,101 @@
 <?php
 
-namespace Tests;
-
 use ArangoClient\ArangoClient;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-class ConnectionTest extends TestCase
-{
-    public function testConnectionIsMade()
-    {
-        $connection = DB::connection();
+uses(TestCase::class);
 
-        $this->assertInstanceOf('LaravelFreelancerNL\Aranguent\Connection', $connection);
-    }
+test('connection is made', function () {
+    $connection = DB::connection();
 
-    public function testChangeDatabaseName()
-    {
-        $initialName = $this->connection->getDatabaseName();
-        $newName = $initialName . 'New';
-        $this->connection->setDatabaseName($newName);
-        $currentName = $this->connection->getDatabaseName();
+    $this->assertInstanceOf('LaravelFreelancerNL\Aranguent\Connection', $connection);
+});
 
-        $this->assertNotEquals($initialName, $currentName);
-        $this->assertEquals($newName, $currentName);
-    }
+test('change database name', function () {
+    $initialName = $this->connection->getDatabaseName();
+    $newName = $initialName . 'New';
+    $this->connection->setDatabaseName($newName);
+    $currentName = $this->connection->getDatabaseName();
 
-    public function testExplainQuery()
-    {
-        $query = '
-            FOR i IN 1..1000
-                RETURN i
-        ';
+    $this->assertNotEquals($initialName, $currentName);
+    $this->assertEquals($newName, $currentName);
+});
 
-        $explanation = $this->connection->explain($query);
+test('explain query', function () {
+    $query = '
+        FOR i IN 1..1000
+            RETURN i
+    ';
 
-        $this->assertObjectHasAttribute('plan', $explanation);
-    }
+    $explanation = $this->connection->explain($query);
 
-    public function testErrorHandlingCollectionNotFound()
-    {
-        $this->expectExceptionCode(404);
-        DB::table('this_collection_does_not_exist')->get();
-    }
+    $this->assertObjectHasAttribute('plan', $explanation);
+});
 
-    public function testErrorHandlingMalformedAql()
-    {
-        $this->expectExceptionCode(400);
-        DB::statement('this aql is malformed');
-    }
+test('error handling collection not found', function () {
+    $this->expectExceptionCode(404);
+    DB::table('this_collection_does_not_exist')->get();
+});
 
-    public function testDisconnect()
-    {
-        $connection = DB::connection();
-        $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
-        $connection->disconnect();
-        $this->assertNull($connection->getArangoClient());
-    }
+test('error handling malformed aql', function () {
+    $this->expectExceptionCode(400);
+    DB::statement('this aql is malformed');
+});
 
-    public function testPurge()
-    {
-        $connection = DB::connection();
-        $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
-        DB::purge();
-        $this->assertNull($connection->getArangoClient());
-    }
+test('disconnect', function () {
+    $connection = DB::connection();
+    $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
+    $connection->disconnect();
+    $this->assertNull($connection->getArangoClient());
+});
 
-    public function testDbCallsFailAfterPurge()
-    {
-        DB::purge();
-        Schema::hasTable('NotATable');
-    }
+test('purge', function () {
+    $connection = DB::connection();
+    $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
+    DB::purge();
+    $this->assertNull($connection->getArangoClient());
+});
 
-    public function testReconnect()
-    {
-        $connection = DB::connection();
-        $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
-        DB::purge();
+test('db calls fail after purge', function () {
+    DB::purge();
+    Schema::hasTable('NotATable');
+});
 
-        $connection->reconnect();
+test('reconnect', function () {
+    $connection = DB::connection();
+    $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
+    DB::purge();
 
-        $connection = DB::connection();
-        $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
-    }
+    $connection->reconnect();
 
-    public function testReconnectToDifferentDatase()
-    {
-        $connection = DB::connection();
-        $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
+    $connection = DB::connection();
+    $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
+});
 
-        DB::purge();
-        $newDatabase = "otherDatabase";
-        config()->set('database.connections.arangodb.database', $newDatabase);
-        $connection->reconnect();
+test('reconnect to different datase', function () {
+    $connection = DB::connection();
+    $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
 
-        $connection = DB::connection();
-        $this->assertSame($newDatabase, $connection->getArangoClient()->getDatabase());
-    }
+    DB::purge();
+    $newDatabase = "otherDatabase";
+    config()->set('database.connections.arangodb.database', $newDatabase);
+    $connection->reconnect();
 
+    $connection = DB::connection();
+    $this->assertSame($newDatabase, $connection->getArangoClient()->getDatabase());
+});
 
-    public function testReconnectToDifferentDataseThrows404()
-    {
-        $connection = DB::connection();
-        $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
-        DB::purge();
+test('reconnect to different datase throws404', function () {
+    $connection = DB::connection();
+    $this->assertInstanceOf(ArangoClient::class, $connection->getArangoClient());
+    DB::purge();
 
-        $newDatabase = "otherDatabase";
-        config()->set('database.connections.arangodb.database', $newDatabase);
-        $connection->reconnect();
+    $newDatabase = "otherDatabase";
+    config()->set('database.connections.arangodb.database', $newDatabase);
+    $connection->reconnect();
 
-        $this->expectExceptionCode(404);
-            Schema::hasTable('dummy');
-    }
-}
+    $this->expectExceptionCode(404);
+        Schema::hasTable('dummy');
+});
