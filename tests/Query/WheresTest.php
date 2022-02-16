@@ -7,7 +7,6 @@ use LaravelFreelancerNL\Aranguent\Query\Processor;
 use Mockery as m;
 use Tests\TestCase;
 
-uses(TestCase::class);
 
 afterEach(function () {
     m::close();

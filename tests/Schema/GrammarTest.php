@@ -5,7 +5,6 @@ use LaravelFreelancerNL\Aranguent\Schema\Grammar;
 use Mockery as M;
 use Tests\TestCase;
 
-uses(TestCase::class);
 
 beforeEach(function () {
     $this->grammar = new Grammar();

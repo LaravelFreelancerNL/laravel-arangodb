@@ -6,7 +6,6 @@ use Mockery as M;
 use Tests\Setup\Models\Character;
 use Tests\TestCase;
 
-uses(TestCase::class);
 
 beforeEach(function () {
     Carbon::setTestNow(Carbon::now());

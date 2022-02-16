@@ -10,7 +10,6 @@ use Tests\Setup\Database\Seeds\TagsSeeder;
 use Tests\Setup\Models\Character;
 use Tests\TestCase;
 
-uses(TestCase::class);
 
 beforeEach(function () {
     Carbon::setTestNow(Carbon::now());

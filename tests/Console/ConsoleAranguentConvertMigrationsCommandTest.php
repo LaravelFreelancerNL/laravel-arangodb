@@ -9,7 +9,6 @@ use Symfony\Component\Console\Output\NullOutput;
 use Tests\Setup\ClassStubs\ApplicationDatabaseMigrationStub;
 use Tests\TestCase;
 
-uses(TestCase::class);
 
 beforeEach(function () {
     //Copy a stub with Illuminate usage to migrations directory

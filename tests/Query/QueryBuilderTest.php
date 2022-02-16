@@ -12,7 +12,6 @@ use Mockery as m;
 use Tests\Setup\Database\Seeds\CharactersSeeder;
 use Tests\TestCase;
 
-uses(TestCase::class);
 
 beforeEach(function () {
     Carbon::setTestNow(Carbon::now());

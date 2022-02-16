@@ -9,7 +9,6 @@ use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Location;
 use Tests\TestCase;
 
-uses(TestCase::class);
 
 beforeEach(function () {
     Artisan::call('db:seed', ['--class' => CharactersSeeder::class]);

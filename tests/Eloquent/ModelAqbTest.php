@@ -5,7 +5,6 @@ use Illuminate\Support\Facades\DB;
 use Tests\Setup\Models\Character;
 use Tests\TestCase;
 
-uses(TestCase::class);
 
 test('model by aql with query builder', function () {
     $results = Character::fromAqb(

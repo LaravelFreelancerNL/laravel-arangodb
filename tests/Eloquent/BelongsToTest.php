@@ -11,7 +11,6 @@ use Tests\setup\Models\Character;
 use Tests\Setup\Models\Location;
 use Tests\TestCase;
 
-uses(TestCase::class);
 
 beforeEach(function () {
     Carbon::setTestNow(Carbon::now());

@@ -10,7 +10,6 @@ use Tests\Setup\Database\Seeds\LocationsSeeder;
 use Tests\setup\Models\Character;
 use Tests\TestCase;
 
-uses(TestCase::class);
 
 beforeEach(function () {
     Carbon::setTestNow(Carbon::now());

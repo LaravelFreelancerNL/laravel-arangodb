@@ -7,7 +7,6 @@ use Tests\Setup\Database\Seeds\HousesSeeder;
 use Tests\Setup\Models\House;
 use Tests\TestCase;
 
-uses(TestCase::class);
 
 test('search', function () {
     $builder = $this->getBuilder();

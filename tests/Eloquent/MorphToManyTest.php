@@ -12,7 +12,6 @@ use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Tag;
 use Tests\TestCase;
 
-uses(TestCase::class);
 
 beforeEach(function () {
     Carbon::setTestNow(Carbon::now());

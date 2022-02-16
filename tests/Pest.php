@@ -1,5 +1,7 @@
 <?php
 
+uses(\Tests\TestCase::class)->in('tests', 'Console', 'Eloquent', 'Migrations', 'Query', 'Schema', 'Setup', 'Testing');
+
 /*
 |--------------------------------------------------------------------------
 | Test Case

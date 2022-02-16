@@ -6,7 +6,6 @@ use Tests\Setup\Database\Seeds\CharactersSeeder;
 use Tests\Setup\Models\Character;
 use Tests\TestCase;
 
-uses(TestCase::class);
 
 test('output conversion with whole document', function () {
     $result = DB::table('characters')->get();

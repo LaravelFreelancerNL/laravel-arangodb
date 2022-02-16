@@ -7,7 +7,6 @@ use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Tag;
 use Tests\TestCase;
 
-uses(TestCase::class);
 
 test('assert database has', function () {
     $this->assertDatabaseHas('characters', [
