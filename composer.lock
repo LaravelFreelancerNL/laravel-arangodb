@@ -7369,12 +7369,12 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Pest\\Laravel\\": "src/"
-                },
                 "files": [
                     "src/Autoload.php"
-                ]
+                ],
+                "psr-4": {
+                    "Pest\\Laravel\\": "src/"
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
