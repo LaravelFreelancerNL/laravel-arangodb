@@ -22,7 +22,8 @@ class Tag extends Model
      */
     public function characters()
     {
-        return $this->morphedByMany(Character::class, 'taggable');
+        return $this->morphedByMany(Character::class, 'taggable')
+            ->using(Taggable::class);
     }
 
     /**
@@ -30,7 +31,8 @@ class Tag extends Model
      */
     public function locations()
     {
-        return $this->morphedByMany(Location::class, 'taggable');
+        return $this->morphedByMany(Location::class, 'taggable')
+            ->using(Taggable::class);
     }
 
 
@@ -39,6 +41,7 @@ class Tag extends Model
      */
     public function houses()
     {
-        return $this->morphedByMany(House::class, 'taggable');
+        return $this->morphedByMany(House::class, 'taggable')
+            ->using(Taggable::class);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Tests\Setup\Models;
 
-use LaravelFreelancerNL\Aranguent\Eloquent\Pivot;
+use LaravelFreelancerNL\Aranguent\Eloquent\Relations\Pivot;
 
 class Child extends Pivot
 {

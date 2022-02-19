@@ -2,7 +2,7 @@
 
 namespace DummyNamespace;
 
-use LaravelFreelancerNL\Aranguent\Eloquent\Pivot;
+use LaravelFreelancerNL\Aranguent\Eloquent\Relations\Pivot;
 
 /**
  * @property string $id

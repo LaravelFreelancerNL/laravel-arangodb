@@ -3,6 +3,7 @@
 use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Tag;
+use Tests\Setup\Models\Taggable;
 use Tests\TestCase;
 
 uses(
@@ -67,4 +68,23 @@ test('sync', function () {
     expect(count($reloadedCharacter->tags))->toEqual(2);
     expect($reloadedCharacter->tags[0]->id)->toEqual('C');
     expect($reloadedCharacter->tags[1]->id)->toEqual('J');
+});
+
+test('morph with MorphType', function () {
+    $newTag = Tag::create([
+        "id" => "1",
+        "en" => "One for all",
+        "de" => "einer für alle",
+    ]);
+
+    $ned = Character::find("NedStark");
+    $ned->tags()->attach($newTag->id);
+
+    $newNed = Character::with('tags')->where('id', 'NedStark')->first();
+
+    $tag = $newNed->tags[0];
+
+    expect($tag)->toBeInstanceOf(Tag::class);
+    expect($tag->pivot)->toBeInstanceOf(Taggable::class);
+    expect($tag->pivot->tag_id)->toBeString();
 });

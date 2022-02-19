@@ -2,9 +2,9 @@
 
 namespace Tests\Setup\Models;
 
-use LaravelFreelancerNL\Aranguent\Eloquent\Pivot;
+use LaravelFreelancerNL\Aranguent\Eloquent\Relations\MorphPivot;
 
-class Taggable extends Pivot
+class Taggable extends MorphPivot
 {
     protected $table = 'taggables';
 }
