@@ -5,6 +5,7 @@ use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Mockery as M;
 use Tests\Setup\Models\Character;
+use Tests\Setup\Models\Tag;
 use Tests\TestCase;
 
 uses(
@@ -125,4 +126,34 @@ test('sync', function () {
     $child->parents()->sync('characters/NedStark');
     $rhaegarTargaryen->delete();
     $lyannaStark->delete();
+});
+
+test('upon attachment a related pivot key is reverted to a string if it is a numeric string', function () {
+    $char = Character::create([
+        'id' => "1",
+        'name' => 'Character 1'
+    ]);
+    Tag::create([
+        'id' => "1",
+        'name' => 'Tag 1'
+    ]);
+    Tag::create([
+        'id' => "2",
+        'name' => 'Tag 2'
+    ]);
+
+    $attachPivotData = [
+        1 => [],
+        2 => []
+    ];
+
+    $char->tags()->attach($attachPivotData);
+
+    expect($char->tags->first()->pivot->tag_id)->toBeString();
+    expect($char->tags->first()->pivot->tag_id)->toBe('1');
+    expect($char->tags->first()->pivot->taggable_id)->toBeString();
+    expect($char->tags->first()->pivot->taggable_id)->toBe('1');
+
+    expect($char->tags[1]->pivot->tag_id)->toBeString();
+    expect($char->tags[1]->pivot->tag_id)->toBe('2');
 });

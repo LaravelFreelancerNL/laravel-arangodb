@@ -3,6 +3,7 @@
 namespace Tests\Setup\Models;
 
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
+use Tests\Setup\Database\Factories\CharacterFactory;
 
 class Character extends Model
 {

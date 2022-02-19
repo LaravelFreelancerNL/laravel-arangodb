@@ -33,9 +33,9 @@ trait OrchestraTestbenchTesting
     use HandlesAnnotations;
     use HandlesDatabases;
     use HandlesRoutes;
-    use WithFactories;
     use WithLaravelMigrations;
     use WithLoadMigrationsFrom;
+    use WithFaker;
 
     /**
      * The Illuminate application instance.

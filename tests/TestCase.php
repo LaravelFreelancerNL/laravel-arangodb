@@ -109,6 +109,7 @@ abstract class TestCase extends AranguentTestCase implements \Orchestra\Testbenc
         $this->tearDownTheTestEnvironment();
     }
 
+
     protected function skipTestOnArangoVersionsBefore(string $version)
     {
         if (version_compare(getenv('ARANGODB_VERSION'), $version, '<')) {
