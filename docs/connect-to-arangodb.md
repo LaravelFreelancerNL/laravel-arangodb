@@ -6,9 +6,9 @@
             'name'       => 'arangodb',
             'driver'     => 'arangodb',
             'endpoint'   => env('DB_ENDPOINT', 'http://localhost:8529'),
-            'database'   => env('DB_DATABASE'),
-            'AuthUser'   => env('DB_USERNAME'),
-            'AuthPasswd' => env('DB_PASSWORD'),
+            'database' => env('DB_DATABASE'),
+            'username' => env('DB_USERNAME'),
+            'password' => env('DB_PASSWORD')
         ],
 ```
 Provide an array of endpoints to handle failover if you have a replication set up. 
