@@ -79,11 +79,11 @@ class Grammar extends FluentAqlGrammar
     ];
 
     /**
-     * The grammar specific bit operators.
+     * The grammar specific bitwise operators.
      *
      * @var array
      */
-    protected $bitOperators = [];
+    protected $bitwiseOperators = [];
 
     /**
      * Get the format for database stored dates.
@@ -536,8 +536,8 @@ class Grammar extends FluentAqlGrammar
      *
      * @return array
      */
-    public function getBitOperators()
+    public function getBitwiseOperators()
     {
-        return $this->bitOperators;
+        return $this->bitwiseOperators;
     }
 }
