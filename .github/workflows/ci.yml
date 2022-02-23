@@ -1,6 +1,11 @@
 name: CI tests
 
-on: [workflow_dispatch, push, pull_request]
+on: 
+  workflow_dispatch:
+  push:
+  pull_request:
+  schedule:
+  - cron: 0 6 * * 4
 
 env:
   DB_ENDPOINT: 'http://localhost:8529'
