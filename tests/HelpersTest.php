@@ -46,3 +46,13 @@ test('associative flatten with list', function () {
 
     expect($result)->toBe($data);
 });
+
+test('isDotString', function () {
+    expect(isDotString('en.description'))->toBeTrue();
+
+    expect(isDotString('en.more.descriptions'))->toBeTrue();
+
+    expect(isDotString('descriptions'))->toBeFalse();
+
+    expect(isDotString('.more.descriptions'))->toBeFalse();
+});

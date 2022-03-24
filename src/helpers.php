@@ -37,6 +37,13 @@ if (! function_exists('associativeFlatten')) {
     }
 }
 
+if (! function_exists('isDotString')) {
+    function isDotString(string $string): bool
+    {
+        return (bool) strpos($string, '.');
+    }
+}
+
 if (! function_exists('renameArrayKey')) {
     /**
      * @param array<mixed> $array

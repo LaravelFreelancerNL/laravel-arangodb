@@ -183,7 +183,7 @@ class Builder extends IlluminateQueryBuilder
                 continue;
             }
 
-            if (! is_string($as) || ! $this->isQueryable($column)) {
+            if (is_string($as)) {
                 $this->columns[$as] = $column;
 
                 continue;
