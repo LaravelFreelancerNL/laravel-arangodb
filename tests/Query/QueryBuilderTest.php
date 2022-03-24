@@ -56,64 +56,6 @@ test('insert or ignore doesnt error on duplicates', function () {
     expect($result)->toBe(1);
 });
 
-test('basic select', function () {
-    $builder = getBuilder();
-    $builder->select('*')->from('users');
-    expect($builder->toSql())->toBe('FOR userDoc IN users RETURN userDoc');
-
-    $builder = getBuilder();
-    $builder->select(['name', 'email'])->from('users');
-    expect($builder->toSql())->toBe('FOR userDoc IN users RETURN {"name":userDoc.name,"email":userDoc.email}');
-});
-
-test('basic select with get columns', function () {
-    $builder = getBuilder();
-    $builder->getProcessor()->shouldReceive('processSelect');
-    $builder->getConnection()->shouldReceive('select')->once()->andReturnUsing(
-        function ($aqb) {
-            expect($aqb->toAql())->toBe('FOR userDoc IN users RETURN userDoc');
-        }
-    );
-    $builder->getConnection()->shouldReceive('select')->once()->andReturnUsing(
-        function ($aqb) {
-            $this->assertSame(
-                'FOR userDoc IN users RETURN {"name":userDoc.name,"email":userDoc.email}',
-                $aqb->toAql()
-            );
-        }
-    );
-    $builder->getConnection()->shouldReceive('select')->once()->andReturnUsing(
-        function ($aqb) {
-            expect($aqb->toAql())->toBe('FOR userDoc IN users RETURN userDoc.name');
-        }
-    );
-
-    $builder->from('users')->get();
-    expect($builder->columns)->toBeNull();
-
-    $builder->from('users')->get(['name', 'email']);
-    expect($builder->columns)->toBeNull();
-
-    $builder->from('users')->get('name');
-    expect($builder->columns)->toBeNull();
-
-    expect($builder->toSql())->toBe('FOR userDoc IN users');
-    expect($builder->columns)->toBeNull();
-});
-
-test('basic select with get one column', function () {
-    $builder = getBuilder();
-    $builder->getProcessor()->shouldReceive('processSelect');
-    $builder->getConnection()->shouldReceive('select')->once()->andReturnUsing(
-        function ($aqb) {
-            expect($aqb->toAql())->toBe('FOR userDoc IN users RETURN userDoc.name');
-        }
-    );
-
-    $builder->from('users')->get('name');
-    expect($builder->columns)->toBeNull();
-});
-
 test('order bys', function () {
     $builder = getBuilder();
     $builder->select('*')->from('users')->orderBy('email')->orderBy('age', 'desc');

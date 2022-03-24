@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
+use Exception;
 use Illuminate\Support\Str;
-use LaravelFreelancerNL\Aranguent\Query\Builder;
-use LaravelFreelancerNL\FluentAQL\Expressions\FunctionExpression;
-use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
 trait HasAliases
 {
@@ -50,14 +48,24 @@ trait HasAliases
     /**
      * Extract table and alias from sql alias notation (entity AS `alias`)
      *
-     * @param  string  $entity
-     * @return array|false|string[]
+     * @param string $entity
+     * @param int|string|null $key
+     * @return array<mixed>
+     * @throws Exception
      */
-    protected function extractAlias(string $entity)
+    protected function extractAlias(string $entity, int|string $key = null): array
     {
         $results = preg_split("/\sas\s/i", $entity);
+
+        if ($results === false) {
+            throw new Exception('Column splitting failed');
+        }
+
         if (isset($results[1])) {
             $results[1] = trim($results[1], '`');
+        }
+        if (! isset($results[1]) && is_string($key)) {
+            $results[1] = $key;
         }
         if (! isset($results[1])) {
             $results[1] = $results[0];
@@ -121,57 +129,6 @@ trait HasAliases
         }
 
         return null;
-    }
-
-    protected function normalizeColumn(Builder $builder, mixed $column, string $table = null): mixed
-    {
-        if ($column instanceof QueryBuilder || $column instanceof FunctionExpression) {
-            return $column;
-        }
-
-        $column = $this->convertColumnId($column);
-
-        if ((is_string($column) || is_numeric($column)) && key_exists($column, $builder->variables)) {
-            return $column;
-        }
-
-        if (is_array($builder->groups) && in_array($column, $builder->groups)) {
-            return $column;
-        }
-
-        if ($table == null) {
-            $table = $builder->from;
-        }
-
-        // Replace SQL JSON arrow for AQL dot
-        $column = str_replace('->', '.', $column);
-
-        $references = explode('.', $column);
-
-        //We check for an existing alias to determine of the first reference is a table.
-        // In which case we replace it with the alias.
-        $references = $this->normalizeColumnReferences($references, $table);
-
-        return implode('.', $references);
-    }
-
-    /**
-     * @param array<mixed> $references
-     * @return array<mixed>
-     */
-    protected function normalizeColumnReferences(array $references, string $table = null): array
-    {
-        $tableAlias = $this->getTableAlias($references[0]);
-        if (isset($tableAlias)) {
-            $references[0] = $tableAlias;
-        }
-
-        if ($tableAlias === null && $table != null && ! $this->isTableAlias($references[0])) {
-            $tableAlias = $this->generateTableAlias($table);
-            array_unshift($references, $tableAlias);
-        }
-
-        return $references;
     }
 
     /**
