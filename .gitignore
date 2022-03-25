@@ -1,6 +1,5 @@
 .idea
 clover.xml
-composer.lock
 composer.phar
 coverage.yml
 phpunit.phar
