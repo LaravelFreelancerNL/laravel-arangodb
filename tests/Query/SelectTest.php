@@ -50,7 +50,7 @@ test('select nested data without alias', function () {
     expect($house)->toHaveProperty('en');
 });
 
-test('select nested data through string key', function () {
+test('select nested data through string-key', function () {
     $house = DB::table('houses')->select([
         'name',
         'description' => 'en.description',
@@ -88,6 +88,23 @@ test('select nested data with multilevel embedded objects though multiple paths'
     expect((array)$house->en)->toHaveCount(2);
     expect((array)$house->en->summary)->toHaveCount(2);
 });
+
+test('select nested data with multilevel embedded objects and aliases', function () {
+    $house = DB::table('houses')->select([
+        'en.summary.short',
+        'en.summary.long as long',
+        'en.words',
+        'name',
+    ])->limit(1)->first();
+
+    expect((array)$house)->toHaveCount(3);
+    expect($house)->toHaveProperty('name');
+    expect($house)->toHaveProperty('en');
+    expect($house)->toHaveProperty('long');
+    expect((array)$house->en)->toHaveCount(2);
+    expect((array)$house->en->summary)->toHaveCount(1);
+});
+
 
 test('addSelect', function () {
     $house = DB::table('houses')->select('en')->addSelect('name')->limit(1)->first();
