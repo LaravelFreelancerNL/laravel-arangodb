@@ -14,13 +14,15 @@ trait CompilesGroups
      * @param Builder $builder
      * @param array<string> $groups
      * @return Builder
+     * @throws \Exception
      */
     protected function compileGroups(Builder $builder, array $groups = []): Builder
     {
         $aqlGroups = [];
         foreach ($groups as $key => $group) {
             $aqlGroups[$key][0] = $group;
-            $aqlGroups[$key][1] = 'characterDoc.' . $group;
+
+            $aqlGroups[$key][1] = $this->normalizeColumn($builder, $group);
         }
 
         $builder->aqb = $builder->aqb->collect($aqlGroups);
