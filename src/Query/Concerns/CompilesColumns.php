@@ -77,7 +77,11 @@ trait CompilesColumns
 
         $column = $this->convertColumnId($column);
 
-        if (is_array($builder->groups) && in_array($column, $builder->groups)) {
+        if (
+            is_array($builder->groups)
+            && in_array($column, $builder->groups)
+            && debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT)[1]['function'] !== "compileGroups"
+        ) {
             return $column;
         }
 
@@ -146,7 +150,6 @@ trait CompilesColumns
             $tableAlias = $this->generateTableAlias($table);
             array_unshift($references, $tableAlias);
         }
-
         return implode('.', $references);
     }
 

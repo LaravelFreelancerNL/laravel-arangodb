@@ -133,9 +133,10 @@ trait CompilesWhereClauses
     /**
      * Compile a "between" where clause.
      *
-     * @param  IluminateBuilder  $query
-     * @param  array  $where
+     * @param IluminateBuilder $query
+     * @param array $where
      * @return string
+     * @throws \Exception
      */
     protected function whereBetween(IluminateBuilder $query, $where)
     {
@@ -183,9 +184,10 @@ trait CompilesWhereClauses
     /**
      * Compile a "between" where clause.
      *
-     * @param  IluminateBuilder  $query
-     * @param  array  $where
+     * @param IluminateBuilder $query
+     * @param array $where
      * @return string
+     * @throws \Exception
      */
     protected function whereBetweenColumns(IluminateBuilder $query, $where)
     {
