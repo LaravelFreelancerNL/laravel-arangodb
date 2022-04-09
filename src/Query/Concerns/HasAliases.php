@@ -104,9 +104,10 @@ trait HasAliases
     }
 
     /**
-     * @param  string  $column
-     * @param  string|null  $alias
+     * @param string $column
+     * @param string|null $alias
      * @return bool
+     * @throws Exception
      */
     public function registerColumnAlias(string $column, string $alias = null): bool
     {
