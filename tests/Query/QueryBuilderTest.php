@@ -56,6 +56,29 @@ test('insert or ignore doesnt error on duplicates', function () {
     expect($result)->toBe(1);
 });
 
+test('insert embedded empty array', function () {
+    $characterData = [
+        "_key" => "LyannaStark",
+        "name" => "Lyanna",
+        "surname" => "Stark",
+        "alive" => false,
+        "age" => 25,
+        "residence_id" => "winterfell",
+        "tags" => [],
+    ];
+    DB::table('characters')->insert($characterData);
+
+    DB::table('characters')->insertOrIgnore($characterData);
+
+    $result = DB::table('characters')
+        ->where("name", "==", "Lyanna")
+        ->get();
+
+    expect($result->first()->tags)->toBeArray();
+    expect($result->first()->tags)->toBeEmpty();
+});
+
+
 test('order bys', function () {
     $builder = getBuilder();
     $builder->select('*')->from('users')->orderBy('email')->orderBy('age', 'desc');

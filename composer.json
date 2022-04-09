@@ -25,8 +25,9 @@
         "php": "^8.0",
         "laravel/framework": "^8.83 || ^9.0",
         "ext-json": "*",
-        "laravel-freelancer-nl/fluentaql": "^1.0",
-        "laravel-freelancer-nl/arangodb-php-client": "^2.0"
+        "laravel-freelancer-nl/fluentaql": "^2.0",
+        "laravel-freelancer-nl/arangodb-php-client": "^2.0",
+        "vlucas/phpdotenv": "^5.4"
     },
     "require-dev": {
         "mockery/mockery": "^1.4.3",
