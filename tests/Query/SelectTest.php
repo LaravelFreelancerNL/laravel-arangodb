@@ -13,6 +13,7 @@ test('basic select', function () {
     $results = DB::table('characters')->select()->get();
 
     expect($results)->toHaveCount(43);
+
     expect(count((array)$results[0]))->toBe(9);
 });
 

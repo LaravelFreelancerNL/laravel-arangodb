@@ -2,52 +2,11 @@
 
 namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
+use Illuminate\Database\Query\Builder as IlluminateBuilder;
 use Illuminate\Database\Query\Builder as IluminateBuilder;
-use Illuminate\Database\Query\Expression;
-use LaravelFreelancerNL\Aranguent\Query\Builder;
-use LaravelFreelancerNL\FluentAQL\Exceptions\BindException;
 
 trait CompilesWhereClauses
 {
-    /**
-     * Compile the "where" portions of the query.
-     *
-     * @param Builder $builder
-     * @param array<mixed> $wheres
-     * @param string $source
-     * @return Builder
-     *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     */
-    protected function compileWheres(Builder $builder, array $wheres = [], string $source = 'wheres'): Builder
-    {
-        if (is_null($builder->$source)) {
-            return $builder;
-        }
-
-        $predicates = $this->compileWheresToArray($builder, $source);
-
-        if (count($predicates) > 0) {
-            $builder->aqb = $builder->aqb->filter($predicates);
-        }
-
-        return $builder;
-    }
-
-    /**
-     * Get an array of all the where clauses for the query.
-     *
-     * @param Builder $builder
-     * @param string $source
-     * @return array<mixed>
-     */
-    protected function compileWheresToArray(Builder $builder, string $source = 'wheres'): array
-    {
-        return collect($builder->$source)->map(function ($where) use ($builder) {
-            return $this->{"where{$where['type']}"}($builder, $where);
-        })->all();
-    }
-
     protected function getOperatorByWhereType($type)
     {
         if (isset($this->whereTypeOperators[$type])) {
@@ -58,26 +17,15 @@ trait CompilesWhereClauses
     }
 
     /**
-     * Determine if the given value is a raw expression.
+     * Format the where clause statements into one string.
      *
-     * @param  mixed  $value
-     * @return bool
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @param  IlluminateBuilder  $query
+     * @param  array<mixed>  $sql
      */
-    public function isExpression($value)
+    protected function concatenateWhereClauses($query, $sql): string
     {
-        return $value instanceof Expression;
-    }
-
-    /**
-     * Get the appropriate query parameter place-holder for a value.
-     *
-     * @param  Builder  $query
-     * @param  mixed  $value
-     * @return object
-     */
-    public function parameter(Builder $query, $value)
-    {
-        return $this->isExpression($value) ? $this->getValue($value) : $query->aqb->bind($value);
+        return 'FILTER ' . $this->removeLeadingBoolean(implode(' ', $sql));
     }
 
     protected function normalizeOperator($where)
@@ -112,33 +60,23 @@ trait CompilesWhereClauses
     /**
      * Compile a basic where clause.
      *
-     * @param  IluminateBuilder  $query
-     * @param  array  $where
-     * @return array
+     * @param  array<mixed>  $where
      */
-    protected function whereBasic(IluminateBuilder $query, $where)
+    protected function whereBasic(IluminateBuilder $query, $where): string
     {
-        $predicate = [];
+        $value = $this->parameter($where['value']);
 
-        $where = $this->normalizeOperator($where);
+        $operator = str_replace('?', '??', $where['operator']);
 
-        $predicate[0] = $this->normalizeColumn($query, $where['column']);
-        $predicate[1] = $where['operator'];
-        $predicate[2] = $this->parameter($query, $where['value']);
-        $predicate[3] = $where['boolean'];
-
-        return $predicate;
+        return $this->wrap($where['column']).' '.$operator.' '.$value;
     }
 
     /**
      * Compile a "between" where clause.
      *
-     * @param IluminateBuilder $query
-     * @param array $where
-     * @return string
-     * @throws \Exception
+     * @param  array<mixed>  $where
      */
-    protected function whereBetween(IluminateBuilder $query, $where)
+    protected function whereBetween(IluminateBuilder $query, $where): string
     {
         $predicate = [];
 
@@ -184,12 +122,9 @@ trait CompilesWhereClauses
     /**
      * Compile a "between" where clause.
      *
-     * @param IluminateBuilder $query
-     * @param array $where
-     * @return string
-     * @throws \Exception
+     * @param  array<mixed>  $where
      */
-    protected function whereBetweenColumns(IluminateBuilder $query, $where)
+    protected function whereBetweenColumns(IluminateBuilder $query, $where): string
     {
         $predicate = [];
 
@@ -212,13 +147,11 @@ trait CompilesWhereClauses
 
 
     /**
-     * Compile a where clause comparing two columns..
+     * Compile a where clause comparing two columns.
      *
-     * @param  IluminateBuilder  $query
-     * @param  array  $where
-     * @return string
+     * @param  array<mixed>  $where
      */
-    protected function whereColumn(IluminateBuilder $query, $where)
+    protected function whereColumn(IluminateBuilder $query, $where): string
     {
         $predicate = [];
 
@@ -235,11 +168,9 @@ trait CompilesWhereClauses
     /**
      * Compile a "where null" clause.
      *
-     * @param  IluminateBuilder  $query
-     * @param  array  $where
-     * @return string
+     * @param  array<mixed>  $where
      */
-    protected function whereNull(IluminateBuilder $query, $where)
+    protected function whereNull(IluminateBuilder $query, $where): string
     {
         $predicate = [];
 
@@ -254,11 +185,9 @@ trait CompilesWhereClauses
     /**
      * Compile a "where not null" clause.
      *
-     * @param  IluminateBuilder  $query
-     * @param  array  $where
-     * @return string
+     * @param  array<mixed>  $where
      */
-    protected function whereNotNull(IluminateBuilder $query, $where)
+    protected function whereNotNull(IluminateBuilder $query, $where): string
     {
         $predicate = [];
 
@@ -273,11 +202,9 @@ trait CompilesWhereClauses
     /**
      * Compile a "where in" clause.
      *
-     * @param  IluminateBuilder  $query
-     * @param  array  $where
-     * @return string
+     * @param  array<mixed>  $where
      */
-    protected function whereIn(IluminateBuilder $query, $where)
+    protected function whereIn(IluminateBuilder $query, $where): string
     {
         $predicate = [];
 
@@ -294,11 +221,9 @@ trait CompilesWhereClauses
      *
      * For safety, whereIntegerInRaw ensures this method is only used with integer values.
      *
-     * @param  IluminateBuilder  $query
-     * @param  array  $where
-     * @return string
+     * @param  array<mixed>  $where
      */
-    protected function whereInRaw(IluminateBuilder $query, $where)
+    protected function whereInRaw(IluminateBuilder $query, $where): string
     {
         $predicate = [];
 
@@ -313,11 +238,9 @@ trait CompilesWhereClauses
     /**
      * Compile a "where not in" clause.
      *
-     * @param  IluminateBuilder  $query
-     * @param  array  $where
-     * @return string
+     * @param  array<mixed>  $where
      */
-    protected function whereNotIn(IluminateBuilder $query, $where)
+    protected function whereNotIn(IluminateBuilder $query, $where): string
     {
         $predicate = [];
 
@@ -334,11 +257,9 @@ trait CompilesWhereClauses
      *
      * For safety, whereIntegerInRaw ensures this method is only used with integer values.
      *
-     * @param  IluminateBuilder  $query
-     * @param  array  $where
-     * @return string
+     * @param  array<mixed>  $where
      */
-    protected function whereNotInRaw(IluminateBuilder $query, $where)
+    protected function whereNotInRaw(IluminateBuilder $query, $where): string
     {
         $predicate = [];
 
@@ -350,14 +271,11 @@ trait CompilesWhereClauses
     }
 
     /**
-     * Compile a "whereJsonContains" clause.
+     * Compile a "where JSON contains" clause.
      *
-     * @param Builder $query
-     * @param array $where
-     * @return string
-     * @throws BindException
+     * @param array<mixed> $where
      */
-    protected function whereJsonContains(Builder $query, $where)
+    protected function whereJsonContains(IluminateBuilder $query, $where): string
     {
         $predicate = [];
 
@@ -372,13 +290,11 @@ trait CompilesWhereClauses
     }
 
     /**
-     * Compile a "whereJsonContains" clause.
+     * Compile a "where JSON length" clause.
      *
-     * @param  Builder  $query
-     * @param  array  $where
-     * @return array
+     * @param  array<mixed>  $where
      */
-    protected function whereJsonLength(Builder $query, $where)
+    protected function whereJsonLength(IluminateBuilder $query, $where): string
     {
         $predicate = [];
 
@@ -396,13 +312,11 @@ trait CompilesWhereClauses
 
 
     /**
-     * Compile a where date clause.
+     * Compile a "where date" clause.
      *
-     * @param  Builder  $query
-     * @param  array  $where
-     * @return array
+     * @param  array<mixed>  $where
      */
-    protected function whereDate(Builder $query, $where)
+    protected function whereDate(IluminateBuilder $query, $where): string
     {
         $predicate = [];
 
@@ -417,13 +331,11 @@ trait CompilesWhereClauses
     }
 
     /**
-     * Compile a where year clause.
+     * Compile a "where year" clause.
      *
-     * @param  Builder  $query
-     * @param  array  $where
-     * @return array
+     * @param  array<mixed>  $where
      */
-    protected function whereYear(Builder $query, $where)
+    protected function whereYear(IluminateBuilder $query, $where): string
     {
         $predicate = [];
 
@@ -438,13 +350,11 @@ trait CompilesWhereClauses
     }
 
     /**
-     * Compile a where month clause.
+     * Compile a "where month" clause.
      *
-     * @param  Builder  $query
-     * @param  array  $where
-     * @return array
+     * @param  array<mixed>  $where
      */
-    protected function whereMonth(Builder $query, $where)
+    protected function whereMonth(IluminateBuilder $query, $where): string
     {
         $predicate = [];
 
@@ -460,13 +370,11 @@ trait CompilesWhereClauses
 
 
     /**
-     * Compile a where day clause.
+     * Compile a "where day" clause.
      *
-     * @param  Builder  $query
-     * @param  array  $where
-     * @return array
+     * @param  array<mixed>  $where
      */
-    protected function whereDay(Builder $query, $where)
+    protected function whereDay(IluminateBuilder $query, $where): string
     {
         $predicate = [];
 
@@ -481,13 +389,11 @@ trait CompilesWhereClauses
     }
 
     /**
-     * Compile a where time clause.
+     * Compile a "where time" clause.
      *
-     * @param  Builder  $query
-     * @param  array  $where
-     * @return array
+     * @param  array<mixed>  $where
      */
-    protected function whereTime(Builder $query, $where)
+    protected function whereTime(IluminateBuilder $query, $where): string
     {
         $predicate = [];
 
@@ -504,11 +410,9 @@ trait CompilesWhereClauses
     /**
      * Compile a nested where clause.
      *
-     * @param  Builder  $query
-     * @param  array  $where
-     * @return string
+     * @param  array<mixed>  $where
      */
-    protected function whereNested(Builder $query, $where)
+    protected function whereNested(IluminateBuilder $query, $where): string
     {
         $predicates = [];
         $predicates = $this->compileWheresToArray($where['query']);
@@ -522,11 +426,9 @@ trait CompilesWhereClauses
     /**
      * Compile a where condition with a sub-select.
      *
-     * @param  Builder  $query
-     * @param  array  $where
-     * @return string
+     * @param  array<mixed>  $where
      */
-    protected function whereSub(Builder $query, $where)
+    protected function whereSub(IluminateBuilder $query, $where): string
     {
         $predicate = [];
 
@@ -540,16 +442,13 @@ trait CompilesWhereClauses
         return $predicate;
     }
 
+
     /**
      * Compile a where exists clause.
      *
-     *  @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     *
-     * @param  Builder  $query
-     * @param  array  $where
-     * @return string
+     * @param  array<mixed>  $where
      */
-    protected function whereExists(Builder $query, $where)
+    protected function whereExists(IluminateBuilder $query, $where): string
     {
         $predicate = [];
 
@@ -564,13 +463,9 @@ trait CompilesWhereClauses
     /**
      * Compile a where exists clause.
      *
-     *  @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     *
-     * @param  Builder  $query
-     * @param  array  $where
-     * @return string
+     * @param  array<mixed>  $where
      */
-    protected function whereNotExists(Builder $query, $where)
+    protected function whereNotExists(IluminateBuilder $query, $where): string
     {
         $predicate = [];
 

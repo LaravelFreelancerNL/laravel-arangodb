@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace LaravelFreelancerNL\Aranguent\Query;
 
+use LaravelFreelancerNL\Aranguent\Query\Concerns\HandlesAqlGrammar;
+use Illuminate\Database\Query\Builder as IlluminateBuilder;
+use Illuminate\Database\Query\Grammars\Grammar as IlluminateGrammar;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Traits\Macroable;
@@ -15,10 +18,8 @@ use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesWhereClauses;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\ConvertsIdToKey;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\HasAliases;
 use LaravelFreelancerNL\FluentAQL\Exceptions\BindException as BindException;
-use LaravelFreelancerNL\FluentAQL\Expressions\FunctionExpression;
-use LaravelFreelancerNL\FluentAQL\Grammar as FluentAqlGrammar;
 
-class Grammar extends FluentAqlGrammar
+class Grammar extends IlluminateGrammar
 {
     use CompilesAggregates;
     use CompilesColumns;
@@ -28,6 +29,7 @@ class Grammar extends FluentAqlGrammar
     use ConvertsIdToKey;
     use HasAliases;
     use Macroable;
+    use HandlesAqlGrammar;
 
     public $name;
 
@@ -100,7 +102,7 @@ class Grammar extends FluentAqlGrammar
     /**
      * Get the grammar specific operators.
      *
-     * @return array
+     * @return array<mixed>
      */
     public function getOperators()
     {
@@ -115,24 +117,24 @@ class Grammar extends FluentAqlGrammar
     /**
      * Compile an insert statement into AQL.
      *
-     * @param Builder $builder
-     * @param array   $values
+     * @param IlluminateBuilder $query
+     * @param array<mixed>   $values
      *
-     * @throws BindException
+     * @return IlluminateBuilder
+     *@throws BindException
      *
-     * @return Builder
      */
-    public function compileInsert(Builder $builder, array $values)
+    public function compileInsert(IlluminateBuilder $query, array $values)
     {
         if (Arr::isAssoc($values)) {
             $values = [$values];
         }
-        $table = $this->prefixTable($builder->from);
+        $table = $this->prefixTable($query->from);
 
         if (empty($values)) {
-            $builder->aqb = $builder->aqb->insert('{}', $table);
+            $query->aqb = $query->aqb->insert('{}', $table);
 
-            return $builder;
+            return $query;
         }
 
         // Convert id to _key
@@ -140,12 +142,12 @@ class Grammar extends FluentAqlGrammar
             $values[$key] = $this->convertIdToKey($value);
         }
 
-        $builder->aqb = $builder->aqb->let('values', $values)
+        $query->aqb = $query->aqb->let('values', $values)
             ->for('value', 'values')
             ->insert('value', $table)
             ->return('NEW._key');
 
-        return $builder;
+        return $query;
     }
 
     /**
@@ -153,22 +155,22 @@ class Grammar extends FluentAqlGrammar
      *
      * @param array<mixed> $values
      */
-    public function compileInsertGetId(Builder $builder, $values, $sequence = "_key"): Builder
+    public function compileInsertGetId(IlluminateBuilder $query, $values, $sequence = "_key"): IlluminateBuilder
     {
         if (Arr::isAssoc($values)) {
             $values = [$values];
         }
-        $table = $this->prefixTable($builder->from);
+        $table = $this->prefixTable($query->from);
 
         if (isset($sequence)) {
             $sequence = $this->convertIdToKey($sequence);
         }
 
         if (empty($values)) {
-            $builder->aqb = $builder->aqb->insert('{}', $table)
+            $query->aqb = $query->aqb->insert('{}', $table)
                 ->return('NEW.' . $sequence);
 
-            return $builder;
+            return $query;
         }
 
         // Convert id to _key
@@ -176,32 +178,32 @@ class Grammar extends FluentAqlGrammar
             $values[$key] = $this->convertIdToKey($value);
         }
 
-        $builder->aqb = $builder->aqb->let('values', $values)
+        $query->aqb = $query->aqb->let('values', $values)
             ->for('value', 'values')
             ->insert('value', $table)
             ->return('NEW.' . $sequence);
 
-        return $builder;
+        return $query;
     }
 
     /**
      * Compile an insert statement into AQL.
      *
-     * @param Builder $builder
+     * @param IlluminateBuilder $query
      * @param array<mixed> $values
-     * @return Builder
+     * @return IlluminateBuilder
      */
-    public function compileInsertOrIgnore(Builder $builder, array $values)
+    public function compileInsertOrIgnore(IlluminateBuilder $query, array $values)
     {
         if (Arr::isAssoc($values)) {
             $values = [$values];
         }
-        $table = $this->prefixTable($builder->from);
+        $table = $this->prefixTable($query->from);
 
         if (empty($values)) {
-            $builder->aqb = $builder->aqb->insert('{}', $table);
+            $query->aqb = $query->aqb->insert('{}', $table);
 
-            return $builder;
+            return $query;
         }
 
         // Convert id to _key
@@ -209,49 +211,22 @@ class Grammar extends FluentAqlGrammar
             $values[$key] = $this->convertIdToKey($value);
         }
 
-        $builder->aqb = $builder->aqb->let('values', $values)
+        $query->aqb = $query->aqb->let('values', $values)
             ->for('value', 'values')
             ->insert('value', $table)
             ->options(["ignoreErrors" => true])
             ->return('NEW._key');
 
-        return $builder;
-    }
-
-
-    /**
-     * Compile a select query into AQL.
-     *
-     * @param Builder $builder
-     *
-     * @return Builder
-     */
-    public function compileSelect(Builder $builder)
-    {
-//        if ($builder->unions && $builder->aggregate) {
-//            return $this->compileUnionAggregate($builder);
-//        }
-
-        // To compile the query, we'll spin through each component of the query and
-        // see if that component exists. If it does we'll just call the compiler
-        // function for the component which is responsible for making the SQL.
-
-        $builder = $this->compileComponents($builder);
-
-//        if ($builder->unions) {
-//            $sql = $this->wrapUnion($sql).' '.$this->compileUnions($builder);
-//        }
-
-        return $builder;
+        return $query;
     }
 
     /**
      * Compile a truncate table statement into SQL.
      *
-     * @param  Builder  $query
-     * @return array
+     * @param IlluminateBuilder $query
+     * @return array<mixed>
      */
-    public function compileTruncate(Builder $query)
+    public function compileTruncate(IlluminateBuilder $query)
     {
         /** @phpstan-ignore-next-line */
         $aqb = DB::aqb();
@@ -260,98 +235,73 @@ class Grammar extends FluentAqlGrammar
     }
 
     /**
-     * Compile the components necessary for a select clause.
-     *
-     * @param Builder $builder
-     *
-     * @return Builder
-     */
-    protected function compileComponents(Builder $builder)
-    {
-        foreach ($this->selectComponents as $component) {
-            // To compile the query, we'll spin through each component of the query and
-            // see if that component exists. If it does we'll just call the compiler
-            // function for the component which is responsible for making the SQL.
-
-            if (isset($builder->$component) && !is_null($builder->$component)) {
-                $method = 'compile' . ucfirst($component);
-
-                $builder = $this->$method($builder, $builder->$component);
-            }
-        }
-
-        return $builder;
-    }
-
-    /**
      * Compile the "from" portion of the query -> FOR in AQL.
      *
-     * @param Builder $builder
+     * @param IlluminateBuilder $query
      * @param string  $table
      *
-     * @return Builder
+     * @return IlluminateBuilder
      */
-    protected function compileFrom(Builder $builder, $table)
+    protected function compileFrom(IlluminateBuilder $query, $table)
     {
         $table = $this->prefixTable($table);
         $alias = $this->registerTableAlias($table);
 
-        $builder->aqb = $builder->aqb->for($alias, $table);
-
-        return $builder;
+        return "FOR $alias IN $table";
     }
 
     /**
-     * @param  Builder  $builder
-     * @param  array $variables
-     * @return Builder
+     * @param  array<mixed> $variables
      */
-    protected function compileVariables(Builder $builder, array $variables)
+    protected function compileVariables(IlluminateBuilder $query, array $variables): string
     {
-        if (! empty($variables)) {
-            foreach ($variables as $variable => $data) {
-                $builder->aqb = $builder->aqb->let($variable, $data);
-            }
+        if (empty($variables)) {
+            return '';
         }
 
-        return $builder;
+        $lets = [];
+        foreach ($variables as $variable => $data) {
+            $lets[] = "LET $variable =" . json_encode($data);
+        }
+
+        return implode(' ', $lets);
     }
 
     /**
      * Compile the "order by" portions of the query.
      *
-     * @param Builder $builder
-     * @param array   $orders
+     * @param IlluminateBuilder $query
+     * @param array<mixed>   $orders
      *
-     * @return Builder
+     * @return IlluminateBuilder
      */
-    protected function compileOrders(Builder $builder, $orders)
+    protected function compileOrders(IlluminateBuilder $query, $orders)
     {
         if (!empty($orders)) {
-            $orders = $this->compileOrdersToFlatArray($builder, $orders);
-            $builder->aqb = $builder->aqb->sort(...$orders);
+            $orders = $this->compileOrdersToFlatArray($query, $orders);
+            $query->aqb = $query->aqb->sort(...$orders);
 
-            return $builder;
+            return $query;
         }
 
-        return $builder;
+        return $query;
     }
 
     /**
      * Compile the query orders to an array.
      *
-     * @param Builder $builder
-     * @param array   $orders
+     * @param IlluminateBuilder $query
+     * @param array<mixed>   $orders
      *
-     * @return array
+     * @return array<mixed>
      */
-    protected function compileOrdersToFlatArray(Builder $builder, $orders)
+    protected function compileOrdersToFlatArray(IlluminateBuilder $query, $orders)
     {
         $flatOrders = [];
 
         foreach ($orders as $order) {
             if (!isset($order['type']) || $order['type'] != 'Raw') {
-                $order['column'] = $this->normalizeColumn($builder, $order['column']);
+                $order['column'] = $this->normalizeColumn($query, $order['column']);
             }
 
             $flatOrders[] = $order['column'];
@@ -368,61 +318,54 @@ class Grammar extends FluentAqlGrammar
      * Compile the "offset" portions of the query.
      * We are handling this first by saving the offset which will be used by the FluentAQL's limit function.
      *
-     * @param Builder $builder
+     * @param IlluminateBuilder $query
      * @param int     $offset
      *
-     * @return Builder
+     * @return IlluminateBuilder
      */
-    protected function compileOffset(Builder $builder, $offset)
+    protected function compileOffset(IlluminateBuilder $query, $offset)
     {
         $this->offset = (int) $offset;
 
-        return $builder;
+        return $query;
     }
 
     /**
      * Compile the "limit" portions of the query.
      *
-     * @param Builder $builder
      * @param int     $limit
-     *
-     * @return Builder
      */
-    protected function compileLimit(Builder $builder, $limit)
+    protected function compileLimit(IlluminateBuilder $query, $limit): string
     {
         if ($this->offset !== null) {
-            $builder->aqb = $builder->aqb->limit((int) $this->offset, (int) $limit);
-
-            return $builder;
+            return 'LIMIT ' . (int) $this->offset . ', ' . (int) $limit;
         }
-        $builder->aqb = $builder->aqb->limit((int) $limit);
-
-        return $builder;
+        return 'LIMIT ' . (int) $limit;
     }
 
 
     /**
      * Compile an update statement into SQL.
      *
-     * @param Builder $builder
-     * @param array   $values
+     * @param IlluminateBuilder $query
+     * @param array<mixed>   $values
      *
-     * @return Builder
+     * @return IlluminateBuilder
      */
-    public function compileUpdate(Builder $builder, array $values)
+    public function compileUpdate(IlluminateBuilder $query, array $values)
     {
 
-        $table = $this->prefixTable($builder->from);
+        $table = $this->prefixTable($query->from);
         $tableAlias = $this->generateTableAlias($table);
 
-        $builder->aqb = $builder->aqb->for($tableAlias, $table);
+        $query->aqb = $query->aqb->for($tableAlias, $table);
 
         //Fixme: joins?
-        $builder = $this->compileWheres($builder);
+        $query = $this->compileWheres($query);
 
-        $builder->aqb = $builder->aqb->update($tableAlias, $values, $table);
+        $query->aqb = $query->aqb->update($tableAlias, $values, $table);
 
-        return $builder;
+        return $query;
     }
 
     /**
@@ -430,13 +373,13 @@ class Grammar extends FluentAqlGrammar
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      *
-     * @param Builder $query
-     * @param array $values
-     * @param array $uniqueBy
-     * @param array $update
+     * @param IlluminateBuilder $query
+     * @param array<mixed> $values
+     * @param array<mixed> $uniqueBy
+     * @param array<mixed> $update
      * @return string
      */
-    public function compileUpsert(Builder $query, array $values, array $uniqueBy, array $update)
+    public function compileUpsert(IlluminateBuilder $query, array $values, array $uniqueBy, array $update)
     {
         // Convert id to _key
         foreach ($values as $key => $value) {
@@ -468,58 +411,57 @@ class Grammar extends FluentAqlGrammar
      * @SuppressWarnings(PHPMD.CamelCaseParameterName)
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      *
-     * @param Builder $builder
+     * @param IlluminateBuilder $query
      * @param null    $id
      *
-     * @return Builder
+     * @return IlluminateBuilder
      */
-    public function compileDelete(Builder $builder, $id = null)
+    public function compileDelete(IlluminateBuilder $query, $id = null)
     {
-        $table = $this->prefixTable($builder->from);
+        $table = $this->prefixTable($query->from);
         $tableAlias = $this->generateTableAlias($table);
 
 
         if (!is_null($id)) {
-            $builder->aqb = $builder->aqb->remove((string) $id, $table);
+            $query->aqb = $query->aqb->remove((string) $id, $table);
 
-            return $builder;
+            return $query;
         }
 
-        $builder->aqb = $builder->aqb->for($tableAlias, $table);
+        $query->aqb = $query->aqb->for($tableAlias, $table);
 
         //Fixme: joins?
-        $builder = $this->compileWheres($builder);
+        $query = $this->compileWheres($query);
 
-        $builder->aqb = $builder->aqb->remove($tableAlias, $table);
+        $query->aqb = $query->aqb->remove($tableAlias, $table);
 
-        return $builder;
+        return $query;
     }
 
     /**
      * Compile the random statement into SQL.
      *
-     * @param Builder $builder
-     *
-     * @return FunctionExpression;
+     * @param  string  $seed
+     * @return string
      */
-    public function compileRandom(Builder $builder)
+    public function compileRandom($seed): string
     {
-        return $builder->aqb->rand();
+        return 'RAND()';
     }
 
     /**
-     * @param Builder $builder
-     * @return Builder
+     * @param IlluminateBuilder $query
+     * @return IlluminateBuilder
      */
-    public function compileSearch(Builder $builder): Builder
+    public function compileSearch(IlluminateBuilder $query): IlluminateBuilder
     {
-        $builder->aqb = $builder->aqb->search($builder->search['predicates']);
+        $query->aqb = $query->aqb->search($query->search['predicates']);
 
-        if (isset($builder->search['options'])) {
-            $builder->aqb = $builder->aqb->options($builder->search['options']);
+        if (isset($query->search['options'])) {
+            $query->aqb = $query->aqb->options($query->search['options']);
         }
 
-        return $builder;
+        return $query;
     }
 
     /**
@@ -536,7 +478,7 @@ class Grammar extends FluentAqlGrammar
     /**
      * Get the grammar specific bit operators.
      *
-     * @return array
+     * @return array<mixed>
      */
     public function getBitwiseOperators()
     {

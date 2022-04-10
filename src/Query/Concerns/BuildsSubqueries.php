@@ -39,7 +39,7 @@ trait BuildsSubqueries
      * Parse the subquery into SQL and bindings.
      *
      * @param  Builder|EloquentBuilder|Relation|QueryBuilder|FunctionExpression|string  $query
-     * @return array|QueryBuilder
+     * @return array<mixed>|QueryBuilder
      *
      * @throws \InvalidArgumentException
      */

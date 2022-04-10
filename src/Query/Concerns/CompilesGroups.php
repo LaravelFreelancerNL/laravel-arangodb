@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
+use Illuminate\Database\Query\Builder as IlluminateBuilder;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 
 trait CompilesGroups
@@ -11,33 +12,29 @@ trait CompilesGroups
     /**
      * Compile the "group by" portions of the query.
      *
-     * @param Builder $builder
-     * @param array<string> $groups
-     * @return Builder
+     * @param array<mixed> $groups
      * @throws \Exception
      */
-    protected function compileGroups(Builder $builder, array $groups = []): Builder
+    protected function compileGroups(IlluminateBuilder $query, $groups): string
     {
         $aqlGroups = [];
         foreach ($groups as $key => $group) {
             $aqlGroups[$key][0] = $group;
 
-            $aqlGroups[$key][1] = $this->normalizeColumn($builder, $group);
+            $aqlGroups[$key][1] = $this->normalizeColumn($query, $group);
         }
 
-        $builder->aqb = $builder->aqb->collect($aqlGroups);
-
-        return $builder;
+        return 'COLLECT ' . json_encode($aqlGroups);
     }
+
     /**
-     * Compile the "group by" portions of the query.
+     * Compile the "having" portions of the query.
      *
-     * @param Builder $builder
-     * @param string[]  $havings
-     * @return Builder
+     * @param IlluminateBuilder $query
+     * @return string
      */
-    protected function compileHavings(Builder $builder, array $havings = [])
+    protected function compileHavings(IlluminateBuilder $query)
     {
-        return $this->compileWheres($builder, $havings, 'havings');
+        return $this->compileWheres($query, $query->havings, 'havings');
     }
 }

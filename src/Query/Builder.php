@@ -103,25 +103,11 @@ class Builder extends IlluminateQueryBuilder
     }
 
     /**
-     * Run the query as a "select" statement against the connection.
-     *
-     * @return array
-     */
-    protected function runSelect()
-    {
-        $this->aqb = new QueryBuilder();
-        $this->grammar->compileSelect($this)->setAql();
-        $results = $this->connection->select($this->aqb);
-        $this->aqb = new QueryBuilder();
-        return $results;
-    }
-
-    /**
      * Run a pagination count query.
      *
-     * @param array $columns
+     * @param array<mixed> $columns
      *
-     * @return array
+     * @return array<mixed>
      */
     protected function runPaginationCountQuery($columns = ['*'])
     {
@@ -138,16 +124,21 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Set the columns to be selected.
      *
-     * @param  array|mixed  $columns
-     * @return IlluminateQueryBuilder
+     * @param  array<mixed>|mixed  $columns
      */
-    public function select($columns = ['*'])
+    public function select($columns = ['*']): IlluminateQueryBuilder
     {
         $this->columns = [];
         $this->bindings['select'] = [];
-        $columns = is_array($columns) ? $columns : func_get_args();
 
-        $this->addColumns($columns);
+        $columns = is_array($columns) ? $columns : func_get_args();
+        foreach ($columns as $as => $column) {
+            if (is_string($as) && $this->isQueryable($column)) {
+                $this->selectSub($column, $as);
+            } else {
+                $this->addColumns($columns);
+            }
+        }
 
         return $this;
     }
@@ -194,20 +185,9 @@ class Builder extends IlluminateQueryBuilder
     }
 
     /**
-     * Get the SQL representation of the query.
-     *
-     * @return string
-     */
-    public function toSql()
-    {
-        $this->grammar->compileSelect($this)->setAql();
-        return $this->aqb->query;
-    }
-
-    /**
      * Insert a new record into the database.
      *
-     * @param array $values
+     * @param array<mixed> $values
      *
      * @throws BindException
      *
@@ -238,7 +218,7 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Insert a new record into the database.
      *
-     * @param array $values
+     * @param array<mixed> $values
      *
      * @throws BindException
      *
@@ -257,7 +237,7 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Get the current query value bindings in a flattened array.
      *
-     * @return array
+     * @return array<mixed>
      */
     public function getBindings()
     {
@@ -274,7 +254,7 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Update a record in the database.
      *
-     * @param array $values
+     * @param array<mixed> $values
      *
      * @return int
      */
@@ -292,7 +272,7 @@ class Builder extends IlluminateQueryBuilder
      * Execute an aggregate function on the database.
      *
      * @param string $function
-     * @param array  $columns
+     * @param array<mixed>  $columns
      *
      * @return mixed
      */
@@ -359,7 +339,7 @@ class Builder extends IlluminateQueryBuilder
      * Add a raw "order by" clause to the query.
      *
      * @param string|ExpressionInterface $aql
-     * @param array                      $bindings
+     * @param array<mixed>                      $bindings
      *
      * @return $this
      */

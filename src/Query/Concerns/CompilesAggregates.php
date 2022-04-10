@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
+use Illuminate\Database\Query\Builder as IlluminateBuilder;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 
 trait CompilesAggregates
@@ -11,43 +12,42 @@ trait CompilesAggregates
     /**
      * Compile an aggregated select clause.
      *
-     * @param Builder $builder
-     * @param array<mixed> $aggregate
-     *
-     * @return Builder
+     * @param IlluminateBuilder $query
+     * @param  array<mixed>  $aggregate
+     * @return string
      */
-    protected function compileAggregate(Builder $builder, array $aggregate): Builder
+    protected function compileAggregate(IlluminateBuilder $query, $aggregate): string
     {
         $method = 'compile' . ucfirst($aggregate['function']);
 
-        return $this->$method($builder, $aggregate);
+        return $this->$method($query, $aggregate);
     }
 
     /**
      * Compile AQL for count aggregate.
      */
-    protected function compileCount(Builder $builder): Builder
+    protected function compileCount(Builder $query): Builder
     {
-        $builder->aqb = $builder->aqb->collect()->withCount('aggregateResult');
+        $query->aqb = $query->aqb->collect()->withCount('aggregateResult');
 
-        return $builder;
+        return $query;
     }
 
     /**
      * Compile AQL for max aggregate.
      *
-     * @param Builder $builder
+     * @param Builder $query
      * @param array<mixed> $aggregate
      *
      * @return Builder
      */
-    protected function compileMax(Builder $builder, array $aggregate)
+    protected function compileMax(Builder $query, array $aggregate)
     {
-        $column = $this->normalizeColumn($builder, $aggregate['columns'][0]);
+        $column = $this->normalizeColumn($query, $aggregate['columns'][0]);
 
-        $builder->aqb = $builder->aqb->collect()->aggregate('aggregateResult', $builder->aqb->max($column));
+        $query->aqb = $query->aqb->collect()->aggregate('aggregateResult', $query->aqb->max($column));
 
-        return $builder;
+        return $query;
     }
 
     /**
@@ -55,13 +55,13 @@ trait CompilesAggregates
      *
      * @param array<mixed> $aggregate
      */
-    protected function compileMin(Builder $builder, array $aggregate): Builder
+    protected function compileMin(Builder $query, array $aggregate): Builder
     {
-        $column = $this->normalizeColumn($builder, $aggregate['columns'][0]);
+        $column = $this->normalizeColumn($query, $aggregate['columns'][0]);
 
-        $builder->aqb = $builder->aqb->collect()->aggregate('aggregateResult', $builder->aqb->min($column));
+        $query->aqb = $query->aqb->collect()->aggregate('aggregateResult', $query->aqb->min($column));
 
-        return $builder;
+        return $query;
     }
 
     /**
@@ -69,29 +69,29 @@ trait CompilesAggregates
      *
      * @param array<mixed> $aggregate
      */
-    protected function compileAvg(Builder $builder, array $aggregate): Builder
+    protected function compileAvg(Builder $query, array $aggregate): Builder
     {
-        $column = $this->normalizeColumn($builder, $aggregate['columns'][0]);
+        $column = $this->normalizeColumn($query, $aggregate['columns'][0]);
 
-        $builder->aqb = $builder->aqb->collect()->aggregate('aggregateResult', $builder->aqb->average($column));
+        $query->aqb = $query->aqb->collect()->aggregate('aggregateResult', $query->aqb->average($column));
 
-        return $builder;
+        return $query;
     }
 
     /**
      * Compile AQL for sum aggregate.
      *
-     * @param Builder $builder
+     * @param Builder $query
      * @param array<mixed> $aggregate
      *
      * @return Builder
      */
-    protected function compileSum(Builder $builder, array $aggregate): Builder
+    protected function compileSum(Builder $query, array $aggregate): Builder
     {
-        $column = $this->normalizeColumn($builder, $aggregate['columns'][0]);
+        $column = $this->normalizeColumn($query, $aggregate['columns'][0]);
 
-        $builder->aqb = $builder->aqb->collect()->aggregate('aggregateResult', $builder->aqb->sum($column));
+        $query->aqb = $query->aqb->collect()->aggregate('aggregateResult', $query->aqb->sum($column));
 
-        return $builder;
+        return $query;
     }
 }

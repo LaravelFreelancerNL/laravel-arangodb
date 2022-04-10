@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
+use Illuminate\Database\Query\Builder as IlluminateBuilder;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
@@ -12,33 +13,32 @@ trait CompilesJoins
     /**
      * Compile the "join" portions of the query.
      *
-     * @param Builder $builder
-     * @param array   $joins
-     *
+     * @param IlluminateBuilder $query
+     * @param  array<mixed>  $joins
      * @return string
      */
-    protected function compileJoins(Builder $builder, $joins)
+    protected function compileJoins(IlluminateBuilder $query, $joins): string
     {
         foreach ($joins as $join) {
             $compileMethod = 'compile' . ucfirst($join->type) . 'Join';
-            $builder = $this->$compileMethod($builder, $join);
+            $query = $this->$compileMethod($query, $join);
         }
 
-        return $builder;
+        return $query;
     }
 
-    protected function compileInnerJoin(Builder $builder, $join)
+    protected function compileInnerJoin(Builder $query, $join)
     {
         $table = $join->table;
         $alias = $this->generateTableAlias($table);
         $this->registerTableAlias($table, $alias);
-        $builder->aqb = $builder->aqb->for($alias, $table)
+        $query->aqb = $query->aqb->for($alias, $table)
             ->filter($this->compileWheresToArray($join));
 
-        return $builder;
+        return $query;
     }
 
-    protected function compileLeftJoin(Builder $builder, $join)
+    protected function compileLeftJoin(Builder $query, $join)
     {
         $table = $join->table;
         $alias = $this->generateTableAlias($table);
@@ -49,25 +49,25 @@ trait CompilesJoins
             ->filter($this->compileWheresToArray($join))
             ->return($alias);
 
-        $builder->aqb = $builder->aqb->let($table, $resultsToJoin)
+        $query->aqb = $query->aqb->let($table, $resultsToJoin)
             ->for(
                 $alias,
-                $builder->aqb->if(
-                    [$builder->aqb->length($table), '>', 0],
+                $query->aqb->if(
+                    [$query->aqb->length($table), '>', 0],
                     $table,
                     '[]'
                 )
             );
 
-        return $builder;
+        return $query;
     }
 
-    protected function compileCrossJoin(Builder $builder, $join)
+    protected function compileCrossJoin(Builder $query, $join)
     {
         $table = $join->table;
         $alias = $this->generateTableAlias($table);
-        $builder->aqb = $builder->aqb->for($alias, $table);
+        $query->aqb = $query->aqb->for($alias, $table);
 
-        return $builder;
+        return $query;
     }
 }
