@@ -5,6 +5,7 @@ namespace LaravelFreelancerNL\Aranguent\Query;
 use Closure;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Database\Query\Expression;
+use Illuminate\Support\Arr;
 use InvalidArgumentException;
 use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsJoinClauses;
@@ -51,6 +52,14 @@ class Builder extends IlluminateQueryBuilder
     public $variables = [];
 
     /**
+     * ID of the query
+     * Used as prefix for automatically generated bindings.
+     *
+     * @var int
+     */
+    protected $queryId = 1;
+
+    /**
      * @override
      * Create a new query builder instance.
      */
@@ -67,6 +76,82 @@ class Builder extends IlluminateQueryBuilder
             $aqb = new QueryBuilder();
         }
         $this->aqb = $aqb;
+
+        $this->queryId = spl_object_id($this);
+    }
+
+    protected function bindValue($value, string $type = 'where')
+    {
+        if (! $value instanceof Expression) {
+            $this->addBinding($this->flattenValue($value), 'where');
+            $value = $this->replaceValueWithBindVariable($type);
+        }
+        return $value;
+    }
+
+    protected function generateBindVariable(string $type = 'where'): string
+    {
+        return $this->queryId . '_' . $type . '_' . (count($this->bindings[$type]) + 1);
+    }
+
+    /**
+     * Add a binding to the query.
+     *
+     * @param  mixed  $value
+     * @param  string  $type
+     * @return IlluminateQueryBuilder
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function addBinding($value, $type = 'where')
+    {
+        if (! array_key_exists($type, $this->bindings)) {
+            throw new InvalidArgumentException("Invalid binding type: {$type}.");
+        }
+
+        $bindVariable = $this->generateBindVariable($type);
+
+        if (is_array($value)) {
+            $this->bindings[$type] = array_map(
+                [$this, 'castBinding'],
+                array_merge($this->bindings[$type], $value),
+            );
+        } else {
+            $this->bindings[$type][$bindVariable] = $this->castBinding($value);
+        }
+
+        return $this;
+    }
+
+    protected function getLastBindVariable(string $type = 'where')
+    {
+        return array_key_last($this->bindings[$type]);
+    }
+
+    protected function replaceValueWithBindVariable(string $type = 'where')
+    {
+        return '@' . $this->getLastBindVariable($type);
+    }
+
+    public function getQueryId()
+    {
+        return $this->queryId;
+    }
+
+    /**
+     * Get the current query value bindings in a flattened array.
+     *
+     * @return array
+     */
+    public function getBindings()
+    {
+        $extractedBindings = [];
+        foreach ($this->bindings as $typeBinds) {
+            foreach ($typeBinds as $key => $value) {
+                $extractedBindings[$key] = $value;
+            }
+        }
+        return $extractedBindings;
     }
 
     /**
@@ -231,17 +316,6 @@ class Builder extends IlluminateQueryBuilder
         $this->aqb = new QueryBuilder();
 
         return $results;
-    }
-
-    /**
-    /**
-     * Get the current query value bindings in a flattened array.
-     *
-     * @return array<mixed>
-     */
-    public function getBindings()
-    {
-        return $this->aqb->binds;
     }
 
     protected function setAql()

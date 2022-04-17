@@ -6,6 +6,7 @@ namespace LaravelFreelancerNL\Aranguent;
 
 use ArangoClient\ArangoClient;
 use Illuminate\Database\Connection as IlluminateConnection;
+use Illuminate\Database\Schema\Grammars\Grammar as IlluminateGrammar;
 use LaravelFreelancerNL\Aranguent\Concerns\DetectsDeadlocks;
 use LaravelFreelancerNL\Aranguent\Concerns\DetectsLostConnections;
 use LaravelFreelancerNL\Aranguent\Concerns\HandlesArangoDb;
@@ -99,7 +100,7 @@ class Connection extends IlluminateConnection
     /**
      * Get the schema grammar used by the connection.
      *
-     * @return Grammar
+     * @return IlluminateGrammar
      */
     public function getSchemaGrammar()
     {
@@ -128,8 +129,6 @@ class Connection extends IlluminateConnection
 
     /**
      * Reconnect to the database.
-     *
-     * @return void
      *
      * @throws \LogicException
      */
@@ -165,11 +164,14 @@ class Connection extends IlluminateConnection
 
     /**
      * @param  string|null  $database
+     * @return $this
      */
-    public function setDatabaseName($database): void
+    public function setDatabaseName($database)
     {
         $this->database = $database;
         $this->arangoClient->setDatabase($database);
+
+        return $this;
     }
 
     public function getDatabaseName(): string

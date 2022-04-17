@@ -138,10 +138,6 @@ trait HasAliases
      */
     protected function convertColumnId(array|string $column): array|string
     {
-        if (is_string($column) || is_array($column)) {
-            $column = $this->convertIdToKey($column);
-        }
-
-        return $column;
+        return $this->convertIdToKey($column);
     }
 }

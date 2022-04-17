@@ -10,16 +10,14 @@ uses(
 
 test('basic wheres', function () {
     $builder = getBuilder();
-    $builder = $builder->select('*')->from('users')->where('id', '=', 1);
+    $builder = $builder->select('*')->from('users')->where('id', '=', "a123");
 
     $this->assertSame(
-        'FOR userDoc IN users FILTER userDoc._key == @'
-          . $builder->aqb->getQueryId()
-        . '_1 RETURN userDoc',
+        'FOR userDoc IN users FILTER userDoc.`_key` == @'
+          . $builder->getQueryId()
+        . '_where_1 RETURN userDoc',
         $builder->toSql()
     );
-
-    expect($builder->getBindings())->toEqual([$builder->aqb->getQueryId() . '_1' => 1]);
 });
 
 test('basic wheres with multiple predicates', function () {
@@ -30,11 +28,11 @@ test('basic wheres with multiple predicates', function () {
         ->where('email', '=', 'foo');
 
     $this->assertSame(
-        'FOR userDoc IN users FILTER userDoc._key == @'
-        . $builder->aqb->getQueryId()
-        . '_1 AND userDoc.email == @'
-        . $builder->aqb->getQueryId()
-        . '_2 RETURN userDoc',
+        'FOR userDoc IN users FILTER userDoc.`_key` == @'
+        . $builder->getQueryId()
+        . '_where_1 and userDoc.`email` == @'
+        . $builder->getQueryId()
+        . '_where_2 RETURN userDoc',
         $builder->toSql()
     );
 });
@@ -47,17 +45,10 @@ test('basic or wheres', function () {
         ->orWhere('email', '==', 'foo');
 
     $this->assertSame(
-        'FOR userDoc IN users FILTER userDoc._key == @'
-        . $builder->aqb->getQueryId() . '_1 OR userDoc.email == @'
-        . $builder->aqb->getQueryId() . '_2 RETURN userDoc',
+        'FOR userDoc IN users FILTER userDoc.`_key` == @'
+        . $builder->getQueryId() . '_where_1 or userDoc.`email` == @'
+        . $builder->getQueryId() . '_where_2 RETURN userDoc',
         $builder->toSql()
-    );
-    $this->assertEquals(
-        [
-            $builder->aqb->getQueryId() . '_1' => 1,
-            $builder->aqb->getQueryId() . '_2' => 'foo'
-        ],
-        $builder->getBindings()
     );
 });
 
@@ -70,19 +61,12 @@ test('where operator conversion', function () {
 
     $this->assertSame(
         'FOR userDoc IN users '
-        . 'FILTER userDoc.email == @'
-        . $builder->aqb->getQueryId()
-        . '_1 AND userDoc._key != @'
-        . $builder->aqb->getQueryId()
-        . '_2 RETURN userDoc',
+        . 'FILTER userDoc.`email` == @'
+        . $builder->getQueryId()
+        . '_where_1 and userDoc.`_key` != @'
+        . $builder->getQueryId()
+        . '_where_2 RETURN userDoc',
         $builder->toSql()
-    );
-    $this->assertEquals(
-        [
-            $builder->aqb->getQueryId() . '_1' => 'email@example.com',
-            $builder->aqb->getQueryId() . '_2' => 'keystring'
-        ],
-        $builder->getBindings()
     );
 });
 
@@ -95,11 +79,11 @@ test('where json arrow conversion', function () {
 
     $this->assertSame(
         'FOR userDoc IN users '
-        . 'FILTER userDoc.email.address == @'
-        . $builder->aqb->getQueryId()
-        . '_1 AND userDoc.profile.address.street != @'
-        . $builder->aqb->getQueryId()
-        . '_2 RETURN userDoc',
+        . 'FILTER userDoc.`email`.`address` == @'
+        . $builder->getQueryId()
+        . '_where_1 and userDoc.`profile`.`address`.`street` != @'
+        . $builder->getQueryId()
+        . '_where_2 RETURN userDoc',
         $builder->toSql()
     );
 });
@@ -113,8 +97,8 @@ test('where json contains', function () {
     $this->assertSame(
         'FOR userDoc IN users '
         . 'FILTER @'
-        . $builder->aqb->getQueryId()
-        . '_1 IN userDoc.options.languages RETURN userDoc',
+        . $builder->getQueryId()
+        . '_where_1 IN userDoc.`options`.`languages` RETURN userDoc',
         $builder->toSql()
     );
 });
@@ -127,9 +111,9 @@ test('where json length', function () {
 
     $this->assertSame(
         'FOR userDoc IN users '
-        . 'FILTER LENGTH(userDoc.options.languages) > @'
-        . $builder->aqb->getQueryId()
-        . '_1 RETURN userDoc',
+        . 'FILTER LENGTH(userDoc.`options`.`languages`) > @'
+        . $builder->getQueryId()
+        . '_where_1 RETURN userDoc',
         $builder->toSql()
     );
 });
@@ -139,11 +123,11 @@ test('where between', function () {
     $builder->select('*')->from('users')->whereBetween('votes', [1, 100]);
 
     $this->assertSame(
-        'FOR userDoc IN users FILTER (userDoc.votes >= @'
-        . $builder->aqb->getQueryId()
-        . '_1 AND userDoc.votes <= @'
-        . $builder->aqb->getQueryId()
-        . '_2) RETURN userDoc',
+        'FOR userDoc IN users FILTER userDoc.`votes` >= @'
+        . $builder->getQueryId()
+        . '_where_1 and userDoc.`votes` <= @'
+        . $builder->getQueryId()
+        . '_where_2 RETURN userDoc',
         $builder->toSql()
     );
 });
@@ -153,11 +137,11 @@ test('where not between', function () {
     $builder->select('*')->from('users')->whereNotBetween('votes', [1, 100]);
 
     $this->assertSame(
-        'FOR userDoc IN users FILTER (userDoc.votes < @'
-        . $builder->aqb->getQueryId()
-        . '_1 OR userDoc.votes > @'
-        . $builder->aqb->getQueryId()
-        . '_2) RETURN userDoc',
+        'FOR userDoc IN users FILTER userDoc.`votes` < @'
+        . $builder->getQueryId()
+        . '_where_1 and userDoc.`votes` > @'
+        . $builder->getQueryId()
+        . '_where_2 RETURN userDoc',
         $builder->toSql()
     );
 });
@@ -167,7 +151,7 @@ test('where between columns', function () {
     $builder->select('*')->from('users')->whereBetweenColumns('votes', ['min_vote', 'max_vote']);
 
     $this->assertSame(
-        'FOR userDoc IN users FILTER (userDoc.votes >= userDoc.min_vote AND userDoc.votes <= userDoc.max_vote)'
+        'FOR userDoc IN users FILTER userDoc.`votes` >= userDoc.`min_vote` and userDoc.`votes` <= userDoc.`max_vote`'
         . ' RETURN userDoc',
         $builder->toSql()
     );
@@ -178,7 +162,7 @@ test('where column', function () {
     $builder->select('*')->from('users')->whereColumn('first_name', '=', 'last_name');
 
     $this->assertSame(
-        'FOR userDoc IN users FILTER userDoc.first_name == userDoc.last_name RETURN userDoc',
+        'FOR userDoc IN users FILTER userDoc.`first_name` == userDoc.`last_name` RETURN userDoc',
         $builder->toSql()
     );
 });
@@ -188,7 +172,7 @@ test('where column without operator', function () {
     $builder->select('*')->from('users')->whereColumn('first_name', 'last_name');
 
     $this->assertSame(
-        'FOR userDoc IN users FILTER userDoc.first_name == userDoc.last_name RETURN userDoc',
+        'FOR userDoc IN users FILTER userDoc.`first_name` == userDoc.`last_name` RETURN userDoc',
         $builder->toSql()
     );
 });
@@ -196,7 +180,7 @@ test('where column without operator', function () {
 test('where nulls', function () {
     $builder = getBuilder();
     $builder->select('*')->from('users')->whereNull('_key');
-    expect($builder->toSql())->toBe('FOR userDoc IN users FILTER userDoc._key == null RETURN userDoc');
+    expect($builder->toSql())->toBe('FOR userDoc IN users FILTER userDoc.`_key` == null RETURN userDoc');
     expect($builder->getBindings())->toEqual([]);
 
     $builder = getBuilder();
@@ -206,18 +190,17 @@ test('where nulls', function () {
         ->orWhereNull('id');
 
     $this->assertSame(
-        'FOR userDoc IN users FILTER userDoc._key == @'
-        . $builder->aqb->getQueryId()
-        . '_1 OR userDoc._key == null RETURN userDoc',
+        'FOR userDoc IN users FILTER userDoc.`_key` == @'
+        . $builder->getQueryId()
+        . '_where_1 or userDoc.`_key` == null RETURN userDoc',
         $builder->toSql()
     );
-    expect($builder->getBindings())->toEqual([$builder->aqb->getQueryId() . '_1' => 1]);
 });
 
 test('where not nulls', function () {
     $builder = getBuilder();
     $builder->select('*')->from('users')->whereNotNull('id');
-    expect($builder->toSql())->toBe('FOR userDoc IN users FILTER userDoc._key != null RETURN userDoc');
+    expect($builder->toSql())->toBe('FOR userDoc IN users FILTER userDoc.`_key` != null RETURN userDoc');
     expect($builder->getBindings())->toEqual([]);
 
     $builder = getBuilder();
@@ -227,12 +210,11 @@ test('where not nulls', function () {
         ->orWhereNotNull('id');
 
     $this->assertSame(
-        'FOR userDoc IN users FILTER userDoc._key > @'
-        . $builder->aqb->getQueryId()
-        . '_1 OR userDoc._key != null RETURN userDoc',
+        'FOR userDoc IN users FILTER userDoc.`_key` > @'
+        . $builder->getQueryId()
+        . '_where_1 or userDoc.`_key` != null RETURN userDoc',
         $builder->toSql()
     );
-    expect($builder->getBindings())->toEqual([$builder->aqb->getQueryId() . '_1' => 1]);
 });
 
 test('where in', function () {
@@ -243,9 +225,9 @@ test('where in', function () {
         ->whereIn('country', ['The Netherlands', 'Germany', 'Great-Britain']);
 
     $this->assertSame(
-        'FOR userDoc IN users FILTER userDoc.country IN @'
-        . $builder->aqb->getQueryId()
-        . '_1 RETURN userDoc',
+        'FOR userDoc IN users FILTER userDoc.`country` IN @'
+        . $builder->getQueryId()
+        . '_where_1 RETURN userDoc',
         $builder->toSql()
     );
 });
@@ -258,9 +240,7 @@ test('where integer in raw', function () {
         ->whereIntegerInRaw('country', [0, 1, 2, 3]);
 
     $this->assertSame(
-        'FOR userDoc IN users FILTER userDoc.country IN @'
-        . $builder->aqb->getQueryId()
-        . '_1 RETURN userDoc',
+        'FOR userDoc IN users FILTER userDoc.`country` IN [0, 1, 2, 3] RETURN userDoc',
         $builder->toSql()
     );
 });
@@ -273,9 +253,9 @@ test('where not in', function () {
         ->whereNotIn('country', ['The Netherlands', 'Germany', 'Great-Britain']);
 
     $this->assertSame(
-        'FOR userDoc IN users FILTER userDoc.country NOT IN @'
-        . $builder->aqb->getQueryId()
-        . '_1 RETURN userDoc',
+        'FOR userDoc IN users FILTER userDoc.`country` NOT IN @'
+        . $builder->getQueryId()
+        . '_where_1 RETURN userDoc',
         $builder->toSql()
     );
 });
@@ -288,9 +268,7 @@ test('where integer not in raw', function () {
         ->whereIntegerNotInRaw('country', [0, 1, 2, 3]);
 
     $this->assertSame(
-        'FOR userDoc IN users FILTER userDoc.country NOT IN @'
-        . $builder->aqb->getQueryId()
-        . '_1 RETURN userDoc',
+        'FOR userDoc IN users FILTER userDoc.`country` NOT IN [0, 1, 2, 3] RETURN userDoc',
         $builder->toSql()
     );
 });
@@ -300,17 +278,11 @@ test('where date', function () {
     $builder->select('*')->from('users')->whereDate('created_at', '2016-12-31');
 
     $this->assertSame(
-        'FOR userDoc IN users FILTER DATE_FORMAT(userDoc.created_at, @'
-        . $builder->aqb->getQueryId()
-        . '_2) == @'
-        . $builder->aqb->getQueryId()
-        . '_1 RETURN userDoc',
+        'FOR userDoc IN users FILTER DATE_FORMAT(userDoc.`created_at`, "%yyyy-%mm-%dd") == @'
+        . $builder->getQueryId()
+        . '_where_1 RETURN userDoc',
         $builder->toSql()
     );
-    $this->assertEquals([
-            $builder->aqb->getQueryId() . '_1' => '2016-12-31',
-            $builder->aqb->getQueryId() . '_2' => "%yyyy-%mm-%dd"
-        ], $builder->getBindings());
 });
 
 test('where year', function () {
@@ -318,13 +290,11 @@ test('where year', function () {
     $builder->select('*')->from('users')->whereYear('created_at', '2016');
 
     $this->assertSame(
-        'FOR userDoc IN users FILTER DATE_YEAR(userDoc.created_at) == @'
-        . $builder->aqb->getQueryId()
-        . '_1 RETURN userDoc',
+        'FOR userDoc IN users FILTER DATE_YEAR(userDoc.`created_at`) == @'
+        . $builder->getQueryId()
+        . '_where_1 RETURN userDoc',
         $builder->toSql()
     );
-
-    expect($builder->getBindings())->toEqual([$builder->aqb->getQueryId() . '_1' => "2016"]);
 });
 
 test('where month', function () {
@@ -332,13 +302,11 @@ test('where month', function () {
     $builder->select('*')->from('users')->whereMonth('created_at', '12');
 
     $this->assertSame(
-        'FOR userDoc IN users FILTER DATE_MONTH(userDoc.created_at) == @'
-        . $builder->aqb->getQueryId()
-        . '_1 RETURN userDoc',
+        'FOR userDoc IN users FILTER DATE_MONTH(userDoc.`created_at`) == @'
+        . $builder->getQueryId()
+        . '_where_1 RETURN userDoc',
         $builder->toSql()
     );
-
-    expect($builder->getBindings())->toEqual([$builder->aqb->getQueryId() . '_1' => "12"]);
 });
 
 test('where day', function () {
@@ -346,13 +314,11 @@ test('where day', function () {
     $builder->select('*')->from('users')->whereDay('created_at', '31');
 
     $this->assertSame(
-        'FOR userDoc IN users FILTER DATE_DAY(userDoc.created_at) == @'
-        . $builder->aqb->getQueryId()
-        . '_1 RETURN userDoc',
+        'FOR userDoc IN users FILTER DATE_DAY(userDoc.`created_at`) == @'
+        . $builder->getQueryId()
+        . '_where_1 RETURN userDoc',
         $builder->toSql()
     );
-
-    expect($builder->getBindings())->toEqual([$builder->aqb->getQueryId() . '_1' => "31"]);
 });
 
 test('where time', function () {
@@ -360,18 +326,11 @@ test('where time', function () {
     $builder->select('*')->from('users')->whereTime('created_at', '11:20:45');
 
     $this->assertSame(
-        'FOR userDoc IN users FILTER DATE_FORMAT(userDoc.created_at, @'
-        . $builder->aqb->getQueryId()
-        . '_2) == @'
-        . $builder->aqb->getQueryId()
-        . '_1 RETURN userDoc',
+        'FOR userDoc IN users FILTER DATE_FORMAT(userDoc.`created_at`, "%hh:%ii:%ss") == @'
+        . $builder->getQueryId()
+        . '_where_1 RETURN userDoc',
         $builder->toSql()
     );
-
-    $this->assertEquals([
-            $builder->aqb->getQueryId() . '_1' => "11:20:45",
-            $builder->aqb->getQueryId() . '_2' => "%hh:%ii:%ss"
-        ], $builder->getBindings());
 });
 
 test('where nested', function () {
@@ -383,17 +342,16 @@ test('where nested', function () {
         ->where(function ($query) {
             $query->where('age', '>', 20)
                 ->orWhere('alive', '=', true);
-        })->toSql();
+        });
 
-    $bindKeys = array_keys($builder->aqb->binds);
+    $binds = $query->getBindings();
+    $bindKeys = array_keys($binds);
 
     $this->assertSame(
-        'FOR characterDoc IN characters FILTER characterDoc.surname == @' . $bindKeys[0]
-        . ' AND (characterDoc.age > @'
-        . $bindKeys[1]
-        . ' OR characterDoc.alive == @'
-        . $bindKeys[2]
+        'FOR characterDoc IN characters FILTER characterDoc.`surname` == @' . $bindKeys[0]
+        . ' and ( characterDoc.`age` > @' . $bindKeys[1]
+        . ' or characterDoc.`alive` == @' . $bindKeys[2]
         . ') RETURN characterDoc',
-        $query
+        $query->toSql()
     );
 });

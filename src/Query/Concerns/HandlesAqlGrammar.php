@@ -108,6 +108,22 @@ trait HandlesAqlGrammar
     }
 
     /**
+     * Wrap a table in keyword identifiers.
+     *
+     * @param  \Illuminate\Database\Query\Expression|string  $table
+     * @return string
+     */
+    public function wrapTable($table)
+    {
+        if (! $this->isExpression($table)) {
+            return $this->tablePrefix.$table;
+//            return $this->wrap($this->tablePrefix.$table, true);
+        }
+
+        return $this->getValue($table);
+    }
+
+    /**
      * Wrap a single string in keyword identifiers.
      *
      * @param  string  $value
@@ -115,11 +131,13 @@ trait HandlesAqlGrammar
      */
     protected function wrapValue($value)
     {
-        if ($value !== '*') {
-            return '`'.str_replace('`', '``', $value).'`';
+        if ($value === '*') {
+            return $value;
         }
 
-        return $value;
+        return '`'.str_replace('`', '``', $value).'`';
     }
+
+
 
 }

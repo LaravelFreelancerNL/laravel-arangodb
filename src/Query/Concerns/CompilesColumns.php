@@ -79,7 +79,7 @@ trait CompilesColumns
     /**
      * @throws Exception
      */
-    protected function normalizeColumn(Builder $query, mixed $column, string $table = null): mixed
+    protected function normalizeColumn(IlluminateBuilder $query, mixed $column, string $table = null): mixed
     {
         if ($column instanceof QueryBuilder || $column instanceof FunctionExpression) {
             return $column;
@@ -160,7 +160,7 @@ trait CompilesColumns
             $tableAlias = $this->generateTableAlias($table);
             array_unshift($references, $tableAlias);
         }
-        return implode('.', $references);
+        return $this->wrap(implode('.', $references));
     }
 
 
