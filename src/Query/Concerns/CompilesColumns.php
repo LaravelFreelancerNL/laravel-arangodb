@@ -49,14 +49,15 @@ trait CompilesColumns
                 [$column, $alias] = $this->normalizeStringColumn($query, $key, $column);
 
                 if (isset($returnAttributes[$alias]) && is_array($column)) {
-                    $returnAttributes[$alias] = array_merge_recursive(
-                        $returnAttributes[$alias],
-                        $this->normalizeColumn($query, $column)
-                    );
-                    continue;
-                }
+                    $normalizedColumn = $this->normalizeColumn($query, $column);
 
-                $returnAttributes[$alias] = $this->normalizeColumn($query, $column);
+                    if (is_array($normalizedColumn)) {
+                        foreach ($normalizedColumn as $key => $value) {
+                            $returnAttributes[$alias][$key] = $value;
+                        }
+                    }
+                }
+                $returnAttributes[$alias] = $column;
             }
         }
 
@@ -66,15 +67,30 @@ trait CompilesColumns
         if ((bool) $query->distinct) {
             $aql .= ' DISTINCT';
         }
-
-        if (! is_string($values)) {
-            $values = json_encode($values);
-        }
-
-        $aql .= ' ' . $values;
+        $aql .= ' ' . $this->compileValuesToAql($values);
 
         return $aql;
     }
+
+    protected function compileValuesToAql(mixed $values): string
+    {
+        if (is_string($values)) {
+            return $values;
+        }
+
+        $compiledValues = '{';
+        foreach ($values as $key => $value) {
+            if (is_array($value) && Arr::isAssoc($value)) {
+                $value = $this->compileValuesToAql($value);
+            }
+            $compiledValues .= "{$key}: {$value}, ";
+        }
+        $compiledValues = substr($compiledValues, 0, strlen($compiledValues) -2);
+        $compiledValues .= '}';
+
+        return $compiledValues;
+    }
+
 
     /**
      * @throws Exception
@@ -97,8 +113,16 @@ trait CompilesColumns
 
         if (is_array($column)) {
             foreach ($column as $key => $value) {
-                $column[$key] = $this->normalizeColumn($query, $value, $table);
+                if (! is_string($value)) {
+                    $column[$key] = $this->normalizeColumn($query, $value, $table);
+                }
+
+                if (is_string($value)) {
+                    [$subColumn, $alias] = $this->normalizeStringColumn($query, $key, $value);
+                    $column[$alias] = $subColumn;
+                }
             }
+
             return $column;
         }
 
@@ -112,11 +136,10 @@ trait CompilesColumns
     }
 
     /**
-     * @param array<mixed> $column
      * @return array<mixed>
      * @throws Exception
      */
-    protected function normalizeStringColumn(Builder $query, int|string $key, mixed $column): array
+    protected function normalizeStringColumn(IlluminateBuilder $query, int|string $key, string $column): array
     {
         [$column, $alias] = $this->extractAlias($column, $key);
 
@@ -129,6 +152,7 @@ trait CompilesColumns
         $column = Arr::undot([$column => $column]);
         $alias = array_key_first($column);
         $column = $column[$alias];
+
         return [$column, $alias];
     }
 
@@ -160,6 +184,7 @@ trait CompilesColumns
             $tableAlias = $this->generateTableAlias($table);
             array_unshift($references, $tableAlias);
         }
+
         return $this->wrap(implode('.', $references));
     }
 

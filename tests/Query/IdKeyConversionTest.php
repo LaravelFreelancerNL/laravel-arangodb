@@ -36,18 +36,18 @@ test('get id conversion single attribute', function () {
     $builder = $builder->select('id')->from('users');
 
     $this->assertSame(
-        'FOR userDoc IN users RETURN userDoc._key',
+        'FOR userDoc IN users RETURN userDoc.`_key`',
         $builder->toSql()
     );
 });
 
-test('get id conversion multiple attributed', function () {
+test('get id conversion multiple attributes', function () {
     $query = DB::table('characters')->select('id', 'name');
 
     $results = $query->get();
 
     $this->assertSame(
-        'FOR characterDoc IN characters RETURN {"id":characterDoc._key,"name":characterDoc.name}',
+        'FOR characterDoc IN characters RETURN {id: characterDoc.`_key`, name: characterDoc.`name`}',
         $query->toSql()
     );
     $this->assertObjectNotHasAttribute('_key', $results->first());
@@ -61,7 +61,7 @@ test('get id conversion with alias', function () {
     $results = $query->get();
 
     $this->assertSame(
-        'FOR characterDoc IN characters RETURN {"i":characterDoc._key,"name":characterDoc.name}',
+        'FOR characterDoc IN characters RETURN {i: characterDoc.`_key`, name: characterDoc.`name`}',
         $query->toSql()
     );
     $this->assertObjectNotHasAttribute('_key', $results->first());
@@ -76,7 +76,7 @@ test('get id conversion with multiple ids', function () {
     $results = $query->get();
 
     $this->assertSame(
-        'FOR characterDoc IN characters RETURN {"id":characterDoc._key,"i":characterDoc._key,"name":characterDoc.name}',
+        'FOR characterDoc IN characters RETURN {id: characterDoc.`_key`, i: characterDoc.`_key`, name: characterDoc.`name`}',
         $query->toSql()
     );
     $this->assertObjectNotHasAttribute('_key', $results->first());
@@ -91,7 +91,7 @@ test('get id conversion with multiple aliases', function () {
     $results = $query->get();
 
     $this->assertSame(
-        'FOR characterDoc IN characters RETURN {"i":characterDoc._key,"i2":characterDoc._key,"name":characterDoc.name}',
+        'FOR characterDoc IN characters RETURN {i: characterDoc.`_key`, i2: characterDoc.`_key`, name: characterDoc.`name`}',
         $query->toSql()
     );
     $this->assertObjectNotHasAttribute('_key', $results->first());
@@ -108,7 +108,8 @@ test('get id conversion with wheres', function () {
     $results = $query->get();
 
     $this->assertSame(
-        'FOR characterDoc IN characters FILTER characterDoc._key == @' . $query->aqb->getQueryId() . '_1',
+        'FOR characterDoc IN characters FILTER characterDoc.`_key` == @' . $query->getQueryId() . '_where_1'
+        . ' RETURN characterDoc',
         $query->toSql()
     );
 
