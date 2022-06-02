@@ -85,7 +85,7 @@ trait CompilesColumns
             }
             $compiledValues .= "{$key}: {$value}, ";
         }
-        $compiledValues = substr($compiledValues, 0, strlen($compiledValues) -2);
+        $compiledValues = substr($compiledValues, 0, strlen($compiledValues) - 2);
         $compiledValues .= '}';
 
         return $compiledValues;

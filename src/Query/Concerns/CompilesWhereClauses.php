@@ -143,7 +143,6 @@ trait CompilesWhereClauses
         $predicate[1][2] = $this->normalizeColumn($query, end($where['values']));
 
         return implode(' ', $predicate[0]) . ' and ' . implode(' ', $predicate[1]);
-
     }
 
 
@@ -353,7 +352,7 @@ trait CompilesWhereClauses
         // if it is a normal query we need to take the leading "where" of queries.
         $offset = $query instanceof JoinClause ? 3 : 6;
 
-        return '('.substr($this->compileWheres($where['query']), $offset).')';
+        return '(' . substr($this->compileWheres($where['query']), $offset) . ')';
     }
 
 

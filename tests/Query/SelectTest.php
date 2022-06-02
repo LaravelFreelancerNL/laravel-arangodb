@@ -82,7 +82,7 @@ test('select nested data with multilevel embedded objects though multiple paths'
         'en.words',
         'name',
     ])->limit(1)->toSql();
-ray($house);
+    ray($house);
     expect((array)$house)->toHaveCount(2);
     expect($house)->toHaveProperty('name');
     expect($house)->toHaveProperty('en');

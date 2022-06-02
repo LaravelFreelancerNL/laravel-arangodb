@@ -116,7 +116,7 @@ trait HandlesAqlGrammar
     public function wrapTable($table)
     {
         if (! $this->isExpression($table)) {
-            return $this->tablePrefix.$table;
+            return $this->tablePrefix . $table;
 //            return $this->wrap($this->tablePrefix.$table, true);
         }
 
@@ -135,9 +135,6 @@ trait HandlesAqlGrammar
             return $value;
         }
 
-        return '`'.str_replace('`', '``', $value).'`';
+        return '`' . str_replace('`', '``', $value) . '`';
     }
-
-
-
 }
