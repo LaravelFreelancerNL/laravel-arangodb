@@ -11,7 +11,7 @@ uses(
 
 test('subquery where', function () {
     $characters = Character::where(function ($query) {
-            $query->select('name')
+        $query->select('name')
                 ->from('locations')
                 ->whereColumn('locations.led_by', 'characters.id')
                 ->limit(1);
@@ -34,7 +34,7 @@ test('where sub', function () {
 
 test('where exists with multiple results', function () {
     $characters = Character::whereExists(function ($query) {
-            $query->select('name')
+        $query->select('name')
                 ->from('locations')
                 ->whereColumn('locations.led_by', 'characters.id');
     })
@@ -44,7 +44,7 @@ test('where exists with multiple results', function () {
 
 test('where exists with limit', function () {
     $characters = Character::whereExists(function ($query) {
-            $query->select('name')
+        $query->select('name')
                 ->from('locations')
                 ->whereColumn('locations.led_by', 'characters.id')
                 ->limit(1);
@@ -65,7 +65,7 @@ test('where not exists with multiple results', function () {
 
 test('where not exists with limit', function () {
     $characters = Character::whereNotExists(function ($query) {
-            $query->select('name')
+        $query->select('name')
                 ->from('locations')
                 ->whereColumn('locations.led_by', 'characters.id')
                 ->limit(1);

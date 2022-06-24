@@ -409,7 +409,6 @@ class Grammar extends FluentAqlGrammar
      */
     public function compileUpdate(Builder $builder, array $values)
     {
-
         $table = $this->prefixTable($builder->from);
         $tableAlias = $this->generateTableAlias($table);
 
