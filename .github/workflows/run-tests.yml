@@ -46,6 +46,11 @@ jobs:
         run: |
           composer update --${{ matrix.stability }} --prefer-dist --no-interaction
 
+      - name: Prepare test database
+        run: |
+          chmod +x "${GITHUB_WORKSPACE}/bin/prepare-test-db.sh"
+          "${GITHUB_WORKSPACE}/bin/prepare-test-db.sh"
+
       - name: Execute tests
         if: ${{ always() }}
         run: |
