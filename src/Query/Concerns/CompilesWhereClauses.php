@@ -89,7 +89,7 @@ trait CompilesWhereClauses
             $where['operator'] = $this->getOperatorByWhereType($where['type']);
         }
 
-            return $where;
+        return $where;
     }
 
     /**

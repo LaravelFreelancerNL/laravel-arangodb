@@ -13,7 +13,6 @@ use Illuminate\Support\Fluent;
 use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\QueryException;
 use LaravelFreelancerNL\Aranguent\Schema\Concerns\UsesBlueprints;
-use stdClass;
 
 class Builder extends \Illuminate\Database\Schema\Builder
 {

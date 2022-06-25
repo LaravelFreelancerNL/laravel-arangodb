@@ -27,7 +27,6 @@ trait QueriesAranguentRelationships
         $count = 1,
         $boolean = 'and'
     ): IlluminateBuilder {
-
         $query->grammar->compileSelect($query);
 
         return $this->where(
