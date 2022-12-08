@@ -15,12 +15,12 @@ abstract class TestCase extends IlluminateTestCase
     use Concerns\InteractsWithDatabase;
 
     /**
-     * @var array<string, array<string>> $transactionCollections
+     * @var array<string, array<string>>
      */
     protected array $transactionCollections = [];
 
     /**
-     * @param array<string, array<string>> $transactionCollections
+     * @param  array<string, array<string>>  $transactionCollections
      */
     public function setTransactionCollections(array $transactionCollections): void
     {

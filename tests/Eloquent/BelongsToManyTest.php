@@ -53,12 +53,12 @@ test('attach', function () {
 
     $lyannaStark = Character::firstOrCreate(
         [
-            "id" => "LyannaStark",
-            "name" => "Lyanna",
-            "surname" => "Stark",
-            "alive" => false,
-            "age" => 25,
-            "residence_id" => "winterfell"
+            'id' => 'LyannaStark',
+            'name' => 'Lyanna',
+            'surname' => 'Stark',
+            'alive' => false,
+            'age' => 25,
+            'residence_id' => 'winterfell',
         ]
     );
 
@@ -93,22 +93,22 @@ test('detach', function () {
 test('sync', function () {
     $lyannaStark = Character::firstOrCreate(
         [
-            "id" => "LyannaStark",
-            "name" => "Lyanna",
-            "surname" => "Stark",
-            "alive" => false,
-            "age" => 25,
-            "residence_id" => "winterfell"
+            'id' => 'LyannaStark',
+            'name' => 'Lyanna',
+            'surname' => 'Stark',
+            'alive' => false,
+            'age' => 25,
+            'residence_id' => 'winterfell',
         ]
     );
     $rhaegarTargaryen = Character::firstOrCreate(
         [
-            "id" => "RhaegarTargaryen",
-            "name" => "Rhaegar",
-            "surname" => "Targaryen",
-            "alive" => false,
-            "age" => 25,
-            "residence_id" => "dragonstone"
+            'id' => 'RhaegarTargaryen',
+            'name' => 'Rhaegar',
+            'surname' => 'Targaryen',
+            'alive' => false,
+            'age' => 25,
+            'residence_id' => 'dragonstone',
         ]
     );
 
@@ -130,21 +130,21 @@ test('sync', function () {
 
 test('upon attachment a related pivot key is reverted to a string if it is a numeric string', function () {
     $char = Character::create([
-        'id' => "1",
-        'name' => 'Character 1'
+        'id' => '1',
+        'name' => 'Character 1',
     ]);
     Tag::create([
-        'id' => "1",
-        'name' => 'Tag 1'
+        'id' => '1',
+        'name' => 'Tag 1',
     ]);
     Tag::create([
-        'id' => "2",
-        'name' => 'Tag 2'
+        'id' => '2',
+        'name' => 'Tag 2',
     ]);
 
     $attachPivotData = [
         1 => [],
-        2 => []
+        2 => [],
     ];
 
     $char->tags()->attach($attachPivotData);

@@ -40,8 +40,8 @@ class CommandServiceProvider extends IlluminateMigrationServiceProvider
             $this->commands,
             [
                 'AranguentConvertMigrations' => 'command.aranguent.convert-migrations',
-                'MigrateMake'                => 'command.migrate.make',
-                'ModelMake'                  => 'command.model.aranguent',
+                'MigrateMake' => 'command.migrate.make',
+                'ModelMake' => 'command.model.aranguent',
             ]
         );
         $this->registerCommands($commands);
@@ -62,7 +62,8 @@ class CommandServiceProvider extends IlluminateMigrationServiceProvider
     protected function registerCreator()
     {
         $this->app->singleton('migration.creator', function ($app) {
-            $customStubPath = __DIR__ . '/../../stubs';
+            $customStubPath = __DIR__.'/../../stubs';
+
             return new MigrationCreator($app['files'], $customStubPath);
         });
     }

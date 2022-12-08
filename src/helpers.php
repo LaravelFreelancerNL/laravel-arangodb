@@ -24,15 +24,17 @@ if (! function_exists('associativeFlatten')) {
                     if (Arr::isAssoc($value)) {
                         $dot = '.';
                     }
-                    $results = array_merge($results, associativeFlatten($value, $prepend . $key . $dot));
+                    $results = array_merge($results, associativeFlatten($value, $prepend.$key.$dot));
 
                     continue;
                 }
-                $results[$prepend . $key] = $value;
+                $results[$prepend.$key] = $value;
             }
+
             return $results;
         }
         $results[$prepend] = $array;
+
         return $results;
     }
 }
@@ -46,9 +48,9 @@ if (! function_exists('isDotString')) {
 
 if (! function_exists('renameArrayKey')) {
     /**
-     * @param array<mixed> $array
-     * @param string|int $oldKey
-     * @param string|int $newKey
+     * @param  array<mixed>  $array
+     * @param  string|int  $oldKey
+     * @param  string|int  $newKey
      * @return array<mixed>
      */
     function renameArrayKey(array &$array, string|int $oldKey, string|int $newKey): array

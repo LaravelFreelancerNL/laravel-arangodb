@@ -7,8 +7,8 @@ use Tests\Setup\ClassStubs\ApplicationDatabaseMigrationStub;
 
 beforeEach(function () {
     //Copy a stub with Illuminate usage to migrations directory
-    $stub = __DIR__ . '/../Setup/Database/stubs/test_stub_for_migration_conversion.php';
-    $this->conversionMigration = __DIR__ . '/../Setup/Database/Migrations/test_migration_conversion.php';
+    $stub = __DIR__.'/../Setup/Database/stubs/test_stub_for_migration_conversion.php';
+    $this->conversionMigration = __DIR__.'/../Setup/Database/Migrations/test_migration_conversion.php';
     copy($stub, $this->conversionMigration);
 });
 
@@ -20,7 +20,6 @@ afterEach(function () {
 
 /**
  * Illuminate usage is replaced by Aranguent in migration files.
- *
  */
 test('illuminate usage is replaced by aranguent in migration files', function () {
     $command = new AranguentConvertMigrationsCommand($migrator = M::mock(Migrator::class));

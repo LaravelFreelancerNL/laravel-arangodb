@@ -16,7 +16,7 @@ dataset(
                     'titles' => ['Ser', 'Lord of Riverrun', 'Lord Paramount of the Trident'],
                 ],
                 'location_id' => 'locations/riverrun',
-            ]
-        ]
+            ],
+        ],
     ]
 );

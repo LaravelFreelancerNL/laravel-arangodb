@@ -19,18 +19,18 @@ test('insert get id', function () {
 
 test('insert or ignore inserts data', function () {
     $characterData = [
-        "_key" => "LyannaStark",
-        "name" => "Lyanna",
-        "surname" => "Stark",
-        "alive" => false,
-        "age" => 25,
-        "residence_id" => "winterfell"
+        '_key' => 'LyannaStark',
+        'name' => 'Lyanna',
+        'surname' => 'Stark',
+        'alive' => false,
+        'age' => 25,
+        'residence_id' => 'winterfell',
     ];
 
     DB::table('characters')->insertOrIgnore($characterData);
 
     $result = DB::table('characters')
-        ->where("name", "==", "Lyanna")
+        ->where('name', '==', 'Lyanna')
         ->count();
 
     expect($result)->toBe(1);
@@ -38,19 +38,19 @@ test('insert or ignore inserts data', function () {
 
 test('insert or ignore doesnt error on duplicates', function () {
     $characterData = [
-        "_key" => "LyannaStark",
-        "name" => "Lyanna",
-        "surname" => "Stark",
-        "alive" => false,
-        "age" => 25,
-        "residence_id" => "winterfell"
+        '_key' => 'LyannaStark',
+        'name' => 'Lyanna',
+        'surname' => 'Stark',
+        'alive' => false,
+        'age' => 25,
+        'residence_id' => 'winterfell',
     ];
     DB::table('characters')->insert($characterData);
 
     DB::table('characters')->insertOrIgnore($characterData);
 
     $result = DB::table('characters')
-        ->where("name", "==", "Lyanna")
+        ->where('name', '==', 'Lyanna')
         ->count();
 
     expect($result)->toBe(1);
@@ -58,26 +58,25 @@ test('insert or ignore doesnt error on duplicates', function () {
 
 test('insert embedded empty array', function () {
     $characterData = [
-        "_key" => "LyannaStark",
-        "name" => "Lyanna",
-        "surname" => "Stark",
-        "alive" => false,
-        "age" => 25,
-        "residence_id" => "winterfell",
-        "tags" => [],
+        '_key' => 'LyannaStark',
+        'name' => 'Lyanna',
+        'surname' => 'Stark',
+        'alive' => false,
+        'age' => 25,
+        'residence_id' => 'winterfell',
+        'tags' => [],
     ];
     DB::table('characters')->insert($characterData);
 
     DB::table('characters')->insertOrIgnore($characterData);
 
     $result = DB::table('characters')
-        ->where("name", "==", "Lyanna")
+        ->where('name', '==', 'Lyanna')
         ->get();
 
     expect($result->first()->tags)->toBeArray();
     expect($result->first()->tags)->toBeEmpty();
 });
-
 
 test('order bys', function () {
     $builder = getBuilder();

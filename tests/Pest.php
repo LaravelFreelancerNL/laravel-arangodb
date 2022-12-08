@@ -5,9 +5,9 @@ use LaravelFreelancerNL\Aranguent\Connection as Connection;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 use LaravelFreelancerNL\Aranguent\Query\Grammar;
 use LaravelFreelancerNL\Aranguent\Query\Processor;
+use Mockery as m;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
-use Mockery as m;
 use Tests\Setup\Database\Seeds\DatabaseSeeder;
 
 /*
@@ -48,7 +48,6 @@ use Tests\Setup\Database\Seeds\DatabaseSeeder;
 */
 
 /** @link https://pestphp.com/docs/helpers */
-
 function getBuilder()
 {
     $grammar = new Grammar();
@@ -63,7 +62,7 @@ function refreshDatabase()
     Artisan::call('migrate:fresh', [
         '--path' => [
             database_path('migrations'),
-            'tests/Setup/Database/Migrations'
+            'tests/Setup/Database/Migrations',
         ],
         '--realpath' => true,
         '--seed' => true,

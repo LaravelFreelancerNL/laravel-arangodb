@@ -13,7 +13,7 @@ test('basic select', function () {
     $results = DB::table('characters')->select()->get();
 
     expect($results)->toHaveCount(43);
-    expect(count((array)$results[0]))->toBe(9);
+    expect(count((array) $results[0]))->toBe(9);
 });
 
 test('basic select with specific column', function () {
@@ -34,7 +34,7 @@ test('select nested data through alias', function () {
         'en.description as description',
     ])->limit(1)->first();
 
-    expect((array)$house)->toHaveCount(2);
+    expect((array) $house)->toHaveCount(2);
     expect($house)->toHaveProperty('name');
     expect($house)->toHaveProperty('description');
 });
@@ -45,7 +45,7 @@ test('select nested data without alias', function () {
         'en.description',
     ])->limit(1)->first();
 
-    expect((array)$house)->toHaveCount(2);
+    expect((array) $house)->toHaveCount(2);
     expect($house)->toHaveProperty('name');
     expect($house)->toHaveProperty('en');
 });
@@ -56,7 +56,7 @@ test('select nested data through string-key', function () {
         'description' => 'en.description',
     ])->limit(1)->first();
 
-    expect((array)$house)->toHaveCount(2);
+    expect((array) $house)->toHaveCount(2);
     expect($house)->toHaveProperty('name');
     expect($house)->toHaveProperty('description');
 });
@@ -68,10 +68,10 @@ test('select nested data with embedded objects though multiple paths', function 
         'en.words',
     ])->limit(1)->first();
 
-    expect((array)$house)->toHaveCount(2);
+    expect((array) $house)->toHaveCount(2);
     expect($house)->toHaveProperty('name');
     expect($house)->toHaveProperty('en');
-    expect((array)$house->en)->toHaveCount(2);
+    expect((array) $house->en)->toHaveCount(2);
 });
 
 test('select nested data with multilevel embedded objects though multiple paths', function () {
@@ -82,11 +82,11 @@ test('select nested data with multilevel embedded objects though multiple paths'
         'name',
     ])->limit(1)->first();
 
-    expect((array)$house)->toHaveCount(2);
+    expect((array) $house)->toHaveCount(2);
     expect($house)->toHaveProperty('name');
     expect($house)->toHaveProperty('en');
-    expect((array)$house->en)->toHaveCount(2);
-    expect((array)$house->en->summary)->toHaveCount(2);
+    expect((array) $house->en)->toHaveCount(2);
+    expect((array) $house->en->summary)->toHaveCount(2);
 });
 
 test('select nested data with multilevel embedded objects and aliases', function () {
@@ -97,19 +97,18 @@ test('select nested data with multilevel embedded objects and aliases', function
         'name',
     ])->limit(1)->first();
 
-    expect((array)$house)->toHaveCount(3);
+    expect((array) $house)->toHaveCount(3);
     expect($house)->toHaveProperty('name');
     expect($house)->toHaveProperty('en');
     expect($house)->toHaveProperty('long');
-    expect((array)$house->en)->toHaveCount(2);
-    expect((array)$house->en->summary)->toHaveCount(1);
+    expect((array) $house->en)->toHaveCount(2);
+    expect((array) $house->en->summary)->toHaveCount(1);
 });
-
 
 test('addSelect', function () {
     $house = DB::table('houses')->select('en')->addSelect('name')->limit(1)->first();
 
-    expect((array)$house)->toHaveCount(2);
+    expect((array) $house)->toHaveCount(2);
     expect($house)->toHaveProperty('name');
     expect($house)->toHaveProperty('en');
 });
@@ -117,17 +116,17 @@ test('addSelect', function () {
 test('addSelect multiple', function () {
     $house = DB::table('houses')->select('en.description')->addSelect(['name', 'en.words'])->limit(1)->first();
 
-    expect((array)$house)->toHaveCount(2);
+    expect((array) $house)->toHaveCount(2);
     expect($house)->toHaveProperty('name');
     expect($house)->toHaveProperty('en');
-    expect((array)$house->en)->toHaveCount(2);
+    expect((array) $house->en)->toHaveCount(2);
 });
 
 test('addSelect with alias', function () {
     $house = DB::table('houses')->select('en.description')->addSelect(['house_name' => 'name', 'en.words'])->limit(1)->first();
 
-    expect((array)$house)->toHaveCount(2);
+    expect((array) $house)->toHaveCount(2);
     expect($house)->toHaveProperty('house_name');
     expect($house)->toHaveProperty('en');
-    expect((array)$house->en)->toHaveCount(2);
+    expect((array) $house->en)->toHaveCount(2);
 });

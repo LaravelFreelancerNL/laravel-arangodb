@@ -32,7 +32,7 @@ trait ConvertsIdToKey
     }
 
     /**
-     * @param array<mixed> $data
+     * @param  array<mixed>  $data
      * @return array<mixed>
      */
     protected function convertIdInArrayKeys(array $data): array

@@ -15,10 +15,10 @@ trait CompilesColumns
     /**
      * Compile the "RETURN" portion of the query.
      *
-     * @param Builder $builder
-     * @param array $columns
-     *
+     * @param  Builder  $builder
+     * @param  array  $columns
      * @return Builder
+     *
      * @throws Exception
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
@@ -30,7 +30,7 @@ trait CompilesColumns
         // Prepare columns
         foreach ($columns as $key => $column) {
             // Extract rows
-            if (is_string($column) && substr($column, strlen($column) - 2)  === '.*') {
+            if (is_string($column) && substr($column, strlen($column) - 2) === '.*') {
                 $table = substr($column, 0, strlen($column) - 2);
                 $returnDocs[] = $this->getTableAlias($table);
 
@@ -52,6 +52,7 @@ trait CompilesColumns
                         $returnAttributes[$alias],
                         $this->normalizeColumn($builder, $column)
                     );
+
                     continue;
                 }
 
@@ -80,7 +81,7 @@ trait CompilesColumns
         if (
             is_array($builder->groups)
             && in_array($column, $builder->groups)
-            && debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT)[1]['function'] !== "compileGroups"
+            && debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT)[1]['function'] !== 'compileGroups'
         ) {
             return $column;
         }
@@ -89,10 +90,11 @@ trait CompilesColumns
             foreach ($column as $key => $value) {
                 $column[$key] = $this->normalizeColumn($builder, $value, $table);
             }
+
             return $column;
         }
 
-        if (key_exists($column, $builder->variables)) {
+        if (array_key_exists($column, $builder->variables)) {
             return $column;
         }
 
@@ -102,8 +104,9 @@ trait CompilesColumns
     }
 
     /**
-     * @param array<mixed> $column
+     * @param  array<mixed>  $column
      * @return array<mixed>
+     *
      * @throws Exception
      */
     protected function normalizeStringColumn(Builder $builder, int|string $key, mixed $column): array
@@ -119,14 +122,14 @@ trait CompilesColumns
         $column = Arr::undot([$column => $column]);
         $alias = array_key_first($column);
         $column = $column[$alias];
+
         return [$column, $alias];
     }
 
-
     /**
-     * @param Builder $builder
-     * @param string $column
-     * @param string|null $table
+     * @param  Builder  $builder
+     * @param  string  $column
+     * @param  string|null  $table
      * @return string
      */
     protected function normalizeColumnReferences(Builder $builder, string $column, string $table = null): string
@@ -140,7 +143,6 @@ trait CompilesColumns
 
         $references = explode('.', $column);
 
-
         $tableAlias = $this->getTableAlias($references[0]);
         if (isset($tableAlias)) {
             $references[0] = $tableAlias;
@@ -150,9 +152,9 @@ trait CompilesColumns
             $tableAlias = $this->generateTableAlias($table);
             array_unshift($references, $tableAlias);
         }
+
         return implode('.', $references);
     }
-
 
     protected function determineReturnValues($builder, $returnAttributes = [], $returnDocs = [])
     {
@@ -166,7 +168,7 @@ trait CompilesColumns
 
         if (empty($values)) {
             $values = $this->getTableAlias($builder->from);
-            if (is_array($builder->joins) && !empty($builder->joins)) {
+            if (is_array($builder->joins) && ! empty($builder->joins)) {
                 $values = $this->mergeJoinResults($builder, $values);
             }
         }
@@ -199,9 +201,9 @@ trait CompilesColumns
         if (! empty($returnDocs)) {
             $values = $builder->aqb->merge(...$returnDocs);
         }
+
         return $values;
     }
-
 
     protected function mergeJoinResults($builder, $baseTable)
     {

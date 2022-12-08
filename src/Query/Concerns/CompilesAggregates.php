@@ -9,14 +9,13 @@ trait CompilesAggregates
     /**
      * Compile an aggregated select clause.
      *
-     * @param Builder $builder
-     * @param array<mixed> $aggregate
-     *
+     * @param  Builder  $builder
+     * @param  array<mixed>  $aggregate
      * @return Builder
      */
     protected function compileAggregate(Builder $builder, array $aggregate): Builder
     {
-        $method = 'compile' . ucfirst($aggregate['function']);
+        $method = 'compile'.ucfirst($aggregate['function']);
 
         return $this->$method($builder, $aggregate);
     }
@@ -34,9 +33,8 @@ trait CompilesAggregates
     /**
      * Compile AQL for max aggregate.
      *
-     * @param Builder $builder
-     * @param array<mixed> $aggregate
-     *
+     * @param  Builder  $builder
+     * @param  array<mixed>  $aggregate
      * @return Builder
      */
     protected function compileMax(Builder $builder, array $aggregate)
@@ -51,7 +49,7 @@ trait CompilesAggregates
     /**
      * Compile AQL for min aggregate.
      *
-     * @param array<mixed> $aggregate
+     * @param  array<mixed>  $aggregate
      */
     protected function compileMin(Builder $builder, array $aggregate): Builder
     {
@@ -65,7 +63,7 @@ trait CompilesAggregates
     /**
      * Compile AQL for average aggregate.
      *
-     * @param array<mixed> $aggregate
+     * @param  array<mixed>  $aggregate
      */
     protected function compileAvg(Builder $builder, array $aggregate): Builder
     {
@@ -79,9 +77,8 @@ trait CompilesAggregates
     /**
      * Compile AQL for sum aggregate.
      *
-     * @param Builder $builder
-     * @param array<mixed> $aggregate
-     *
+     * @param  Builder  $builder
+     * @param  array<mixed>  $aggregate
      * @return Builder
      */
     protected function compileSum(Builder $builder, array $aggregate): Builder

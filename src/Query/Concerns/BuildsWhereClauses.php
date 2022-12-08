@@ -12,11 +12,10 @@ trait BuildsWhereClauses
     /**
      * Add a basic where clause to the query.
      *
-     * @param Closure|string|array|QueryBuilder $column
-     * @param mixed                $operator
-     * @param mixed                $value
-     * @param string               $boolean
-     *
+     * @param  Closure|string|array|QueryBuilder  $column
+     * @param  mixed  $operator
+     * @param  mixed  $value
+     * @param  string  $boolean
      * @return Builder
      */
     public function where($column, $operator = null, $value = null, $boolean = 'and')
@@ -49,6 +48,7 @@ trait BuildsWhereClauses
         // of that subquery with the given value that was provided to the method.
         if ($this->isQueryable($column) && ! is_null($operator)) {
             $sub = $this->createSub($column);
+
             return $this->where($sub, $operator, $value, $boolean);
         }
 

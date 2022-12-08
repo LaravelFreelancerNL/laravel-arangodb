@@ -15,19 +15,19 @@ class CreateHouseView extends Migration
         Schema::dropViewIfExists('house_view');
 
         Schema::createView('house_view', [
-            "links" => [
-                "houses" => [
-                    "fields" => [
+            'links' => [
+                'houses' => [
+                    'fields' => [
                         'name' => [
-                            'analyzers' => ['identity']
+                            'analyzers' => ['identity'],
                         ],
                         'en' => [
-                            'analyzers' => ['text_en']
+                            'analyzers' => ['text_en'],
                         ],
                     ],
-                    "includeAllFields" => true,
-                    "storeValues" => "none",
-                    "trackListPositions" => false,
+                    'includeAllFields' => true,
+                    'storeValues' => 'none',
+                    'trackListPositions' => false,
                 ],
             ],
         ]);

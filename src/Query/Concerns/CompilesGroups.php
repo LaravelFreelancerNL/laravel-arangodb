@@ -9,9 +9,10 @@ trait CompilesGroups
     /**
      * Compile the "group by" portions of the query.
      *
-     * @param Builder $builder
-     * @param array<string> $groups
+     * @param  Builder  $builder
+     * @param  array<string>  $groups
      * @return Builder
+     *
      * @throws \Exception
      */
     protected function compileGroups(Builder $builder, array $groups = []): Builder
@@ -27,11 +28,12 @@ trait CompilesGroups
 
         return $builder;
     }
+
     /**
      * Compile the "group by" portions of the query.
      *
-     * @param Builder $builder
-     * @param string[]  $havings
+     * @param  Builder  $builder
+     * @param  string[]  $havings
      * @return Builder
      */
     protected function compileHavings(Builder $builder, array $havings = [])

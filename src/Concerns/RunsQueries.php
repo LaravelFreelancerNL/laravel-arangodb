@@ -42,9 +42,8 @@ trait RunsQueries
     /**
      * Execute an AQL statement and return the boolean result.
      *
-     * @param string|ArangoQueryBuilder $query
-     * @param array            $bindings
-     *
+     * @param  string|ArangoQueryBuilder  $query
+     * @param  array  $bindings
      * @return bool
      */
     public function statement($query, $bindings = []): bool
@@ -73,9 +72,8 @@ trait RunsQueries
     /**
      * Run an AQL statement and get the number of rows affected.
      *
-     * @param string|ArangoQueryBuilder $query
-     * @param array            $bindings
-     *
+     * @param  string|ArangoQueryBuilder  $query
+     * @param  array  $bindings
      * @return int
      */
     public function affectingStatement($query, $bindings = []): int
@@ -109,7 +107,6 @@ trait RunsQueries
      * Run a raw, unprepared query against the connection.
      *
      * @param  string  $query
-     *
      * @return bool
      */
     public function unprepared($query): bool
@@ -135,7 +132,6 @@ trait RunsQueries
      *
      * @param  string  $query
      * @param  array<mixed>  $bindings
-     *
      * @return stdClass
      */
     public function explain(string|ArangoQueryBuilder $query, $bindings = []): stdClass
@@ -161,6 +157,7 @@ trait RunsQueries
             $bindings = $query->binds;
             $query = $query->query;
         }
+
         return [$query, $bindings];
     }
 
@@ -169,9 +166,9 @@ trait RunsQueries
      *
      * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      *
-     * @param string|ArangoQueryBuilder $query
-     * @param array            $bindings
-     * @param bool             $useReadPdo
+     * @param  string|ArangoQueryBuilder  $query
+     * @param  array  $bindings
+     * @param  bool  $useReadPdo
      * @return mixed
      */
     public function select($query, $bindings = [], $useReadPdo = true)
@@ -184,10 +181,9 @@ trait RunsQueries
      *
      * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      *
-     * @param string|ArangoQueryBuilder $query
-     * @param array<mixed>|null     $bindings
-     * @param bool             $useReadPdo
-     *
+     * @param  string|ArangoQueryBuilder  $query
+     * @param  array<mixed>|null  $bindings
+     * @param  bool  $useReadPdo
      * @return mixed
      */
     public function execute($query, ?array $bindings = [], $useReadPdo = true)

@@ -66,7 +66,8 @@ trait ManagesTransactions
     /**
      * Start a new database transaction.
      *
-     * @param array<string, array<string>> $collections
+     * @param  array<string, array<string>>  $collections
+     *
      * @throws Throwable
      */
     public function beginTransaction(array $collections = []): void
@@ -81,7 +82,8 @@ trait ManagesTransactions
     /**
      * Create a transaction within the database.
      *
-     * @param array<string, array<string>> $collections
+     * @param  array<string, array<string>>  $collections
+     *
      * @throws Throwable
      */
     protected function createTransaction(array $collections = []): void

@@ -21,21 +21,20 @@ class Grammar extends IlluminateGrammar
      * Compile AQL to check if an attribute is in use within a document in the collection.
      * If multiple attributes are set then all must be set in one document.
      *
-     * @param string $collection
-     * @param Fluent $command
-     *
+     * @param  string  $collection
+     * @param  Fluent  $command
      * @return Fluent
      */
     public function compileHasColumn($collection, Fluent $command)
     {
         $attributes = $command->getAttributes();
-        if (!isset($attributes['columns'])) {
+        if (! isset($attributes['columns'])) {
             return $command;
         }
 
         $filter = [];
         foreach ($attributes['columns'] as $column) {
-            $filter[] = ['doc.' . $column, '!=', null];
+            $filter[] = ['doc.'.$column, '!=', null];
         }
 
         $aqb = (new QueryBuilder())->for('doc', $collection)
@@ -52,9 +51,8 @@ class Grammar extends IlluminateGrammar
     /**
      * Compile AQL to rename an attribute, if the new name isn't already in use.
      *
-     * @param string $collection
-     * @param Fluent $command
-     *
+     * @param  string  $collection
+     * @param  Fluent  $command
      * @return Fluent
      */
     public function compileRenameAttribute($collection, Fluent $command)
@@ -62,8 +60,8 @@ class Grammar extends IlluminateGrammar
         $attributes = $command->getAttributes();
 
         $filter = [
-            ['doc.' . $attributes['from'], '!=', null],
-            ['doc.' . $attributes['to'], '==', null],
+            ['doc.'.$attributes['from'], '!=', null],
+            ['doc.'.$attributes['to'], '==', null],
         ];
 
         $aqb = (new QueryBuilder())->for('doc', $collection)
@@ -72,7 +70,7 @@ class Grammar extends IlluminateGrammar
                 'doc',
                 [
                     $attributes['from'] => null,
-                    $attributes['to']   => 'doc.' . $command->from,
+                    $attributes['to'] => 'doc.'.$command->from,
                 ],
                 $collection
             )
@@ -87,9 +85,8 @@ class Grammar extends IlluminateGrammar
     /**
      * Compile AQL to drop one or more attributes.
      *
-     * @param string $collection
-     * @param Fluent $command
-     *
+     * @param  string  $collection
+     * @param  Fluent  $command
      * @return Fluent
      */
     public function compileDropAttribute($collection, Fluent $command)
@@ -99,7 +96,7 @@ class Grammar extends IlluminateGrammar
 
         $data = [];
         foreach ($attributes['attributes'] as $attribute) {
-            $filter[] = ['doc.' . $attribute, '!=', null, 'OR'];
+            $filter[] = ['doc.'.$attribute, '!=', null, 'OR'];
             $data[$attribute] = null;
         }
         $aqb = (new QueryBuilder())->for('doc', $collection)

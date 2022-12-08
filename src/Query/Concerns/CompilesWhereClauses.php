@@ -12,9 +12,9 @@ trait CompilesWhereClauses
     /**
      * Compile the "where" portions of the query.
      *
-     * @param Builder $builder
-     * @param array<mixed> $wheres
-     * @param string $source
+     * @param  Builder  $builder
+     * @param  array<mixed>  $wheres
+     * @param  string  $source
      * @return Builder
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
@@ -37,8 +37,8 @@ trait CompilesWhereClauses
     /**
      * Get an array of all the where clauses for the query.
      *
-     * @param Builder $builder
-     * @param string $source
+     * @param  Builder  $builder
+     * @param  string  $source
      * @return array<mixed>
      */
     protected function compileWheresToArray(Builder $builder, string $source = 'wheres'): array
@@ -95,8 +95,7 @@ trait CompilesWhereClauses
     /**
      * Translate sql operators to their AQL equivalent where possible.
      *
-     * @param string $operator
-     *
+     * @param  string  $operator
      * @return mixed|string
      */
     private function translateOperator(string $operator)
@@ -107,7 +106,6 @@ trait CompilesWhereClauses
 
         return $operator;
     }
-
 
     /**
      * Compile a basic where clause.
@@ -133,9 +131,10 @@ trait CompilesWhereClauses
     /**
      * Compile a "between" where clause.
      *
-     * @param IluminateBuilder $query
-     * @param array $where
+     * @param  IluminateBuilder  $query
+     * @param  array  $where
      * @return string
+     *
      * @throws \Exception
      */
     protected function whereBetween(IluminateBuilder $query, $where)
@@ -163,6 +162,7 @@ trait CompilesWhereClauses
 
     /**
      * Generate operators for between and 'not between'
+     *
      * @param  bool  $notBetween
      * @return string[]
      */
@@ -184,9 +184,10 @@ trait CompilesWhereClauses
     /**
      * Compile a "between" where clause.
      *
-     * @param IluminateBuilder $query
-     * @param array $where
+     * @param  IluminateBuilder  $query
+     * @param  array  $where
      * @return string
+     *
      * @throws \Exception
      */
     protected function whereBetweenColumns(IluminateBuilder $query, $where)
@@ -209,7 +210,6 @@ trait CompilesWhereClauses
 
         return $predicate;
     }
-
 
     /**
      * Compile a where clause comparing two columns..
@@ -304,7 +304,7 @@ trait CompilesWhereClauses
 
         $predicate[0] = $this->normalizeColumn($query, $where['column']);
         $predicate[1] = 'IN';
-        $predicate[2] = '[' . implode(', ', $where['values']) . ']';
+        $predicate[2] = '['.implode(', ', $where['values']).']';
         $predicate[3] = $where['boolean'];
 
         return $predicate;
@@ -344,17 +344,19 @@ trait CompilesWhereClauses
 
         $predicate[0] = $this->normalizeColumn($query, $where['column']);
         $predicate[1] = 'NOT IN';
-        $predicate[2] = '[' . implode(', ', $where['values']) . ']';
+        $predicate[2] = '['.implode(', ', $where['values']).']';
         $predicate[3] = $where['boolean'];
+
         return $predicate;
     }
 
     /**
      * Compile a "whereJsonContains" clause.
      *
-     * @param Builder $query
-     * @param array $where
+     * @param  Builder  $query
+     * @param  array  $where
      * @return string
+     *
      * @throws BindException
      */
     protected function whereJsonContains(Builder $query, $where)
@@ -394,7 +396,6 @@ trait CompilesWhereClauses
         return $predicate;
     }
 
-
     /**
      * Compile a where date clause.
      *
@@ -408,7 +409,7 @@ trait CompilesWhereClauses
 
         $where = $this->normalizeOperator($where);
 
-        $predicate[0] = $query->aqb->dateFormat($this->normalizeColumn($query, $where['column']), "%yyyy-%mm-%dd");
+        $predicate[0] = $query->aqb->dateFormat($this->normalizeColumn($query, $where['column']), '%yyyy-%mm-%dd');
         $predicate[1] = $where['operator'];
         $predicate[2] = $this->parameter($query, $where['value']);
         $predicate[3] = $where['boolean'];
@@ -458,7 +459,6 @@ trait CompilesWhereClauses
         return $predicate;
     }
 
-
     /**
      * Compile a where day clause.
      *
@@ -493,7 +493,7 @@ trait CompilesWhereClauses
 
         $where = $this->normalizeOperator($where);
 
-        $predicate[0] = $query->aqb->dateFormat($this->normalizeColumn($query, $where['column']), "%hh:%ii:%ss");
+        $predicate[0] = $query->aqb->dateFormat($this->normalizeColumn($query, $where['column']), '%hh:%ii:%ss');
         $predicate[1] = $where['operator'];
         $predicate[2] = $this->parameter($query, $where['value']);
         $predicate[3] = $where['boolean'];

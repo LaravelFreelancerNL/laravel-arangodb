@@ -15,9 +15,9 @@ trait InteractsWithDatabase
     /**
      * Assert that a given where condition exists in the database.
      *
-     * @param Model|string $table
-     * @param array $data
-     * @param null $connection
+     * @param  Model|string  $table
+     * @param  array  $data
+     * @param  null  $connection
      * @return $this
      */
     protected function assertDatabaseHas($table, array $data, $connection = null)
@@ -33,9 +33,9 @@ trait InteractsWithDatabase
     /**
      * Assert that a given where condition does not exist in the database.
      *
-     * @param Model|string $table
-     * @param array $data
-     * @param null $connection
+     * @param  Model|string  $table
+     * @param  array  $data
+     * @param  null  $connection
      * @return $this
      */
     protected function assertDatabaseMissing($table, array $data, $connection = null)
@@ -52,10 +52,10 @@ trait InteractsWithDatabase
     /**
      * Assert the given record has been "soft deleted".
      *
-     * @param Model|string $table
-     * @param array $data
-     * @param null $connection
-     * @param string $deletedAtColumn
+     * @param  Model|string  $table
+     * @param  array  $data
+     * @param  null  $connection
+     * @param  string  $deletedAtColumn
      * @return $this
      */
     protected function assertSoftDeleted(
@@ -88,10 +88,10 @@ trait InteractsWithDatabase
     /**
      * Assert the given record has not been "soft deleted".
      *
-     * @param Model|string $table
-     * @param array<mixed> $data
-     * @param null $connection
-     * @param string $deletedAtColumn
+     * @param  Model|string  $table
+     * @param  array<mixed>  $data
+     * @param  null  $connection
+     * @param  string  $deletedAtColumn
      * @return $this
      */
     protected function assertNotSoftDeleted(
