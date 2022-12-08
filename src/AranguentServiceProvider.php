@@ -2,9 +2,9 @@
 
 namespace LaravelFreelancerNL\Aranguent;
 
+use Illuminate\Database\Migrations\MigrationCreator as IlluminateMigrationCreator;
 use Illuminate\Support\ServiceProvider;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
-use Illuminate\Database\Migrations\MigrationCreator as IlluminateMigrationCreator;
 use LaravelFreelancerNL\Aranguent\Migrations\MigrationCreator;
 use LaravelFreelancerNL\Aranguent\Schema\Grammar as SchemaGrammar;
 
@@ -45,12 +45,12 @@ class AranguentServiceProvider extends ServiceProvider
         $this->app->when(MigrationCreator::class)
             ->needs('$customStubPath')
             ->give(function () {
-                return __DIR__ . '/../stubs';
+                return __DIR__.'/../stubs';
             });
         $this->app->when(IlluminateMigrationCreator::class)
             ->needs('$customStubPath')
             ->give(function () {
-                return __DIR__ . '/../stubs';
+                return __DIR__.'/../stubs';
             });
 
         $this->app->resolving(

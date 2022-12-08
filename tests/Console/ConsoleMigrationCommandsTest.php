@@ -6,12 +6,12 @@ use Tests\TestCase;
 uses(TestCase::class);
 
 beforeEach(function () {
-    $this->packageMigrationPath = __DIR__ . '/../Setup/Database/Migrations';
-    $this->aranguentMigrationStubPath = __DIR__ . '/../../stubs';
-    $this->laravelMigrationPath = base_path() . '/database/migrations';
+    $this->packageMigrationPath = __DIR__.'/../Setup/Database/Migrations';
+    $this->aranguentMigrationStubPath = __DIR__.'/../../stubs';
+    $this->laravelMigrationPath = base_path().'/database/migrations';
 
     // Clear the make migration test stubs
-    array_map('unlink', array_filter((array) glob($this->laravelMigrationPath . '/*')));
+    array_map('unlink', array_filter((array) glob($this->laravelMigrationPath.'/*')));
 });
 
 afterEach(function () {
@@ -20,7 +20,6 @@ afterEach(function () {
 
 /**
  * migrate.
- *
  */
 test('migrate', function () {
     $path = 'migrations';

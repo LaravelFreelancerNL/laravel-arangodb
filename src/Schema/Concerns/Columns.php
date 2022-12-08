@@ -9,8 +9,7 @@ trait Columns
     /**
      * Check if any document within the table has the column.
      *
-     * @param string|array $column
-     *
+     * @param  string|array  $column
      * @return Fluent
      */
     public function hasColumn($column)
@@ -18,8 +17,8 @@ trait Columns
         $parameters = [];
         $parameters['handler'] = 'aql';
         $parameters['explanation'] = "Checking if any document within the table has the '"
-            . implode(', ', (array) $column)
-            . "' column(s).";
+            .implode(', ', (array) $column)
+            ."' column(s).";
         $parameters['column'] = $column;
 
         return $this->addCommand('hasAttribute', $parameters);
@@ -28,9 +27,8 @@ trait Columns
     /**
      * Indicate that the given attributes should be renamed.
      *
-     * @param string $from
-     * @param string $to
-     *
+     * @param  string  $from
+     * @param  string  $to
      * @return Fluent
      */
     public function renameColumn($from, $to)
@@ -47,8 +45,7 @@ trait Columns
     /**
      * Indicate that the given column(s) should be dropped.
      *
-     * @param array|mixed $columns
-     *
+     * @param  array|mixed  $columns
      * @return Fluent
      */
     public function dropColumn($columns)
@@ -58,7 +55,7 @@ trait Columns
         $parameters = [];
         $parameters['handler'] = 'aql';
         $parameters['attributes'] = $columns;
-        $parameters['explanation'] = 'Drop the following column(s): ' . implode(',', $columns) . '.';
+        $parameters['explanation'] = 'Drop the following column(s): '.implode(',', $columns).'.';
 
         return $this->addCommand('dropAttribute', compact('parameters'));
     }

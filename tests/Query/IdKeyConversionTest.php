@@ -20,15 +20,15 @@ test('output conversion with limited attributes', function () {
     $result = DB::table('characters')->get(['_id', '_key', 'name']);
 
     $this->assertObjectHasAttribute('id', $result->first());
-    $this->assertCount(3, (array)$result->first());
+    $this->assertCount(3, (array) $result->first());
 });
 
 test('output conversion without key', function () {
-    $result = DB::table('characters')->get(['_id','name']);
+    $result = DB::table('characters')->get(['_id', 'name']);
 
     $this->assertObjectNotHasAttribute('id', $result->first());
     $this->assertObjectHasAttribute('_id', $result->first());
-    $this->assertCount(2, (array)$result->first());
+    $this->assertCount(2, (array) $result->first());
 });
 
 test('get id conversion single attribute', function () {
@@ -52,7 +52,7 @@ test('get id conversion multiple attributed', function () {
     );
     $this->assertObjectNotHasAttribute('_key', $results->first());
     $this->assertObjectHasAttribute('id', $results->first());
-    $this->assertCount(2, (array)$results->first());
+    $this->assertCount(2, (array) $results->first());
 });
 
 test('get id conversion with alias', function () {
@@ -67,7 +67,7 @@ test('get id conversion with alias', function () {
     $this->assertObjectNotHasAttribute('_key', $results->first());
     $this->assertObjectNotHasAttribute('id', $results->first());
     $this->assertObjectHasAttribute('i', $results->first());
-    $this->assertCount(2, (array)$results->first());
+    $this->assertCount(2, (array) $results->first());
 });
 
 test('get id conversion with multiple ids', function () {
@@ -82,7 +82,7 @@ test('get id conversion with multiple ids', function () {
     $this->assertObjectNotHasAttribute('_key', $results->first());
     $this->assertObjectHasAttribute('id', $results->first());
     $this->assertObjectHasAttribute('i', $results->first());
-    $this->assertCount(3, (array)$results->first());
+    $this->assertCount(3, (array) $results->first());
 });
 
 test('get id conversion with multiple aliases', function () {
@@ -98,7 +98,7 @@ test('get id conversion with multiple aliases', function () {
     $this->assertObjectNotHasAttribute('id', $results->first());
     $this->assertObjectHasAttribute('i', $results->first());
     $this->assertObjectHasAttribute('i2', $results->first());
-    $this->assertCount(3, (array)$results->first());
+    $this->assertCount(3, (array) $results->first());
 });
 
 test('get id conversion with wheres', function () {
@@ -108,7 +108,7 @@ test('get id conversion with wheres', function () {
     $results = $query->get();
 
     $this->assertSame(
-        'FOR characterDoc IN characters FILTER characterDoc._key == @' . $query->aqb->getQueryId() . '_1',
+        'FOR characterDoc IN characters FILTER characterDoc._key == @'.$query->aqb->getQueryId().'_1',
         $query->toSql()
     );
 

@@ -19,7 +19,7 @@ test('connection is made', function () {
 test('change database name', function () {
     $initialName = $this->connection->getDatabaseName();
 
-    $newName = $initialName . 'New';
+    $newName = $initialName.'New';
     $this->connection->setDatabaseName($newName);
     $currentName = $this->connection->getDatabaseName();
 
@@ -98,7 +98,7 @@ test('reconnect to different database', function () {
     expect($connection->getArangoClient())->toBeInstanceOf(ArangoClient::class);
 
     DB::purge();
-    $newDatabase = "otherDatabase";
+    $newDatabase = 'otherDatabase';
     config()->set('database.connections.arangodb.database', $newDatabase);
     $connection->reconnect();
 

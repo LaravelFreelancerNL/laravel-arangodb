@@ -64,17 +64,17 @@ class Grammar extends FluentAqlGrammar
     ];
 
     protected $operatorTranslations = [
-        '='          => '==',
-        '<>'         => '!=',
-        '<=>'        => '==',
-        'rlike'      => '=~',
-        'not rlike'  => '!~',
-        'regexp'     => '=~',
+        '=' => '==',
+        '<>' => '!=',
+        '<=>' => '==',
+        'rlike' => '=~',
+        'not rlike' => '!~',
+        'regexp' => '=~',
         'not regexp' => '!~',
     ];
 
     protected $whereTypeOperators = [
-        'In'    => 'IN',
+        'In' => 'IN',
         'NotIn' => 'NOT IN',
     ];
 
@@ -107,18 +107,17 @@ class Grammar extends FluentAqlGrammar
 
     protected function prefixTable($table)
     {
-        return $this->tablePrefix . $table;
+        return $this->tablePrefix.$table;
     }
 
     /**
      * Compile an insert statement into AQL.
      *
-     * @param Builder $builder
-     * @param array   $values
+     * @param  Builder  $builder
+     * @param  array  $values
+     * @return Builder
      *
      * @throws BindException
-     *
-     * @return Builder
      */
     public function compileInsert(Builder $builder, array $values)
     {
@@ -149,9 +148,9 @@ class Grammar extends FluentAqlGrammar
     /**
      * Compile an insert and get ID statement into SQL.
      *
-     * @param array<mixed> $values
+     * @param  array<mixed>  $values
      */
-    public function compileInsertGetId(Builder $builder, $values, $sequence = "_key"): Builder
+    public function compileInsertGetId(Builder $builder, $values, $sequence = '_key'): Builder
     {
         if (Arr::isAssoc($values)) {
             $values = [$values];
@@ -164,7 +163,7 @@ class Grammar extends FluentAqlGrammar
 
         if (empty($values)) {
             $builder->aqb = $builder->aqb->insert('{}', $table)
-                ->return('NEW.' . $sequence);
+                ->return('NEW.'.$sequence);
 
             return $builder;
         }
@@ -177,7 +176,7 @@ class Grammar extends FluentAqlGrammar
         $builder->aqb = $builder->aqb->let('values', $values)
             ->for('value', 'values')
             ->insert('value', $table)
-            ->return('NEW.' . $sequence);
+            ->return('NEW.'.$sequence);
 
         return $builder;
     }
@@ -185,8 +184,8 @@ class Grammar extends FluentAqlGrammar
     /**
      * Compile an insert statement into AQL.
      *
-     * @param Builder $builder
-     * @param array<mixed> $values
+     * @param  Builder  $builder
+     * @param  array<mixed>  $values
      * @return Builder
      */
     public function compileInsertOrIgnore(Builder $builder, array $values)
@@ -210,18 +209,16 @@ class Grammar extends FluentAqlGrammar
         $builder->aqb = $builder->aqb->let('values', $values)
             ->for('value', 'values')
             ->insert('value', $table)
-            ->options(["ignoreErrors" => true])
+            ->options(['ignoreErrors' => true])
             ->return('NEW._key');
 
         return $builder;
     }
 
-
     /**
      * Compile a select query into AQL.
      *
-     * @param Builder $builder
-     *
+     * @param  Builder  $builder
      * @return Builder
      */
     public function compileSelect(Builder $builder)
@@ -254,14 +251,14 @@ class Grammar extends FluentAqlGrammar
         /** @phpstan-ignore-next-line */
         $aqb = DB::aqb();
         $aqb = $aqb->for('doc', $query->from)->remove('doc', $query->from)->get();
+
         return [$aqb->query => []];
     }
 
     /**
      * Compile the components necessary for a select clause.
      *
-     * @param Builder $builder
-     *
+     * @param  Builder  $builder
      * @return Builder
      */
     protected function compileComponents(Builder $builder)
@@ -271,8 +268,8 @@ class Grammar extends FluentAqlGrammar
             // see if that component exists. If it does we'll just call the compiler
             // function for the component which is responsible for making the SQL.
 
-            if (isset($builder->$component) && !is_null($builder->$component)) {
-                $method = 'compile' . ucfirst($component);
+            if (isset($builder->$component) && ! is_null($builder->$component)) {
+                $method = 'compile'.ucfirst($component);
 
                 $builder = $this->$method($builder, $builder->$component);
             }
@@ -284,9 +281,8 @@ class Grammar extends FluentAqlGrammar
     /**
      * Compile the "from" portion of the query -> FOR in AQL.
      *
-     * @param Builder $builder
-     * @param string  $table
-     *
+     * @param  Builder  $builder
+     * @param  string  $table
      * @return Builder
      */
     protected function compileFrom(Builder $builder, $table)
@@ -301,7 +297,7 @@ class Grammar extends FluentAqlGrammar
 
     /**
      * @param  Builder  $builder
-     * @param  array $variables
+     * @param  array  $variables
      * @return Builder
      */
     protected function compileVariables(Builder $builder, array $variables)
@@ -318,14 +314,13 @@ class Grammar extends FluentAqlGrammar
     /**
      * Compile the "order by" portions of the query.
      *
-     * @param Builder $builder
-     * @param array   $orders
-     *
+     * @param  Builder  $builder
+     * @param  array  $orders
      * @return Builder
      */
     protected function compileOrders(Builder $builder, $orders)
     {
-        if (!empty($orders)) {
+        if (! empty($orders)) {
             $orders = $this->compileOrdersToFlatArray($builder, $orders);
             $builder->aqb = $builder->aqb->sort(...$orders);
 
@@ -338,9 +333,8 @@ class Grammar extends FluentAqlGrammar
     /**
      * Compile the query orders to an array.
      *
-     * @param Builder $builder
-     * @param array   $orders
-     *
+     * @param  Builder  $builder
+     * @param  array  $orders
      * @return array
      */
     protected function compileOrdersToFlatArray(Builder $builder, $orders)
@@ -348,7 +342,7 @@ class Grammar extends FluentAqlGrammar
         $flatOrders = [];
 
         foreach ($orders as $order) {
-            if (!isset($order['type']) || $order['type'] != 'Raw') {
+            if (! isset($order['type']) || $order['type'] != 'Raw') {
                 $order['column'] = $this->normalizeColumn($builder, $order['column']);
             }
 
@@ -366,9 +360,8 @@ class Grammar extends FluentAqlGrammar
      * Compile the "offset" portions of the query.
      * We are handling this first by saving the offset which will be used by the FluentAQL's limit function.
      *
-     * @param Builder $builder
-     * @param int     $offset
-     *
+     * @param  Builder  $builder
+     * @param  int  $offset
      * @return Builder
      */
     protected function compileOffset(Builder $builder, $offset)
@@ -381,9 +374,8 @@ class Grammar extends FluentAqlGrammar
     /**
      * Compile the "limit" portions of the query.
      *
-     * @param Builder $builder
-     * @param int     $limit
-     *
+     * @param  Builder  $builder
+     * @param  int  $limit
      * @return Builder
      */
     protected function compileLimit(Builder $builder, $limit)
@@ -398,13 +390,11 @@ class Grammar extends FluentAqlGrammar
         return $builder;
     }
 
-
     /**
      * Compile an update statement into SQL.
      *
-     * @param Builder $builder
-     * @param array   $values
-     *
+     * @param  Builder  $builder
+     * @param  array  $values
      * @return Builder
      */
     public function compileUpdate(Builder $builder, array $values)
@@ -427,10 +417,10 @@ class Grammar extends FluentAqlGrammar
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      *
-     * @param Builder $query
-     * @param array $values
-     * @param array $uniqueBy
-     * @param array $update
+     * @param  Builder  $query
+     * @param  array  $values
+     * @param  array  $uniqueBy
+     * @param  array  $update
      * @return string
      */
     public function compileUpsert(Builder $query, array $values, array $uniqueBy, array $update)
@@ -454,8 +444,8 @@ class Grammar extends FluentAqlGrammar
             ->for('doc', 'docs')
             ->insert('doc', $query->from)
             ->options([
-                "overwriteMode" => "update",
-                "mergeObjects" => false,
+                'overwriteMode' => 'update',
+                'mergeObjects' => false,
             ])->get();
     }
 
@@ -465,9 +455,8 @@ class Grammar extends FluentAqlGrammar
      * @SuppressWarnings(PHPMD.CamelCaseParameterName)
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      *
-     * @param Builder $builder
-     * @param null    $id
-     *
+     * @param  Builder  $builder
+     * @param  null  $id
      * @return Builder
      */
     public function compileDelete(Builder $builder, $id = null)
@@ -475,8 +464,7 @@ class Grammar extends FluentAqlGrammar
         $table = $this->prefixTable($builder->from);
         $tableAlias = $this->generateTableAlias($table);
 
-
-        if (!is_null($id)) {
+        if (! is_null($id)) {
             $builder->aqb = $builder->aqb->remove((string) $id, $table);
 
             return $builder;
@@ -495,8 +483,7 @@ class Grammar extends FluentAqlGrammar
     /**
      * Compile the random statement into SQL.
      *
-     * @param Builder $builder
-     *
+     * @param  Builder  $builder
      * @return FunctionExpression;
      */
     public function compileRandom(Builder $builder)
@@ -505,7 +492,7 @@ class Grammar extends FluentAqlGrammar
     }
 
     /**
-     * @param Builder $builder
+     * @param  Builder  $builder
      * @return Builder
      */
     public function compileSearch(Builder $builder): Builder

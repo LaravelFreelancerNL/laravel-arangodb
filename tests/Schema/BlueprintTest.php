@@ -20,7 +20,7 @@ test('create index', function () {
     });
     $name = 'characters_name_persistent';
 
-    $index = $this->schemaManager ->getIndexByName('characters', $name);
+    $index = $this->schemaManager->getIndexByName('characters', $name);
 
     expect($index->name)->toEqual($name);
 });
@@ -49,7 +49,7 @@ test('index names include options', function () {
     Schema::table('characters', function (Blueprint $collection) {
         $options = [
             'unique' => true,
-            'sparse' => true
+            'sparse' => true,
         ];
 
         $indexName = $collection->createIndexName('persistent', ['address'], $options);

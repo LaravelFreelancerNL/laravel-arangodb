@@ -43,8 +43,7 @@ trait IsAranguentModel
      * @override
      * Create a new Eloquent query builder for the model.
      *
-     * @param QueryBuilder $query
-     *
+     * @param  QueryBuilder  $query
      * @return Builder
      */
     public function newEloquentBuilder($query)
@@ -102,25 +101,24 @@ trait IsAranguentModel
      */
     protected function updateIdWithKey(string $key)
     {
-        $this->attributes['_id'] = $this->getTable() . '/' . $key;
+        $this->attributes['_id'] = $this->getTable().'/'.$key;
     }
 
     /**
      * Qualify the given column name by the model's table.
      *
-     * @param string $column
-     *
+     * @param  string  $column
      * @return string
      */
     public function qualifyColumn($column)
     {
-        $tableReferer = Str::singular($this->getTable()) . 'Doc';
+        $tableReferer = Str::singular($this->getTable()).'Doc';
 
-        if (Str::startsWith($column, $tableReferer . '.')) {
+        if (Str::startsWith($column, $tableReferer.'.')) {
             return $column;
         }
 
-        return $tableReferer . '.' . $column;
+        return $tableReferer.'.'.$column;
     }
 
     /**
@@ -133,10 +131,10 @@ trait IsAranguentModel
         $keyName = $this->getKeyName();
 
         if ($keyName[0] != '_') {
-            $keyName = '_' . $keyName;
+            $keyName = '_'.$keyName;
         }
 
-        return Str::snake(class_basename($this)) . $keyName;
+        return Str::snake(class_basename($this)).$keyName;
     }
 
     protected function fromAqb(ArangoQueryBuilder|Closure $aqb): Collection
@@ -147,6 +145,7 @@ trait IsAranguentModel
         }
         $connection = $this->getConnection();
         $results = $connection->execute($aqb->get());
+
         return $this->hydrate($results);
     }
 

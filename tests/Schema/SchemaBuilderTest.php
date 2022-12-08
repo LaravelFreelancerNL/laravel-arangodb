@@ -39,7 +39,7 @@ test('has table', function () {
 
 test('has table throws on none existing database', function () {
     DB::purge();
-    $newDatabase = "otherDatabase";
+    $newDatabase = 'otherDatabase';
     config()->set('database.connections.arangodb.database', $newDatabase);
 
     $this->expectException(QueryException::class);
@@ -216,7 +216,6 @@ test('drop database if exists', function () {
 
     $databaseName = 'aranguent__test_dummy';
     Schema::createDatabase($databaseName);
-
 
     $result = Schema::dropDatabaseIfExists($databaseName);
 

@@ -9,8 +9,7 @@ trait Tables
     /**
      * Indicate that the table needs to be created.
      *
-     * @param array $options
-     *
+     * @param  array  $options
      * @return Fluent
      */
     public function create($options = [])
@@ -38,7 +37,7 @@ trait Tables
     public function executeCreateCommand($command)
     {
         if ($this->connection->pretending()) {
-            $this->connection->logQuery('/* ' . $command->explanation . " */\n", []);
+            $this->connection->logQuery('/* '.$command->explanation." */\n", []);
 
             return;
         }
@@ -68,8 +67,7 @@ trait Tables
     /**
      * Rename the table to a given name.
      *
-     * @param string $to
-     *
+     * @param  string  $to
      * @return Fluent
      */
     public function rename($to)

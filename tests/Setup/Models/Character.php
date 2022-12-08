@@ -70,9 +70,9 @@ class Character extends Model
             '_id',
         )->using('Tests\Setup\Models\Child')
             ->withPivot([
-                            'created_by',
-                            'updated_by',
-                        ]);
+                'created_by',
+                'updated_by',
+            ]);
     }
 
     public function captured()

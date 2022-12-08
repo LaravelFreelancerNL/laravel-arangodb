@@ -12,7 +12,7 @@ class Processor extends IlluminateProcessor
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      *
-     * @param Builder $query
+     * @param  Builder  $query
      * @param  array<mixed>  $results
      * @return array<mixed>
      */
@@ -25,6 +25,7 @@ class Processor extends IlluminateProcessor
                 $val = (object) $val;
             }
         }
+
         return $results;
     }
 }

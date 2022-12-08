@@ -18,8 +18,8 @@ class QueryException extends IlluminateQueryException
     protected function formatMessage($sql, $bindings, Throwable $previous)
     {
         return $previous->getMessage()
-            . ' (AQL: ' . $sql
-            . ' - Bindings: ' . var_export($bindings, true)
-            . ')';
+            .' (AQL: '.$sql
+            .' - Bindings: '.var_export($bindings, true)
+            .')';
     }
 }

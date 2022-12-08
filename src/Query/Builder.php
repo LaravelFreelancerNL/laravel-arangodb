@@ -63,7 +63,7 @@ class Builder extends IlluminateQueryBuilder
         $this->connection = $connection;
         $this->grammar = $grammar ?: $connection->getQueryGrammar();
         $this->processor = $processor ?: $connection->getPostProcessor();
-        if (!$aqb instanceof QueryBuilder) {
+        if (! $aqb instanceof QueryBuilder) {
             $aqb = new QueryBuilder();
         }
         $this->aqb = $aqb;
@@ -72,14 +72,14 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Delete a record from the database.
      *
-     * @param mixed $id
-     *
+     * @param  mixed  $id
      * @return int
      */
     public function delete($id = null)
     {
         $this->aqb = new QueryBuilder();
         $this->grammar->compileDelete($this, $id)->setAql();
+
         return $this->connection->delete($this->aqb);
     }
 
@@ -113,14 +113,14 @@ class Builder extends IlluminateQueryBuilder
         $this->grammar->compileSelect($this)->setAql();
         $results = $this->connection->select($this->aqb);
         $this->aqb = new QueryBuilder();
+
         return $results;
     }
 
     /**
      * Run a pagination count query.
      *
-     * @param array $columns
-     *
+     * @param  array  $columns
      * @return array
      */
     protected function runPaginationCountQuery($columns = ['*'])
@@ -168,14 +168,14 @@ class Builder extends IlluminateQueryBuilder
     }
 
     /**
-     * @param array<mixed> $columns
+     * @param  array<mixed>  $columns
      */
     protected function addColumns(array $columns): void
     {
         foreach ($columns as $as => $column) {
             if (is_string($as) && $this->isQueryable($column)) {
                 if (is_null($this->columns)) {
-                    $this->select($this->from . '.*');
+                    $this->select($this->from.'.*');
                 }
 
                 $this->selectSub($column, $as);
@@ -201,30 +201,31 @@ class Builder extends IlluminateQueryBuilder
     public function toSql()
     {
         $this->grammar->compileSelect($this)->setAql();
+
         return $this->aqb->query;
     }
 
     /**
      * Insert a new record into the database.
      *
-     * @param array $values
+     * @param  array  $values
+     * @return bool
      *
      * @throws BindException
-     *
-     * @return bool
      */
     public function insert(array $values): bool
     {
         $this->grammar->compileInsert($this, $values)->setAql();
         $results = $this->getConnection()->insert($this->aqb);
         $this->aqb = new QueryBuilder();
+
         return $results;
     }
 
     /**
      * Insert a new record and get the value of the primary key.
      *
-     * @param array<mixed> $values
+     * @param  array<mixed>  $values
      */
     public function insertGetId(array $values, $sequence = null)
     {
@@ -238,11 +239,10 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Insert a new record into the database.
      *
-     * @param array $values
+     * @param  array  $values
+     * @return bool
      *
      * @throws BindException
-     *
-     * @return bool
      */
     public function insertOrIgnore(array $values): bool
     {
@@ -274,8 +274,7 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Update a record in the database.
      *
-     * @param array $values
-     *
+     * @param  array  $values
      * @return int
      */
     public function update(array $values)
@@ -285,15 +284,15 @@ class Builder extends IlluminateQueryBuilder
         $this->grammar->compileUpdate($this, $values)->setAql();
         $results = $this->connection->update($this->aqb);
         $this->aqb = new QueryBuilder();
+
         return $results;
     }
 
     /**
      * Execute an aggregate function on the database.
      *
-     * @param string $function
-     * @param array  $columns
-     *
+     * @param  string  $function
+     * @param  array  $columns
      * @return mixed
      */
     public function aggregate($function, $columns = ['*'])
@@ -304,37 +303,33 @@ class Builder extends IlluminateQueryBuilder
 
         $this->aqb = new QueryBuilder();
 
-        if (!$results->isEmpty()) {
+        if (! $results->isEmpty()) {
             return array_change_key_case((array) $results[0])['aggregate'];
         }
 
         return false;
     }
 
-
     /**
      * Determine if the given operator is supported.
      *
-     * @param string $operator
-     *
+     * @param  string  $operator
      * @return bool
      */
     protected function invalidOperator($operator)
     {
-        return !in_array(strtolower($operator), $this->operators, true) &&
-            !isset($this->grammar->getOperators()[strtoupper($operator)]);
+        return ! in_array(strtolower($operator), $this->operators, true) &&
+            ! isset($this->grammar->getOperators()[strtoupper($operator)]);
     }
-
 
     /**
      * Add an "order by" clause to the query.
      *
-     * @param Closure|IlluminateQueryBuilder|string $column
-     * @param string                                $direction
+     * @param  Closure|IlluminateQueryBuilder|string  $column
+     * @param  string  $direction
+     * @return $this
      *
      * @throws InvalidArgumentException
-     *
-     * @return $this
      */
     public function orderBy($column, $direction = 'asc')
     {
@@ -344,11 +339,11 @@ class Builder extends IlluminateQueryBuilder
             //fixme: Remove binding when implementing subqueries
             $bindings = null;
 
-            $column = new Expression('(' . $query . ')');
+            $column = new Expression('('.$query.')');
         }
 
         $this->{$this->unions ? 'unionOrders' : 'orders'}[] = [
-            'column'    => $column,
+            'column' => $column,
             'direction' => $direction,
         ];
 
@@ -358,9 +353,8 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Add a raw "order by" clause to the query.
      *
-     * @param string|ExpressionInterface $aql
-     * @param array                      $bindings
-     *
+     * @param  string|ExpressionInterface  $aql
+     * @param  array  $bindings
      * @return $this
      */
     public function orderByRaw($aql, $bindings = [])
@@ -374,12 +368,10 @@ class Builder extends IlluminateQueryBuilder
         return $this;
     }
 
-
     /**
      * Put the query's results in random order.
      *
-     * @param string $seed
-     *
+     * @param  string  $seed
      * @return $this
      */
     public function inRandomOrder($seed = '')
@@ -393,8 +385,8 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Search an ArangoSearch view.
      *
-     * @param mixed $predicates
-     * @param array|null $options
+     * @param  mixed  $predicates
+     * @param  array|null  $options
      * @return Builder
      */
     public function search(mixed $predicates, array $options = null): Builder
@@ -409,7 +401,7 @@ class Builder extends IlluminateQueryBuilder
 
         $this->search = [
             'predicates' => $predicates,
-            'options' => $options
+            'options' => $options,
         ];
 
         return $this;

@@ -31,7 +31,7 @@ abstract class TestCase extends AranguentTestCase implements \Orchestra\Testbenc
             'locations',
             'tags',
             'taggables',
-        ]
+        ],
     ];
 
     /**
@@ -83,7 +83,7 @@ abstract class TestCase extends AranguentTestCase implements \Orchestra\Testbenc
         //Convert orchestra migrations
         $this->artisan(
             'aranguent:convert-migrations',
-            ['--realpath' => true, '--path' => __DIR__ . '/../vendor/orchestra/testbench-core/laravel/migrations/']
+            ['--realpath' => true, '--path' => __DIR__.'/../vendor/orchestra/testbench-core/laravel/migrations/']
         )->run();
     }
 
@@ -109,11 +109,10 @@ abstract class TestCase extends AranguentTestCase implements \Orchestra\Testbenc
         $this->tearDownTheTestEnvironment();
     }
 
-
     protected function skipTestOnArangoVersionsBefore(string $version)
     {
         if (version_compare(getenv('ARANGODB_VERSION'), $version, '<')) {
-            $this->markTestSkipped('This test does not support ArangoDB versions before ' . $version);
+            $this->markTestSkipped('This test does not support ArangoDB versions before '.$version);
         }
     }
 }

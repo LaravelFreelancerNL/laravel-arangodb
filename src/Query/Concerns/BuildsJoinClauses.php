@@ -13,15 +13,15 @@ trait BuildsJoinClauses
      * Add a join clause to the query.
      *
      * The boolean argument flag is part of this method's API in Laravel.
+     *
      * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      *
-     * @param mixed          $table
-     * @param \Closure|string $first
-     * @param string|null     $operator
-     * @param string|null     $second
-     * @param string          $type
-     * @param bool            $where
-     *
+     * @param  mixed  $table
+     * @param  \Closure|string  $first
+     * @param  string|null  $operator
+     * @param  string|null  $second
+     * @param  string  $type
+     * @param  bool  $where
      * @return Builder
      */
     public function join($table, $first, $operator = null, $second = null, $type = 'inner', $where = false): Builder
@@ -53,10 +53,9 @@ trait BuildsJoinClauses
     /**
      * Get a new join clause.
      *
-     * @param IlluminateQueryBuilder $parentQuery
-     * @param string                 $type
-     * @param string                 $table
-     *
+     * @param  IlluminateQueryBuilder  $parentQuery
+     * @param  string  $type
+     * @param  string  $table
      * @return JoinClause
      */
     protected function newJoinClause(IlluminateQueryBuilder $parentQuery, $type, $table): JoinClause

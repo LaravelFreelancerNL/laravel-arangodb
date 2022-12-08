@@ -38,7 +38,8 @@ class Connection extends IlluminateConnection
     /**
      * Connection constructor.
      *
-     * @param array $config
+     * @param  array  $config
+     *
      * @throws UnknownProperties
      */
     public function __construct($config = [])

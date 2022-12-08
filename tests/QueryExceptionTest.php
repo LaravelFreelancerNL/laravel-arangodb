@@ -24,8 +24,8 @@ test('query exception extends illuminate', function () {
 test('query exception has correct message', function () {
     $this->expectExceptionMessage(
         "400 - AQL: syntax error, unexpected identifier near 'this ain't AQL' at position 1:1 (while parsing)"
-        . " (AQL: this ain't AQL - Bindings: array (\n"
-        . "  'testBind' => 'test',\n))"
+        ." (AQL: this ain't AQL - Bindings: array (\n"
+        ."  'testBind' => 'test',\n))"
     );
 
     DB::execute('this ain\'t AQL', ['testBind' => 'test']);
@@ -34,8 +34,8 @@ test('query exception has correct message', function () {
 test('query exception without binds', function () {
     $this->expectExceptionMessage(
         "400 - AQL: syntax error, unexpected identifier near 'this ain't AQL' at position 1:1 (while parsing)"
-        . " (AQL: this ain't AQL - Bindings: array (\n"
-        . "))"
+        ." (AQL: this ain't AQL - Bindings: array (\n"
+        .'))'
     );
 
     DB::execute('this ain\'t AQL', []);

@@ -14,10 +14,9 @@ trait BuildsSubqueries
     /**
      * Add a subselect expression to the query.
      *
-     * @param Builder $query
+     * @param  Builder  $query
      * @param  string  $as
      * @return $this
-     *
      */
     public function selectSub($query, $as)
     {
@@ -54,6 +53,7 @@ trait BuildsSubqueries
                 /** @phpstan-ignore-next-line */
                 return $query->aqb->first($query->aqb);
             }
+
             return $query->aqb;
         }
 

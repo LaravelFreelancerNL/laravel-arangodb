@@ -10,15 +10,14 @@ trait CompilesJoins
     /**
      * Compile the "join" portions of the query.
      *
-     * @param Builder $builder
-     * @param array   $joins
-     *
+     * @param  Builder  $builder
+     * @param  array  $joins
      * @return string
      */
     protected function compileJoins(Builder $builder, $joins)
     {
         foreach ($joins as $join) {
-            $compileMethod = 'compile' . ucfirst($join->type) . 'Join';
+            $compileMethod = 'compile'.ucfirst($join->type).'Join';
             $builder = $this->$compileMethod($builder, $join);
         }
 

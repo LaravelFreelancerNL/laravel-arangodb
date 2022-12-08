@@ -25,8 +25,8 @@ class MigrateMakeCommand extends IlluminateMigrateMakeCommand
     /**
      * Create a new migration install command instance.
      *
-     * @param MigrationCreator $creator
-     * @param Composer         $composer
+     * @param  MigrationCreator  $creator
+     * @param  Composer  $composer
      */
     public function __construct(MigrationCreator $creator, Composer $composer)
     {
@@ -39,9 +39,9 @@ class MigrateMakeCommand extends IlluminateMigrateMakeCommand
     /**
      * Execute the console command.
      *
-     * @throws \Exception
-     *
      * @return void
+     *
+     * @throws \Exception
      */
     public function handle()
     {
@@ -51,7 +51,7 @@ class MigrateMakeCommand extends IlluminateMigrateMakeCommand
         $name = Str::snake(trim($this->input->getArgument('name')));
 
         $collection = $this->input->getOption('collection');
-        if (!$collection) {
+        if (! $collection) {
             $collection = $this->input->getOption('table');
         }
 
@@ -60,7 +60,7 @@ class MigrateMakeCommand extends IlluminateMigrateMakeCommand
         // If no table was given as an option but a create option is given then we
         // will use the "create" option as the table name. This allows the devs
         // to pass a table name into this option as a short-cut for creating.
-        if (!$collection && is_string($create)) {
+        if (! $collection && is_string($create)) {
             $collection = $create;
 
             $create = true;
@@ -69,7 +69,7 @@ class MigrateMakeCommand extends IlluminateMigrateMakeCommand
         // Next, we will attempt to guess the table name if this the migration has
         // "create" in the name. This will allow us to provide a convenient way
         // of creating migrations that create new tables for the application.
-        if (!$collection) {
+        if (! $collection) {
             [$collection, $create] = TableGuesser::guess($name);
         }
 
@@ -84,13 +84,12 @@ class MigrateMakeCommand extends IlluminateMigrateMakeCommand
     /**
      * Write the migration file to disk.
      *
-     * @param string $name
-     * @param string $collection
-     * @param bool   $create
+     * @param  string  $name
+     * @param  string  $collection
+     * @param  bool  $create
+     * @return void
      *
      * @throws \Exception
-     *
-     * @return void
      */
     protected function writeMigration($name, $collection, $create)
     {

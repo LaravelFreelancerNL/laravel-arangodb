@@ -35,7 +35,6 @@ class Tag extends Model
             ->using(Taggable::class);
     }
 
-
     /**
      * Get all of the locations that are assigned this tag.
      */

@@ -13,12 +13,12 @@ test('create aranguent model', function () {
     $this->artisan(
         'aranguent:model',
         [
-            'name'    => 'AranguentModelTest',
+            'name' => 'AranguentModelTest',
             '--force' => '',
         ]
     )->run();
 
-    $file = __DIR__ . '/../../vendor/orchestra/testbench-core/laravel/app/Models/AranguentModelTest.php';
+    $file = __DIR__.'/../../vendor/orchestra/testbench-core/laravel/app/Models/AranguentModelTest.php';
 
     //assert file exists
     expect($file)->toBeFile();
@@ -57,20 +57,20 @@ test('upsert', function () {
     Character::upsert(
         [
             [
-               "id" => "NedStark",
-               "name" => "Ned",
-               "surname" => "Stark",
-               "alive" => false,
-               "age" => 41,
-               "residence_id" => "winterfell"
+                'id' => 'NedStark',
+                'name' => 'Ned',
+                'surname' => 'Stark',
+                'alive' => false,
+                'age' => 41,
+                'residence_id' => 'winterfell',
             ],
             [
-               "id" => "JaimeLannister",
-               "name" => "Jaime",
-               "surname" => "Lannister",
-               "alive" => false,
-               "age" => 36,
-               "residence_id" => "the-red-keep"
+                'id' => 'JaimeLannister',
+                'name' => 'Jaime',
+                'surname' => 'Lannister',
+                'alive' => false,
+                'age' => 36,
+                'residence_id' => 'the-red-keep',
             ],
         ],
         ['name', 'surname'],

@@ -55,15 +55,15 @@ test('search with options', function () {
             [['userViewDoc.age', '>=', 20], ['userViewDoc.age', '<=', 30]],
             [
                 'conditionOptimization' => 'none',
-                'countApproximate' => 'cost'
+                'countApproximate' => 'cost',
             ]
         );
 
     $this->assertSame(
         'FOR userViewDoc IN user_view'
-        . ' SEARCH userViewDoc.age >= 20 AND userViewDoc.age <= 30'
-        . ' OPTIONS {"conditionOptimization":"none","countApproximate":"cost"}'
-        . ' RETURN userViewDoc',
+        .' SEARCH userViewDoc.age >= 20 AND userViewDoc.age <= 30'
+        .' OPTIONS {"conditionOptimization":"none","countApproximate":"cost"}'
+        .' RETURN userViewDoc',
         $builder->toSql()
     );
 });
@@ -76,9 +76,9 @@ test('search with aqb method', function () {
 
     $this->assertSame(
         'FOR pageViewDoc IN page_view'
-        . ' SEARCH ANALYZER(pageViewDoc.en.body_copy == @' . $builder->aqb->getQueryId() . '_1,'
-        . ' @' . $builder->aqb->getQueryId() . '_2)'
-        . ' RETURN pageViewDoc',
+        .' SEARCH ANALYZER(pageViewDoc.en.body_copy == @'.$builder->aqb->getQueryId().'_1,'
+        .' @'.$builder->aqb->getQueryId().'_2)'
+        .' RETURN pageViewDoc',
         $builder->toSql()
     );
 });
@@ -94,8 +94,8 @@ test('search against db', function () {
     $results = $query->paginate();
 
     expect($results)->toHaveCount(2);
-    expect($results[0]->_id)->toBe("houses/lannister");
-    expect($results[1]->_id)->toBe("houses/stark");
+    expect($results[0]->_id)->toBe('houses/lannister');
+    expect($results[1]->_id)->toBe('houses/stark');
 });
 
 test('search from model', function () {
@@ -107,8 +107,8 @@ test('search from model', function () {
         ->paginate();
 
     expect($results)->toHaveCount(2);
-    expect($results[0]->_id)->toBe("houses/lannister");
+    expect($results[0]->_id)->toBe('houses/lannister');
     expect($results[0])->toBeInstanceOf(House::class);
-    expect($results[1]->_id)->toBe("houses/stark");
+    expect($results[1]->_id)->toBe('houses/stark');
     expect($results[1])->toBeInstanceOf(House::class);
 });

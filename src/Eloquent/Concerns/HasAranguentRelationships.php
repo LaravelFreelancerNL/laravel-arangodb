@@ -177,6 +177,7 @@ trait HasAranguentRelationships
      * Instantiate a new MorphToMany relationship.
      *
      *  Laravel API PHPMD exclusions
+     *
      *  @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      *  @SuppressWarnings(PHPMD.ExcessiveParameterList)
      *
