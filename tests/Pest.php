@@ -23,6 +23,10 @@ use Tests\Setup\Database\Seeds\DatabaseSeeder;
 
 /** @link https://pestphp.com/docs/underlying-test-case */
 
+uses(
+    Tests\TestCase::class,
+);
+
 /*
 |--------------------------------------------------------------------------
 | Expectations

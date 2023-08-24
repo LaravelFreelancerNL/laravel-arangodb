@@ -5,12 +5,14 @@ namespace Tests;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\AranguentServiceProvider;
-use LaravelFreelancerNL\Aranguent\Testing\TestCase as AranguentTestCase;
+use LaravelFreelancerNL\Aranguent\Testing\Concerns\InteractsWithDatabase;
+use LaravelFreelancerNL\Aranguent\Testing\WithArangoDb;
 use Tests\Setup\TestConfig;
 
-abstract class TestCase extends AranguentTestCase implements \Orchestra\Testbench\Contracts\TestCase
+class TestCase extends \Orchestra\Testbench\TestCase
 {
-    use OrchestraTestbenchTesting;
+    use InteractsWithDatabase;
+    use WithArangoDb;
 
     protected ?ConnectionInterface $connection;
 
@@ -23,16 +25,73 @@ abstract class TestCase extends AranguentTestCase implements \Orchestra\Testbenc
      */
     protected $baseUrl = 'http://localhost';
 
-    protected array $transactionCollections = [
-        'write' => [
-            'characters',
-            'children',
-            'houses',
-            'locations',
-            'tags',
-            'taggables',
-        ]
-    ];
+    /**
+     * Get package providers.
+     *
+     * @param  \Illuminate\Foundation\Application  $app
+     *
+     * @return array<int, class-string<\Illuminate\Support\ServiceProvider>>
+     */
+    protected function getPackageProviders($app)
+    {
+        return [
+            AranguentServiceProvider::class,
+        ];
+    }
+
+    /**
+     * Ignore package discovery from.
+     *
+     * @return array<int, string>
+     */
+    public function ignorePackageDiscoveriesFrom()
+    {
+        return [];
+    }
+
+    /**
+     * Override application aliases.
+     *
+     * @param  \Illuminate\Foundation\Application  $app
+     *
+     * @return array<string, class-string<\Illuminate\Support\Facades\Facade>>
+     */
+    protected function getPackageAliases($app)
+    {
+        return [
+            'Aranguent' => 'LaravelFreelancerNL\Aranguent',
+        ];
+    }
+
+
+    /**
+     * Setup the test environment.
+     *
+     * @return void
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->connection = DB::connection();
+
+        //Convert orchestra migrations
+        $this->artisan(
+            'aranguent:convert-migrations',
+            ['--realpath' => true, '--path' => __DIR__ . '/../vendor/orchestra/testbench-core/laravel/migrations/']
+        )->run();
+
+        $this->setTransactionCollections([
+            'write' => [
+                'characters',
+                'children',
+                'houses',
+                'locations',
+                'tags',
+                'taggables',
+            ]
+        ]);
+    }
 
     /**
      * Define environment setup.
@@ -43,70 +102,6 @@ abstract class TestCase extends AranguentTestCase implements \Orchestra\Testbenc
     protected function defineEnvironment($app)
     {
         TestConfig::set($app);
-    }
-
-    protected function getPackageAliases($app)
-    {
-        return [
-            'Aranguent' => 'LaravelFreelancerNL\Aranguent',
-        ];
-    }
-
-    protected function getPackageProviders($app)
-    {
-        return [
-            AranguentServiceProvider::class,
-        ];
-    }
-
-    /**
-     * Refresh the application instance.
-     *
-     * @return void
-     */
-    protected function refreshApplication()
-    {
-        $this->app = $this->createApplication();
-    }
-
-    /**
-     * Setup the test environment.
-     *
-     * @return void
-     */
-    protected function setUp(): void
-    {
-        $this->setUpTheTestEnvironment();
-
-        $this->connection = DB::connection();
-
-        //Convert orchestra migrations
-        $this->artisan(
-            'aranguent:convert-migrations',
-            ['--realpath' => true, '--path' => __DIR__ . '/../vendor/orchestra/testbench-core/laravel/migrations/']
-        )->run();
-    }
-
-    /**
-     * Boot the testing helper traits.
-     *
-     * @return array<string, string>
-     */
-    protected function setUpTraits()
-    {
-        $uses = array_flip(class_uses_recursive(static::class));
-
-        return $this->setUpTheTestEnvironmentTraits($uses);
-    }
-
-    /**
-     * Clean up the testing environment before the next test.
-     *
-     * @return void
-     */
-    protected function tearDown(): void
-    {
-        $this->tearDownTheTestEnvironment();
     }
 
 
