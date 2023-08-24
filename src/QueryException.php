@@ -14,14 +14,14 @@ class QueryException extends IlluminateQueryException
      *
      * @param  string  $sql
      * @param  array  $bindings
-     * @param  \Throwable  $previous
      * @return string
      */
-    protected function formatMessage($sql, $bindings, Throwable $previous)
+    protected function formatMessage($connectionName, $sql, $bindings, Throwable $previous)
     {
         return $previous->getMessage()
-            . ' (AQL: ' . $sql
-            . ' - Bindings: ' . var_export($bindings, true)
-            . ')';
+            .' (Connection: '.$connectionName
+            .',AQL: '.$sql
+            .' - Bindings: '.var_export($bindings, true)
+            .')';
     }
 }

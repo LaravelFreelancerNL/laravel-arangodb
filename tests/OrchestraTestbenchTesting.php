@@ -21,7 +21,6 @@ use Orchestra\Testbench\Concerns\CreatesApplication;
 use Orchestra\Testbench\Concerns\HandlesAnnotations;
 use Orchestra\Testbench\Concerns\HandlesDatabases;
 use Orchestra\Testbench\Concerns\HandlesRoutes;
-use Orchestra\Testbench\Concerns\WithFactories;
 use Orchestra\Testbench\Concerns\WithLaravelMigrations;
 use Orchestra\Testbench\Concerns\WithLoadMigrationsFrom;
 use PHPUnit\Framework\TestCase;

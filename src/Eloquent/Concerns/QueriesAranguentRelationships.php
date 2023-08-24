@@ -21,7 +21,6 @@ trait QueriesAranguentRelationships
      * @param  string  $operator
      * @param  int  $count
      * @param  string  $boolean
-     * @return IlluminateBuilder
      */
     protected function addWhereCountQuery(
         IlluminateQueryBuilder $query,
@@ -39,7 +38,6 @@ trait QueriesAranguentRelationships
             $boolean
         );
     }
-
 
     /**
      * Add subselect queries to include an aggregate value for a relationship.
@@ -59,7 +57,7 @@ trait QueriesAranguentRelationships
         }
 
         if (is_null($this->query->columns)) {
-            $this->query->select([$this->query->from . '.*']);
+            $this->query->select([$this->query->from.'.*']);
         }
 
         $relations = is_array($relations) ? $relations : [$relations];

@@ -20,6 +20,7 @@ class AranguentConvertMigrationsCommand extends BaseCommand
     protected $signature = 'aranguent:convert-migrations
                 {--path= : The path to the migrations files to be converted}
                 {--realpath : Indicate any provided migration file paths are pre-resolved absolute paths}';
+
     /**
      * The console command description.
      *
@@ -37,7 +38,6 @@ class AranguentConvertMigrationsCommand extends BaseCommand
     /**
      * Create a new migration command instance.
      *
-     * @param \Illuminate\Database\Migrations\Migrator $migrator
      *
      * @return void
      */
@@ -55,7 +55,7 @@ class AranguentConvertMigrationsCommand extends BaseCommand
      */
     public function handle()
     {
-        if (!$this->confirmToProceed()) {
+        if (! $this->confirmToProceed()) {
             return;
         }
 
@@ -73,7 +73,7 @@ class AranguentConvertMigrationsCommand extends BaseCommand
         // Check for additional information to make sure we
         // partial matches aren't accidentally replaced.
         $replacements = [
-            'Illuminate\Support\Facades\Schema'    => 'LaravelFreelancerNL\Aranguent\Facades\Schema',
+            'Illuminate\Support\Facades\Schema' => 'LaravelFreelancerNL\Aranguent\Facades\Schema',
             'Illuminate\Database\Schema\Blueprint' => 'LaravelFreelancerNL\Aranguent\Schema\Blueprint',
         ];
 

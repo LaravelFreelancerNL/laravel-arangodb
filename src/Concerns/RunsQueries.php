@@ -7,6 +7,7 @@ namespace LaravelFreelancerNL\Aranguent\Concerns;
 use Closure;
 use Exception;
 use Iterator;
+use LaravelFreelancerNL\Aranguent\Query\Builder as ArangoBuilder;
 use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 use LaravelFreelancerNL\Aranguent\QueryException;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder as ArangoQueryBuilder;
@@ -21,7 +22,6 @@ trait RunsQueries
      * @param  string  $query
      * @param  array  $bindings
      * @param  bool|null  $useReadPdo
-     * @return Iterator|null
      */
     public function cursor($query, $bindings = [], $useReadPdo = null): ?Iterator
     {
@@ -42,10 +42,8 @@ trait RunsQueries
     /**
      * Execute an AQL statement and return the boolean result.
      *
-     * @param string|ArangoQueryBuilder $query
-     * @param array            $bindings
-     *
-     * @return bool
+     * @param  string|ArangoQueryBuilder  $query
+     * @param  array  $bindings
      */
     public function statement($query, $bindings = []): bool
     {
@@ -73,10 +71,8 @@ trait RunsQueries
     /**
      * Run an AQL statement and get the number of rows affected.
      *
-     * @param string|ArangoQueryBuilder $query
-     * @param array            $bindings
-     *
-     * @return int
+     * @param  string|ArangoQueryBuilder  $query
+     * @param  array  $bindings
      */
     public function affectingStatement($query, $bindings = []): int
     {
@@ -109,8 +105,6 @@ trait RunsQueries
      * Run a raw, unprepared query against the connection.
      *
      * @param  string  $query
-     *
-     * @return bool
      */
     public function unprepared($query): bool
     {
@@ -135,8 +129,6 @@ trait RunsQueries
      *
      * @param  string  $query
      * @param  array<mixed>  $bindings
-     *
-     * @return stdClass
      */
     public function explain(string|ArangoQueryBuilder $query, $bindings = []): stdClass
     {
@@ -152,15 +144,21 @@ trait RunsQueries
 
     /**
      * @param  ArangoQueryBuilder|string  $query
-     * @param  array  $bindings
-     * @return array
      */
     protected function handleQueryBuilder($query, array $bindings): array
     {
+
         if ($query instanceof ArangoQueryBuilder) {
             $bindings = $query->binds;
             $query = $query->query;
         }
+
+        if ($query instanceof ArangoBuilder) {
+            $bindings = $query->getBindings();
+            $query = $query->toSql();
+//            dd("handleQueryBuilder query", $query->toSql(), "bindings", $query->getBindings());
+        }
+
         return [$query, $bindings];
     }
 
@@ -169,9 +167,9 @@ trait RunsQueries
      *
      * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      *
-     * @param string|ArangoQueryBuilder $query
-     * @param array            $bindings
-     * @param bool             $useReadPdo
+     * @param  string|ArangoQueryBuilder  $query
+     * @param  array  $bindings
+     * @param  bool  $useReadPdo
      * @return mixed
      */
     public function select($query, $bindings = [], $useReadPdo = true)
@@ -184,10 +182,9 @@ trait RunsQueries
      *
      * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      *
-     * @param string|ArangoQueryBuilder $query
-     * @param array<mixed>|null     $bindings
-     * @param bool             $useReadPdo
-     *
+     * @param  string|ArangoQueryBuilder  $query
+     * @param  array<mixed>|null  $bindings
+     * @param  bool  $useReadPdo
      * @return mixed
      */
     public function execute($query, ?array $bindings = [], $useReadPdo = true)
@@ -206,6 +203,7 @@ trait RunsQueries
             }
 
             $statement = $this->arangoClient->prepare($query, $bindings);
+
             $statement->execute();
 
             return $statement->fetchAll();
@@ -214,8 +212,6 @@ trait RunsQueries
 
     /**
      * Get a new query builder instance.
-     *
-     * @return QueryBuilder
      */
     public function query(): QueryBuilder
     {
@@ -231,7 +227,6 @@ trait RunsQueries
      *
      * @param  string  $query
      * @param  array  $bindings
-     * @param  Closure  $callback
      * @return mixed
      *
      * @throws QueryException
@@ -277,7 +272,6 @@ trait RunsQueries
      *
      * @param  string  $query
      * @param  array  $bindings
-     * @param  Closure  $callback
      * @return mixed
      *
      * @throws QueryException
@@ -295,6 +289,7 @@ trait RunsQueries
             // lot more helpful to the developer instead of just the database's errors.
 
             throw new QueryException(
+                $this->getName(),
                 $query,
                 $this->prepareBindings($bindings),
                 $e

@@ -12,9 +12,7 @@ trait UsesBlueprints
     /**
      * Create a new command set with a Closure.
      *
-     * @param string        $collection
-     * @param Closure|null $callback
-     *
+     * @param  string  $collection
      * @return Blueprint
      */
     protected function createBlueprint($collection, Closure $callback = null)
@@ -32,7 +30,6 @@ trait UsesBlueprints
     /**
      * Set the Schema Blueprint resolver callback.
      *
-     * @param Closure $resolver
      *
      * @return void
      */
@@ -49,7 +46,7 @@ trait UsesBlueprints
     /**
      * Create a new collection on the schema.
      *
-     * @param array<mixed> $config
+     * @param  array<mixed>  $config
      */
     public function create($table, Closure $callback, array $config = []): void
     {
@@ -63,9 +60,7 @@ trait UsesBlueprints
     /**
      * Modify a table's schema.
      *
-     * @param string  $table
-     * @param Closure $callback
-     *
+     * @param  string  $table
      * @return void
      */
     public function table($table, Closure $callback)

@@ -30,8 +30,6 @@ trait HasAranguentRelationships
     /**
      * Instantiate a new BelongsTo relationship.
      *
-     * @param  Builder  $query
-     * @param  Model  $child
      * @param  string  $foreignKey
      * @param  string  $ownerKey
      * @param  string  $relation
@@ -45,8 +43,6 @@ trait HasAranguentRelationships
     /**
      * Instantiate a new BelongsToMany relationship.
      *
-     * @param  Builder  $query
-     * @param  Model  $parent
      * @param  string  $table
      * @param  string  $foreignPivotKey
      * @param  string  $relatedPivotKey
@@ -80,8 +76,6 @@ trait HasAranguentRelationships
     /**
      * Instantiate a new HasMany relationship.
      *
-     * @param  Builder  $query
-     * @param  Model  $parent
      * @param  string  $foreignKey
      * @param  string  $localKey
      * @return IlluminateHasMany
@@ -94,8 +88,6 @@ trait HasAranguentRelationships
     /**
      * Instantiate a new HasOne relationship.
      *
-     * @param  Builder  $query
-     * @param  Model  $parent
      * @param  string  $foreignKey
      * @param  string  $localKey
      * @return IlluminateHasOne
@@ -108,9 +100,6 @@ trait HasAranguentRelationships
     /**
      * Instantiate a new HasOneThrough relationship.
      *
-     * @param  Builder  $query
-     * @param  Model  $farParent
-     * @param  Model  $throughParent
      * @param  string  $firstKey
      * @param  string  $secondKey
      * @param  string  $localKey
@@ -132,8 +121,6 @@ trait HasAranguentRelationships
     /**
      * Instantiate a new MorphMany relationship.
      *
-     * @param  Builder  $query
-     * @param  Model  $parent
      * @param  string  $type
      * @param  string  $id
      * @param  string  $localKey
@@ -147,8 +134,6 @@ trait HasAranguentRelationships
     /**
      * Instantiate a new MorphOne relationship.
      *
-     * @param  Builder  $query
-     * @param  Model  $parent
      * @param  string  $type
      * @param  string  $id
      * @param  string  $localKey
@@ -162,8 +147,6 @@ trait HasAranguentRelationships
     /**
      * Instantiate a new MorphTo relationship.
      *
-     * @param  Builder  $query
-     * @param  Model  $parent
      * @param  string  $foreignKey
      * @param  string  $ownerKey
      * @param  string  $type
@@ -179,11 +162,10 @@ trait HasAranguentRelationships
      * Instantiate a new MorphToMany relationship.
      *
      *  Laravel API PHPMD exclusions
+     *
      *  @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      *  @SuppressWarnings(PHPMD.ExcessiveParameterList)
      *
-     * @param  Builder  $query
-     * @param  Model  $parent
      * @param  string  $name
      * @param  string  $table
      * @param  string  $foreignPivotKey

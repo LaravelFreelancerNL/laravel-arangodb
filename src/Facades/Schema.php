@@ -10,6 +10,7 @@ use LaravelFreelancerNL\Aranguent\Schema\Builder;
 
 /**
  * Table handling:
+ *
  * @method static Builder create($collection, Closure $callback, $options = [])
  * @method static Builder getAllTables()
  * @method static Builder drop(string $collection)

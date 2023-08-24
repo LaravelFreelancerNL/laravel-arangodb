@@ -37,8 +37,6 @@ class Builder extends \Illuminate\Database\Schema\Builder
      * Create a new database Schema manager.
      *
      * Builder constructor.
-     *
-     * @param Connection $connection
      */
     public function __construct(Connection $connection)
     {
@@ -52,7 +50,7 @@ class Builder extends \Illuminate\Database\Schema\Builder
     /**
      * Determine if the given table exists.
      *
-     * @param string $table
+     * @param  string  $table
      * @return bool
      */
     public function hasTable($table)
@@ -61,7 +59,6 @@ class Builder extends \Illuminate\Database\Schema\Builder
             return $this->schemaManager->hasCollection($table);
         });
     }
-
 
     /**
      * @throws ArangoException
@@ -78,6 +75,7 @@ class Builder extends \Illuminate\Database\Schema\Builder
      * Get all the tables for the database; excluding ArangoDB system collections
      *
      * @return array<mixed>
+     *
      * @throws ArangoException
      */
     public function getAllTables(): array
@@ -88,8 +86,9 @@ class Builder extends \Illuminate\Database\Schema\Builder
     /**
      * Rename a table (collection).
      *
-     * @param string $from
-     * @param string $to
+     * @param  string  $from
+     * @param  string  $to
+     *
      * @throws ArangoException
      */
     public function rename($from, $to): bool
@@ -141,7 +140,6 @@ class Builder extends \Illuminate\Database\Schema\Builder
      * Determine if the given table has given columns.
      *
      * @param  string  $table
-     * @param  array  $columns
      * @return bool
      */
     public function hasColumns($table, array $columns)
@@ -158,7 +156,8 @@ class Builder extends \Illuminate\Database\Schema\Builder
     }
 
     /**
-     * @param  array<mixed> $properties
+     * @param  array<mixed>  $properties
+     *
      * @throws ArangoException
      */
     public function createView(string $name, array $properties, string $type = 'arangosearch')
@@ -194,8 +193,6 @@ class Builder extends \Illuminate\Database\Schema\Builder
     }
 
     /**
-     * @param  string  $name
-     * @param  array  $properties
      * @throws ArangoException
      */
     public function editView(string $name, array $properties)
@@ -204,9 +201,6 @@ class Builder extends \Illuminate\Database\Schema\Builder
     }
 
     /**
-     * @param  string  $from
-     * @param  string  $to
-     *
      * @throws ArangoException
      */
     public function renameView(string $from, string $to)
@@ -215,7 +209,6 @@ class Builder extends \Illuminate\Database\Schema\Builder
     }
 
     /**
-     * @param  string  $name
      * @throws ArangoException
      */
     public function dropView(string $name)
@@ -224,8 +217,6 @@ class Builder extends \Illuminate\Database\Schema\Builder
     }
 
     /**
-     * @param string $name
-     * @return bool
      * @throws ArangoException
      */
     public function dropViewIfExists(string $name): bool
@@ -254,7 +245,7 @@ class Builder extends \Illuminate\Database\Schema\Builder
     /**
      * Create a database in the schema.
      *
-     * @param string $name
+     * @param  string  $name
      * @return bool
      *
      * @throws ArangoException
@@ -267,7 +258,7 @@ class Builder extends \Illuminate\Database\Schema\Builder
     /**
      * Drop a database from the schema if the database exists.
      *
-     * @param string $name
+     * @param  string  $name
      * @return bool
      *
      * @throws ArangoException
@@ -280,7 +271,6 @@ class Builder extends \Illuminate\Database\Schema\Builder
 
         return true;
     }
-
 
     /**
      * Get the database connection instance.
@@ -300,7 +290,7 @@ class Builder extends \Illuminate\Database\Schema\Builder
         try {
             return $callback();
         } catch (\Exception $e) {
-            throw new QueryException($e->getMessage(), [], $e);
+            throw new QueryException($this->connection->getName(), $e->getMessage(), [], $e);
         }
     }
 

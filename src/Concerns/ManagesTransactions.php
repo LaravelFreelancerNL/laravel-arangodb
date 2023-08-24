@@ -12,14 +12,14 @@ trait ManagesTransactions
     /**
      * Execute a Closure within a transaction.
      *
-     * @param  Closure  $callback
+     * @param  \Closure  $callback
      * @param  int  $attempts
-     * @param  array  $collections
+     *
      * @return mixed
      *
-     * @throws Throwable
+     * @throws \Throwable
      */
-    public function transaction(Closure $callback, $attempts = 1, $collections = [])
+    public function transaction(Closure $callback, $attempts = 1, array $collections = [])
     {
         for ($currentAttempt = 1; $currentAttempt <= $attempts; $currentAttempt++) {
             $this->beginTransaction($collections);
@@ -68,7 +68,8 @@ trait ManagesTransactions
     /**
      * Start a new database transaction.
      *
-     * @param array<string, array<string>> $collections
+     * @param  array<string, array<string>>  $collections
+     *
      * @throws Throwable
      */
     public function beginTransaction(array $collections = []): void
@@ -83,7 +84,8 @@ trait ManagesTransactions
     /**
      * Create a transaction within the database.
      *
-     * @param array<string, array<string>> $collections
+     * @param  array<string, array<string>>  $collections
+     *
      * @throws Throwable
      */
     protected function createTransaction(array $collections = []): void
