@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 echo "Fix coding style"
-./vendor/bin/phpcbf
-
-echo "Check for remaining coding style errors"
-./vendor/bin/phpcs -p --ignore=tests
+./vendor/bin/pint
 
 echo "Run PHPMD"
 ./vendor/bin/phpmd src/ text phpmd-ruleset.xml
