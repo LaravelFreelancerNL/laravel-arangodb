@@ -2,17 +2,19 @@
 
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
+use LaravelFreelancerNL\Aranguent\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 uses(
     TestCase::class,
-    DatabaseTransactions::class
+//    DatabaseTransactions::class,
+        RefreshDatabase::class
 );
 
 test('basic select', function () {
     $results = DB::table('characters')->select()->get();
 
-    expect($results)->toHaveCount(43);
+    expect($results)->toHaveCount(52);
 
     expect(count((array)$results[0]))->toBe(9);
 });
@@ -49,6 +51,7 @@ test('select nested data without alias', function () {
     expect((array)$house)->toHaveCount(2);
     expect($house)->toHaveProperty('name');
     expect($house)->toHaveProperty('en');
+    expect($house->en)->toHaveProperty('description');
 });
 
 test('select nested data through string-key', function () {
@@ -81,8 +84,8 @@ test('select nested data with multilevel embedded objects though multiple paths'
         'en.summary.long',
         'en.words',
         'name',
-    ])->limit(1)->toSql();
-    ray($house);
+    ])->limit(1)->first();
+
     expect((array)$house)->toHaveCount(2);
     expect($house)->toHaveProperty('name');
     expect($house)->toHaveProperty('en');
@@ -108,7 +111,11 @@ test('select nested data with multilevel embedded objects and aliases', function
 
 
 test('addSelect', function () {
-    $house = DB::table('houses')->select('en')->addSelect('name')->limit(1)->first();
+    $house = DB::table('houses')
+        ->select('en')
+        ->addSelect('name')
+        ->limit(1)
+        ->first();
 
     expect((array)$house)->toHaveCount(2);
     expect($house)->toHaveProperty('name');
@@ -116,7 +123,11 @@ test('addSelect', function () {
 });
 
 test('addSelect multiple', function () {
-    $house = DB::table('houses')->select('en.description')->addSelect(['name', 'en.words'])->limit(1)->first();
+    $house = DB::table('houses')
+        ->select('en.description')
+        ->addSelect(['name', 'en.words'])
+        ->limit(1)
+        ->first();
 
     expect((array)$house)->toHaveCount(2);
     expect($house)->toHaveProperty('name');

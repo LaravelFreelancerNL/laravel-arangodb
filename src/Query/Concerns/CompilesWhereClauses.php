@@ -2,11 +2,24 @@
 
 namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
-use Illuminate\Database\Query\Builder as IlluminateBuilder;
-use Illuminate\Database\Query\JoinClause;
+use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
+use Illuminate\Database\Query\Expression;
+use LaravelFreelancerNL\Aranguent\Query\Builder;
 
 trait CompilesWhereClauses
 {
+    /**
+     * Format the where clause statements into one string.
+     *
+     * @param IlluminateQueryBuilder $query
+     * @param  array  $sql
+     * @return string
+     */
+    protected function concatenateWhereClauses($query, $sql)
+    {
+        return 'FILTER '.$this->removeLeadingBoolean(implode(' ', $sql));
+    }
+
     protected function getOperatorByWhereType($type)
     {
         if (isset($this->whereTypeOperators[$type])) {
@@ -17,15 +30,14 @@ trait CompilesWhereClauses
     }
 
     /**
-     * Format the where clause statements into one string.
+     * Determine if the given value is a raw expression.
      *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     * @param  IlluminateBuilder  $query
-     * @param  array<mixed>  $sql
+     * @param  mixed  $value
+     * @return bool
      */
-    protected function concatenateWhereClauses($query, $sql): string
+    public function isExpression($value)
     {
-        return 'FILTER ' . $this->removeLeadingBoolean(implode(' ', $sql));
+        return $value instanceof Expression;
     }
 
     protected function normalizeOperator($where)
@@ -37,7 +49,7 @@ trait CompilesWhereClauses
             $where['operator'] = $this->getOperatorByWhereType($where['type']);
         }
 
-            return $where;
+        return $where;
     }
 
     /**
@@ -60,27 +72,33 @@ trait CompilesWhereClauses
     /**
      * Compile a basic where clause.
      *
-     * @param array<mixed> $where
-     * @throws \Exception
+     * @param  IlluminateQueryBuilder  $query
+     * @param  array  $where
+     * @return array
      */
-    protected function whereBasic(IlluminateBuilder $query, $where): string
+    protected function whereBasic(IlluminateQueryBuilder $query, $where)
     {
+        $predicate = [];
+
         $where = $this->normalizeOperator($where);
-        $column = $this->normalizeColumn($query, $where['column']);
-        $value = $this->parameter($where['value']);
 
-        $operator = str_replace('?', '??', $where['operator']);
+        $predicate[0] = $this->normalizeColumn($query, $where['column']);
+        $predicate[1] = $where['operator'];
+        $predicate[2] = $this->parameter($where['value']);
+        //        $predicate[3] = $where['boolean'];
 
-        return $column . ' ' . $operator . ' ' . $value;
+        return implode(" ", $predicate);
     }
 
     /**
      * Compile a "between" where clause.
      *
-     * @param array<mixed> $where
+     * @param IlluminateQueryBuilder $query
+     * @param array $where
+     * @return string
      * @throws \Exception
      */
-    protected function whereBetween(IlluminateBuilder $query, $where): string
+    protected function whereBetween(IlluminateQueryBuilder $query, $where)
     {
         $predicate = [];
 
@@ -98,7 +116,7 @@ trait CompilesWhereClauses
         $predicate[1][1] = $maxOperator;
         $predicate[1][2] = $max;
 
-        return implode(' ', $predicate[0]) . ' and ' . implode(' ', $predicate[1]);
+        return implode(" ", $predicate[0]) . " " . $boolean . " " . implode(" ", $predicate[1]);
     }
 
     /**
@@ -124,9 +142,12 @@ trait CompilesWhereClauses
     /**
      * Compile a "between" where clause.
      *
-     * @param  array<mixed>  $where
+     * @param IlluminateQueryBuilder $query
+     * @param array $where
+     * @return string
+     * @throws \Exception
      */
-    protected function whereBetweenColumns(IlluminateBuilder $query, $where): string
+    protected function whereBetweenColumns(IlluminateQueryBuilder $query, $where)
     {
         $predicate = [];
 
@@ -142,53 +163,84 @@ trait CompilesWhereClauses
         $predicate[1][1] = $maxOperator;
         $predicate[1][2] = $this->normalizeColumn($query, end($where['values']));
 
-        return implode(' ', $predicate[0]) . ' and ' . implode(' ', $predicate[1]);
+        return implode(" ", $predicate[0]) . " " . $boolean . " " . implode(" ", $predicate[1]);
+
     }
 
 
     /**
-     * Compile a where clause comparing two columns.
+     * Compile a where clause comparing two columns..
      *
-     * @param  array<mixed>  $where
+     * @param  IlluminateQueryBuilder  $query
+     * @param  array  $where
+     * @return string
      */
-    protected function whereColumn(IlluminateBuilder $query, $where): string
+    protected function whereColumn(IlluminateQueryBuilder $query, $where)
     {
+        $predicate = [];
+
         $where = $this->normalizeOperator($where);
 
-        return $this->normalizeColumn($query, $where['first'])
-            . ' ' . $where['operator']
-            . ' ' . $this->normalizeColumn($query, $where['second']);
+        $predicate[0] = $this->normalizeColumn($query, $where['first']);
+        $predicate[1] = $where['operator'];
+        $predicate[2] = $this->normalizeColumn($query, $where['second']);
+        ray("whereColumn", $predicate);
+
+        return implode(" ", $predicate);
     }
 
     /**
      * Compile a "where null" clause.
      *
-     * @param  array<mixed>  $where
+     * @param  IlluminateQueryBuilder  $query
+     * @param  array  $where
+     * @return string
      */
-    protected function whereNull(IlluminateBuilder $query, $where): string
+    protected function whereNull(IlluminateQueryBuilder $query, $where)
     {
-        return $this->normalizeColumn($query, $where['column']) . ' == null';
+        $predicate = [];
+
+        $predicate[0] = $this->normalizeColumn($query, $where['column']);
+        $predicate[1] = '==';
+        $predicate[2] = "null";
+
+        return implode(" ", $predicate);
     }
 
     /**
      * Compile a "where not null" clause.
      *
-     * @param  array<mixed>  $where
+     * @param  IlluminateQueryBuilder  $query
+     * @param  array  $where
+     * @return string
      */
-    protected function whereNotNull(IlluminateBuilder $query, $where): string
+    protected function whereNotNull(IlluminateQueryBuilder $query, $where)
     {
-        return $this->normalizeColumn($query, $where['column']) . ' != null';
+        $predicate = [];
+
+        $predicate[0] = $this->normalizeColumn($query, $where['column']);
+        $predicate[1] = '!=';
+        $predicate[2] = 'null';
+
+        return implode(" ", $predicate);
     }
 
     /**
      * Compile a "where in" clause.
      *
-     * @param array<mixed> $where
-     * @throws \Exception
+     * @param  IlluminateQueryBuilder  $query
+     * @param  array  $where
+     * @return string
      */
-    protected function whereIn(IlluminateBuilder $query, $where): string
+    protected function whereIn(IlluminateQueryBuilder $query, $where)
     {
-        return $this->normalizeColumn($query, $where['column']) . ' IN ' . $this->parameter($where['values']);
+        $predicate = [];
+
+        $predicate[0] = $this->normalizeColumn($query, $where['column']);
+        $predicate[1] = 'IN';
+        $predicate[2] = $this->parameter($where['values']);
+
+        return implode(" ", $predicate);
     }
 
     /**
@@ -196,23 +248,37 @@ trait CompilesWhereClauses
      *
      * For safety, whereIntegerInRaw ensures this method is only used with integer values.
      *
-     * @param  array<mixed>  $where
+     * @param  IlluminateQueryBuilder  $query
+     * @param  array  $where
+     * @return string
      */
-    protected function whereInRaw(IlluminateBuilder $query, $where): string
+    protected function whereInRaw(IlluminateQueryBuilder $query, $where)
     {
-        return $this->normalizeColumn($query, $where['column']) . ' IN '
-            . '[' . implode(', ', $where['values']) . ']';
+        $predicate = [];
+
+        $predicate[0] = $this->normalizeColumn($query, $where['column']);
+        $predicate[1] = 'IN';
+        $predicate[2] = '[' . implode(', ', $where['values']) . ']';
+
+        return implode(" ", $predicate);
     }
 
     /**
      * Compile a "where not in" clause.
      *
-     * @param  array<mixed>  $where
+     * @param  IlluminateQueryBuilder  $query
+     * @param  array  $where
+     * @return string
      */
-    protected function whereNotIn(IlluminateBuilder $query, $where): string
+    protected function whereNotIn(IlluminateQueryBuilder $query, $where)
     {
-        return $this->normalizeColumn($query, $where['column'])
-            . ' NOT IN ' . $this->parameter($where['values']);
+        $predicate = [];
+
+        $predicate[0] = $this->normalizeColumn($query, $where['column']);
+        $predicate[1] = 'NOT IN';
+        $predicate[2] = $this->parameter($where['values']);
+
+        return implode(" ", $predicate);
     }
 
     /**
@@ -220,193 +286,243 @@ trait CompilesWhereClauses
      *
      * For safety, whereIntegerInRaw ensures this method is only used with integer values.
      *
-     * @param  array<mixed>  $where
+     * @param  IlluminateQueryBuilder  $query
+     * @param  array  $where
+     * @return string
      */
-    protected function whereNotInRaw(IlluminateBuilder $query, $where): string
+    protected function whereNotInRaw(IlluminateQueryBuilder $query, $where)
     {
-        return $this->normalizeColumn($query, $where['column'])
-            . ' NOT IN ' . '[' . implode(', ', $where['values']) . ']';
+        $predicate = [];
+
+        $predicate[0] = $this->normalizeColumn($query, $where['column']);
+        $predicate[1] = 'NOT IN';
+        $predicate[2] = '[' . implode(', ', $where['values']) . ']';
+
+        return implode(" ", $predicate);
     }
 
     /**
      * Compile a "where JSON contains" clause.
      *
-     * @param array<mixed> $where
-     * @throws \Exception
+     * @param IlluminateQueryBuilder $query
+     * @param  array  $where
+     * @return string
      */
-    protected function whereJsonContains(IlluminateBuilder $query, $where): string
+    protected function whereJsonContains(IlluminateQueryBuilder $query, $where)
     {
         $predicate = [];
 
         $operator = $where['not'] ? 'NOT IN' : 'IN';
 
+        //FIXME: bind value earlier
         $predicate[0] = $this->parameter($where['value']);
         $predicate[1] = $operator;
         $predicate[2] = $this->normalizeColumn($query, $where['column']);
+        //        $predicate[3] = $where['boolean'];
 
-        return  implode(' ', $predicate);
+        return implode(" ", $predicate);
     }
 
     /**
-     * Compile a "where JSON length" clause.
+     * Compile a "whereJsonContains" clause.
      *
-     * @param array<mixed> $where
-     * @throws \Exception
+     * @param  IlluminateQueryBuilder  $query
+     * @param  array  $where
+     * @return string
      */
-    protected function whereJsonLength(IlluminateBuilder $query, $where): string
+    protected function whereJsonLength(IlluminateQueryBuilder $query, $where)
     {
         $predicate = [];
 
         $where = $this->normalizeOperator($where);
+
         $column = $this->normalizeColumn($query, $where['column']);
 
-        $predicate[0] = 'LENGTH(' . $column . ')';
+        $predicate[0] = "LENGTH($column)";
         $predicate[1] = $where['operator'];
         $predicate[2] = $this->parameter($where['value']);
 
-        return implode(' ', $predicate);
+        return implode(" ", $predicate);
     }
 
+    /**
+     * Compile a where date clause.
+     *
+     * @param  IlluminateQueryBuilder  $query
+     * @param  array  $where
+     * @return array
+     */
+    protected function whereDate(IlluminateQueryBuilder $query, $where)
+    {
+        $predicate = [];
+
+        $where = $this->normalizeOperator($where);
+        $predicate[0] = "DATE_FORMAT(" . $this->normalizeColumn($query, $where['column']) . ', "%yyyy-%mm-%dd")';
+        $predicate[1] = $where['operator'];
+        $predicate[2] = $this->parameter($where['value']);
+
+        return implode(" ", $predicate);
+    }
 
     /**
-     * Compile a "where date" clause.
+     * Compile a where year clause.
      *
-     * @param  array<mixed>  $where
+     * @param  IlluminateQueryBuilder $query
+     * @param  array  $where
+     * @return array
      */
-    protected function whereDate(IlluminateBuilder $query, $where): string
+    protected function whereYear(IlluminateQueryBuilder $query, $where)
     {
+        $predicate = [];
+
         $where = $this->normalizeOperator($where);
 
-        return 'DATE_FORMAT(' . $this->normalizeColumn($query, $where['column']) . ', "%yyyy-%mm-%dd")'
-            . ' ' . $where['operator']
-            . ' ' . $this->parameter($where['value']);
+        $predicate[0] = "DATE_YEAR(". $this->normalizeColumn($query, $where['column']) . ")";
+        $predicate[1] = $where['operator'];
+        $predicate[2] = $this->parameter($where['value']);
+
+        return implode(" ", $predicate);
     }
 
     /**
-     * Compile a "where year" clause.
+     * Compile a where month clause.
      *
-     * @param  array<mixed>  $where
+     * @param  IlluminateQueryBuilder  $query
+     * @param  array  $where
+     * @return array
      */
-    protected function whereYear(IlluminateBuilder $query, $where): string
+    protected function whereMonth(IlluminateQueryBuilder $query, $where)
     {
+        $predicate = [];
+
         $where = $this->normalizeOperator($where);
 
-        return 'DATE_YEAR(' . $this->normalizeColumn($query, $where['column']) . ')'
-            . ' ' . $where['operator']
-            . ' ' . $this->parameter($where['value']);
-    }
+        $predicate[0] =  "DATE_MONTH(" . $this->normalizeColumn($query, $where['column']) . ")";
+        $predicate[1] = $where['operator'];
+        $predicate[2] = $this->parameter($where['value']);
 
-    /**
-     * Compile a "where month" clause.
-     *
-     * @param  array<mixed>  $where
-     */
-    protected function whereMonth(IlluminateBuilder $query, $where): string
-    {
-        $where = $this->normalizeOperator($where);
-
-        return 'DATE_MONTH(' . $this->normalizeColumn($query, $where['column']) . ')'
-            . ' ' . $where['operator']
-            . ' ' . $this->parameter($where['value']);
+        return implode(" ", $predicate);
     }
 
 
     /**
-     * Compile a "where day" clause.
+     * Compile a where day clause.
      *
-     * @param  array<mixed>  $where
-     */
-    protected function whereDay(IlluminateBuilder $query, $where): string
-    {
-        $where = $this->normalizeOperator($where);
-
-        return 'DATE_DAY(' . $this->normalizeColumn($query, $where['column']) . ')'
-            . ' ' . $where['operator']
-            . ' ' . $this->parameter($where['value']);
-    }
-
-    /**
-     * Compile a "where time" clause.
-     *
-     * @param  array<mixed>  $where
-     */
-    protected function whereTime(IlluminateBuilder $query, $where): string
-    {
-        $where = $this->normalizeOperator($where);
-
-        return 'DATE_FORMAT(' . $this->normalizeColumn($query, $where['column']) . ', "%hh:%ii:%ss")'
-            . ' ' . $where['operator']
-            . ' ' . $this->parameter($where['value']);
-    }
-    /**
-     * Compile a nested where clause.
-     *
-     * @param  IlluminateBuilder  $query
+     * @param  IlluminateQueryBuilder  $query
      * @param  array  $where
      * @return string
      */
-    protected function whereNested(IlluminateBuilder $query, $where)
+    protected function whereDay(IlluminateQueryBuilder $query, $where)
     {
-        // Here we will calculate what portion of the string we need to remove. If this
-        // is a join clause query, we need to remove the "on" portion of the SQL and
-        // if it is a normal query we need to take the leading "where" of queries.
-        $offset = $query instanceof JoinClause ? 3 : 6;
+        $predicate = [];
 
-        return '(' . substr($this->compileWheres($where['query']), $offset) . ')';
+        $where = $this->normalizeOperator($where);
+
+        $predicate[0] = "DATE_DAY(". $this->normalizeColumn($query, $where['column']) . ")";
+        $predicate[1] = $where['operator'];
+        $predicate[2] = $this->parameter($where['value']);
+
+        return implode(" ", $predicate);
     }
 
+    /**
+     * Compile a where time clause.
+     *
+     * @param  IlluminateQueryBuilder  $query
+     * @param  array  $where
+     * @return string
+     */
+    protected function whereTime(IlluminateQueryBuilder $query, $where)
+    {
+        $predicate = [];
+
+        $where = $this->normalizeOperator($where);
+
+        $predicate[0] = "DATE_FORMAT(" . $this->normalizeColumn($query, $where['column']) . ", '%hh:%ii:%ss')";
+        $predicate[1] = $where['operator'];
+        $predicate[2] = $this->parameter($where['value']);
+
+        return implode(" ", $predicate);
+    }
+
+    /**
+     * Compile a nested where clause.
+     *
+     * @param  Builder  $query
+     * @param  array  $where
+     * @return string
+     */
+    //    protected function whereNested(Builder $query, $where)
+    //    {
+    //        $predicates = [];
+    //        $predicates = $this->compileWheresToArray($where['query']);
+    //
+    //        $query->aqb->binds = array_merge($query->aqb->binds, $where['query']->aqb->binds);
+    //        $query->aqb->collections = array_merge_recursive($query->aqb->collections, $where['query']->aqb->collections);
+    //
+    //        return $predicates;
+    //    }
 
     /**
      * Compile a where condition with a sub-select.
      *
-     * @param  array<mixed>  $where
+     * @param  Builder  $query
+     * @param  array  $where
+     * @return string
      */
-    protected function whereSub(IlluminateBuilder $query, $where): string
-    {
-        $predicate = [];
-
-        $where = $this->normalizeOperator($where);
-
-        $predicate[0] = $this->normalizeColumn($query, $where['column']);
-        $predicate[1] = $where['operator'];
-        $predicate[2] = $where['query']->aqb;
-        $predicate[3] = $where['boolean'];
-
-        return $predicate;
-    }
-
+    //    protected function whereSub(Builder $query, $where)
+    //    {
+    //        $predicate = [];
+    //
+    //        $where = $this->normalizeOperator($where);
+    //
+    //        $predicate[0] = $this->normalizeColumn($query, $where['column']);
+    //        $predicate[1] = $where['operator'];
+    //        $predicate[2] = $where['query']->aqb;
+    //        $predicate[3] = $where['boolean'];
+    //
+    //        return $predicate;
+    //    }
 
     /**
      * Compile a where exists clause.
      *
-     * @param  array<mixed>  $where
+     *  @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     *
+     * @param  Builder  $query
+     * @param  array  $where
+     * @return string
      */
-    protected function whereExists(IlluminateBuilder $query, $where): string
-    {
-        $predicate = [];
-
-        $predicate[0] = $where['query']->aqb;
-        $predicate[1] = $where['operator'];
-        $predicate[2] = $where['value'];
-        $predicate[3] = $where['boolean'];
-
-        return $predicate;
-    }
+    //    protected function whereExists(Builder $query, $where)
+    //    {
+    //        $predicate = [];
+    //
+    //        $predicate[0] = $where['query']->aqb;
+    //        $predicate[1] = $where['operator'];
+    //        $predicate[2] = $where['value'];
+    //        $predicate[3] = $where['boolean'];
+    //
+    //        return $predicate;
+    //    }
 
     /**
      * Compile a where exists clause.
      *
-     * @param  array<mixed>  $where
+     *  @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     *
+     * @param  Builder  $query
+     * @param  array  $where
+     * @return string
      */
-    protected function whereNotExists(IlluminateBuilder $query, $where): string
-    {
-        $predicate = [];
-
-        $predicate[0] = $where['query']->aqb;
-        $predicate[1] = $where['operator'];
-        $predicate[2] = $where['value'];
-        $predicate[3] = $where['boolean'];
-
-        return $predicate;
-    }
+    //    protected function whereNotExists(Builder $query, $where)
+    //    {
+    //        $predicate = [];
+    //
+    //        $predicate[0] = $where['query']->aqb;
+    //        $predicate[1] = $where['operator'];
+    //        $predicate[2] = $where['value'];
+    //        $predicate[3] = $where['boolean'];
+    //
+    //        return $predicate;
+    //    }
 }

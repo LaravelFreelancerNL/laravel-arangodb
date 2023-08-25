@@ -15,7 +15,6 @@ use LaravelFreelancerNL\Aranguent\Concerns\RunsQueries;
 use LaravelFreelancerNL\Aranguent\Query\Grammar as QueryGrammar;
 use LaravelFreelancerNL\Aranguent\Query\Processor;
 use LaravelFreelancerNL\Aranguent\Schema\Builder as SchemaBuilder;
-use LaravelFreelancerNL\Aranguent\Schema\Grammar;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder as ArangoQueryBuilder;
 use LogicException;
 use Spatie\DataTransferObject\Exceptions\UnknownProperties;
@@ -34,15 +33,14 @@ class Connection extends IlluminateConnection
 
     /**
      * The ArangoDB driver name.
-     *
-     * @var string
      */
     protected string $driverName = 'arangodb';
 
     /**
      * Connection constructor.
      *
-     * @param array $config
+     * @param  array  $config
+     *
      * @throws UnknownProperties
      */
     public function __construct($config = [])
@@ -65,8 +63,6 @@ class Connection extends IlluminateConnection
 
     /**
      * Get a schema builder instance for the connection.
-     *
-     * @return SchemaBuilder
      */
     public function getSchemaBuilder(): SchemaBuilder
     {
@@ -79,8 +75,6 @@ class Connection extends IlluminateConnection
 
     /**
      * Get the default query grammar instance.
-     *
-     * @return QueryGrammar
      */
     protected function getDefaultQueryGrammar(): QueryGrammar
     {
@@ -89,8 +83,6 @@ class Connection extends IlluminateConnection
 
     /**
      * Get the default post processor instance.
-     *
-     * @return Processor
      */
     protected function getDefaultPostProcessor(): Processor
     {
@@ -109,8 +101,6 @@ class Connection extends IlluminateConnection
 
     /**
      * Get the collection prefix for the connection.
-     *
-     * @return string
      */
     public function getTablePrefix(): string
     {
@@ -135,7 +125,7 @@ class Connection extends IlluminateConnection
     public function reconnect()
     {
         if (is_callable($this->reconnector)) {
-//            $this->arangoClient = null;
+            //            $this->arangoClient = null;
 
             $result = call_user_func($this->reconnector, $this);
 
@@ -150,7 +140,7 @@ class Connection extends IlluminateConnection
      *
      * @return void
      */
-    protected function reconnectIfMissingConnection()
+    public function reconnectIfMissingConnection()
     {
         if (is_null($this->arangoClient)) {
             $this->reconnect();

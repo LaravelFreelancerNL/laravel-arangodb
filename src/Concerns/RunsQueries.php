@@ -156,7 +156,7 @@ trait RunsQueries
         if ($query instanceof ArangoBuilder) {
             $bindings = $query->getBindings();
             $query = $query->toSql();
-//            dd("handleQueryBuilder query", $query->toSql(), "bindings", $query->getBindings());
+            //            dd("handleQueryBuilder query", $query->toSql(), "bindings", $query->getBindings());
         }
 
         return [$query, $bindings];

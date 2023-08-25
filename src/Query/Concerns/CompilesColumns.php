@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
 use Exception;
-use Illuminate\Database\Query\Builder as IlluminateBuilder;
+use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Support\Arr;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 use LaravelFreelancerNL\FluentAQL\Expressions\FunctionExpression;
@@ -16,14 +16,11 @@ trait CompilesColumns
     /**
      * Compile the "select *" portion of the query.
      *
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     *
-     * @param IlluminateBuilder $query
-     * @param array<mixed> $columns
+     * @param IlluminateQueryBuilder $query
+     * @param  array  $columns
      * @return string|null
-     * @throws Exception
      */
-    protected function compileColumns(IlluminateBuilder $query, $columns)
+    protected function compileColumns(IlluminateQueryBuilder $query, $columns)
     {
         $returnDocs = [];
         $returnAttributes = [];
@@ -49,53 +46,31 @@ trait CompilesColumns
                 [$column, $alias] = $this->normalizeStringColumn($query, $key, $column);
 
                 if (isset($returnAttributes[$alias]) && is_array($column)) {
-                    $normalizedColumn = $this->normalizeColumn($query, $column);
-
-                    if (is_array($normalizedColumn)) {
-                        foreach ($normalizedColumn as $key => $value) {
-                            $returnAttributes[$alias][$key] = $value;
-                        }
-                    }
+                    $returnAttributes[$alias] = array_merge_recursive(
+                        $returnAttributes[$alias],
+                        $this->normalizeColumn($query, $column)
+                    );
+                    continue;
                 }
-                $returnAttributes[$alias] = $column;
+
+                $returnAttributes[$alias] = $this->normalizeColumn($query, $column);
             }
         }
 
         $values = $this->determineReturnValues($query, $returnAttributes, $returnDocs);
 
-        $aql = 'RETURN';
-        if ((bool) $query->distinct) {
-            $aql .= ' DISTINCT';
+        $return = 'RETURN ';
+        if ($query->distinct) {
+            $return .= 'DISTINCT ';
         }
-        $aql .= ' ' . $this->compileValuesToAql($values);
 
-        return $aql;
+        return $return . $values;
     }
-
-    protected function compileValuesToAql(mixed $values): string
-    {
-        if (is_string($values)) {
-            return $values;
-        }
-
-        $compiledValues = '{';
-        foreach ($values as $key => $value) {
-            if (is_array($value) && Arr::isAssoc($value)) {
-                $value = $this->compileValuesToAql($value);
-            }
-            $compiledValues .= "{$key}: {$value}, ";
-        }
-        $compiledValues = substr($compiledValues, 0, strlen($compiledValues) - 2);
-        $compiledValues .= '}';
-
-        return $compiledValues;
-    }
-
 
     /**
      * @throws Exception
      */
-    protected function normalizeColumn(IlluminateBuilder $query, mixed $column, string $table = null): mixed
+    protected function normalizeColumn(IlluminateQueryBuilder $query, mixed $column, string $table = null): mixed
     {
         if ($column instanceof QueryBuilder || $column instanceof FunctionExpression) {
             return $column;
@@ -108,26 +83,19 @@ trait CompilesColumns
             && in_array($column, $query->groups)
             && debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT)[1]['function'] !== "compileGroups"
         ) {
-            return $column;
+            return $this->wrap($column);
         }
 
         if (is_array($column)) {
             foreach ($column as $key => $value) {
-                if (! is_string($value)) {
-                    $column[$key] = $this->normalizeColumn($query, $value, $table);
-                }
-
-                if (is_string($value)) {
-                    [$subColumn, $alias] = $this->normalizeStringColumn($query, $key, $value);
-                    $column[$alias] = $subColumn;
-                }
+                $column[$key] = $this->normalizeColumn($query, $value, $table);
             }
-
             return $column;
         }
 
+
         if (key_exists($column, $query->variables)) {
-            return $column;
+            return $this->wrap($column);
         }
 
         //We check for an existing alias to determine of the first reference is a table.
@@ -136,10 +104,11 @@ trait CompilesColumns
     }
 
     /**
+     * @param array<mixed> $column
      * @return array<mixed>
      * @throws Exception
      */
-    protected function normalizeStringColumn(IlluminateBuilder $query, int|string $key, string $column): array
+    protected function normalizeStringColumn(Builder $query, int|string $key, mixed $column): array
     {
         [$column, $alias] = $this->extractAlias($column, $key);
 
@@ -152,13 +121,12 @@ trait CompilesColumns
         $column = Arr::undot([$column => $column]);
         $alias = array_key_first($column);
         $column = $column[$alias];
-
         return [$column, $alias];
     }
 
 
     /**
-     * @param Builder $query
+     * @param Builder $builder
      * @param string $column
      * @param string|null $table
      * @return string
@@ -169,11 +137,11 @@ trait CompilesColumns
             $table = $query->from;
         }
 
-        // Replace SQL JSON arrow for AQL dot
-        $column = str_replace('->', '.', $column);
-
-        $references = explode('.', $column);
-
+        $seperator = '.';
+        if ($this->isJsonSelector($column)) {
+            $seperator = '->';
+        }
+        $references = explode($seperator, $column);
 
         $tableAlias = $this->getTableAlias($references[0]);
         if (isset($tableAlias)) {
@@ -184,16 +152,16 @@ trait CompilesColumns
             $tableAlias = $this->generateTableAlias($table);
             array_unshift($references, $tableAlias);
         }
-
         return $this->wrap(implode('.', $references));
     }
 
 
-    protected function determineReturnValues($query, $returnAttributes = [], $returnDocs = [])
+    protected function determineReturnValues($query, $returnAttributes = [], $returnDocs = []): string
     {
         $values = $this->mergeReturnAttributes($returnAttributes, $returnDocs);
 
-        $values = $this->mergeReturnDocs($values, $query, $returnAttributes, $returnDocs);
+
+        $values = $this->mergeReturnDocs($values, $returnAttributes, $returnDocs);
 
         if ($query->aggregate !== null) {
             $values = ['aggregate' => 'aggregateResult'];
@@ -206,7 +174,28 @@ trait CompilesColumns
             }
         }
 
+        if (is_array($values)) {
+            $values = $this->formatReturnData($values);
+        }
+
         return $values;
+    }
+
+    protected function formatReturnData($values)
+    {
+        $object = "";
+        foreach ($values as $key => $value) {
+            if ($object !== "") {
+                $object .= ", ";
+            }
+            if (is_array($value)) {
+                $value = $this->formatReturnData($value);
+            }
+
+            $object .= $key . ': ' . $value;
+        }
+
+        return '{' . $object . '}';
     }
 
     protected function mergeReturnAttributes($returnAttributes, $returnDocs)
@@ -225,34 +214,34 @@ trait CompilesColumns
         return $values;
     }
 
-    protected function mergeReturnDocs($values, $query, $returnAttributes, $returnDocs)
+    protected function mergeReturnDocs($values, $returnAttributes, $returnDocs)
     {
         if (! empty($returnAttributes) && ! empty($returnDocs)) {
             $returnDocs[] = $returnAttributes;
         }
 
         if (! empty($returnDocs)) {
-            $values = $query->aqb->merge(...$returnDocs);
+            $returnDocString = implode(', ', $returnDocs);
+            $values = `MERGE($returnDocString)`;
         }
         return $values;
     }
 
-
-    protected function mergeJoinResults($query, $baseTable)
-    {
-        $tablesToJoin = [];
-        foreach ($query->joins as $key => $join) {
-            $tableAlias = $this->getTableAlias($join->table);
-
-            if (! isset($tableAlias)) {
-                $tableAlias = $this->generateTableAlias($join->table);
-            }
-            $tablesToJoin[$key] = $tableAlias;
-        }
-
-        $tablesToJoin = array_reverse($tablesToJoin);
-        $tablesToJoin[] = $baseTable;
-
-        return $query->aqb->merge(...$tablesToJoin);
-    }
+    //    protected function mergeJoinResults($builder, $baseTable)
+    //    {
+    //        $tablesToJoin = [];
+    //        foreach ($builder->joins as $key => $join) {
+    //            $tableAlias = $this->getTableAlias($join->table);
+    //
+    //            if (! isset($tableAlias)) {
+    //                $tableAlias = $this->generateTableAlias($join->table);
+    //            }
+    //            $tablesToJoin[$key] = $tableAlias;
+    //        }
+    //
+    //        $tablesToJoin = array_reverse($tablesToJoin);
+    //        $tablesToJoin[] = $baseTable;
+    //
+    //        return $builder->aqb->merge(...$tablesToJoin);
+    //    }
 }

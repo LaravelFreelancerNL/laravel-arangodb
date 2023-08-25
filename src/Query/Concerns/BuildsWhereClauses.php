@@ -6,7 +6,6 @@ namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
 use Carbon\CarbonPeriod;
 use Closure;
-use DateTimeInterface;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Database\Query\Expression;
@@ -44,32 +43,32 @@ trait BuildsWhereClauses
      * @param  bool  $not
      * @return Builder
      */
-    public function addWhereExistsQuery(IlluminateQueryBuilder $query, $boolean = 'and', $not = false)
-    {
-        if ($not) {
-            return $this->addWhereNotExistsQuery($query, $boolean = 'and');
-        }
-
-        $type = 'Exists';
-        $operator = '>';
-        $value = 0;
-
-        $query->grammar->compileSelect($query);
-
-        if ($query->limit != 1) {
-            $query->aqb = $query->aqb->length($query->aqb);
-        }
-
-        if (isset($query->limit) && $query->limit == 1) {
-            $query->aqb = $query->aqb->first($query->aqb);
-            $operator = '!=';
-            $value = null;
-        }
-
-        $this->wheres[] = compact('type', 'query', 'operator', 'value', 'boolean');
-
-        return $this;
-    }
+    //    public function addWhereExistsQuery(IlluminateQueryBuilder $query, $boolean = 'and', $not = false)
+    //    {
+    //        if ($not) {
+    //            return $this->addWhereNotExistsQuery($query, $boolean = 'and');
+    //        }
+    //
+    //        $type = 'Exists';
+    //        $operator = '>';
+    //        $value = 0;
+    //
+    //        $query->grammar->compileSelect($query);
+    //
+    //        if ($query->limit != 1) {
+    //            $query->aqb = $query->aqb->length($query->aqb);
+    //        }
+    //
+    //        if (isset($query->limit) && $query->limit == 1) {
+    //            $query->aqb = $query->aqb->first($query->aqb);
+    //            $operator = '!=';
+    //            $value = null;
+    //        }
+    //
+    //        $this->wheres[] = compact('type', 'query', 'operator', 'value', 'boolean');
+    //
+    //        return $this;
+    //    }
 
     /**
      * Add an not exists clause to the query.
@@ -78,28 +77,27 @@ trait BuildsWhereClauses
      * @param  string  $boolean
      * @return Builder
      */
-    public function addWhereNotExistsQuery(IlluminateQueryBuilder $query, $boolean = 'and')
-    {
-        $type = 'Exists';
-        $operator = '==';
-        $value = 0;
-
-        $query->grammar->compileSelect($query);
-
-        if ($query->limit != 1) {
-            $query->aqb = $query->aqb->length($query->aqb);
-        }
-
-        if (isset($query->limit) && $query->limit == 1) {
-            $query->aqb = $query->aqb->first($query->aqb);
-            $value = null;
-        }
-
-        $this->wheres[] = compact('type', 'query', 'operator', 'value', 'boolean');
-
-        return $this;
-    }
-
+    //    public function addWhereNotExistsQuery(IlluminateQueryBuilder $query, $boolean = 'and')
+    //    {
+    //        $type = 'Exists';
+    //        $operator = '==';
+    //        $value = 0;
+    //
+    //        $query->grammar->compileSelect($query);
+    //
+    //        if ($query->limit != 1) {
+    //            $query->aqb = $query->aqb->length($query->aqb);
+    //        }
+    //
+    //        if (isset($query->limit) && $query->limit == 1) {
+    //            $query->aqb = $query->aqb->first($query->aqb);
+    //            $value = null;
+    //        }
+    //
+    //        $this->wheres[] = compact('type', 'query', 'operator', 'value', 'boolean');
+    //
+    //        return $this;
+    //    }
 
     /**
      * Add a basic where clause to the query.
@@ -202,8 +200,7 @@ trait BuildsWhereClauses
     /**
      * Add a where between statement to the query.
      *
-     * @param  string|Expression $column
-     * @param  iterable  $values
+     * @param  string|Expression  $column
      * @param  string  $boolean
      * @param  bool  $not
      * @return IlluminateQueryBuilder
@@ -263,7 +260,6 @@ trait BuildsWhereClauses
         return $this;
     }
 
-
     /**
      * Add a "where JSON contains" clause to the query.
      *
@@ -312,40 +308,38 @@ trait BuildsWhereClauses
         return $this;
     }
 
-
     /**
      * Add a full sub-select to the query.
      *
      * @param  string  $column
      * @param  string  $operator
-     * @param  \Closure  $callback
      * @param  string  $boolean
      * @return Builder
      */
-    protected function whereSub($column, $operator, Closure $callback, $boolean)
-    {
-        $type = 'Sub';
-
-        // Once we have the query instance we can simply execute it so it can add all
-        // of the sub-select's conditions to itself, and then we can cache it off
-        // in the array of where clauses for the "main" parent query instance.
-        call_user_func($callback, $query = $this->forSubQuery());
-
-        $query->grammar->compileSelect($query);
-
-        if (isset($query->limit) && $query->limit == 1) {
-            //Return the value, not an array of values
-            $query->aqb = $query->aqb->first($query->aqb);
-        }
-
-        $this->wheres[] = compact(
-            'type',
-            'column',
-            'operator',
-            'query',
-            'boolean'
-        );
-
-        return $this;
-    }
+    //    protected function whereSub($column, $operator, Closure $callback, $boolean)
+    //    {
+    //        $type = 'Sub';
+    //
+    //        // Once we have the query instance we can simply execute it so it can add all
+    //        // of the sub-select's conditions to itself, and then we can cache it off
+    //        // in the array of where clauses for the "main" parent query instance.
+    //        call_user_func($callback, $query = $this->forSubQuery());
+    //
+    //        $query->grammar->compileSelect($query);
+    //
+    //        if (isset($query->limit) && $query->limit == 1) {
+    //            //Return the value, not an array of values
+    //            $query->aqb = $query->aqb->first($query->aqb);
+    //        }
+    //
+    //        $this->wheres[] = compact(
+    //            'type',
+    //            'column',
+    //            'operator',
+    //            'query',
+    //            'boolean'
+    //        );
+    //
+    //        return $this;
+    //    }
 }

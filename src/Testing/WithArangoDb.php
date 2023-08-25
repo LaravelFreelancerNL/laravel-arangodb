@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace LaravelFreelancerNL\Aranguent\Testing;
 
-use Illuminate\Foundation\Testing\DatabaseTransactions as IlluminateDatabaseTransactions;
-
-trait WithArangoDb {
+trait WithArangoDb
+{
     use Concerns\InteractsWithDatabase;
 
     /**

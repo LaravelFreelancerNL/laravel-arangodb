@@ -11,7 +11,6 @@ trait DetectsDeadlocks
     /**
      * Determine if the given exception was caused by a deadlock.
      *
-     * @param \Exception $e
      *
      * @return bool
      */

@@ -13,11 +13,6 @@ trait HasAliases
 
     protected $columnAliases = [];
 
-    /**
-     * @param  string  $table
-     * @param  string|null  $alias
-     * @return string
-     */
     public function registerTableAlias(string $table, string $alias = null): string
     {
         if ($alias == null && stripos($table, ' as ') !== false) {
@@ -48,9 +43,8 @@ trait HasAliases
     /**
      * Extract table and alias from sql alias notation (entity AS `alias`)
      *
-     * @param string $entity
-     * @param int|string|null $key
      * @return array<mixed>
+     *
      * @throws Exception
      */
     protected function extractAlias(string $entity, int|string $key = null): array
@@ -76,7 +70,7 @@ trait HasAliases
 
     protected function generateTableAlias(string $table, string $postfix = 'Doc'): string
     {
-        return Str::camel(Str::singular($table)) . $postfix;
+        return Str::camel(Str::singular($table)).$postfix;
     }
 
     protected function replaceTableForAlias($reference): string
@@ -96,17 +90,14 @@ trait HasAliases
     {
         $alias = $this->getTableAlias($target);
 
-        if (Str::startsWith($value, $alias . '.')) {
+        if (Str::startsWith($value, $alias.'.')) {
             return $value;
         }
 
-        return $alias . '.' . $value;
+        return $alias.'.'.$value;
     }
 
     /**
-     * @param string $column
-     * @param string|null $alias
-     * @return bool
      * @throws Exception
      */
     public function registerColumnAlias(string $column, string $alias = null): bool
@@ -117,6 +108,7 @@ trait HasAliases
 
         if (isset($alias)) {
             $this->columnAliases[$column] = $alias;
+
             return true;
         }
 
@@ -133,7 +125,7 @@ trait HasAliases
     }
 
     /**
-     * @param array<mixed>|string $column
+     * @param  array<mixed>|string  $column
      * @return array<mixed>|string
      */
     protected function convertColumnId(array|string $column): array|string

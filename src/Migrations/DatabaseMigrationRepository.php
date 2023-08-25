@@ -21,9 +21,6 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
 
     /**
      * Create a new database migration repository instance.
-     *
-     * @param IlluminateResolver $resolver
-     * @param string $table
      */
     public function __construct(IlluminateResolver $resolver, string $table)
     {
@@ -56,17 +53,16 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
 
         return $this->getConnection()->select($qb->query);
 
-//        return $this->table()
-//                ->orderBy('batch', 'asc')
-//                ->orderBy('migration', 'asc')
-//                ->pluck('migration')->all();
+        //        return $this->table()
+        //                ->orderBy('batch', 'asc')
+        //                ->orderBy('migration', 'asc')
+        //                ->pluck('migration')->all();
     }
 
     /**
      * Get list of migrations.
      *
-     * @param int $steps
-     *
+     * @param  int  $steps
      * @return array
      */
     public function getMigrations($steps)
@@ -112,8 +108,8 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
     /**
      * Log that a migration was run.
      *
-     * @param string $file
-     * @param int    $batch
+     * @param  string  $file
+     * @param  int  $batch
      */
     public function log($file, $batch)
     {
@@ -121,16 +117,15 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
 
         $this->getConnection()->insert($qb->query, $qb->binds);
 
-//        $record = ['migration' => $file, 'batch' => $batch];
-//
-//        $this->table()->insert($record);
+        //        $record = ['migration' => $file, 'batch' => $batch];
+        //
+        //        $this->table()->insert($record);
     }
 
     /**
      * Remove a migration from the log.
      *
-     * @param object|string $migration
-     *
+     * @param  object|string  $migration
      * @return void
      */
     public function delete($migration)
@@ -177,7 +172,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
         }
 
         return $results;
-//        return $this->table()->max('batch');
+        //        return $this->table()->max('batch');
     }
 
     /**
@@ -191,16 +186,16 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
 
         $schemaManager->createCollection($this->table);
 
-//        $schema = $this->getConnection()->getSchemaBuilder();
-//
-//        $schema->create($this->table, function ($collection) {
-//            // The migrations collection is responsible for keeping track of which of the
-//            // migrations have actually run for the application. We'll create the
-//            // collection to hold the migration file's path as well as the batch ID.
-//            $collection->increments('id');
-//            $collection->string('migration');
-//            $collection->integer('batch');
-//        });
+        //        $schema = $this->getConnection()->getSchemaBuilder();
+        //
+        //        $schema->create($this->table, function ($collection) {
+        //            // The migrations collection is responsible for keeping track of which of the
+        //            // migrations have actually run for the application. We'll create the
+        //            // collection to hold the migration file's path as well as the batch ID.
+        //            $collection->increments('id');
+        //            $collection->string('migration');
+        //            $collection->integer('batch');
+        //        });
     }
 
     /**
@@ -214,9 +209,9 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
 
         return $schemaManager->hasCollection($this->table);
 
-//        $schema = $this->getConnection()->getSchemaBuilder();
-//
-//        return $schema->hasCollection($this->table);
+        //        $schema = $this->getConnection()->getSchemaBuilder();
+        //
+        //        return $schema->hasCollection($this->table);
     }
 
     /**

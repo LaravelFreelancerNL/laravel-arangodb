@@ -107,6 +107,32 @@ trait HandlesAqlGrammar
         return "`$value`";
     }
 
+
+    /**
+     * Wrap a value in keyword identifiers.
+     *
+     * @param  \Illuminate\Contracts\Database\Query\Expression|string  $value
+     * @param  bool  $prefixAlias
+     * @return string
+     */
+    public function wrap($value, $prefixAlias = false)
+    {
+        ray("wrap", $value);
+        if ($this->isExpression($value)) {
+            return $this->getValue($value);
+        }
+
+        // If the value being wrapped has a column alias we will need to separate out
+        // the pieces so we can wrap each of the segments of the expression on its
+        // own, and then join these both back together using the "as" connector.
+        if (stripos($value, ' as ') !== false) {
+            return $this->wrapAliasedValue($value, $prefixAlias);
+        }
+
+        return $this->wrapSegments(explode('.', $value));
+    }
+
+
     /**
      * Wrap a table in keyword identifiers.
      *
@@ -116,8 +142,8 @@ trait HandlesAqlGrammar
     public function wrapTable($table)
     {
         if (! $this->isExpression($table)) {
-            return $this->tablePrefix . $table;
-//            return $this->wrap($this->tablePrefix.$table, true);
+            //            return $this->tablePrefix . $table;
+            return $this->wrap($this->tablePrefix.$table, true);
         }
 
         return $this->getValue($table);

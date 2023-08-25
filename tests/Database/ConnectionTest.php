@@ -37,7 +37,7 @@ test('explain query', function () {
 
     $explanation = $this->connection->explain($query);
 
-    $this->assertObjectHasAttribute('plan', $explanation);
+    $this->assertObjectHasProperty('plan', $explanation);
 });
 
 test('error handling collection not found', function () {
