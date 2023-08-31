@@ -17,24 +17,13 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\WithoutEvents;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Mockery;
-use Orchestra\Testbench\Concerns\CreatesApplication;
-use Orchestra\Testbench\Concerns\HandlesAnnotations;
-use Orchestra\Testbench\Concerns\HandlesDatabases;
-use Orchestra\Testbench\Concerns\HandlesRoutes;
-use Orchestra\Testbench\Concerns\WithLaravelMigrations;
-use Orchestra\Testbench\Concerns\WithLoadMigrationsFrom;
+use Orchestra\Testbench\Concerns\Testing;
 use PHPUnit\Framework\TestCase;
 use Throwable;
 
 trait OrchestraTestbenchTesting
 {
-    use CreatesApplication;
-    use HandlesAnnotations;
-    use HandlesDatabases;
-    use HandlesRoutes;
-    use WithLaravelMigrations;
-    use WithLoadMigrationsFrom;
-    use WithFaker;
+    use Testing;
 
     /**
      * The Illuminate application instance.

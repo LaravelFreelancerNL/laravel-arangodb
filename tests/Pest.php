@@ -55,6 +55,7 @@ uses(
 
 function getBuilder()
 {
+    ray("Pestphp getBuilder");
     $grammar = new Grammar();
     $processor = m::mock(Processor::class);
 
@@ -79,3 +80,4 @@ function runCommand($command, $input = [])
 {
     return $command->run(new ArrayInput($input), new NullOutput());
 }
+

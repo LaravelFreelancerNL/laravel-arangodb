@@ -8,11 +8,11 @@ use LaravelFreelancerNL\Aranguent\AranguentServiceProvider;
 use LaravelFreelancerNL\Aranguent\Testing\Concerns\InteractsWithDatabase;
 use LaravelFreelancerNL\Aranguent\Testing\WithArangoDb;
 use Tests\Setup\TestConfig;
+use LaravelFreelancerNL\Aranguent\Testing\TestCase as AranguentTestCase;
 
-class TestCase extends \Orchestra\Testbench\TestCase
+class TestCase extends AranguentTestCase implements \Orchestra\Testbench\Contracts\TestCase
 {
-    use InteractsWithDatabase;
-    use WithArangoDb;
+    use OrchestraTestbenchTesting;
 
     protected ?ConnectionInterface $connection;
 
@@ -71,6 +71,16 @@ class TestCase extends \Orchestra\Testbench\TestCase
      */
     protected function setUp(): void
     {
+        $this->setTransactionCollections([
+            'write' => [
+                'characters',
+                'children',
+                'houses',
+                'locations',
+                'tags',
+                'taggables',
+            ]]);
+
         parent::setUp();
 
         $this->connection = DB::connection();

@@ -46,7 +46,8 @@
     "repositories": [],
     "autoload": {
         "psr-4": {
-            "LaravelFreelancerNL\\Aranguent\\": "src/"
+            "LaravelFreelancerNL\\Aranguent\\": "src/",
+            "Tests\\": "tests/"
         },
         "files": [
             "src/helpers.php"
@@ -54,7 +55,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/",
+            "Tests\\": "tests/"
         }
     },
     "extra": {
@@ -69,12 +70,7 @@
         "test": "./vendor/bin/pest",
         "test-coverage": "./vendor/bin/pest --coverage",
         "style": "vendor/bin/pint",
-        "post-autoload-dump": [
-            "@clear",
-            "@prepare"
-        ],
         "lint": [
-            "@prepare",
             "@php vendor/bin/pint",
             "@php vendor/bin/phpstan analyse"
         ]

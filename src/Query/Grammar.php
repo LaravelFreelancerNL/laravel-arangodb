@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace LaravelFreelancerNL\Aranguent\Query;
 
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
@@ -135,32 +137,20 @@ class Grammar extends IlluminateQueryGrammar
          *
          * @return string
          */
-        public function compileInsert(IlluminateQueryBuilder $query, array $values)
+        public function compileInsert(Builder|IlluminateQueryBuilder $query, array $values, string $bindVar = null)
         {
             $table = $this->prefixTable($query->from);
 
-            if (Arr::isAssoc($values)) {
-                $values = [$values];
-            }
-
             if (empty($values)) {
-                $aql = "INSERT {} INTO $table";
+                $aql = "INSERT {} INTO $table RETURN NEW._key";
 
                 return $aql;
             }
 
-            // Convert id to _key
-            foreach ($values as $key => $value) {
-                $values[$key] = $this->convertIdToKey($value);
-            }
-
-            //add binds here?
-
-            //FIXME: format values as string, list or object.
-//            $aql = "LET values = $values";
-//                ->for('value', 'values')
-//                ->insert('value', $table)
-//                ->return('NEW._key');
+            $aql = "LET values = $bindVar "
+                    . "FOR value IN values "
+                    . "INSERT value INTO $table "
+                    . "RETURN NEW._key";
 
             return $aql;
         }
@@ -170,70 +160,53 @@ class Grammar extends IlluminateQueryGrammar
      *
      * @param array<mixed> $values
      */
-    //    public function compileInsertGetId(IlluminateQueryBuilder $builder, $values, $sequence = "_key"): Builder
-    //    {
-    //        if (Arr::isAssoc($values)) {
-    //            $values = [$values];
-    //        }
-    //        $table = $this->prefixTable($builder->from);
-    //
-    //        if (isset($sequence)) {
-    //            $sequence = $this->convertIdToKey($sequence);
-    //        }
-    //
-    //        if (empty($values)) {
-    //            $builder->aqb = $builder->aqb->insert('{}', $table)
-    //                ->return('NEW.' . $sequence);
-    //
-    //            return $builder;
-    //        }
-    //
-    //        // Convert id to _key
-    //        foreach ($values as $key => $value) {
-    //            $values[$key] = $this->convertIdToKey($value);
-    //        }
-    //
-    //        $builder->aqb = $builder->aqb->let('values', $values)
-    //            ->for('value', 'values')
-    //            ->insert('value', $table)
-    //            ->return('NEW.' . $sequence);
-    //
-    //        return $builder;
-    //    }
+        public function compileInsertGetId(IlluminateQueryBuilder $builder, $values, $sequence = "_key", string $bindVar = null)
+        {
+            $table = $this->prefixTable($builder->from);
+
+            if (isset($sequence)) {
+                $sequence = $this->convertIdToKey($sequence);
+            }
+
+            if (empty($values)) {
+                $aql = "INSERT {} INTO $table RETURN NEW.$sequence";
+
+                return $aql;
+            }
+
+            $aql = "LET values = $bindVar "
+                . "FOR value IN values "
+                . "INSERT value INTO $table "
+                . "RETURN NEW.$sequence";
+
+            return $aql;
+        }
 
     /**
      * Compile an insert statement into AQL.
      *
-     * @param IlluminateQueryBuilder $builder
+     * @param IlluminateQueryBuilder $query
      * @param array<mixed> $values
-     * @return Builder
+     * @return string
      */
-    //    public function compileInsertOrIgnore(IlluminateQueryBuilder $builder, array $values)
-    //    {
-    //        if (Arr::isAssoc($values)) {
-    //            $values = [$values];
-    //        }
-    //        $table = $this->prefixTable($builder->from);
-    //
-    //        if (empty($values)) {
-    //            $builder->aqb = $builder->aqb->insert('{}', $table);
-    //
-    //            return $builder;
-    //        }
-    //
-    //        // Convert id to _key
-    //        foreach ($values as $key => $value) {
-    //            $values[$key] = $this->convertIdToKey($value);
-    //        }
-    //
-    //        $builder->aqb = $builder->aqb->let('values', $values)
-    //            ->for('value', 'values')
-    //            ->insert('value', $table)
-    //            ->options(["ignoreErrors" => true])
-    //            ->return('NEW._key');
-    //
-    //        return $builder;
-    //    }
+        public function compileInsertOrIgnore(IlluminateQueryBuilder $query, array $values, string $bindVar = null)
+        {
+            $table = $this->prefixTable($query->from);
+
+            if (empty($values)) {
+                $aql = "INSERT {} INTO $table RETURN NEW._key";
+
+                return $aql;
+            }
+
+            $aql = "LET values = $bindVar "
+                . "FOR value IN values "
+                . "INSERT value INTO $table "
+                . "OPTIONS { ignoreErrors: true } "
+                . "RETURN NEW._key";
+
+            return $aql;
+        }
 
     /**
      * Compile a select query into SQL.
