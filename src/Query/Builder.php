@@ -425,7 +425,6 @@ class Builder extends IlluminateQueryBuilder
             ->setAggregate($function, $columns)
             ->get($columns);
 
-        $this->aqb = new QueryBuilder();
 
         if (! $results->isEmpty()) {
             return array_change_key_case((array) $results[0])['aggregate'];
