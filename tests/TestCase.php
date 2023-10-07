@@ -5,8 +5,6 @@ namespace Tests;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\AranguentServiceProvider;
-use LaravelFreelancerNL\Aranguent\Testing\Concerns\InteractsWithDatabase;
-use LaravelFreelancerNL\Aranguent\Testing\WithArangoDb;
 use Tests\Setup\TestConfig;
 use LaravelFreelancerNL\Aranguent\Testing\TestCase as AranguentTestCase;
 
