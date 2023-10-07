@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
-use Tests\Setup\Models\Character;
 
 uses(
     \Tests\TestCase::class,
