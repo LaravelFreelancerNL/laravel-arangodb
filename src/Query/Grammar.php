@@ -58,11 +58,11 @@ class Grammar extends IlluminateQueryGrammar
 //        'joins',
         'wheres',
 //        'groups',
-//        'aggregate',
+        'aggregate',
 //        'havings',
         'orders',
-//        'offset',
-//        'limit',
+        'offset',
+        'limit',
         'columns',
     ];
 
@@ -342,39 +342,33 @@ class Grammar extends IlluminateQueryGrammar
 
     /**
      * Compile the "offset" portions of the query.
-     * We are handling this first by saving the offset which will be used by the FluentAQL's limit function.
      *
-     * @param IlluminateQueryBuilder $builder
-     * @param int     $offset
-     *
-     * @return IlluminateQueryBuilder
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @param  int  $offset
+     * @return string
      */
-    //    protected function compileOffset(IlluminateQueryBuilder $builder, $offset)
-    //    {
-    //        $this->offset = (int) $offset;
-    //
-    //        return $builder;
-    //    }
+    protected function compileOffset(IlluminateQueryBuilder $query, $offset)
+        {
+            $this->offset = (int) $offset;
+
+            return "";
+        }
 
     /**
      * Compile the "limit" portions of the query.
      *
-     * @param IlluminateQueryBuilder $builder
-     * @param int     $limit
-     *
-     * @return IlluminateQueryBuilder
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @param  int  $limit
+     * @return string
      */
-    //    protected function compileLimit(IlluminateQueryBuilder $builder, $limit)
-    //    {
-    //        if ($this->offset !== null) {
-    //            $builder->aqb = $builder->aqb->limit((int) $this->offset, (int) $limit);
-    //
-    //            return $builder;
-    //        }
-    //        $builder->aqb = $builder->aqb->limit((int) $limit);
-    //
-    //        return $builder;
-    //    }
+    protected function compileLimit(IlluminateQueryBuilder $query, $limit)
+        {
+            if ($this->offset !== null) {
+                return "LIMIT " . (int) $this->offset . ", " . (int) $limit;
+            }
+
+            return "LIMIT ". (int) $limit;
+        }
 
 
     /**
