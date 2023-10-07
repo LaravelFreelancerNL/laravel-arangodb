@@ -13,7 +13,6 @@ use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsWhereClauses;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\ConvertsIdToKey;
 use Illuminate\Contracts\Database\Query\Expression as ExpressionContract;
 use LaravelFreelancerNL\FluentAQL\Exceptions\BindException;
-use LaravelFreelancerNL\FluentAQL\Expressions\ExpressionInterface as ExpressionInterface;
 use LaravelFreelancerNL\FluentAQL\Expressions\FunctionExpression;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
@@ -382,7 +381,8 @@ class Builder extends IlluminateQueryBuilder
         $this->applyBeforeQueryCallbacks();
 
         return $this->connection->delete(
-            $this->grammar->compileDelete($this), $this->cleanBindings(
+            $this->grammar->compileDelete($this),
+            $this->cleanBindings(
                 $this->grammar->prepareBindingsForDelete($this->bindings)
             )
         );
@@ -449,21 +449,26 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Add an "order by" clause to the query.
      *
-     * @param  Closure|IlluminateQueryBuilder|string  $column
+     * @param  \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder|\Illuminate\Contracts\Database\Query\Expression|string  $column
      * @param  string  $direction
      * @return $this
      *
-     * @throws InvalidArgumentException
+     * @throws \InvalidArgumentException
      */
     public function orderBy($column, $direction = 'asc')
     {
         if ($this->isQueryable($column)) {
             [$query, $bindings] = $this->createSub($column);
 
-            //fixme: Remove binding when implementing subqueries
-            $bindings = null;
-
             $column = new Expression('('.$query.')');
+
+            $this->addBinding($bindings, $this->unions ? 'unionOrder' : 'order');
+        }
+
+        $direction = strtoupper($direction);
+
+        if (! in_array($direction, ['ASC', 'DESC'], true)) {
+            throw new InvalidArgumentException('Order direction must be "asc" or "desc".');
         }
 
         $this->{$this->unions ? 'unionOrders' : 'orders'}[] = [
@@ -474,20 +479,22 @@ class Builder extends IlluminateQueryBuilder
         return $this;
     }
 
-    /**
-     * Add a raw "order by" clause to the query.
-     *
-     * @param  string|ExpressionInterface  $aql
-     * @param  array<mixed>  $bindings
-     * @return $this
-     */
-    public function orderByRaw($aql, $bindings = [])
+    public function orderByRaw($sql, $bindings = [])
     {
-        $bindings = [];
-
         $type = 'Raw';
-        $column = $aql;
-        $this->{$this->unions ? 'unionOrders' : 'orders'}[] = compact('type', 'column');
+
+        $this->{$this->unions ? 'unionOrders' : 'orders'}[] = compact('type', 'sql');
+
+        if (!isset($this->bindings[$this->unions ? 'unionOrders' : 'orders'])) {
+            $this->bindings[$this->unions ? 'unionOrders' : 'orders'] = $bindings;
+
+            return $this;
+        }
+
+        $this->bindings[$this->unions ? 'unionOrders' : 'orders'] = array_merge(
+            $this->bindings[$this->unions ? 'unionOrders' : 'orders'],
+            $bindings
+        );
 
         return $this;
     }

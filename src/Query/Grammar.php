@@ -60,7 +60,7 @@ class Grammar extends IlluminateQueryGrammar
 //        'groups',
 //        'aggregate',
 //        'havings',
-//        'orders',
+        'orders',
 //        'offset',
 //        'limit',
         'columns',
@@ -242,10 +242,10 @@ class Grammar extends IlluminateQueryGrammar
      * @param  IlluminateQueryBuilder  $query
      * @return array
      */
-        public function compileTruncate(IlluminateQueryBuilder $query)
-        {
-            return [$this->compileDelete($query) => []];
-        }
+    public function compileTruncate(IlluminateQueryBuilder $query)
+    {
+        return [$this->compileDelete($query) => []];
+    }
 
     /**
      * Compile the "from" portion of the query -> FOR in AQL.
@@ -286,22 +286,32 @@ class Grammar extends IlluminateQueryGrammar
     /**
      * Compile the "order by" portions of the query.
      *
-     * @param IlluminateQueryBuilder $builder
-     * @param array   $orders
-     *
-     * @return IlluminateQueryBuilder
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @param  array  $orders
+     * @return string
      */
-    //    protected function compileOrders(IlluminateQueryBuilder $builder, $orders)
-    //    {
-    //        if (!empty($orders)) {
-    //            $orders = $this->compileOrdersToFlatArray($builder, $orders);
-    //            $builder->aqb = $builder->aqb->sort(...$orders);
-    //
-    //            return $builder;
-    //        }
-    //
-    //        return $builder;
-    //    }
+    protected function compileOrders(IlluminateQueryBuilder $query, $orders)
+    {
+        if (! empty($orders)) {
+            return 'SORT '.implode(', ', $this->compileOrdersToArray($query, $orders));
+        }
+
+        return '';
+    }
+
+    /**
+     * Compile the query orders to an array.
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @param  array  $orders
+     * @return array
+     */
+    protected function compileOrdersToArray(IlluminateQueryBuilder $query, $orders)
+    {
+        return array_map(function ($order) use ($query) {
+            return $order['sql'] ?? $this->normalizeColumn($query, $order['column']).' '.$order['direction'];
+        }, $orders);
+    }
 
     /**
      * Compile the query orders to an array.
