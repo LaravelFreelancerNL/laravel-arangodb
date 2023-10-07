@@ -1,10 +1,8 @@
 <?php
 
 use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
-use Tests\TestCase;
 
 uses(
-    TestCase::class,
     DatabaseTransactions::class
 );
 
@@ -347,12 +345,13 @@ test('where nested', function () {
         });
 
     $binds = $query->getBindings();
-    $bindKeys = array_keys($binds);
+    $bindQuery1 = array_keys($binds);
+    $bindQuery2 = array_keys($binds[$bindQuery1[1]]);
 
     $this->assertSame(
-        'FOR characterDoc IN characters FILTER `characterDoc`.`surname` == @' . $bindKeys[0]
-        . ' and ( `characterDoc`.`age` > @' . $bindKeys[1]
-        . ' or `characterDoc`.`alive` == @' . $bindKeys[2]
+        'FOR characterDoc IN characters FILTER `characterDoc`.`surname` == @' . $bindQuery1[0]
+        . ' and ( `characterDoc`.`age` > @' . $bindQuery2[0]
+        . ' or `characterDoc`.`alive` == @' . $bindQuery2[1]
         . ') RETURN characterDoc',
         $query->toSql()
     );
