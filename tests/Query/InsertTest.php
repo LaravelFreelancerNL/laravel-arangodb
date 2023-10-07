@@ -21,10 +21,10 @@ test('insert', function () {
     ];
     DB::table('characters')->insert($characterData);
 
-    $result = DB::table('characters')->first();
+    $results = DB::table('characters')->get();
 
-    expect($result->tags)->toBeArray();
-    expect($result->tags)->toBeEmpty();
+    expect($results->last()->tags)->toBeArray();
+    expect($results->last()->tags)->toBeEmpty();
 });
 
 

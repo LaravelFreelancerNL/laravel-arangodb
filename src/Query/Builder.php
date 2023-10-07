@@ -10,6 +10,8 @@ use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsJoinClauses;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsSubqueries;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsWhereClauses;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\ConvertsIdToKey;
+use Illuminate\Contracts\Database\Query\Expression as ExpressionContract;
 use LaravelFreelancerNL\FluentAQL\Exceptions\BindException;
 use LaravelFreelancerNL\FluentAQL\Expressions\ExpressionInterface as ExpressionInterface;
 use LaravelFreelancerNL\FluentAQL\Expressions\FunctionExpression;
@@ -20,8 +22,28 @@ class Builder extends IlluminateQueryBuilder
     use BuildsJoinClauses;
     use BuildsSubqueries;
     use BuildsWhereClauses;
+    use ConvertsIdToKey;
 
     public QueryBuilder|FunctionExpression $aqb;
+
+    /**
+     * The current query value bindings.
+     *
+     * @var array
+     */
+    public $bindings = [
+        'select' => [],
+        'from' => [],
+        'join' => [],
+        'where' => [],
+        'groupBy' => [],
+        'having' => [],
+        'order' => [],
+        'union' => [],
+        'unionOrder' => [],
+        'insert' => [],
+    ];
+
 
     /**
      * @var Connection
@@ -79,12 +101,13 @@ class Builder extends IlluminateQueryBuilder
     protected function bindValue($value, string $type = 'where')
     {
         if (! $value instanceof Expression) {
-            $this->addBinding($this->flattenValue($value), 'where');
+            $this->addBinding($value, $type);
             $value = $this->replaceValueWithBindVariable($type);
         }
 
         return $value;
     }
+
 
     protected function generateBindVariable(string $type = 'where'): string
     {
@@ -108,14 +131,7 @@ class Builder extends IlluminateQueryBuilder
 
         $bindVariable = $this->generateBindVariable($type);
 
-        if (is_array($value)) {
-            $this->bindings[$type] = array_map(
-                [$this, 'castBinding'],
-                array_merge($this->bindings[$type], $value),
-            );
-        } else {
-            $this->bindings[$type][$bindVariable] = $this->castBinding($value);
-        }
+        $this->bindings[$type][$bindVariable] = $this->castBinding($value);
 
         return $this;
     }
@@ -128,6 +144,22 @@ class Builder extends IlluminateQueryBuilder
     protected function replaceValueWithBindVariable(string $type = 'where')
     {
         return '@'.$this->getLastBindVariable($type);
+    }
+
+    /**
+     * Remove all of the expressions from a list of bindings.
+     *
+     * @param  array  $bindings
+     * @return array
+     */
+    public function cleanBindings(array $bindings)
+    {
+        return collect($bindings)
+            ->reject(function ($binding) {
+                return $binding instanceof ExpressionContract;
+            })
+            ->map([$this, 'castBinding'])
+            ->all();
     }
 
     public function getQueryId()
@@ -150,20 +182,6 @@ class Builder extends IlluminateQueryBuilder
         }
 
         return $extractedBindings;
-    }
-
-    /**
-     * Delete a record from the database.
-     *
-     * @param  mixed  $id
-     * @return int
-     */
-    public function delete($id = null)
-    {
-        $this->aqb = new QueryBuilder();
-        $this->grammar->compileDelete($this, $id)->setAql();
-
-        return $this->connection->delete($this->aqb);
     }
 
     /**
@@ -277,9 +295,19 @@ class Builder extends IlluminateQueryBuilder
      */
     public function insert(array $values): bool
     {
-        $this->grammar->compileInsert($this, $values);
-        $results = $this->getConnection()->insert($this->aqb);
-        $this->aqb = new QueryBuilder();
+        if (! array_is_list($values)) {
+            $values = [$values];
+        }
+
+        // Convert id to _key
+        foreach ($values as $key => $value) {
+            $values[$key] = $this->convertIdToKey($value);
+        }
+
+        $bindVar = $this->bindValue($values, 'insert');
+
+        $aql = $this->grammar->compileInsert($this, $values, $bindVar);
+        $results = $this->getConnection()->insert($aql, $this->getBindings());
 
         return $results;
     }
@@ -291,8 +319,19 @@ class Builder extends IlluminateQueryBuilder
      */
     public function insertGetId(array $values, $sequence = null)
     {
-        $this->grammar->compileInsertGetId($this, $values, $sequence)->setAql();
-        $response = $this->getConnection()->execute($this->aqb);
+        if (! array_is_list($values)) {
+            $values = [$values];
+        }
+
+        // Convert id to _key
+        foreach ($values as $key => $value) {
+            $values[$key] = $this->convertIdToKey($value);
+        }
+
+        $bindVar = $this->bindValue($values, 'insert');
+
+        $aql =  $this->grammar->compileInsertGetId($this, $values, $sequence, $bindVar);
+        $response = $this->getConnection()->execute($aql, $this->getBindings());
         $this->aqb = new QueryBuilder();
 
         return (is_array($response)) ? end($response) : $response;
@@ -307,11 +346,46 @@ class Builder extends IlluminateQueryBuilder
      */
     public function insertOrIgnore(array $values): bool
     {
-        $this->grammar->compileInsertOrIgnore($this, $values)->setAql();
-        $results = $this->getConnection()->insert($this->aqb);
-        $this->aqb = new QueryBuilder();
+        if (! array_is_list($values)) {
+            $values = [$values];
+        }
+
+        // Convert id to _key
+        foreach ($values as $key => $value) {
+            $values[$key] = $this->convertIdToKey($value);
+        }
+
+        $bindVar = $this->bindValue($values, 'insert');
+
+
+        $aql = $this->grammar->compileInsertOrIgnore($this, $values, $bindVar);
+        $results = $this->getConnection()->insert($aql, $this->getBindings());
 
         return $results;
+    }
+
+    /**
+     * Delete records from the database.
+     *
+     * @param  mixed  $id
+     * @return int
+     */
+    public function delete($id = null)
+    {
+        // If an ID is passed to the method, we will set the where clause to check the
+        // ID to let developers to simply and quickly remove a single row from this
+        // database without manually specifying the "where" clauses on the query.
+        if (! is_null($id)) {
+            $this->where($this->from.'._key', '=', $id);
+        }
+
+        $this->applyBeforeQueryCallbacks();
+
+        return $this->connection->delete(
+            $this->grammar->compileDelete($this), $this->cleanBindings(
+                $this->grammar->prepareBindingsForDelete($this->bindings)
+            )
+        );
     }
 
     protected function setAql()

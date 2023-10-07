@@ -7,7 +7,6 @@ namespace LaravelFreelancerNL\Aranguent\Query;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Database\Query\Grammars\Grammar as IlluminateQueryGrammar;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Traits\Macroable;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesAggregates;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesColumns;
@@ -127,60 +126,60 @@ class Grammar extends IlluminateQueryGrammar
         return $this->isExpression($value) ? $this->getValue($value) : $value;
     }
 
-        /**
-         * Compile an insert statement into AQL.
-         *
-         * @param IlluminateQueryBuilder $builder
-         * @param array   $values
-         *
-         * @throws BindException
-         *
-         * @return string
-         */
-        public function compileInsert(Builder|IlluminateQueryBuilder $query, array $values, string $bindVar = null)
-        {
-            $table = $this->prefixTable($query->from);
+    /**
+     * Compile an insert statement into AQL.
+     *
+     * @param IlluminateQueryBuilder $builder
+     * @param array   $values
+     *
+     * @throws BindException
+     *
+     * @return string
+     */
+    public function compileInsert(Builder|IlluminateQueryBuilder $query, array $values, string $bindVar = null)
+    {
+        $table = $this->prefixTable($query->from);
 
-            if (empty($values)) {
-                $aql = "INSERT {} INTO $table RETURN NEW._key";
-
-                return $aql;
-            }
-
-            $aql = "LET values = $bindVar "
-                    . "FOR value IN values "
-                    . "INSERT value INTO $table "
-                    . "RETURN NEW._key";
+        if (empty($values)) {
+            $aql = "INSERT {} INTO $table RETURN NEW._key";
 
             return $aql;
         }
+
+        $aql = "LET values = $bindVar "
+                . "FOR value IN values "
+                . "INSERT value INTO $table "
+                . "RETURN NEW._key";
+
+        return $aql;
+    }
 
     /**
      * Compile an insert and get ID statement into SQL.
      *
      * @param array<mixed> $values
      */
-        public function compileInsertGetId(IlluminateQueryBuilder $builder, $values, $sequence = "_key", string $bindVar = null)
-        {
-            $table = $this->prefixTable($builder->from);
+    public function compileInsertGetId(IlluminateQueryBuilder $builder, $values, $sequence = "_key", string $bindVar = null)
+    {
+        $table = $this->prefixTable($builder->from);
 
-            if (isset($sequence)) {
-                $sequence = $this->convertIdToKey($sequence);
-            }
+        if (isset($sequence)) {
+            $sequence = $this->convertIdToKey($sequence);
+        }
 
-            if (empty($values)) {
-                $aql = "INSERT {} INTO $table RETURN NEW.$sequence";
-
-                return $aql;
-            }
-
-            $aql = "LET values = $bindVar "
-                . "FOR value IN values "
-                . "INSERT value INTO $table "
-                . "RETURN NEW.$sequence";
+        if (empty($values)) {
+            $aql = "INSERT {} INTO $table RETURN NEW.$sequence";
 
             return $aql;
         }
+
+        $aql = "LET values = $bindVar "
+            . "FOR value IN values "
+            . "INSERT value INTO $table "
+            . "RETURN NEW.$sequence";
+
+        return $aql;
+    }
 
     /**
      * Compile an insert statement into AQL.
@@ -189,24 +188,24 @@ class Grammar extends IlluminateQueryGrammar
      * @param array<mixed> $values
      * @return string
      */
-        public function compileInsertOrIgnore(IlluminateQueryBuilder $query, array $values, string $bindVar = null)
-        {
-            $table = $this->prefixTable($query->from);
+    public function compileInsertOrIgnore(IlluminateQueryBuilder $query, array $values, string $bindVar = null)
+    {
+        $table = $this->prefixTable($query->from);
 
-            if (empty($values)) {
-                $aql = "INSERT {} INTO $table RETURN NEW._key";
-
-                return $aql;
-            }
-
-            $aql = "LET values = $bindVar "
-                . "FOR value IN values "
-                . "INSERT value INTO $table "
-                . "OPTIONS { ignoreErrors: true } "
-                . "RETURN NEW._key";
+        if (empty($values)) {
+            $aql = "INSERT {} INTO $table RETURN NEW._key";
 
             return $aql;
         }
+
+        $aql = "LET values = $bindVar "
+            . "FOR value IN values "
+            . "INSERT value INTO $table "
+            . "OPTIONS { ignoreErrors: true } "
+            . "RETURN NEW._key";
+
+        return $aql;
+    }
 
     /**
      * Compile a select query into SQL.
@@ -243,13 +242,10 @@ class Grammar extends IlluminateQueryGrammar
      * @param  IlluminateQueryBuilder  $query
      * @return array
      */
-    //    public function compileTruncate(IlluminateQueryBuilder $query)
-    //    {
-    //        /** @phpstan-ignore-next-line */
-    //        $aqb = DB::aqb();
-    //        $aqb = $aqb->for('doc', $query->from)->remove('doc', $query->from)->get();
-    //        return [$aqb->query => []];
-    //    }
+        public function compileTruncate(IlluminateQueryBuilder $query)
+        {
+            return [$this->compileDelete($query) => []];
+        }
 
     /**
      * Compile the "from" portion of the query -> FOR in AQL.
@@ -434,35 +430,40 @@ class Grammar extends IlluminateQueryGrammar
     /**
      * Compile a delete statement into SQL.
      *
-     * @SuppressWarnings(PHPMD.CamelCaseParameterName)
-     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
-     *
-     * @param IlluminateQueryBuilder $builder
-     * @param null    $id
-     *
-     * @return IlluminateQueryBuilder
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @return string
      */
-    //    public function compileDelete(IlluminateQueryBuilder $builder, $id = null)
-    //    {
-    //        $table = $this->prefixTable($builder->from);
-    //        $tableAlias = $this->generateTableAlias($table);
-    //
-    //
-    //        if (!is_null($id)) {
-    //            $builder->aqb = $builder->aqb->remove((string) $id, $table);
-    //
-    //            return $builder;
-    //        }
-    //
-    //        $builder->aqb = $builder->aqb->for($tableAlias, $table);
-    //
-    //        //Fixme: joins?
-    //        $builder = $this->compileWheres($builder);
-    //
-    //        $builder->aqb = $builder->aqb->remove($tableAlias, $table);
-    //
-    //        return $builder;
-    //    }
+    public function compileDelete(IlluminateQueryBuilder $query)
+    {
+        $table = $query->from;
+
+        $where = $this->compileWheres($query);
+
+        return trim(
+            isset($query->joins)
+                ? $this->compileDeleteWithJoins($query, $table, $where)
+                : $this->compileDeleteWithoutJoins($query, $table, $where)
+        );
+    }
+
+
+    /**
+     * Compile a delete statement without joins into SQL.
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @param  string  $table
+     * @param  string  $where
+     * @return string
+     */
+    protected function compileDeleteWithoutJoins(IlluminateQueryBuilder $query, $table, $where)
+    {
+
+        $alias = $this->normalizeColumn($query, $this->registerTableAlias($table));
+
+        $table = $this->wrapTable($this->prefixTable($table));
+
+        return "FOR {$alias} IN {$table} {$where} REMOVE {$alias} IN {$table}";
+    }
 
     /**
      * Compile the random statement into SQL.
@@ -511,5 +512,18 @@ class Grammar extends IlluminateQueryGrammar
     public function getBitwiseOperators()
     {
         return $this->bitwiseOperators;
+    }
+
+    /**
+     * Prepare the bindings for a delete statement.
+     *
+     * @param  array  $bindings
+     * @return array
+     */
+    public function prepareBindingsForDelete(array $bindings)
+    {
+        return Arr::collapse(
+            Arr::except($bindings, 'select')
+        );
     }
 }
