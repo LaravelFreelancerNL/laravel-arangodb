@@ -8,9 +8,54 @@ use Closure;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 use LaravelFreelancerNL\Aranguent\Query\JoinClause;
+use LogicException;
 
 trait BuildsJoinClauses
 {
+    /**
+     * Add a right join to the query.
+     *
+     * @param  \Illuminate\Contracts\Database\Query\Expression|string  $table
+     * @param  \Closure|string  $first
+     * @param  string|null  $operator
+     * @param  \Illuminate\Contracts\Database\Query\Expression|string|null  $second
+     * @return $this
+     */
+    public function rightJoin($table, $first, $operator = null, $second = null)
+    {
+        throw new LogicException('This database engine does not support the rightJoin method.');
+    }
+
+    /**
+     * Add a subquery right join to the query.
+     *
+     * @param  \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder|string  $query
+     * @param  string  $as
+     * @param  \Closure|string  $first
+     * @param  string|null  $operator
+     * @param  \Illuminate\Contracts\Database\Query\Expression|string|null  $second
+     * @return $this
+     */
+    public function rightJoinSub($query, $as, $first, $operator = null, $second = null)
+    {
+        throw new LogicException('This database engine does not support the rightJoinSub method.');
+    }
+
+    /**
+     * Add a "right join where" clause to the query.
+     *
+     * @param  \Illuminate\Contracts\Database\Query\Expression|string  $table
+     * @param  \Closure|string  $first
+     * @param  string  $operator
+     * @param  \Illuminate\Contracts\Database\Query\Expression|string  $second
+     * @return $this
+     */
+    public function rightJoinWhere($table, $first, $operator, $second)
+    {
+        throw new LogicException('This database engine does not support the rightJoinWhere method.');
+    }
+
+
     /**
      * Add a join clause to the query.
      *

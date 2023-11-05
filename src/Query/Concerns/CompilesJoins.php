@@ -9,23 +9,6 @@ use LaravelFreelancerNL\Aranguent\Query\Builder;
 
 trait CompilesJoins
 {
-    //    /**
-    //     * Compile the "join" portions of the query.
-    //     *
-    //     * @param  \Illuminate\Database\Query\Builder  $query
-    //     * @param  array  $joins
-    //     * @return string
-    //     */
-    //    protected function compileJoins(IlluminateBuilder $query, $joins)
-    //    {
-    //        foreach ($joins as $join) {
-    //            $compileMethod = 'compile'.ucfirst($join->type).'Join';
-    //            $query = $this->$compileMethod($query, $join);
-    //        }
-    //
-    //        return $query;
-    //    }
-
     /**
      * Compile the "join" portions of the query.
      *
