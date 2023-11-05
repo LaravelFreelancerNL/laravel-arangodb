@@ -23,9 +23,13 @@ trait ConvertsIdToKey
 
     protected function convertIdInString(string $data): string
     {
+        $replace = [
+            "/^id$/" => "_key",
+            "/\.id$/" => "._key"
+        ];
         return preg_replace(
-            "/^id$/",
-            '_key',
+            array_keys($replace),
+            $replace,
             $data,
             1
         );

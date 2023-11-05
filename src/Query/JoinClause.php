@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace LaravelFreelancerNL\Aranguent\Query;
 
 use Closure;
+use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Database\Query\Processors\Processor;
 use LaravelFreelancerNL\Aranguent\Connection;
 
@@ -59,7 +60,7 @@ class JoinClause extends Builder
      * @param  string  $table
      * @return void
      */
-    public function __construct(Builder $parentQuery, $type, $table)
+    public function __construct(IlluminateQueryBuilder $parentQuery, $type, $table)
     {
         $this->type = $type;
         $this->table = $table;

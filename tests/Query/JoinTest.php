@@ -19,10 +19,8 @@ test('cross join', function () {
 
 test('join', function () {
     $query = DB::table('characters')
-        ->join('locations', 'characterDoc.residence_id', '=', 'locationDoc._key')
+        ->join('locations', 'characters.residence_id', '=', 'locations.id')
         ->where('residence_id', '=', 'winterfell');
-
-    ray($query->toSql(), $query->getBindings());
 
     $characters = $query->get();
 
