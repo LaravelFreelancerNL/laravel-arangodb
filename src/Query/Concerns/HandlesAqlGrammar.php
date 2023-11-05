@@ -117,7 +117,6 @@ trait HandlesAqlGrammar
      */
     public function wrap($value, $prefixAlias = false)
     {
-        ray("wrap", $value);
         if ($this->isExpression($value)) {
             return $this->getValue($value);
         }

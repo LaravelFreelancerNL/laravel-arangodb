@@ -85,7 +85,6 @@ trait CompilesWhereClauses
         $predicate[0] = $this->normalizeColumn($query, $where['column']);
         $predicate[1] = $where['operator'];
         $predicate[2] = $this->parameter($where['value']);
-        //        $predicate[3] = $where['boolean'];
 
         return implode(" ", $predicate);
     }
@@ -184,7 +183,6 @@ trait CompilesWhereClauses
         $predicate[0] = $this->normalizeColumn($query, $where['first']);
         $predicate[1] = $where['operator'];
         $predicate[2] = $this->normalizeColumn($query, $where['second']);
-        ray("whereColumn", $predicate);
 
         return implode(" ", $predicate);
     }
@@ -202,7 +200,7 @@ trait CompilesWhereClauses
 
         $predicate[0] = $this->normalizeColumn($query, $where['column']);
         $predicate[1] = '==';
-        $predicate[2] = "null";
+        $predicate[2] = 'null';
 
         return implode(" ", $predicate);
     }
@@ -222,7 +220,7 @@ trait CompilesWhereClauses
         $predicate[1] = '!=';
         $predicate[2] = 'null';
 
-        return implode(" ", $predicate);
+        return implode(' ', $predicate);
     }
 
     /**
@@ -318,7 +316,6 @@ trait CompilesWhereClauses
         $predicate[0] = $this->parameter($where['value']);
         $predicate[1] = $operator;
         $predicate[2] = $this->normalizeColumn($query, $where['column']);
-        //        $predicate[3] = $where['boolean'];
 
         return implode(" ", $predicate);
     }
@@ -357,11 +354,11 @@ trait CompilesWhereClauses
         $predicate = [];
 
         $where = $this->normalizeOperator($where);
-        $predicate[0] = "DATE_FORMAT(" . $this->normalizeColumn($query, $where['column']) . ', "%yyyy-%mm-%dd")';
+        $predicate[0] = 'DATE_FORMAT(' . $this->normalizeColumn($query, $where['column']) . ', "%yyyy-%mm-%dd")';
         $predicate[1] = $where['operator'];
         $predicate[2] = $this->parameter($where['value']);
 
-        return implode(" ", $predicate);
+        return implode(' ', $predicate);
     }
 
     /**
@@ -377,11 +374,11 @@ trait CompilesWhereClauses
 
         $where = $this->normalizeOperator($where);
 
-        $predicate[0] = "DATE_YEAR(". $this->normalizeColumn($query, $where['column']) . ")";
+        $predicate[0] = 'DATE_YEAR('. $this->normalizeColumn($query, $where['column']) . ')';
         $predicate[1] = $where['operator'];
         $predicate[2] = $this->parameter($where['value']);
 
-        return implode(" ", $predicate);
+        return implode(' ', $predicate);
     }
 
     /**
@@ -397,11 +394,11 @@ trait CompilesWhereClauses
 
         $where = $this->normalizeOperator($where);
 
-        $predicate[0] =  "DATE_MONTH(" . $this->normalizeColumn($query, $where['column']) . ")";
+        $predicate[0] =  'DATE_MONTH(' . $this->normalizeColumn($query, $where['column']) . ')';
         $predicate[1] = $where['operator'];
         $predicate[2] = $this->parameter($where['value']);
 
-        return implode(" ", $predicate);
+        return implode(' ', $predicate);
     }
 
 
@@ -418,11 +415,11 @@ trait CompilesWhereClauses
 
         $where = $this->normalizeOperator($where);
 
-        $predicate[0] = "DATE_DAY(". $this->normalizeColumn($query, $where['column']) . ")";
+        $predicate[0] = 'DATE_DAY('. $this->normalizeColumn($query, $where['column']) . ')';
         $predicate[1] = $where['operator'];
         $predicate[2] = $this->parameter($where['value']);
 
-        return implode(" ", $predicate);
+        return implode(' ', $predicate);
     }
 
     /**
@@ -438,11 +435,11 @@ trait CompilesWhereClauses
 
         $where = $this->normalizeOperator($where);
 
-        $predicate[0] = "DATE_FORMAT(" . $this->normalizeColumn($query, $where['column']) . ", '%hh:%ii:%ss')";
+        $predicate[0] = 'DATE_FORMAT(' . $this->normalizeColumn($query, $where['column']) . ", '%hh:%ii:%ss')";
         $predicate[1] = $where['operator'];
         $predicate[2] = $this->parameter($where['value']);
 
-        return implode(" ", $predicate);
+        return implode(' ', $predicate);
     }
 
     /**

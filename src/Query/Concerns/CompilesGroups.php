@@ -9,32 +9,19 @@ trait CompilesGroups
     /**
      * Compile the "group by" portions of the query.
      *
-     * @param IlluminateQueryBuilder $query
+     * @param  \Illuminate\Database\Query\Builder  $query
      * @param  array  $groups
      * @return string
      */
-    //    protected function compileGroups(IlluminateQueryBuilder $query, $groups)
-    //    {
-    //        $aqlGroups = [];
-    //        foreach ($groups as $key => $group) {
-    //            $aqlGroups[$key][0] = $group;
-    //
-    //            $aqlGroups[$key][1] = $this->normalizeColumn($builder, $group);
-    //        }
-    //
-    //        $builder->aqb = $builder->aqb->collect($aqlGroups);
-    //
-    //        return $builder;
-    //    }
+    protected function compileGroups(IlluminateQueryBuilder $query, $groups)
+    {
+        $aql = "COLLECT ";
 
-    /**
-     * Compile the "having" portions of the query.
-     *
-     * @param IlluminateQueryBuilder $query
-     * @return string
-     */
-    //    protected function compileHavings(IlluminateQueryBuilder $query)
-    //    {
-    //        return $this->compileWheres($query);
-    //    }
+        $aqlGroups = [];
+        foreach ($groups as $group) {
+            $aqlGroups[] = $group . " = " . $this->normalizeColumn($query, $group);
+        }
+
+        return $aql . implode(", ", $aqlGroups);
+    }
 }

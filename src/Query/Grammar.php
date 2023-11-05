@@ -10,6 +10,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Traits\Macroable;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesAggregates;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesColumns;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesFilterClauses;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesGroups;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesJoins;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesWhereClauses;
@@ -22,6 +23,7 @@ class Grammar extends IlluminateQueryGrammar
 {
     use CompilesAggregates;
     use CompilesColumns;
+    use CompilesFilterClauses;
     use CompilesJoins;
     use CompilesGroups;
     use CompilesWhereClauses;
@@ -47,19 +49,33 @@ class Grammar extends IlluminateQueryGrammar
     protected $offset = null;
 
     /**
+     * The grammar specific operators.
+     *
+     * @var array
+     */
+    protected $operators = [
+        '==', '!=', '<', '>', '<=', '>=',
+        'LIKE', '~', '!~',
+        'IN', 'NOT IN',
+        'ALL ==', 'ALL !=', 'ALL <', 'ALL >', 'ALL <=', 'ALL >=', 'ALL IN',
+        'ANY ==', 'ANY !=', 'ANY <', 'ANY >', 'ANY <=', 'ANY >=', 'ANY IN',
+        'NONE ==', 'NONE !=', 'NONE <', 'NONE >', 'NONE <=', 'NONE >=', 'NONE IN',
+    ];
+
+    /**
      * The components that make up a select clause.
      *
      * @var array
      */
     protected $selectComponents = [
         'from',
-//        'search',
+        'search',
 //        'variables',
-//        'joins',
+        'joins',
         'wheres',
-//        'groups',
+        'groups',
         'aggregate',
-//        'havings',
+        'havings',
         'orders',
         'offset',
         'limit',
@@ -86,7 +102,9 @@ class Grammar extends IlluminateQueryGrammar
      *
      * @var array
      */
-    protected $bitwiseOperators = [];
+    public $bitwiseOperators = [
+        '&', '|', '^', '<<', '>>', '~',
+    ];
 
     /**
      * Get the format for database stored dates.
@@ -105,7 +123,17 @@ class Grammar extends IlluminateQueryGrammar
      */
     public function getOperators()
     {
-        return $this->comparisonOperators;
+        return $this->operators;
+    }
+
+
+    public function translateOperator(string $operator): string
+    {
+        if (array_key_exists($operator, $this->operatorTranslations)) {
+            return $this->operatorTranslations[$operator];
+        }
+
+        return $operator;
     }
 
     protected function prefixTable($table)
@@ -348,11 +376,11 @@ class Grammar extends IlluminateQueryGrammar
      * @return string
      */
     protected function compileOffset(IlluminateQueryBuilder $query, $offset)
-        {
-            $this->offset = (int) $offset;
+    {
+        $this->offset = (int) $offset;
 
-            return "";
-        }
+        return "";
+    }
 
     /**
      * Compile the "limit" portions of the query.
@@ -362,13 +390,13 @@ class Grammar extends IlluminateQueryGrammar
      * @return string
      */
     protected function compileLimit(IlluminateQueryBuilder $query, $limit)
-        {
-            if ($this->offset !== null) {
-                return "LIMIT " . (int) $this->offset . ", " . (int) $limit;
-            }
-
-            return "LIMIT ". (int) $limit;
+    {
+        if ($this->offset !== null) {
+            return "LIMIT " . (int) $this->offset . ", " . (int) $limit;
         }
+
+        return "LIMIT ". (int) $limit;
+    }
 
 
     /**
@@ -379,20 +407,20 @@ class Grammar extends IlluminateQueryGrammar
      *
      * @return IlluminateQueryBuilder
      */
-    //    public function compileUpdate(IlluminateQueryBuilder $builder, array $values)
-    //    {
-    //        $table = $this->prefixTable($builder->from);
-    //        $tableAlias = $this->generateTableAlias($table);
-    //
-    //        $builder->aqb = $builder->aqb->for($tableAlias, $table);
-    //
-    //        //Fixme: joins?
-    //        $builder = $this->compileWheres($builder);
-    //
-    //        $builder->aqb = $builder->aqb->update($tableAlias, $values, $table);
-    //
-    //        return $builder;
-    //    }
+    public function compileUpdate(IlluminateQueryBuilder $query, array $values)
+    {
+        $table = $this->prefixTable($builder->from);
+        $tableAlias = $this->generateTableAlias($table);
+
+        $builder->aqb = $builder->aqb->for($tableAlias, $table);
+
+        //Fixme: joins?
+        $builder = $this->compileWheres($builder);
+
+        $builder->aqb = $builder->aqb->update($tableAlias, $values, $table);
+
+        return $builder;
+    }
 
     /**
      * Compile an "upsert" statement into SQL.
@@ -484,18 +512,29 @@ class Grammar extends IlluminateQueryGrammar
 
     /**
      * @param IlluminateQueryBuilder $builder
-     * @return IlluminateQueryBuilder
+     * @return string
      */
-    //    public function compileSearch(IlluminateQueryBuilder $builder): Builder
-    //    {
-    //        $builder->aqb = $builder->aqb->search($builder->search['predicates']);
-    //
-    //        if (isset($builder->search['options'])) {
-    //            $builder->aqb = $builder->aqb->options($builder->search['options']);
-    //        }
-    //
-    //        return $builder;
-    //    }
+    public function compileSearch(IlluminateQueryBuilder $query)
+    {
+        $aql = "SEARCH "
+            . $this->removeLeadingBoolean(
+                implode(
+                    ' ',
+                    $this->whereBasic($query, $query->search['predicates'])
+                )
+            );
+
+        if (!isset($builder->search['options'])) {
+            return $aql;
+        }
+
+        $options = [];
+        foreach($builder->search['options'] as $key => $value) {
+            $options[] = $key . ": " . $value;
+        }
+
+        return $aql . "{ " . implode(', ', $options) . " }";
+    }
 
     /**
      * Get the value of a raw expression.
@@ -530,4 +569,5 @@ class Grammar extends IlluminateQueryGrammar
             Arr::except($bindings, 'select')
         );
     }
+
 }

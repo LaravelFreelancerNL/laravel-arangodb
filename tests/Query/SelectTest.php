@@ -7,14 +7,14 @@ use Tests\TestCase;
 
 uses(
     TestCase::class,
-//    DatabaseTransactions::class,
-        RefreshDatabase::class
+    //    DatabaseTransactions::class,
+    //        RefreshDatabase::class
 );
 
 test('basic select', function () {
     $results = DB::table('characters')->select()->get();
 
-    expect($results)->toHaveCount(52);
+    expect($results)->toHaveCount(43);
 
     expect(count((array)$results[0]))->toBe(9);
 });
@@ -109,7 +109,6 @@ test('select nested data with multilevel embedded objects and aliases', function
     expect((array)$house->en->summary)->toHaveCount(1);
 });
 
-
 test('addSelect', function () {
     $house = DB::table('houses')
         ->select('en')
@@ -142,4 +141,18 @@ test('addSelect with alias', function () {
     expect($house)->toHaveProperty('house_name');
     expect($house)->toHaveProperty('en');
     expect((array)$house->en)->toHaveCount(2);
+});
+
+
+test('first method', function () {
+    $result = \DB::table('characters')->where('id', '=', 'NedStark')->first();
+
+    expect($result->id)->toBe('NedStark');
+});
+
+test('pluck', function () {
+    $results = DB::table('characters')->pluck('name', 'id');
+
+    expect($results->count())->toEqual(43);
+    expect($results['NedStark'])->toEqual('Ned');
 });

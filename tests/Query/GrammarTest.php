@@ -6,6 +6,18 @@ uses(
     TestCase::class,
 );
 
+test('wrap multiple columns', function () {
+    $builder = getBuilder();
+    $builder = $builder->select(['id', '_id', 'email'])
+        ->from('users');
+
+    $this->assertSame(
+        'FOR userDoc IN users RETURN {id: `userDoc`.`_key`, _id: `userDoc`.`_id`, email: `userDoc`.`email`}',
+        $builder->toSql()
+    );
+});
+
+
 test('wrap bypass', function () {
     $builder = getBuilder();
     $builder = $builder->select('*')

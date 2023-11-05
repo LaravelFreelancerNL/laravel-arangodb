@@ -27,6 +27,7 @@
         "laravel-freelancer-nl/arangodb-php-client": "^2.0",
         "laravel-freelancer-nl/fluentaql": "^2.0",
         "laravel/framework": "^10.0",
+        "spatie/laravel-data": "^3.9",
         "vlucas/phpdotenv": "^5.4"
     },
     "require-dev": {

@@ -17,19 +17,19 @@ trait CompilesAggregates
      * @return string
      */
     protected function compileAggregate(IlluminateBuilder $query, $aggregate)
-        {
-            $method = 'compile'.ucfirst($aggregate['function']);
+    {
+        $method = 'compile'.ucfirst($aggregate['function']);
 
-            return $this->$method($query, $aggregate);
-        }
+        return $this->$method($query, $aggregate);
+    }
 
     /**
      * Compile AQL for count aggregate.
      */
-        protected function compileCount(Builder $query)
-        {
-            return "COLLECT WITH COUNT INTO aggregateResult";
-        }
+    protected function compileCount(Builder $query)
+    {
+        return "COLLECT WITH COUNT INTO aggregateResult";
+    }
 
     /**
      * Compile AQL for max aggregate.
@@ -37,46 +37,46 @@ trait CompilesAggregates
      * @param  array<mixed>  $aggregate
      * @return string
      */
-        protected function compileMax(Builder $query, array $aggregate)
-        {
-            $column = $this->normalizeColumn($query, $aggregate['columns'][0]);
+    protected function compileMax(Builder $query, array $aggregate)
+    {
+        $column = $this->normalizeColumn($query, $aggregate['columns'][0]);
 
-            return "COLLECT AGGREGATE aggregateResult = MAX($column)";
-        }
+        return "COLLECT AGGREGATE aggregateResult = MAX($column)";
+    }
 
     /**
      * Compile AQL for min aggregate.
      *
      * @param  array<mixed>  $aggregate
      */
-        protected function compileMin(Builder $query, array $aggregate)
-        {
-            $column = $this->normalizeColumn($query, $aggregate['columns'][0]);
+    protected function compileMin(Builder $query, array $aggregate)
+    {
+        $column = $this->normalizeColumn($query, $aggregate['columns'][0]);
 
-            return "COLLECT AGGREGATE aggregateResult = MIN($column)";
-        }
+        return "COLLECT AGGREGATE aggregateResult = MIN($column)";
+    }
 
     /**
      * Compile AQL for average aggregate.
      *
      * @param  array<mixed>  $aggregate
      */
-        protected function compileAvg(Builder $query, array $aggregate)
-        {
-            $column = $this->normalizeColumn($query, $aggregate['columns'][0]);
+    protected function compileAvg(Builder $query, array $aggregate)
+    {
+        $column = $this->normalizeColumn($query, $aggregate['columns'][0]);
 
-            return "COLLECT AGGREGATE aggregateResult = AVERAGE($column)";
-        }
+        return "COLLECT AGGREGATE aggregateResult = AVERAGE($column)";
+    }
 
     /**
      * Compile AQL for sum aggregate.
      *
      * @param  array<mixed>  $aggregate
      */
-        protected function compileSum(Builder $query, array $aggregate)
-        {
-            $column = $this->normalizeColumn($query, $aggregate['columns'][0]);
+    protected function compileSum(Builder $query, array $aggregate)
+    {
+        $column = $this->normalizeColumn($query, $aggregate['columns'][0]);
 
-            return "COLLECT AGGREGATE aggregateResult = SUM($column)";
-        }
+        return "COLLECT AGGREGATE aggregateResult = SUM($column)";
+    }
 }

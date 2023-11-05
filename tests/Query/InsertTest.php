@@ -46,10 +46,17 @@ test('insert or ignore inserts data', function () {
         "residence_id" => "winterfell"
     ];
 
+    $result = DB::table('characters')
+        ->where("name", "==", "Lyanna")
+        ->get();
+
+    expect($result->count())->toBe(0);
+
+
     DB::table('characters')->insertOrIgnore($characterData);
 
     $result = DB::table('characters')
-        ->where("name", "==", "Lyanna")
+        ->where("name", "=", "Lyanna")
         ->get();
 
     expect($result->count())->toBe(1);
@@ -69,7 +76,7 @@ test('insert or ignore doesnt error on duplicates', function () {
     DB::table('characters')->insertOrIgnore($characterData);
 
     $result = DB::table('characters')
-        ->where("name", "==", "Lyanna")
+        ->where("name", "=", "Lyanna")
         ->get();
 
     expect($result->count())->toBe(1);
@@ -90,9 +97,12 @@ test('insert embedded empty array', function () {
     DB::table('characters')->insertOrIgnore($characterData);
 
     $result = DB::table('characters')
-        ->where("name", "==", "Lyanna")
+        ->where("name", "=", "Lyanna")
         ->get();
 
     expect($result->first()->tags)->toBeArray();
     expect($result->first()->tags)->toBeEmpty();
 });
+
+test('insert using', function () {
+})->todo();

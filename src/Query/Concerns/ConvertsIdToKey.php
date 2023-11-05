@@ -24,7 +24,7 @@ trait ConvertsIdToKey
     protected function convertIdInString(string $data): string
     {
         return preg_replace(
-            "/(?<![_a-zA-Z0-9_\s\.][^\.])id$/",
+            "/^id$/",
             '_key',
             $data,
             1

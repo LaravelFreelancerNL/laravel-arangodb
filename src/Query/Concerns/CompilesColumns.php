@@ -24,7 +24,6 @@ trait CompilesColumns
     {
         $returnDocs = [];
         $returnAttributes = [];
-
         // Prepare columns
         foreach ($columns as $key => $column) {
             // Extract rows
@@ -37,7 +36,7 @@ trait CompilesColumns
 
             // Extract groups
             if (is_array($query->groups) && in_array($column, $query->groups)) {
-                $returnAttributes[$key] = $column;
+                $returnAttributes[$key] = $this->normalizeColumn($query, $column);
 
                 continue;
             }
@@ -52,8 +51,7 @@ trait CompilesColumns
                     );
                     continue;
                 }
-
-                $returnAttributes[$alias] = $this->normalizeColumn($query, $column);
+                $returnAttributes[$alias] = $column;
             }
         }
 
@@ -63,7 +61,6 @@ trait CompilesColumns
         if ($query->distinct) {
             $return .= 'DISTINCT ';
         }
-
         return $return . $values;
     }
 
@@ -95,12 +92,12 @@ trait CompilesColumns
 
 
         if (key_exists($column, $query->variables)) {
-            return $this->wrap($column);
+            return $column;
         }
 
         //We check for an existing alias to determine of the first reference is a table.
         // In which case we replace it with the alias.
-        return $this->normalizeColumnReferences($query, $column, $table);
+        return $this->wrap($this->normalizeColumnReferences($query, $column, $table));
     }
 
     /**
@@ -120,7 +117,7 @@ trait CompilesColumns
 
         $column = Arr::undot([$column => $column]);
         $alias = array_key_first($column);
-        $column = $column[$alias];
+        $column = $this->wrap($column[$alias]);
         return [$column, $alias];
     }
 
@@ -152,7 +149,7 @@ trait CompilesColumns
             $tableAlias = $this->generateTableAlias($table);
             array_unshift($references, $tableAlias);
         }
-        return $this->wrap(implode('.', $references));
+        return implode('.', $references);
     }
 
 
@@ -164,7 +161,7 @@ trait CompilesColumns
         $values = $this->mergeReturnDocs($values, $returnAttributes, $returnDocs);
 
         if ($query->aggregate !== null) {
-            $values = ['aggregate' => 'aggregateResult'];
+            $values = ['`aggregate`' => 'aggregateResult'];
         }
 
         if (empty($values)) {
@@ -192,9 +189,17 @@ trait CompilesColumns
                 $value = $this->formatReturnData($value);
             }
 
+            if (array_is_list($values)) {
+                $object .= $value;
+                continue;
+            }
+
             $object .= $key . ': ' . $value;
         }
 
+        if (array_is_list($values)) {
+            return '[' . $object . ']';
+        }
         return '{' . $object . '}';
     }
 
@@ -227,21 +232,21 @@ trait CompilesColumns
         return $values;
     }
 
-    //    protected function mergeJoinResults($builder, $baseTable)
-    //    {
-    //        $tablesToJoin = [];
-    //        foreach ($builder->joins as $key => $join) {
-    //            $tableAlias = $this->getTableAlias($join->table);
-    //
-    //            if (! isset($tableAlias)) {
-    //                $tableAlias = $this->generateTableAlias($join->table);
-    //            }
-    //            $tablesToJoin[$key] = $tableAlias;
-    //        }
-    //
-    //        $tablesToJoin = array_reverse($tablesToJoin);
-    //        $tablesToJoin[] = $baseTable;
-    //
-    //        return $builder->aqb->merge(...$tablesToJoin);
-    //    }
+    protected function mergeJoinResults(IlluminateQueryBuilder $query, $baseTable): string
+    {
+        $tablesToJoin = [];
+        foreach ($query->joins as $key => $join) {
+            $tableAlias = $this->getTableAlias($join->table);
+
+            if (! isset($tableAlias)) {
+                $tableAlias = $this->generateTableAlias($join->table);
+            }
+            $tablesToJoin[$key] = $tableAlias;
+        }
+
+        $tablesToJoin = array_reverse($tablesToJoin);
+        $tablesToJoin[] = $baseTable;
+
+        return 'MERGE('.implode(', ', $tablesToJoin).')';
+    }
 }

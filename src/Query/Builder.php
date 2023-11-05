@@ -5,19 +5,23 @@ namespace LaravelFreelancerNL\Aranguent\Query;
 use Closure;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Database\Query\Expression;
+use Illuminate\Support\Arr;
 use InvalidArgumentException;
 use LaravelFreelancerNL\Aranguent\Connection;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsHavingClauses;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsJoinClauses;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsSubqueries;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsWhereClauses;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\ConvertsIdToKey;
 use Illuminate\Contracts\Database\Query\Expression as ExpressionContract;
+use LaravelFreelancerNL\Aranguent\Query\Data\SearchOptionsData;
 use LaravelFreelancerNL\FluentAQL\Exceptions\BindException;
 use LaravelFreelancerNL\FluentAQL\Expressions\FunctionExpression;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
 class Builder extends IlluminateQueryBuilder
 {
+    use BuildsHavingClauses;
     use BuildsJoinClauses;
     use BuildsSubqueries;
     use BuildsWhereClauses;
@@ -81,15 +85,15 @@ class Builder extends IlluminateQueryBuilder
      * Create a new query builder instance.
      */
     public function __construct(
-        Connection $connection,
-        Grammar $grammar = null,
-        Processor $processor = null,
+        Connection   $connection,
+        Grammar      $grammar = null,
+        Processor    $processor = null,
         QueryBuilder $aqb = null
     ) {
         $this->connection = $connection;
         $this->grammar = $grammar ?: $connection->getQueryGrammar();
         $this->processor = $processor ?: $connection->getPostProcessor();
-        if (! $aqb instanceof QueryBuilder) {
+        if (!$aqb instanceof QueryBuilder) {
             $aqb = new QueryBuilder();
         }
         $this->aqb = $aqb;
@@ -99,7 +103,7 @@ class Builder extends IlluminateQueryBuilder
 
     protected function bindValue($value, string $type = 'where')
     {
-        if (! $value instanceof Expression) {
+        if (!$value instanceof Expression) {
             $this->addBinding($value, $type);
             $value = $this->replaceValueWithBindVariable($type);
         }
@@ -110,21 +114,21 @@ class Builder extends IlluminateQueryBuilder
 
     protected function generateBindVariable(string $type = 'where'): string
     {
-        return $this->queryId.'_'.$type.'_'.(count($this->bindings[$type]) + 1);
+        return $this->queryId . '_' . $type . '_' . (count($this->bindings[$type]) + 1);
     }
 
     /**
      * Add a binding to the query.
      *
-     * @param  mixed  $value
-     * @param  string  $type
+     * @param mixed $value
+     * @param string $type
      * @return IlluminateQueryBuilder
      *
      * @throws \InvalidArgumentException
      */
     public function addBinding($value, $type = 'where')
     {
-        if (! array_key_exists($type, $this->bindings)) {
+        if (!array_key_exists($type, $this->bindings)) {
             throw new InvalidArgumentException("Invalid binding type: {$type}.");
         }
 
@@ -142,13 +146,13 @@ class Builder extends IlluminateQueryBuilder
 
     protected function replaceValueWithBindVariable(string $type = 'where')
     {
-        return '@'.$this->getLastBindVariable($type);
+        return '@' . $this->getLastBindVariable($type);
     }
 
     /**
      * Remove all of the expressions from a list of bindings.
      *
-     * @param  array  $bindings
+     * @param array $bindings
      * @return array
      */
     public function cleanBindings(array $bindings)
@@ -186,8 +190,8 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Set the table which the query is targeting.
      *
-     * @param  \Closure|IlluminateQueryBuilder|string  $table
-     * @param  string|null  $as
+     * @param \Closure|IlluminateQueryBuilder|string $table
+     * @param string|null $as
      * @return IlluminateQueryBuilder
      */
     public function from($table, $as = null)
@@ -205,7 +209,7 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Run a pagination count query.
      *
-     * @param  array<mixed>  $columns
+     * @param array<mixed> $columns
      * @return array<mixed>
      */
     protected function runPaginationCountQuery($columns = ['*'])
@@ -223,7 +227,7 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Set the columns to be selected.
      *
-     * @param  array<mixed>|mixed  $columns
+     * @param array<mixed>|mixed $columns
      */
     public function select($columns = ['*']): IlluminateQueryBuilder
     {
@@ -247,7 +251,7 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Add a new select column to the query.
      *
-     * @param  array|mixed  $column
+     * @param array|mixed $column
      * @return $this
      */
     public function addSelect($column)
@@ -260,14 +264,14 @@ class Builder extends IlluminateQueryBuilder
     }
 
     /**
-     * @param  array<mixed>  $columns
+     * @param array<mixed> $columns
      */
     protected function addColumns(array $columns): void
     {
         foreach ($columns as $as => $column) {
             if (is_string($as) && $this->isQueryable($column)) {
                 if (is_null($this->columns)) {
-                    $this->select($this->from.'.*');
+                    $this->select($this->from . '.*');
                 }
 
                 $this->selectSub($column, $as);
@@ -288,13 +292,13 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Insert a new record into the database.
      *
-     * @param  array<mixed>  $values
+     * @param array<mixed> $values
      *
      * @throws BindException
      */
     public function insert(array $values): bool
     {
-        if (! array_is_list($values)) {
+        if (!array_is_list($values)) {
             $values = [$values];
         }
 
@@ -314,11 +318,11 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Insert a new record and get the value of the primary key.
      *
-     * @param  array<mixed>  $values
+     * @param array<mixed> $values
      */
     public function insertGetId(array $values, $sequence = null)
     {
-        if (! array_is_list($values)) {
+        if (!array_is_list($values)) {
             $values = [$values];
         }
 
@@ -329,7 +333,7 @@ class Builder extends IlluminateQueryBuilder
 
         $bindVar = $this->bindValue($values, 'insert');
 
-        $aql =  $this->grammar->compileInsertGetId($this, $values, $sequence, $bindVar);
+        $aql = $this->grammar->compileInsertGetId($this, $values, $sequence, $bindVar);
         $response = $this->getConnection()->execute($aql, $this->getBindings());
         $this->aqb = new QueryBuilder();
 
@@ -339,13 +343,13 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Insert a new record into the database.
      *
-     * @param  array<mixed>  $values
+     * @param array<mixed> $values
      *
      * @throws BindException
      */
     public function insertOrIgnore(array $values): bool
     {
-        if (! array_is_list($values)) {
+        if (!array_is_list($values)) {
             $values = [$values];
         }
 
@@ -366,7 +370,7 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Delete records from the database.
      *
-     * @param  mixed  $id
+     * @param mixed $id
      * @return int
      */
     public function delete($id = null)
@@ -374,8 +378,8 @@ class Builder extends IlluminateQueryBuilder
         // If an ID is passed to the method, we will set the where clause to check the
         // ID to let developers to simply and quickly remove a single row from this
         // database without manually specifying the "where" clauses on the query.
-        if (! is_null($id)) {
-            $this->where($this->from.'._key', '=', $id);
+        if (!is_null($id)) {
+            $this->where($this->from . '._key', '=', $id);
         }
 
         $this->applyBeforeQueryCallbacks();
@@ -396,27 +400,10 @@ class Builder extends IlluminateQueryBuilder
     }
 
     /**
-     * Update a record in the database.
-     *
-     * @param  array<mixed>  $values
-     * @return int
-     */
-    public function update(array $values)
-    {
-        $this->aqb = new QueryBuilder();
-
-        $this->grammar->compileUpdate($this, $values)->setAql();
-        $results = $this->connection->update($this->aqb);
-        $this->aqb = new QueryBuilder();
-
-        return $results;
-    }
-
-    /**
      * Execute an aggregate function on the database.
      *
-     * @param  string  $function
-     * @param  array<mixed>  $columns
+     * @param string $function
+     * @param array<mixed> $columns
      * @return mixed
      */
     public function aggregate($function, $columns = ['*'])
@@ -426,30 +413,18 @@ class Builder extends IlluminateQueryBuilder
             ->get($columns);
 
 
-        if (! $results->isEmpty()) {
-            return array_change_key_case((array) $results[0])['aggregate'];
+        if (!$results->isEmpty()) {
+            return array_change_key_case((array)$results[0])['aggregate'];
         }
 
         return false;
     }
 
     /**
-     * Determine if the given operator is supported.
-     *
-     * @param  string  $operator
-     * @return bool
-     */
-    protected function invalidOperator($operator)
-    {
-        return ! in_array(strtolower($operator), $this->operators, true) &&
-            ! isset($this->grammar->getOperators()[strtoupper($operator)]);
-    }
-
-    /**
      * Add an "order by" clause to the query.
      *
-     * @param  \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder|\Illuminate\Contracts\Database\Query\Expression|string  $column
-     * @param  string  $direction
+     * @param \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder|\Illuminate\Contracts\Database\Query\Expression|string $column
+     * @param string $direction
      * @return $this
      *
      * @throws \InvalidArgumentException
@@ -459,14 +434,14 @@ class Builder extends IlluminateQueryBuilder
         if ($this->isQueryable($column)) {
             [$query, $bindings] = $this->createSub($column);
 
-            $column = new Expression('('.$query.')');
+            $column = new Expression('(' . $query . ')');
 
             $this->addBinding($bindings, $this->unions ? 'unionOrder' : 'order');
         }
 
         $direction = strtoupper($direction);
 
-        if (! in_array($direction, ['ASC', 'DESC'], true)) {
+        if (!in_array($direction, ['ASC', 'DESC'], true)) {
             throw new InvalidArgumentException('Order direction must be "asc" or "desc".');
         }
 
@@ -501,7 +476,7 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Put the query's results in random order.
      *
-     * @param  string  $seed
+     * @param string $seed
      * @return $this
      */
     public function inRandomOrder($seed = '')
@@ -513,15 +488,44 @@ class Builder extends IlluminateQueryBuilder
     }
 
     /**
+     * Add a "group by" clause to the query.
+     *
+     * @param array|\Illuminate\Contracts\Database\Query\Expression|string ...$groups
+     * @return $this
+     */
+    public function groupBy(...$groups)
+    {
+        foreach ($groups as $group) {
+            $this->groups = array_merge(
+                (array)$this->groups,
+                Arr::wrap($group)
+            );
+        }
+
+        return $this;
+    }
+
+    /**
+     * Search an ArangoSearch view.
+     * Deprecated in favor of searchView to avoid conflicts with Laravel Scout
+     *
+     * @deprecated
+     */
+    public function search(mixed $predicates, SearchOptionsData $options = null): Builder
+    {
+        return $this->searchView($predicates, $options);
+    }
+
+    /**
      * Search an ArangoSearch view.
      */
-    public function search(mixed $predicates, array $options = null): Builder
+    public function searchView(mixed $predicates, SearchOptionsData $options = null): Builder
     {
         if ($predicates instanceof Closure) {
             $predicates = $predicates($this->aqb);
         }
 
-        if (! is_array($predicates)) {
+        if (!is_array($predicates)) {
             $predicates = [$predicates];
         }
 

@@ -7,7 +7,7 @@ use Tests\TestCase;
 
 uses(
     TestCase::class,
-    DatabaseTransactions::class
+    DatabaseTransactions::class,
 );
 
 test('output conversion with whole document', function () {
@@ -35,7 +35,7 @@ test('get id conversion single attribute', function () {
     $builder = $builder->select('id')->from('users');
 
     $this->assertSame(
-        'FOR userDoc IN users RETURN userDoc._key',
+        'FOR userDoc IN users RETURN `userDoc`.`_key`',
         $builder->toSql()
     );
 });
@@ -46,7 +46,7 @@ test('get id conversion multiple attributes', function () {
     $result = $query->first();
 
     $this->assertSame(
-        'FOR characterDoc IN characters RETURN {id: characterDoc._key, name: characterDoc.name}',
+        'FOR characterDoc IN characters LIMIT 1 RETURN {id: `characterDoc`.`_key`, name: `characterDoc`.`name`}',
         $query->toSql()
     );
 
@@ -61,7 +61,7 @@ test('get id conversion with alias', function () {
     $result = $query->first();
 
     $this->assertSame(
-        'FOR characterDoc IN characters RETURN {i: characterDoc._key, name: characterDoc.name}',
+        'FOR characterDoc IN characters LIMIT 1 RETURN {i: `characterDoc`.`_key`, name: `characterDoc`.`name`}',
         $query->toSql()
     );
 
@@ -76,7 +76,7 @@ test('get id conversion with multiple ids', function () {
     $result = $query->first();
 
     $this->assertSame(
-        'FOR characterDoc IN characters RETURN {id: characterDoc._key, i: characterDoc._key, name: characterDoc.name}',
+        'FOR characterDoc IN characters LIMIT 1 RETURN {id: `characterDoc`.`_key`, i: `characterDoc`.`_key`, name: `characterDoc`.`name`}',
         $query->toSql()
     );
 
@@ -91,7 +91,7 @@ test('get id conversion with multiple aliases', function () {
     $result = $query->first();
 
     $this->assertSame(
-        'FOR characterDoc IN characters RETURN {i: characterDoc._key, i2: characterDoc._key, name: characterDoc.name}',
+        'FOR characterDoc IN characters LIMIT 1 RETURN {i: `characterDoc`.`_key`, i2: `characterDoc`.`_key`, name: `characterDoc`.`name`}',
         $query->toSql()
     );
 
@@ -107,8 +107,8 @@ test('get id conversion with wheres', function () {
     $result = $query->first();
 
     $this->assertSame(
-        'FOR characterDoc IN characters FILTER characterDoc.`_key` == @' . $query->getQueryId() . '_where_1'
-        . ' RETURN characterDoc',
+        'FOR characterDoc IN characters FILTER `characterDoc`.`_key` == @' . $query->getQueryId() . '_where_1'
+        . ' LIMIT 1',
         $query->toSql()
     );
 
@@ -117,7 +117,7 @@ test('get id conversion with wheres', function () {
 
 test('model has correct ids', function () {
     $results = Character::all();
-    ray($results);
+
     expect($results->first()->id)->toBe('NedStark');
     expect($results->first()->_id)->toBe('characters/NedStark');
     expect($results->first()->_key)->toBeNull();

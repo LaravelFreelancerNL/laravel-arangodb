@@ -10,10 +10,32 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Arr;
+use InvalidArgumentException;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 
 trait BuildsWhereClauses
 {
+    /**
+     * Prepare the value and operator for a where clause.
+     *
+     * @param  string  $value
+     * @param  string  $operator
+     * @param  bool  $useDefault
+     * @return array
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function prepareValueAndOperator($value, $operator, $useDefault = false)
+    {
+        if ($useDefault) {
+            return [$operator, '=='];
+        } elseif ($this->invalidOperatorAndValue($operator, $value)) {
+            throw new InvalidArgumentException('Illegal operator and value combination.');
+        }
+
+        return [$value, $operator];
+    }
+
     /**
      * Add a date based (year, month, day, time) statement to the query.
      *
@@ -144,8 +166,8 @@ trait BuildsWhereClauses
         }
 
         // If the given operator is not found in the list of valid operators we will
-        // assume that the developer is just short-cutting the '=' operators and
-        // we will set the operators to '=' and set the values appropriately.
+        // assume that the developer is just short-cutting the '==' operators and
+        // we will set the operators to '==' and set the values appropriately.
         if ($this->invalidOperator($operator)) {
             [$value, $operator] = [$operator, '=='];
         }

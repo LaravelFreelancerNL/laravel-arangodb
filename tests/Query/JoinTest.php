@@ -9,16 +9,6 @@ uses(
     DatabaseTransactions::class
 );
 
-test('join', function () {
-    $characters = DB::table('characters')
-        ->join('locations', 'characters.residence_id', '=', 'locations.id')
-        ->where('residence_id', '=', 'winterfell')
-        ->get();
-
-    expect($characters)->toHaveCount(15);
-    expect($characters[0]->id)->toEqual('NedStark');
-});
-
 test('cross join', function () {
     $characters = DB::table('characters')
         ->crossJoin('locations')
@@ -27,9 +17,22 @@ test('cross join', function () {
     expect($characters)->toHaveCount(387);
 });
 
+test('join', function () {
+    $query = DB::table('characters')
+        ->join('locations', 'characterDoc.residence_id', '=', 'locationDoc._key')
+        ->where('residence_id', '=', 'winterfell');
+
+    ray($query->toSql(), $query->getBindings());
+
+    $characters = $query->get();
+
+    expect($characters)->toHaveCount(15);
+    expect($characters[0]->id)->toEqual('NedStark');
+});
+
 test('left join', function () {
     $characters = DB::table('characters')
-        ->leftJoin('locations', 'characters.residence_id', '=', 'locations.id')
+        ->leftJoin('locations', 'characterDoc.residence_id', '=', 'locationDoc._key')
         ->get();
 
     $charactersWithoutResidence = DB::table('characters')
