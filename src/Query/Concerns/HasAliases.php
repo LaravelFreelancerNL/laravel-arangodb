@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
 use Exception;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Str;
 
 trait HasAliases
@@ -128,8 +129,13 @@ trait HasAliases
      * @param  array<mixed>|string  $column
      * @return array<mixed>|string
      */
-    protected function convertColumnId(array|string $column): array|string
+    protected function convertColumnId(array|string|Expression $column): array|string|Expression
     {
+
+        if ($column instanceof Expression) {
+            return $column;
+        }
+
         return $this->convertIdToKey($column);
     }
 }

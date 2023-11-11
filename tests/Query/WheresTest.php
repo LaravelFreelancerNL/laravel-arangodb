@@ -1,8 +1,11 @@
 <?php
 
 use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
+use Tests\Setup\Models\Character;
+use Tests\TestCase;
 
 uses(
+    TestCase::class,
     DatabaseTransactions::class
 );
 
@@ -355,4 +358,73 @@ test('where nested', function () {
         . ') RETURN characterDoc',
         $query->toSql()
     );
+});
+
+test('subquery where', function () {
+    $query = Character::where(function ($query) {
+        $query->select('name')
+            ->from('locations')
+            ->whereColumn('locations.led_by', 'characters.id')
+            ->limit(1);
+    }, 'Dragonstone');
+
+    $characters = $query->get();
+
+    expect($characters[0]->id)->toEqual('DaenerysTargaryen');
+});
+
+test('where sub', function () {
+    $query = Character::where('id', '==', function ($query) {
+        $query->select('led_by')
+            ->from('locations')
+            ->where('name', 'Dragonstone')
+            ->limit(1);
+    });
+    $characters = $query->get();
+
+    expect($characters[0]->id)->toEqual('DaenerysTargaryen');
+});
+
+test('where exists with multiple results', function () {
+    $query = Character::whereExists(function ($query) {
+        $query->select('name')
+            ->from('locations')
+            ->whereColumn('locations.led_by', 'characters.id');
+    });
+
+    $characters = $query->get();
+    expect(count($characters))->toEqual(3);
+});
+
+test('where exists with limit', function () {
+    $characters = Character::whereExists(function ($query) {
+        $query->select('name')
+            ->from('locations')
+            ->whereColumn('locations.led_by', 'characters.id')
+            ->limit(1);
+    })
+        ->get();
+    expect(count($characters))->toEqual(3);
+});
+
+test('where not exists with multiple results', function () {
+    $query = Character::whereNotExists(function ($query) {
+        $query->select('name')
+            ->from('locations')
+            ->whereColumn('locations.led_by', 'characters.id');
+    });
+
+    $characters = $query->get();
+    expect(count($characters))->toEqual(40);
+});
+
+test('where not exists with limit', function () {
+    $characters = Character::whereNotExists(function ($query) {
+        $query->select('name')
+            ->from('locations')
+            ->whereColumn('locations.led_by', 'characters.id')
+            ->limit(1);
+    })
+        ->get();
+    expect(count($characters))->toEqual(40);
 });

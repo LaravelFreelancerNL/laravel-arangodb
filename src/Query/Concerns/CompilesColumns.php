@@ -6,6 +6,7 @@ namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
 use Exception;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Arr;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 use LaravelFreelancerNL\FluentAQL\Expressions\FunctionExpression;
@@ -69,7 +70,7 @@ trait CompilesColumns
      */
     protected function normalizeColumn(IlluminateQueryBuilder $query, mixed $column, string $table = null): mixed
     {
-        if ($column instanceof QueryBuilder || $column instanceof FunctionExpression) {
+        if ($column instanceof QueryBuilder || $column instanceof FunctionExpression || $column instanceof Expression) {
             return $column;
         }
 

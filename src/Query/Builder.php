@@ -103,6 +103,9 @@ class Builder extends IlluminateQueryBuilder
 
     protected function bindValue($value, string $type = 'where')
     {
+        if ($this->grammar->isBind($value, $type)) {
+            return $value;
+        }
         if (!$value instanceof Expression) {
             $this->addBinding($value, $type);
             $value = $this->replaceValueWithBindVariable($type);

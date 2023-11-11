@@ -81,6 +81,19 @@ trait HandlesAqlGrammar
         return 'Y-m-d\TH:i:s.vp';
     }
 
+    public function isBind(array|string $value, string $type): bool
+    {
+        if (is_array($value)) {
+            return false;
+        }
+
+        if (preg_match('/^@?[0-9]{4}_'.$value.'_[0-9_]+$/', $value)) {
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * Get the appropriate query parameter place-holder for a value.
      *

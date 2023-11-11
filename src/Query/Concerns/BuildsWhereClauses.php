@@ -6,6 +6,8 @@ namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
 use Carbon\CarbonPeriod;
 use Closure;
+use Illuminate\Contracts\Database\Query\ConditionExpression;
+use Illuminate\Contracts\Database\Query\Expression as ExpressionContract;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Database\Query\Expression;
@@ -55,76 +57,32 @@ trait BuildsWhereClauses
         return $this;
     }
 
+
     /**
      * Add an exists clause to the query.
      *
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
-     *
-     * @param  Builder  $query
+     * @param  \Illuminate\Database\Query\Builder  $query
      * @param  string  $boolean
      * @param  bool  $not
-     * @return Builder
+     * @return $this
      */
-    //    public function addWhereExistsQuery(IlluminateQueryBuilder $query, $boolean = 'and', $not = false)
-    //    {
-    //        if ($not) {
-    //            return $this->addWhereNotExistsQuery($query, $boolean = 'and');
-    //        }
-    //
-    //        $type = 'Exists';
-    //        $operator = '>';
-    //        $value = 0;
-    //
-    //        $query->grammar->compileSelect($query);
-    //
-    //        if ($query->limit != 1) {
-    //            $query->aqb = $query->aqb->length($query->aqb);
-    //        }
-    //
-    //        if (isset($query->limit) && $query->limit == 1) {
-    //            $query->aqb = $query->aqb->first($query->aqb);
-    //            $operator = '!=';
-    //            $value = null;
-    //        }
-    //
-    //        $this->wheres[] = compact('type', 'query', 'operator', 'value', 'boolean');
-    //
-    //        return $this;
-    //    }
+    public function addWhereExistsQuery(IlluminateQueryBuilder $query, $boolean = 'and', $not = false)
+    {
+        $type = $not ? 'NotExists' : 'Exists';
 
-    /**
-     * Add an not exists clause to the query.
-     *
-     * @param  Builder  $query
-     * @param  string  $boolean
-     * @return Builder
-     */
-    //    public function addWhereNotExistsQuery(IlluminateQueryBuilder $query, $boolean = 'and')
-    //    {
-    //        $type = 'Exists';
-    //        $operator = '==';
-    //        $value = 0;
-    //
-    //        $query->grammar->compileSelect($query);
-    //
-    //        if ($query->limit != 1) {
-    //            $query->aqb = $query->aqb->length($query->aqb);
-    //        }
-    //
-    //        if (isset($query->limit) && $query->limit == 1) {
-    //            $query->aqb = $query->aqb->first($query->aqb);
-    //            $value = null;
-    //        }
-    //
-    //        $this->wheres[] = compact('type', 'query', 'operator', 'value', 'boolean');
-    //
-    //        return $this;
-    //    }
+        $subquery = '('.$query->toSql().')';
+
+        $this->wheres[] = compact('type', 'subquery', 'boolean');
+
+        $this->bindings = array_merge($this->bindings, $query->getBindings());
+
+        return $this;
+    }
 
     /**
      * Add a basic where clause to the query.
      *
-     * @param  \Closure|string|array  $column
+     * @param  \Closure|Expression|string|array  $column
      * @param  mixed  $operator
      * @param  mixed  $value
      * @param  string  $boolean
@@ -132,6 +90,14 @@ trait BuildsWhereClauses
      */
     public function where($column, $operator = null, $value = null, $boolean = 'and')
     {
+        if ($column instanceof ConditionExpression) {
+            $type = 'Expression';
+
+            $this->wheres[] = compact('type', 'column', 'boolean');
+
+            return $this;
+        }
+
         // If the column is an array, we will assume it is an array of key-value pairs
         // and can add them each as a where clause. We will maintain the boolean we
         // received when the method was called and pass it into the nested where.
@@ -161,8 +127,12 @@ trait BuildsWhereClauses
         if ($this->isQueryable($column) && ! is_null($operator)) {
             [$sub, $bindings] = $this->createSub($column);
 
-            return $this->addBinding($bindings, 'where')
-                ->where(new Expression('(' . $sub . ')'), $operator, $value, $boolean);
+            //FIXME: Check for limit in query, if limit 1, surround subquery with first(());
+
+            if (! empty($bindings)) {
+                $this->addBinding($bindings, 'where');
+            }
+            return $this->where(new Expression('(' . $sub . ')'), $operator, $value, $boolean);
         }
 
         // If the given operator is not found in the list of valid operators we will
@@ -175,7 +145,7 @@ trait BuildsWhereClauses
         // If the value is a Closure, it means the developer is performing an entire
         // sub-select within the query and we will need to compile the sub-select
         // within the where clause to get the appropriate query record results.
-        if ($value instanceof Closure) {
+        if ($this->isQueryable($value)) {
             return $this->whereSub($column, $operator, $value, $boolean);
         }
 
@@ -188,10 +158,14 @@ trait BuildsWhereClauses
 
         $type = 'Basic';
 
+        $columnString = ($column instanceof ExpressionContract)
+            ? $this->grammar->getValue($column)
+            : $column;
+
         // If the column is making a JSON reference we'll check to see if the value
         // is a boolean. If it is, we'll add the raw boolean string as an actual
         // value to the query to ensure this is properly handled by the query.
-        if (str_contains($column, '->') && is_bool($value)) {
+        if (str_contains($columnString, '->') && is_bool($value)) {
             $value = new Expression($value ? 'true' : 'false');
 
             if (is_string($column)) {
@@ -203,7 +177,9 @@ trait BuildsWhereClauses
             $type = 'Bitwise';
         }
 
-        $value = $this->bindValue($value);
+        if (! $value instanceof ExpressionContract) {
+            $value = $this->bindValue($this->flattenValue($value));
+        }
 
         // Now that we are working with just a simple query we can put the elements
         // in our array and add the query binding to our array of bindings that
@@ -215,6 +191,8 @@ trait BuildsWhereClauses
             'value',
             'boolean'
         );
+
+
 
         return $this;
     }
@@ -333,35 +311,43 @@ trait BuildsWhereClauses
     /**
      * Add a full sub-select to the query.
      *
-     * @param  string  $column
+     * @param  \Illuminate\Contracts\Database\Query\Expression|string  $column
      * @param  string  $operator
+     * @param  \Closure||\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder  $callback
      * @param  string  $boolean
-     * @return Builder
+     * @return $this
      */
-    //    protected function whereSub($column, $operator, Closure $callback, $boolean)
-    //    {
-    //        $type = 'Sub';
-    //
-    //        // Once we have the query instance we can simply execute it so it can add all
-    //        // of the sub-select's conditions to itself, and then we can cache it off
-    //        // in the array of where clauses for the "main" parent query instance.
-    //        call_user_func($callback, $query = $this->forSubQuery());
-    //
-    //        $query->grammar->compileSelect($query);
-    //
-    //        if (isset($query->limit) && $query->limit == 1) {
-    //            //Return the value, not an array of values
-    //            $query->aqb = $query->aqb->first($query->aqb);
-    //        }
-    //
-    //        $this->wheres[] = compact(
-    //            'type',
-    //            'column',
-    //            'operator',
-    //            'query',
-    //            'boolean'
-    //        );
-    //
-    //        return $this;
-    //    }
+    protected function whereSub($column, $operator, $callback, $boolean)
+        {
+            $type = 'Sub';
+
+            // Once we have the query instance we can simply execute it so it can add all
+            // of the sub-select's conditions to itself, and then we can cache it off
+            // in the array of where clauses for the "main" parent query instance.
+            call_user_func($callback, $query = $this->forSubQuery());
+            $query->grammar->compileSelect($query);
+
+            $subquery = '('.$query->toSql().')';
+
+            // ArangoDB always returns an array of results. SQL will return a singular result
+            // To mimic the same behaviour we take the first result.
+            if ($query->hasLimitOfOne($query)) {
+                $subquery = 'FIRST('.$subquery.')';
+            }
+
+            $this->bindings = array_merge(
+                $this->bindings,
+                $query->bindings
+            );
+
+            $this->wheres[] = compact(
+                'type',
+                'column',
+                'operator',
+                'subquery',
+                'boolean'
+            );
+
+            return $this;
+        }
 }

@@ -82,7 +82,14 @@ trait CompilesWhereClauses
 
         $where = $this->normalizeOperator($where);
 
-        $predicate[0] = $this->normalizeColumn($query, $where['column']);
+        if ($where['column'] instanceof expression) {
+            //FIXME: first might need to be generic for subqueries with limit 1...?
+            $column = 'FIRST('.$where['column']->getValue($this).')';
+        } else {
+            $column = $this->normalizeColumn($query, $where['column']);
+        }
+
+        $predicate[0] = $column;
         $predicate[1] = $where['operator'];
         $predicate[2] = $this->parameter($where['value']);
 
@@ -463,63 +470,44 @@ trait CompilesWhereClauses
     /**
      * Compile a where condition with a sub-select.
      *
-     * @param  Builder  $query
-     * @param  array  $where
+     * @param IlluminateQueryBuilder $query
+     * @param array $where
      * @return string
+     * @throws \Exception
      */
-    //    protected function whereSub(Builder $query, $where)
-    //    {
-    //        $predicate = [];
-    //
-    //        $where = $this->normalizeOperator($where);
-    //
-    //        $predicate[0] = $this->normalizeColumn($query, $where['column']);
-    //        $predicate[1] = $where['operator'];
-    //        $predicate[2] = $where['query']->aqb;
-    //        $predicate[3] = $where['boolean'];
-    //
-    //        return $predicate;
-    //    }
+    protected function whereSub(IlluminateQueryBuilder $query, $where)
+        {
+            $predicate = [];
+
+            $where = $this->normalizeOperator($where);
+
+            $predicate[0] = $this->normalizeColumn($query, $where['column']);
+            $predicate[1] = $where['operator'];
+            $predicate[2] = $where['subquery'];
+
+            return implode(' ', $predicate);
+        }
 
     /**
      * Compile a where exists clause.
      *
-     *  @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     *
-     * @param  Builder  $query
+     * @param  \Illuminate\Database\Query\Builder  $query
      * @param  array  $where
      * @return string
      */
-    //    protected function whereExists(Builder $query, $where)
-    //    {
-    //        $predicate = [];
-    //
-    //        $predicate[0] = $where['query']->aqb;
-    //        $predicate[1] = $where['operator'];
-    //        $predicate[2] = $where['value'];
-    //        $predicate[3] = $where['boolean'];
-    //
-    //        return $predicate;
-    //    }
+    protected function whereExists(IlluminateQueryBuilder $query, $where)
+        {
+            RETURN 'LENGTH('.$where['subquery'].') > 0';
+        }
 
     /**
      * Compile a where exists clause.
      *
-     *  @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     *
-     * @param  Builder  $query
+     * @param  \Illuminate\Database\Query\Builder  $query
      * @param  array  $where
      * @return string
      */
-    //    protected function whereNotExists(Builder $query, $where)
-    //    {
-    //        $predicate = [];
-    //
-    //        $predicate[0] = $where['query']->aqb;
-    //        $predicate[1] = $where['operator'];
-    //        $predicate[2] = $where['value'];
-    //        $predicate[3] = $where['boolean'];
-    //
-    //        return $predicate;
-    //    }
-}
+    protected function whereNotExists(IlluminateQueryBuilder $query, $where)
+    {
+        RETURN 'LENGTH('.$where['subquery'].') == 0';
+    }}

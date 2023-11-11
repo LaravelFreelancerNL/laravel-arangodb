@@ -4,6 +4,7 @@ namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use InvalidArgumentException;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 use LaravelFreelancerNL\FluentAQL\Expressions\FunctionExpression;
@@ -11,28 +12,13 @@ use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
 trait BuildsSubqueries
 {
-    /**
-     * Add a subselect expression to the query.
-     *
-     * @param  Builder  $query
-     * @param  string  $as
-     * @return $this
-     */
-    //    public function selectSub($query, $as)
-    //    {
-    //        $query = $this->createSub($query);
-    //
-    //        // Register $as as attribute alias
-    //        $this->grammar->registerColumnAlias($as, $as);
-    //
-    //        // Set $as as return value
-    //        $this->columns[] = $as;
-    //
-    //        // let alias = query
-    //        $this->variables[$as] = $query;
-    //
-    //        return $query;
-    //    }
+    protected function hasLimitOfOne(IlluminateQueryBuilder $query) {
+        if (isset($query->limit) && $query->limit == 1) {
+            return true;
+        }
+
+        return false;
+    }
 
     /**
      * Parse the subquery into SQL and bindings.
