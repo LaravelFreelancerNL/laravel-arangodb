@@ -39,8 +39,6 @@ test('search order by best matching', function () {
 
     $results = $query->get();
 
-    ray($query->toSql(), $results);
-
     expect($results->count())->toBe(3);
     expect($results[0]->name)->toBe('Stark');
     expect($results[1]->name)->toBe('Targaryen');
