@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
+use Illuminate\Support\Arr;
+use Illuminate\Database\Query\Expression;
+
 trait HandlesAqlGrammar
 {
     /**
@@ -81,13 +84,9 @@ trait HandlesAqlGrammar
         return 'Y-m-d\TH:i:s.vp';
     }
 
-    public function isBind(array|string $value, string $type): bool
+    public function isBind($value, string $type): bool
     {
-        if (is_array($value)) {
-            return false;
-        }
-
-        if (preg_match('/^@?[0-9]{4}_'.$value.'_[0-9_]+$/', $value)) {
+        if (is_string($value) && preg_match('/^@?[0-9]{4}_' . $value . '_[0-9_]+$/', $value)) {
             return true;
         }
 
@@ -126,7 +125,7 @@ trait HandlesAqlGrammar
      *
      * @param  \Illuminate\Contracts\Database\Query\Expression|string  $value
      * @param  bool  $prefixAlias
-     * @return string
+     * @return string|array
      */
     public function wrap($value, $prefixAlias = false)
     {
@@ -134,10 +133,17 @@ trait HandlesAqlGrammar
             return $this->getValue($value);
         }
 
+        if (is_array($value)) {
+            foreach($value as $key => $subvalue) {
+                $value[$key] = $this->wrap($subvalue, $prefixAlias);
+            }
+            return $value;
+        }
+
         // If the value being wrapped has a column alias we will need to separate out
         // the pieces so we can wrap each of the segments of the expression on its
         // own, and then join these both back together using the "as" connector.
-        if (stripos($value, ' as ') !== false) {
+        if (is_string($value) && stripos($value, ' as ') !== false) {
             return $this->wrapAliasedValue($value, $prefixAlias);
         }
 
@@ -153,9 +159,8 @@ trait HandlesAqlGrammar
      */
     public function wrapTable($table)
     {
-        if (! $this->isExpression($table)) {
-            //            return $this->tablePrefix . $table;
-            return $this->wrap($this->tablePrefix.$table, true);
+        if (!$this->isExpression($table)) {
+            return $this->wrap($this->tablePrefix . $table, true);
         }
 
         return $this->getValue($table);
@@ -174,5 +179,41 @@ trait HandlesAqlGrammar
         }
 
         return '`' . str_replace('`', '``', $value) . '`';
+    }
+
+    public function generateAqlObject(array $data): string
+    {
+        $data = Arr::undot($data);
+
+        return $this->generateAqlObjectString($data);
+    }
+
+    protected function generateAqlObjectString(array $data): string
+    {
+        foreach($data as $key => $value) {
+            $prefix = $key . ': ';
+            if (array_is_list($data)) {
+                $prefix = '';
+            }
+
+            if (is_array($value)) {
+                $data[$key] = $prefix . $this->generateAqlObjectString($value);
+                continue;
+            }
+
+            if ($value instanceof Expression) {
+                $data[$key] = $prefix . $value->getValue($this);
+                continue;
+            }
+
+            //TODO: check if value needs additional assurances for regular strings vs binds and references
+            $data[$key] = $prefix . $value;
+        }
+
+        $returnString = implode(', ', $data);
+        if (array_is_list($data)) {
+            return '[' . $returnString . ']';
+        }
+        return '{' . $returnString . '}';
     }
 }

@@ -1,12 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\DB;
+use LaravelFreelancerNL\Aranguent\Query\JoinClause;
 use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 uses(
     TestCase::class,
-    DatabaseTransactions::class
+    DatabaseTransactions::class,
 );
 
 test('cross join', function () {
@@ -41,3 +42,37 @@ test('left join', function () {
     expect($characters[0]->id)->toEqual('NedStark');
     expect($charactersWithoutResidence)->toHaveCount(10);
 });
+
+
+test('joinSub', function () {
+    $locations = DB::table('locations')
+        ->select()
+        ->whereColumn('led_by', '=', 'characters.id');
+
+    $builder = DB::table('characters')
+        ->joinSub($locations, 'leads_locations', function (JoinClause $join) {
+            $join->on('characters.id', '=', 'leads_locations.led_by');
+        });
+
+    $characters = $builder->get();
+
+    expect($characters)->toHaveCount(7);
+    expect($characters[0]->id)->toEqual('DaenerysTargaryen');
+});
+
+
+test('leftJoinSub', function () {
+    $locations = DB::table('locations')
+        ->select()
+        ->whereColumn('led_by', '=', 'characters.id');
+
+    $builder = DB::table('characters')
+        ->leftJoinSub($locations, 'leads_locations', function (JoinClause $join) {
+            $join->on('characters.id', '=', 'leads_locations.led_by');
+        });
+
+    $characters = $builder->get();
+
+    expect($characters)->toHaveCount(43);
+    expect($characters[0]->id)->toEqual('DaenerysTargaryen');
+})->todo();

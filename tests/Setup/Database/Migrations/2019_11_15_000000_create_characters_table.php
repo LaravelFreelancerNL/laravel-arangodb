@@ -15,8 +15,7 @@ class CreateCharactersTable extends Migration
      */
     public function up()
     {
-        Schema::create('characters', function (Blueprint $collection) {
-        });
+        Schema::create('characters', function (Blueprint $collection) {});
     }
 
     /**

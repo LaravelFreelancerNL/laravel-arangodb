@@ -23,6 +23,5 @@ class SearchOptionsData extends Data
         public ?string $conditionOptimization,
         #[In(['exact', 'cost'])]
         public ?string $countApproximate
-    ) {
-    }
+    ) {}
 }

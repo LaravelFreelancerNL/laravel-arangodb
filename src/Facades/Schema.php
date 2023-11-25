@@ -29,6 +29,4 @@ use LaravelFreelancerNL\Aranguent\Schema\Builder;
  *
  * @see \LaravelFreelancerNL\Aranguent\Schema\Builder
  */
-class Schema extends IlluminateSchema
-{
-}
+class Schema extends IlluminateSchema {}

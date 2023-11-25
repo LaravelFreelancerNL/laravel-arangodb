@@ -64,7 +64,7 @@ class CommandServiceProvider extends IlluminateMigrationServiceProvider
     protected function registerCreator()
     {
         $this->app->singleton('migration.creator', function ($app) {
-            $customStubPath = __DIR__.'/../../stubs';
+            $customStubPath = __DIR__ . '/../../stubs';
 
             return new MigrationCreator($app['files'], $customStubPath);
         });

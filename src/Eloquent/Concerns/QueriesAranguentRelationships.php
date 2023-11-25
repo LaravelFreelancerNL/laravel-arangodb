@@ -57,7 +57,7 @@ trait QueriesAranguentRelationships
         }
 
         if (is_null($this->query->columns)) {
-            $this->query->select([$this->query->from.'.*']);
+            $this->query->select([$this->query->from . '.*']);
         }
 
         $relations = is_array($relations) ? $relations : [$relations];
@@ -123,7 +123,7 @@ trait QueriesAranguentRelationships
             $query->grammar->compileSelect($query);
             $result = (new ArangoQueryBuilder())->$function($query->aqb);
         }
-        if (! $function) {
+        if (!$function) {
             $query->limit(1);
             $result = $query;
         }

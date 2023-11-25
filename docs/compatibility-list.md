@@ -2,88 +2,82 @@
 This page shows a list of tried and tested compatible abilities and methods. Unmentioned methods & abilities 
 might work but your mileage may vary. 
 
-**_Note_**: This list is limited to database interactions. It lists 'create' but not 'make' etc.
+**_Note_**: This list is limited to database interactions. For example it lists 'create' but not 'make'.
 
 - [Query Builder](#query-builder)
 - [Eloquent](#eloquent)
 - [Database Connection](#database-connection)
 - [Known Incompatibilities](#known-incompatibilities)
 
+## <a name="query-builder"></a>Query Builder
 
-##<a name="query-builder"></a>Query Builder
-- dd
-- raw (use AQL)
-- toSql
-
-### Selections
-- addSelect
-- crossJoin
-- distinct
-- doesntExist
-- exists
-- find
-- get
-- groupBy
-- inRandomOrder
-- join
-- leftJoin
-- limit
-- offset
-- orderBy
-- orderByRaw (use AQL)
-- pluck
-- select
-- selectRaw (use AQL)
-- skip
-- table
-- take
-
-### filters
-- having
-- havingBetween
-- orWhere
-- orWhereColumn
-- orWhereIn
-- orWhereNotIn
-- orWhereNotNull
-- orWhereNull
-- where
-- whereBetween
-- whereColumn
-- whereDate
-- whereDay
-- whereExists
-- whereIn
-- whereJsonContains
-- whereJsonLength
-- whereMonth
-- whereNotBetween
-- whereNotIn
-- whereNotNull 
-- whereNull
-- whereRaw (use AQL)
-- whereTime
-- whereYear
-
-### Statements
-- delete
-- insert
-- insertGetId
-- insertOrIgnore
-- truncate
-- update
-- upsert
+### Data retrieval
+find / first / get / pluck / chunk? / chunkById? / lazy? / lazyById?
+paginate / simplePaginate / cursorPaginate
 
 ### Aggregates
-- average
-- avg
-- count
-- max
-- min
-- sum
+average / avg / count / doesntExist / exists / max / min / sum
 
+### Selections
+addSelect / distinct / select / selectRaw
 
-##<a name="eloquent"></a>Eloquent
+### Expressions
+Expression / raw
+
+### Joins
+crossJoin / join / joinSub / leftJoin / leftJoinSub
+
+#### Unsupported join clauses
+rightJoin / rightJoinSub
+
+### Where clauses
+where / orWhere / whereNot / orWhereNot / whereColumn / whereExists
+
+whereBetween / whereNotBetween / whereBetweenColumns / whereNotBetweenColumns /
+whereJsonContains / whereJsonLength /
+whereIn / whereNotIn / whereNull / whereNotNull /
+whereDate / whereMonth / whereDay / whereYear / whereTime /
+whereRaw /
+
+nested wheres / subquery wheres on both operands 
+
+#### Incompatible where clauses
+whereFullText (use searchView instead)
+
+### Ordering
+orderBy / latest / oldest / inRandomOrder / reorder? /
+orderByRaw (use AQL)
+
+### Grouping
+groupBy /
+groupByRaw?(use AQL) /
+having / havingBetween / havingNull / havingNotNull / 
+havingRaw (use AQL) /
+
+Nested havings
+
+### Limit & Offset
+limit / offset / take / skip
+
+### Conditional Clauses
+when?
+
+### Insert Statements
+insert / insertOrIgnore / insertUsing? / insertGetId
+
+### Update Statements
+update / updateOrInsert / upsert /
+increment / incrementEach / decrement / decrementEach
+
+### Delete Statements
+delete / truncate
+
+### Debugging
+dd? / dump? /
+dumpRawSql? / ddRawSql? /
+toSql
+
+## <a name="eloquent"></a>Eloquent
 The methods listed below are specific to Eloquent.
 Note that a lot of Eloquent's featured are leveraging the query builder. Those methods are listed in the corresponding
 chapter below.
@@ -129,38 +123,31 @@ Methods:
 - withCount
 
 
-##<a name="testing"></a>Testing
-- assertDatabaseCount
-- assertDeleted
-- assertDatabaseHas
-- assertDatabaseMissing
-- assertModelExists
-- assertModelMissing
-- assertNotSoftDeleted
-- assertSoftDeleted
-- castAsJson (dummy method)
+## <a name="testing"></a> Testing
 
+### Traits
+DatabaseTransactions / RefreshDatabase?
 
-##<a name="known-incompatibilities"></a>Known incompatibilities
+### Assertions
+assertDatabaseCount /
+assertDatabaseHas / assertDatabaseMissing /
+assertModelExists / assertModelMissing /
+assertDeleted  / assertSoftDeleted / assertNotSoftDeleted /
+castAsJson (dummy method)
+
+## <a name="known-incompatibilities"></a> Known incompatibilities
 Not all features can be made compatible. Known issues are listed below:
 
-- unions
-- rightJoin
+### Query Builder incompatibilities
+ / union / unionAll? / 
 
-## id vs _id
-All ArangoDB documents have a default indexed identifier called '_id' consisting of the collection (table) name and
-a unique string _key. This looks something like: users/12345.
-
-At the moment _id and id aren't transcribed back and forth. So relations and queries that rely on 'id' will fail if they 
-don't retrieve a models keyName. Relevant parts of packages must be overridden.
-
-**Note**: this is high on the list to solve generically. So this behaviour is likely to change in the future.
 
 ### Transactions
 [At the beginning of a transaction you must declare collections that are used in (write) statements.](transactions.md)
 
-### Locking: sharedLock/lockForUpdate
+### Locking: sharedLock / lockForUpdate
 These methods don't work as ArangoDB requires you to declare the locking mechanics at the start of a transaction. 
+They fail silently and just run the query. (???)
 
 ### Separate read and write connections
 Aranguent currently doesn't support the combination of a separate read and write connection  

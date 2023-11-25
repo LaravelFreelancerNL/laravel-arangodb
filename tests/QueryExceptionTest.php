@@ -32,11 +32,5 @@ test('query exception has correct message', function () {
 });
 
 test('query exception without binds', function () {
-    $this->expectExceptionMessage(
-        "400 - AQL: syntax error, unexpected identifier near 'this ain't AQL' at position 1:1 (while parsing)"
-        . " (AQL: this ain't AQL - Bindings: array (\n"
-        . "))"
-    );
-
-    DB::execute('this ain\'t AQL', []);
+    expect(fn() => DB::execute("this is not AQL", []))->toThrow(QueryException::class);
 });

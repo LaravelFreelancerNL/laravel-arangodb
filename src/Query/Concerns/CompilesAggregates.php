@@ -18,9 +18,21 @@ trait CompilesAggregates
      */
     protected function compileAggregate(IlluminateBuilder $query, $aggregate)
     {
-        $method = 'compile'.ucfirst($aggregate['function']);
+        $method = 'compile' . ucfirst($aggregate['function']);
 
         return $this->$method($query, $aggregate);
+    }
+
+    /**
+     * Compile AQL for average aggregate.
+     *
+     * @param  array<mixed>  $aggregate
+     */
+    protected function compileAvg(Builder $query, array $aggregate)
+    {
+        $column = $this->normalizeColumn($query, $aggregate['columns'][0]);
+
+        return "COLLECT AGGREGATE aggregateResult = AVERAGE($column)";
     }
 
     /**
@@ -32,10 +44,27 @@ trait CompilesAggregates
     }
 
     /**
+     * Compile an exists statement into AQL.
+     *
+     * @param  IlluminateBuilder  $query
+     * @return string
+     */
+    public function compileExists(IlluminateBuilder $query)
+    {
+        $query->columns = [$query->from];
+
+        $select = $this->compileSelect($query);
+
+        return 'RETURN { exists: LENGTH((' . $select . ')) > 0 ? true : false }';
+    }
+
+
+    /**
      * Compile AQL for max aggregate.
      *
-     * @param  array<mixed>  $aggregate
+     * @param array<mixed> $aggregate
      * @return string
+     * @throws \Exception
      */
     protected function compileMax(Builder $query, array $aggregate)
     {
@@ -57,22 +86,10 @@ trait CompilesAggregates
     }
 
     /**
-     * Compile AQL for average aggregate.
-     *
-     * @param  array<mixed>  $aggregate
-     */
-    protected function compileAvg(Builder $query, array $aggregate)
-    {
-        $column = $this->normalizeColumn($query, $aggregate['columns'][0]);
-
-        return "COLLECT AGGREGATE aggregateResult = AVERAGE($column)";
-    }
-
-    /**
-     * Compile AQL for sum aggregate.
-     *
-     * @param  array<mixed>  $aggregate
-     */
+    * Compile AQL for sum aggregate.
+    *
+    * @param  array<mixed>  $aggregate
+    */
     protected function compileSum(Builder $query, array $aggregate)
     {
         $column = $this->normalizeColumn($query, $aggregate['columns'][0]);

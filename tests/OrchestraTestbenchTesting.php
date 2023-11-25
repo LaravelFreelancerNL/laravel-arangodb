@@ -74,7 +74,7 @@ trait OrchestraTestbenchTesting
      */
     final protected function setUpTheTestEnvironment(): void
     {
-        if (! $this->app) {
+        if (!$this->app) {
             $this->refreshApplication();
 
             $this->setUpParallelTestingCallbacks();
@@ -263,7 +263,7 @@ trait OrchestraTestbenchTesting
             try {
                 \call_user_func($callback);
             } catch (Throwable $e) {
-                if (! $this->callbackException) {
+                if (!$this->callbackException) {
                     $this->callbackException = $e;
                 }
             }

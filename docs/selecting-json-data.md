@@ -41,7 +41,7 @@ will return a data structure like:
 ```json
 [
   {
-    "name": "Targaryan",
+    "name": "Targaryen",
     "en": {
       "description": "House Targaryen of Dragonstone is...Velaryon, and House Martell.",
       "words": "Fire and Blood"

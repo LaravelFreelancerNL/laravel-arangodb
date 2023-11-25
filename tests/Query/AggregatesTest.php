@@ -41,3 +41,23 @@ test('sum', function () {
 
     expect($average)->toEqual(384);
 });
+
+test('exists is true', function () {
+    $result = DB::table('characters')->where('id', 'NedStark')->exists();
+    expect($result)->toBeTrue();
+});
+
+test('exists is false', function () {
+    $result = DB::table('characters')->where('id', 'LyannaStark')->exists();
+    expect($result)->toBeFalse();
+});
+
+test('doesntExist is true', function () {
+    $result = DB::table('characters')->where('id', 'LyannaStark')->doesntExist();
+    expect($result)->toBeTrue();
+});
+
+test('doesntExist is false', function () {
+    $result = DB::table('characters')->where('id', 'NedStark')->doesntExist();
+    expect($result)->toBeFalse();
+});

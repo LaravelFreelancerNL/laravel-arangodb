@@ -48,7 +48,8 @@
     "autoload": {
         "psr-4": {
             "LaravelFreelancerNL\\Aranguent\\": "src/",
-            "Tests\\": "tests/"
+            "Tests\\": "tests/",
+            "Database\\Seeders\\": "tests/Setup/Database/Seeds"
         },
         "files": [
             "src/helpers.php"
@@ -70,6 +71,8 @@
         "analyse": "./vendor/bin/phpstan analyse",
         "test": "./vendor/bin/pest",
         "test-coverage": "./vendor/bin/pest --coverage",
+        "tests:migrate":  "./vendor/bin/testbench migrate",
+        "tests:seed":  "./vendor/bin/testbench db:seed",
         "style": "vendor/bin/pint",
         "lint": [
             "@php vendor/bin/pint",

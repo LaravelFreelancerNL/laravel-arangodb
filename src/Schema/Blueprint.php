@@ -110,7 +110,7 @@ class Blueprint
 
         $this->prefix = $prefix;
 
-        if (! is_null($callback)) {
+        if (!is_null($callback)) {
             $callback($this);
         }
     }
@@ -125,7 +125,7 @@ class Blueprint
     {
         $this->connection = $connection;
 
-        if (! isset($grammar)) {
+        if (!isset($grammar)) {
             $this->grammar = $connection->getSchemaGrammar();
         }
 
@@ -143,7 +143,7 @@ class Blueprint
      */
     public function compileAqlCommand(Fluent $command): Fluent
     {
-        $compileMethod = 'compile'.ucfirst($command->name);
+        $compileMethod = 'compile' . ucfirst($command->name);
         if (method_exists($this->grammar, $compileMethod)) {
             return $this->grammar->$compileMethod($this->table, $command);
         }
@@ -156,7 +156,7 @@ class Blueprint
      */
     public function executeCommand(Fluent $command): void
     {
-        $executeNamedMethod = 'execute'.ucfirst($command->name).'Command';
+        $executeNamedMethod = 'execute' . ucfirst($command->name) . 'Command';
         if (method_exists($this, $executeNamedMethod)) {
             $this->$executeNamedMethod($command);
 
@@ -167,10 +167,10 @@ class Blueprint
 
     protected function executeCommandByHandler(Fluent $command): void
     {
-        if (! isset($command->handler)) {
+        if (!isset($command->handler)) {
             return;
         }
-        $executeHandlerMethod = 'execute'.ucfirst($command->handler).'Command';
+        $executeHandlerMethod = 'execute' . ucfirst($command->handler) . 'Command';
         if (method_exists($this, $executeHandlerMethod)) {
             $this->$executeHandlerMethod($command);
         }
@@ -187,7 +187,7 @@ class Blueprint
     public function executeCollectionCommand(Fluent $command): void
     {
         if ($this->connection->pretending()) {
-            $this->connection->logQuery('/* '.$command->explanation." */\n", []);
+            $this->connection->logQuery('/* ' . $command->explanation . " */\n", []);
 
             return;
         }
@@ -203,7 +203,7 @@ class Blueprint
     public function executeIgnoreCommand(Fluent $command): void
     {
         if ($this->connection->pretending()) {
-            $this->connection->logQuery('/* '.$command->explanation." */\n", []);
+            $this->connection->logQuery('/* ' . $command->explanation . " */\n", []);
         }
     }
 

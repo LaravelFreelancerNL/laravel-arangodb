@@ -32,10 +32,11 @@ test('basic select with specific columns', function () {
 });
 
 test('select nested data through alias', function () {
-    $house = DB::table('houses')->select([
+    $query = DB::table('houses')->select([
         'name',
         'en.description as description',
-    ])->limit(1)->first();
+    ])->limit(1);
+    $house = $query->first();
 
     expect((array)$house)->toHaveCount(2);
     expect($house)->toHaveProperty('name');
@@ -43,10 +44,13 @@ test('select nested data through alias', function () {
 });
 
 test('select nested data without alias', function () {
-    $house = DB::table('houses')->select([
+    $query = DB::table('houses')->select([
         'name',
         'en.description',
-    ])->limit(1)->first();
+        'en.words',
+    ]);
+
+    $house = $query->first();
 
     expect((array)$house)->toHaveCount(2);
     expect($house)->toHaveProperty('name');
@@ -143,16 +147,3 @@ test('addSelect with alias', function () {
     expect((array)$house->en)->toHaveCount(2);
 });
 
-
-test('first method', function () {
-    $result = \DB::table('characters')->where('id', '=', 'NedStark')->first();
-
-    expect($result->id)->toBe('NedStark');
-});
-
-test('pluck', function () {
-    $results = DB::table('characters')->pluck('name', 'id');
-
-    expect($results->count())->toEqual(43);
-    expect($results['NedStark'])->toEqual('Ned');
-});

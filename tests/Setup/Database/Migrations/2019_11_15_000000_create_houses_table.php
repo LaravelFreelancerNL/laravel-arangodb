@@ -14,8 +14,7 @@ class CreateHousesTable extends Migration
      */
     public function up()
     {
-        Schema::create('houses', function (Blueprint $collection) {
-        });
+        Schema::create('houses', function (Blueprint $collection) {});
     }
 
     /**

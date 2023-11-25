@@ -6,11 +6,12 @@ namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
 use Closure;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
+use Illuminate\Database\Query\Expression;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 use LaravelFreelancerNL\Aranguent\Query\JoinClause;
 use LogicException;
 
-trait BuildsJoinClauses
+trait BuildsJoins
 {
     /**
      * Add a right join to the query.
@@ -23,7 +24,13 @@ trait BuildsJoinClauses
      */
     public function rightJoin($table, $first, $operator = null, $second = null)
     {
-        throw new LogicException('This database engine does not support the rightJoin method.');
+        // TODO: right outer joins should be doable by basically transforming them to a left outer join.
+        // The right join would need to be checked before generating the FOR clause on the first called collection
+        // with the filter after that.
+        // FOR x IN rightJoinCollection
+        //  FOR x IN firstCollection
+        //    FILTER ...
+        throw new LogicException('This database driver does not support the rightJoin method.');
     }
 
     /**
@@ -38,7 +45,7 @@ trait BuildsJoinClauses
      */
     public function rightJoinSub($query, $as, $first, $operator = null, $second = null)
     {
-        throw new LogicException('This database engine does not support the rightJoinSub method.');
+        throw new LogicException('This database driver does not support the rightJoinSub method.');
     }
 
     /**
@@ -52,7 +59,7 @@ trait BuildsJoinClauses
      */
     public function rightJoinWhere($table, $first, $operator, $second)
     {
-        throw new LogicException('This database engine does not support the rightJoinWhere method.');
+        throw new LogicException('This database driver does not support the rightJoinWhere method.');
     }
 
 
@@ -82,7 +89,7 @@ trait BuildsJoinClauses
 
             $this->joins[] = $join;
         }
-        if (! $first instanceof Closure) {
+        if (!$first instanceof Closure) {
             // If the column is simply a string, we can assume the join simply has a basic
             // "on" clause with a single condition. So we will just build the join with
             // this simple join clauses attached to it. There is not a join callback.
@@ -97,6 +104,33 @@ trait BuildsJoinClauses
     }
 
     /**
+     * Add a subquery join clause to the query.
+     *
+     * @param  \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder|string  $query
+     * @param  string  $as
+     * @param  \Closure|string  $first
+     * @param  string|null  $operator
+     * @param  string|null  $second
+     * @param  string  $type
+     * @param  bool  $where
+     * @return $this
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function joinSub($query, $as, $first, $operator = null, $second = null, $type = 'inner', $where = false)
+    {
+        $query->importTableAliases($this);
+        $query->importTableAliases([$as => $as]);
+
+        [$query, $bindings] = $this->createSub($query);
+
+        $this->bindings['join'] = array_merge($this->bindings['join'], $bindings);
+
+        return  $this->join(new Expression('(' . $query . ') as ' . $as), $first, $operator, $second, $type, $where);
+    }
+
+
+    /**
      * Get a new join clause.
      *
      * @param  string  $type
@@ -106,4 +140,25 @@ trait BuildsJoinClauses
     {
         return new JoinClause($parentQuery, $type, $table);
     }
+
+    /**
+     * Creates a subquery and parse it.
+     *
+     * @param  \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder|string  $query
+     * @return array
+     */
+    protected function createSub($query)
+    {
+        // If the given query is a Closure, we will execute it while passing in a new
+        // query instance to the Closure. This will give the developer a chance to
+        // format and work with the query before we cast it to a raw SQL string.
+        if ($query instanceof Closure) {
+            $callback = $query;
+
+            $callback($query = $this->forSubQuery());
+        }
+
+        return $this->parseSub($query);
+    }
+
 }

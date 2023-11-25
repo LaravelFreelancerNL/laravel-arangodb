@@ -17,7 +17,6 @@ test('wrap multiple columns', function () {
     );
 });
 
-
 test('wrap bypass', function () {
     $builder = getBuilder();
     $builder = $builder->select('*')

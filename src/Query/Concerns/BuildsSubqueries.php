@@ -12,7 +12,8 @@ use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
 trait BuildsSubqueries
 {
-    protected function hasLimitOfOne(IlluminateQueryBuilder $query) {
+    protected function hasLimitOfOne(IlluminateQueryBuilder $query)
+    {
         if (isset($query->limit) && $query->limit == 1) {
             return true;
         }

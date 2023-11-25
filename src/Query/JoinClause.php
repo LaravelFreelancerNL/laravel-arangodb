@@ -74,6 +74,9 @@ class JoinClause extends Builder
             $this->parentGrammar,
             $this->parentProcessor
         );
+
+        $this->registerTableAlias($table);
+        $this->importTableAliases($parentQuery);
     }
 
     /**
@@ -101,7 +104,6 @@ class JoinClause extends Builder
         if ($first instanceof Closure) {
             return $this->whereNested($first, $boolean);
         }
-
         return $this->whereColumn($first, $operator, $second, $boolean);
     }
 

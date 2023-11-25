@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Setup\Database\Seeds;
+namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Tests\Setup\Models\House;
@@ -32,8 +32,8 @@ class HousesSeeder extends Seeder
         }
     },
     {
-        "_key": "targaryan",
-        "name": "Targaryan",
+        "_key": "targaryen",
+        "name": "Targaryen",
         "location_id": "dragonstone",
         "en": {
             "coat-of-arms": "A three-headed dragon breathing flames, red on black (Sable, a dragon thrice-headed gules)",

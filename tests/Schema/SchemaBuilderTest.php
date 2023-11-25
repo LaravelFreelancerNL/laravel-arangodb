@@ -93,7 +93,7 @@ test('collection has columns', function () {
 
 test('create view', function () {
     $schemaManager = $this->connection->getArangoClient()->schema();
-    if (! $schemaManager->hasView('search')) {
+    if (!$schemaManager->hasView('search')) {
         Schema::createView('search', []);
     }
     $view = $schemaManager->getView('search');
@@ -105,7 +105,7 @@ test('create view', function () {
 
 test('get view', function () {
     $schemaManager = $this->connection->getArangoClient()->schema();
-    if (! $schemaManager->hasView('search')) {
+    if (!$schemaManager->hasView('search')) {
         Schema::createView('search', []);
     }
     $view = Schema::getView('search');
@@ -117,13 +117,13 @@ test('get view', function () {
 
 test('get all views', function () {
     $schemaManager = $this->connection->getArangoClient()->schema();
-    if (! $schemaManager->hasView('pages')) {
+    if (!$schemaManager->hasView('pages')) {
         Schema::createView('pages', []);
     }
-    if (! $schemaManager->hasView('products')) {
+    if (!$schemaManager->hasView('products')) {
         Schema::createView('products', []);
     }
-    if (! $schemaManager->hasView('search')) {
+    if (!$schemaManager->hasView('search')) {
         Schema::createView('search', []);
     }
 
@@ -142,7 +142,7 @@ test('get all views', function () {
 
 test('edit view', function () {
     $schemaManager = $this->connection->getArangoClient()->schema();
-    if (! $schemaManager->hasView('search')) {
+    if (!$schemaManager->hasView('search')) {
         Schema::createView('search', []);
     }
     Schema::editView('search', ['consolidationIntervalMsec' => 5]);
@@ -156,7 +156,7 @@ test('edit view', function () {
 
 test('rename view', function () {
     $schemaManager = $this->connection->getArangoClient()->schema();
-    if (! $schemaManager->hasView('search')) {
+    if (!$schemaManager->hasView('search')) {
         Schema::createView('search', []);
     }
     Schema::renameView('search', 'find');
@@ -175,7 +175,7 @@ test('rename view', function () {
 
 test('drop view', function () {
     $schemaManager = $this->connection->getArangoClient()->schema();
-    if (! $schemaManager->hasView('search')) {
+    if (!$schemaManager->hasView('search')) {
         Schema::createView('search', []);
     }
     Schema::dropView('search');
@@ -185,10 +185,10 @@ test('drop view', function () {
 
 test('drop all views', function () {
     $schemaManager = $this->connection->getArangoClient()->schema();
-    if (! $schemaManager->hasView('products')) {
+    if (!$schemaManager->hasView('products')) {
         Schema::createView('products', []);
     }
-    if (! $schemaManager->hasView('pages')) {
+    if (!$schemaManager->hasView('pages')) {
         Schema::createView('pages', []);
     }
     Schema::dropAllViews();

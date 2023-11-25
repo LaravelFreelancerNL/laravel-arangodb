@@ -104,5 +104,4 @@ test('insert embedded empty array', function () {
     expect($result->first()->tags)->toBeEmpty();
 });
 
-test('insert using', function () {
-})->todo();
+test('insert using', function () {})->todo();

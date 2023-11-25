@@ -30,7 +30,7 @@ class Builder extends IlluminateBuilder
     public function firstOrCreate(array $attributes = [], array $values = [])
     {
         $instance = $this->where(associativeFlatten($attributes))->first();
-        if (! is_null($instance)) {
+        if (!is_null($instance)) {
             return $instance;
         }
 
@@ -47,7 +47,7 @@ class Builder extends IlluminateBuilder
     public function firstOrNew(array $attributes = [], array $values = [])
     {
         $instance = $this->where(associativeFlatten($attributes))->first();
-        if (! is_null($instance)) {
+        if (!is_null($instance)) {
             return $instance;
         }
 
@@ -72,7 +72,7 @@ class Builder extends IlluminateBuilder
         if (Arr::isAssoc($values)) {
             $values = [$values];
         }
-        if (! Arr::isAssoc($values)) {
+        if (!Arr::isAssoc($values)) {
             // Here, we will sort the insert keys for every record so that each insert is
             // in the same order for the record. We need to make sure this is the case
             // so there are not any errors or problems when inserting these records.
@@ -100,7 +100,7 @@ class Builder extends IlluminateBuilder
     protected function updateTimestamps(array $values)
     {
         if (
-            ! $this->model->usesTimestamps() ||
+            !$this->model->usesTimestamps() ||
             is_null($this->model->getUpdatedAtColumn()) ||
             is_null($this->model->getCreatedAtColumn())
         ) {
@@ -114,7 +114,7 @@ class Builder extends IlluminateBuilder
         $timestamps[$updatedAtColumn] = $timestamp;
 
         $createdAtColumn = $this->model->getCreatedAtColumn();
-        if (! isset($values[$createdAtColumn]) && ! isset($this->model->$createdAtColumn)) {
+        if (!isset($values[$createdAtColumn]) && !isset($this->model->$createdAtColumn)) {
             $timestamps[$createdAtColumn] = $timestamp;
         }
 
@@ -132,7 +132,7 @@ class Builder extends IlluminateBuilder
     protected function addUpdatedAtColumn(array $values): array
     {
         if (
-            ! $this->model->usesTimestamps() ||
+            !$this->model->usesTimestamps() ||
             is_null($this->model->getUpdatedAtColumn())
         ) {
             return $values;

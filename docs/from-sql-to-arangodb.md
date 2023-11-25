@@ -2,6 +2,16 @@
 An existing Laravel project can't be fully converted now as the new AQL query builder isn't implemented yet. 
 Migrations can be converted as well as raw queries against the database. 
 
+## id vs _id
+ArangoDB has a two default identifiers '_key' and _'id'.
+'_key' is a similar identifier as commonly used in SQL databases by default it is a numeric string.
+'_id' is a combination of the collection and the key. For example: users/12345
+
+The query builder automatically translates _key to id and vice versa to optimize compatibility
+with third party packages as these often assume 'id' to be present in the query results.
+
+
+
 ## Migrations
 Existing Illuminate based migration files can be quickly converted to use the Aranguent Schema Builder with the following 
 Artisan command: 

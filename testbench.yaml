@@ -7,3 +7,9 @@ providers:
   - LaravelFreelancerNL\Aranguent\AranguentServiceProvider
   - LaravelFreelancerNL\Aranguent\Providers\CommandServiceProvider
   - Tests\Setup\AranguentTestServiceProvider
+
+migrations:
+  - tests/Setup/Database/Migrations
+
+seeders:
+  - Tests\Setup\Database\Seeds\DatabaseSeeder

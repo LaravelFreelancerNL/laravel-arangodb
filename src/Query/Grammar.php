@@ -5,30 +5,29 @@ declare(strict_types=1);
 namespace LaravelFreelancerNL\Aranguent\Query;
 
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Database\Query\Grammars\Grammar as IlluminateQueryGrammar;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Traits\Macroable;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesAggregates;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesColumns;
-use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesFilterClauses;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesFilters;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesGroups;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesJoins;
-use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesWhereClauses;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesWheres;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\ConvertsIdToKey;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\HandlesAqlGrammar;
-use LaravelFreelancerNL\Aranguent\Query\Concerns\HasAliases;
 use LaravelFreelancerNL\FluentAQL\Exceptions\BindException as BindException;
 
 class Grammar extends IlluminateQueryGrammar
 {
     use CompilesAggregates;
     use CompilesColumns;
-    use CompilesFilterClauses;
+    use CompilesFilters;
     use CompilesJoins;
     use CompilesGroups;
-    use CompilesWhereClauses;
+    use CompilesWheres;
     use ConvertsIdToKey;
-    use HasAliases;
     use HandlesAqlGrammar;
     use Macroable;
 
@@ -68,9 +67,9 @@ class Grammar extends IlluminateQueryGrammar
      * @var array
      */
     protected $selectComponents = [
+        'variables',
         'from',
         'search',
-//        'variables',
         'joins',
         'wheres',
         'groups',
@@ -157,7 +156,7 @@ class Grammar extends IlluminateQueryGrammar
     /**
      * Compile an insert statement into AQL.
      *
-     * @param IlluminateQueryBuilder $builder
+     * @param IlluminateQueryBuilder $query
      * @param array   $values
      *
      * @throws BindException
@@ -169,17 +168,15 @@ class Grammar extends IlluminateQueryGrammar
         $table = $this->prefixTable($query->from);
 
         if (empty($values)) {
-            $aql = "INSERT {} INTO $table RETURN NEW._key";
+            $aql = 'INSERT {} INTO ' . $table . ' RETURN NEW._key';
 
             return $aql;
         }
 
-        $aql = "LET values = $bindVar "
-                . "FOR value IN values "
-                . "INSERT value INTO $table "
-                . "RETURN NEW._key";
-
-        return $aql;
+        return 'LET values = ' . $bindVar
+                . ' FOR value IN values'
+                . ' INSERT value INTO ' . $table
+                . ' RETURN NEW._key';
     }
 
     /**
@@ -187,24 +184,22 @@ class Grammar extends IlluminateQueryGrammar
      *
      * @param array<mixed> $values
      */
-    public function compileInsertGetId(IlluminateQueryBuilder $builder, $values, $sequence = "_key", string $bindVar = null)
+    public function compileInsertGetId(IlluminateQueryBuilder $query, $values, $sequence = '_key', string $bindVar = null)
     {
-        $table = $this->prefixTable($builder->from);
+        $table = $this->prefixTable($query->from);
 
-        if (isset($sequence)) {
-            $sequence = $this->convertIdToKey($sequence);
-        }
+        $sequence = $this->convertIdToKey($sequence);
 
         if (empty($values)) {
-            $aql = "INSERT {} INTO $table RETURN NEW.$sequence";
+            $aql = 'INSERT {} INTO ' . $table . ' RETURN NEW.' . $sequence;
 
             return $aql;
         }
 
-        $aql = "LET values = $bindVar "
-            . "FOR value IN values "
-            . "INSERT value INTO $table "
-            . "RETURN NEW.$sequence";
+        $aql = 'LET values = ' . $bindVar
+            . ' FOR value IN values'
+            . ' INSERT value INTO ' . $table
+            . ' RETURN NEW.' . $sequence;
 
         return $aql;
     }
@@ -278,7 +273,7 @@ class Grammar extends IlluminateQueryGrammar
     /**
      * Compile the "from" portion of the query -> FOR in AQL.
      *
-     * @param IlluminateQueryBuilder $builder
+     * @param IlluminateQueryBuilder $query
      * @param string  $table
      *
      * @return Builder
@@ -289,26 +284,29 @@ class Grammar extends IlluminateQueryGrammar
         $table = $this->prefixTable($table);
 
         //FIXME: register given alias (x AS y in SQL)
-        $alias = $this->registerTableAlias($table);
+        $alias = $query->registerTableAlias($table);
 
 
         return "FOR $alias IN $table";
     }
 
     /**
-     * @param  IlluminateQueryBuilder  $builder
-     * @param  array $variables
-     * @return IlluminateQueryBuilder
+     * @param IlluminateQueryBuilder $query
+     * @param array $variables
+     * @return string
      */
-    protected function compileVariables(IlluminateQueryBuilder $query, array $variables)
+    protected function compileVariables(IlluminateQueryBuilder $query, array $variables): string
     {
-        if (! empty($variables)) {
-            foreach ($variables as $variable => $data) {
-                $query->aqb = $query->aqb->let($variable, $data);
+        $aql = "";
+        foreach ($variables as $variable => $value) {
+            if ($value instanceof Expression) {
+                $value = $value->getValue($this);
             }
+
+            $aql .= ' LET ' . $variable . ' = ' . $value;
         }
 
-        return $query;
+        return trim($aql);
     }
 
     /**
@@ -320,8 +318,8 @@ class Grammar extends IlluminateQueryGrammar
      */
     protected function compileOrders(IlluminateQueryBuilder $query, $orders)
     {
-        if (! empty($orders)) {
-            return 'SORT '.implode(', ', $this->compileOrdersToArray($query, $orders));
+        if (!empty($orders)) {
+            return 'SORT ' . implode(', ', $this->compileOrdersToArray($query, $orders));
         }
 
         return '';
@@ -337,36 +335,20 @@ class Grammar extends IlluminateQueryGrammar
     protected function compileOrdersToArray(IlluminateQueryBuilder $query, $orders)
     {
         return array_map(function ($order) use ($query) {
-            return $order['sql'] ?? $this->normalizeColumn($query, $order['column']).' '.$order['direction'];
+            $key = 'column';
+            if (array_key_exists('sql', $order)) {
+                $key = 'sql';
+            }
+
+            if ( $order[$key] instanceof Expression) {
+                $order[$key] = $order[$key]->getValue($this);
+            } else {
+                $order[$key] = $this->normalizeColumn($query, $order[$key]);
+            }
+
+            return array_key_exists('direction', $order) ? $order[$key].' '.$order['direction'] : $order[$key];
         }, $orders);
     }
-
-    /**
-     * Compile the query orders to an array.
-     *
-     * @param IlluminateQueryBuilder $builder
-     * @param array   $orders
-     *
-     * @return array
-     */
-    //    protected function compileOrdersToFlatArray(IlluminateQueryBuilder $builder, $orders)
-    //    {
-    //        $flatOrders = [];
-    //
-    //        foreach ($orders as $order) {
-    //            if (!isset($order['type']) || $order['type'] != 'Raw') {
-    //                $order['column'] = $this->normalizeColumn($builder, $order['column']);
-    //            }
-    //
-    //            $flatOrders[] = $order['column'];
-    //
-    //            if (isset($order['direction'])) {
-    //                $flatOrders[] = $order['direction'];
-    //            }
-    //        }
-    //
-    //        return $flatOrders;
-    //    }
 
     /**
      * Compile the "offset" portions of the query.
@@ -395,69 +377,90 @@ class Grammar extends IlluminateQueryGrammar
             return "LIMIT " . (int) $this->offset . ", " . (int) $limit;
         }
 
-        return "LIMIT ". (int) $limit;
+        return "LIMIT " . (int) $limit;
     }
 
-
-    /**
-     * Compile an update statement into SQL.
-     *
-     * @param IlluminateQueryBuilder $builder
-     * @param array   $values
-     *
-     * @return IlluminateQueryBuilder
-     */
-    public function compileUpdate(IlluminateQueryBuilder $query, array $values)
+    protected function createUpdateObject($values)
     {
-        $table = $this->prefixTable($builder->from);
-        $tableAlias = $this->generateTableAlias($table);
+        $valueStrings = [];
+        foreach($values as $key => $value) {
+            if (is_array($value)) {
+                $valueStrings[] = $key . ': ' . $this->createUpdateObject($value);
+            } else {
+                $valueStrings[] = $key . ': ' . $value;
+            }
+        }
 
-        $builder->aqb = $builder->aqb->for($tableAlias, $table);
-
-        //Fixme: joins?
-        $builder = $this->compileWheres($builder);
-
-        $builder->aqb = $builder->aqb->update($tableAlias, $values, $table);
-
-        return $builder;
+        return '{ ' . implode(', ', $valueStrings) . ' }';
     }
 
     /**
-     * Compile an "upsert" statement into SQL.
+     * Compile an update statement into AQL.
      *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     *
-     * @param IlluminateQueryBuilder $query
-     * @param array $values
-     * @param array $uniqueBy
-     * @param array $update
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @param  array  $values
      * @return string
      */
-    //    public function compileUpsert(IlluminateQueryBuilder $query, array $values, array $uniqueBy, array $update)
-    //    {
-    //        // Convert id to _key
-    //        foreach ($values as $key => $value) {
-    //            $values[$key] = $this->convertIdToKey($value);
-    //        }
-    //
-    //        foreach ($uniqueBy as $key => $value) {
-    //            $uniqueBy[$key] = $this->convertIdToKey($value);
-    //        }
-    //
-    //        foreach ($update as $key => $value) {
-    //            $update[$key] = $this->convertIdToKey($value);
-    //        }
-    //
-    //        /** @phpstan-ignore-next-line */
-    //        return DB::aqb()
-    //            ->let('docs', $values)
-    //            ->for('doc', 'docs')
-    //            ->insert('doc', $query->from)
-    //            ->options([
-    //                "overwriteMode" => "update",
-    //                "mergeObjects" => false,
-    //            ])->get();
-    //    }
+    public function compileUpdate(IlluminateQueryBuilder $query, array|string $values)
+    {
+        $table = $query->from;
+        $alias = $query->getTableAlias($query->from);
+
+        if (!is_array($values)) {
+            $values = Arr::wrap($values);
+        }
+
+        $updateValues = $this->generateAqlObject($values);
+
+        $aqlElements = [];
+        $aqlElements[] = $this->compileFrom($query, $query->from);
+
+        if (isset($query->joins)) {
+            $aqlElements[] = $this->compileJoins($query, $query->joins);
+        }
+
+        $aqlElements[] = $this->compileWheres($query);
+
+        $aqlElements[] = 'UPDATE ' . $alias . ' WITH ' . $updateValues . ' IN ' . $table;
+
+        return implode(' ', $aqlElements);
+    }
+
+    /**
+     * Compile an "upsert" statement into AQL.
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @param  array  $values
+     * @param  array  $uniqueBy
+     * @param  array  $update
+     * @return string
+     */
+    public function compileUpsert(IlluminateQueryBuilder $query, array $values, array $uniqueBy, array $update)
+    {
+        $searchFields = [];
+        foreach($uniqueBy as $key => $field) {
+            $searchFields[$field] = 'doc.' . $field;
+        }
+        $searchObject = $this->generateAqlObject($searchFields);
+
+        $updateFields = [];
+        foreach($update as $key => $field) {
+            $updateFields[$field] = 'doc.' . $field;
+        }
+        $updateObject = $this->generateAqlObject($updateFields);
+
+        $valueObjects = [];
+        foreach($values as $data) {
+            $valueObjects[] = $this->generateAqlObject($data);
+        }
+
+        return 'LET docs = [' . implode(', ', $valueObjects) . ']'
+            . ' FOR doc IN docs'
+            . ' UPSERT ' . $searchObject
+            . ' INSERT doc'
+            . ' UPDATE ' . $updateObject
+            . ' IN ' . $query->from;
+    }
 
     /**
      * Compile a delete statement into SQL.
@@ -490,7 +493,7 @@ class Grammar extends IlluminateQueryGrammar
     protected function compileDeleteWithoutJoins(IlluminateQueryBuilder $query, $table, $where)
     {
 
-        $alias = $this->normalizeColumn($query, $this->registerTableAlias($table));
+        $alias = $this->normalizeColumn($query, $query->registerTableAlias($table));
 
         $table = $this->wrapTable($this->prefixTable($table));
 
@@ -500,10 +503,10 @@ class Grammar extends IlluminateQueryGrammar
     /**
      * Compile the random statement into SQL.
      *
-     * @param  string|int  $seed
+     * @param  string|int|null  $seed
      * @return string
      */
-    public function compileRandom($seed)
+    public function compileRandom($seed = null)
     {
         unset($seed);
 
@@ -511,29 +514,21 @@ class Grammar extends IlluminateQueryGrammar
     }
 
     /**
-     * @param IlluminateQueryBuilder $builder
+     * @param IlluminateQueryBuilder $query
      * @return string
+     * @throws \Exception
      */
-    public function compileSearch(IlluminateQueryBuilder $query)
+    public function compileSearch(IlluminateQueryBuilder $query, array $search)
     {
-        $aql = "SEARCH "
-            . $this->removeLeadingBoolean(
-                implode(
-                    ' ',
-                    $this->whereBasic($query, $query->search['predicates'])
-                )
-            );
-
-        if (!isset($builder->search['options'])) {
-            return $aql;
+        $predicates = [];
+        foreach($search['fields'] as $field) {
+            $predicates[] = $this->normalizeColumn($query, $field)
+                . ' IN TOKENS(' . $search['searchText'] . ', "text_en")';
         }
 
-        $options = [];
-        foreach($builder->search['options'] as $key => $value) {
-            $options[] = $key . ": " . $value;
-        }
-
-        return $aql . "{ " . implode(', ', $options) . " }";
+        return 'SEARCH ANALYZER('
+            . implode(' OR ', $predicates)
+            . ', "text_en")';
     }
 
     /**
@@ -570,4 +565,56 @@ class Grammar extends IlluminateQueryGrammar
         );
     }
 
+    /**
+     * Determine if the given string is a JSON selector.
+     *
+     * @param  string  $value
+     * @return bool
+     */
+    public function isJsonSelector($value)
+    {
+        if(!is_string($value)) {
+            return false;
+        }
+
+        return str_contains($value, '->');
+    }
+
+    public function convertJsonFields($data): array|string
+    {
+        if (!is_array($data) && !is_string($data)) {
+            return $data;
+        }
+
+        if (is_string($data)) {
+            return str_replace('->', '.', $data);
+        }
+
+        if (array_is_list($data)) {
+            return $this->convertJsonValuesToDotNotation($data);
+        }
+
+        return $this->convertJsonKeysToDotNotation($data);
+    }
+
+    public function convertJsonValuesToDotNotation(array $fields): array
+    {
+        foreach($fields as $key => $value) {
+            if ($this->isJsonSelector($value)) {
+                $fields[$key] = str_replace('->', '.', $value);
+            }
+        }
+        return $fields;
+    }
+
+    public function convertJsonKeysToDotNotation(array $fields): array
+    {
+        foreach($fields as $key => $value) {
+            if ($this->isJsonSelector($key)) {
+                $fields[str_replace('->', '.', $key)] = $value;
+                unset($fields[$key]);
+            }
+        }
+        return $fields;
+    }
 }

@@ -5,7 +5,7 @@ namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 
-trait CompilesFilterClauses
+trait CompilesFilters
 {
     /**
      * Compile the "having" portions of the query.
@@ -15,15 +15,16 @@ trait CompilesFilterClauses
      */
     protected function compileHavings(IlluminateQueryBuilder $query)
     {
-        return 'FILTER '.$this->removeLeadingBoolean(collect($query->havings)->map(function ($having) use ($query) {
-            return $having['boolean'].' '.$this->compileFilter($query, $having);
+        return 'FILTER ' . $this->removeLeadingBoolean(collect($query->havings)->map(function ($having) use ($query) {
+            return $having['boolean'] . ' ' . $this->compileFilter($query, $having);
         })->implode(' '));
     }
 
     /**
      * Compile a single having clause.
      *
-     * @param array $having
+     * @param IlluminateQueryBuilder $query
+     * @param array $filter
      * @return string
      * @throws \Exception
      */
@@ -37,7 +38,7 @@ trait CompilesFilterClauses
             'between' => $this->compileFilterBetween($query, $filter),
             'Null' => $this->compileFilterNull($query, $filter),
             'NotNull' => $this->compileFilterNotNull($query, $filter),
-            'bit' => $this->compileHavingBit($filter),
+            'bit' => $this->compileFilterBit($query, $filter),
             'Expression' => $this->compileFilterExpression($filter),
             'Nested' => $this->compileNestedHavings($filter),
             default => $this->compileBasicFilter($query, $filter),
@@ -47,8 +48,10 @@ trait CompilesFilterClauses
     /**
      * Compile a basic having clause.
      *
-     * @param  array  $filter
+     * @param IlluminateQueryBuilder $query
+     * @param array $filter
      * @return string
+     * @throws \Exception
      */
     protected function compileBasicFilter(IlluminateQueryBuilder $query, $filter)
     {
@@ -68,11 +71,11 @@ trait CompilesFilterClauses
      * Compile a "between" where clause.
      *
      * @param IlluminateQueryBuilder $query
-     * @param array $where
+     * @param $filter
      * @return string
      * @throws \Exception
      */
-    protected function compileFilterBetween(IlluminateQueryBuilder $query, $filter)
+    protected function compileFilterBetween(IlluminateQueryBuilder $query, $filter): string
     {
         $predicate = [];
 
@@ -98,9 +101,10 @@ trait CompilesFilterClauses
     /**
      * Compile a "where null" clause.
      *
-     * @param  IlluminateQueryBuilder  $query
-     * @param  array  $where
+     * @param IlluminateQueryBuilder $query
+     * @param $filter
      * @return string
+     * @throws \Exception
      */
     protected function compileFilterNull(IlluminateQueryBuilder $query, $filter)
     {
@@ -116,9 +120,10 @@ trait CompilesFilterClauses
     /**
      * Compile a "where null" clause.
      *
-     * @param  IlluminateQueryBuilder  $query
-     * @param  array  $where
+     * @param IlluminateQueryBuilder $query
+     * @param $filter
      * @return string
+     * @throws \Exception
      */
     protected function compileFilterNotNull(IlluminateQueryBuilder $query, $filter)
     {
@@ -132,6 +137,10 @@ trait CompilesFilterClauses
     }
 
 
+    /**
+     * @param array $filter
+     * @return mixed
+     */
     protected function compileFilterExpression($filter)
     {
         return $filter['column']->getValue($this);
@@ -162,41 +171,41 @@ trait CompilesFilterClauses
             '>>' => $this->bitExpressionRightShift($column, $value)
         };
 
-        return '('.$bitExpression.') != 0';
+        return '(' . $bitExpression . ') != 0';
     }
 
     protected function bitExpressionAnd(string $column, int|string $value): string
     {
-        return 'BIT_AND('.$column.', '.$value.')';
+        return 'BIT_AND(' . $column . ', ' . $value . ')';
     }
 
     protected function bitExpressionOr(string $column, int|string $value): string
     {
-        return 'BIT_AND('.$column.', '.$value.')';
+        return 'BIT_AND(' . $column . ', ' . $value . ')';
     }
 
     protected function bitExpressionXor(string $column, int|string $value): string
     {
-        return 'BIT_XOR('.$column.', '.$value.')';
+        return 'BIT_XOR(' . $column . ', ' . $value . ')';
     }
 
     protected function bitExpressionNegate(string $column): string
     {
-        return 'BIT_NEGATE('.$column.', BIT_POPCOUNT('. $column.'))';
+        return 'BIT_NEGATE(' . $column . ', BIT_POPCOUNT(' . $column . '))';
     }
 
     protected function bitExpressionNegatedAnd(string $column, int|string $value): string
     {
-        return 'BIT_AND('.$column.', BIT_NEGATE('.$value.', BIT_POPCOUNT('. $value.'))';
+        return 'BIT_AND(' . $column . ', BIT_NEGATE(' . $value . ', BIT_POPCOUNT(' . $value . '))';
     }
 
     protected function bitExpressionLeftShift(string $column, int|string $value): string
     {
-        return 'BIT_SHIFT_LEFT('.$column.',  '.$value.', BIT_POPCOUNT('.$column.'))';
+        return 'BIT_SHIFT_LEFT(' . $column . ',  ' . $value . ', BIT_POPCOUNT(' . $column . '))';
     }
 
     protected function bitExpressionRightShift(string $column, int|string $value): string
     {
-        return 'BIT_SHIFT_RIGHT('.$column.',  '.$value.', BIT_POPCOUNT('.$column.'))';
+        return 'BIT_SHIFT_RIGHT(' . $column . ',  ' . $value . ', BIT_POPCOUNT(' . $column . '))';
     }
 }

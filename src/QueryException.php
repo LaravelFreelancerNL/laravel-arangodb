@@ -19,9 +19,9 @@ class QueryException extends IlluminateQueryException
     protected function formatMessage($connectionName, $sql, $bindings, Throwable $previous)
     {
         return $previous->getMessage()
-            .' (Connection: '.$connectionName
-            .',AQL: '.$sql
-            .' - Bindings: '.var_export($bindings, true)
-            .')';
+            . ' (Connection: ' . $connectionName
+            . ',AQL: ' . $sql
+            . ' - Bindings: ' . var_export($bindings, true)
+            . ')';
     }
 }

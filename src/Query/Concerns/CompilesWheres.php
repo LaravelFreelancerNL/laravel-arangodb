@@ -6,7 +6,7 @@ use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Database\Query\Expression;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 
-trait CompilesWhereClauses
+trait CompilesWheres
 {
     /**
      * Format the where clause statements into one string.
@@ -17,7 +17,7 @@ trait CompilesWhereClauses
      */
     protected function concatenateWhereClauses($query, $sql)
     {
-        return 'FILTER '.$this->removeLeadingBoolean(implode(' ', $sql));
+        return 'FILTER ' . $this->removeLeadingBoolean(implode(' ', $sql));
     }
 
     protected function getOperatorByWhereType($type)
@@ -45,7 +45,7 @@ trait CompilesWhereClauses
         if (isset($where['operator'])) {
             $where['operator'] = $this->translateOperator($where['operator']);
         }
-        if (! isset($where['operator'])) {
+        if (!isset($where['operator'])) {
             $where['operator'] = $this->getOperatorByWhereType($where['type']);
         }
 
@@ -83,8 +83,7 @@ trait CompilesWhereClauses
         $where = $this->normalizeOperator($where);
 
         if ($where['column'] instanceof expression) {
-            //FIXME: first might need to be generic for subqueries with limit 1...?
-            $column = 'FIRST('.$where['column']->getValue($this).')';
+            $column = 'FIRST(' . $where['column']->getValue($this) . ')';
         } else {
             $column = $this->normalizeColumn($query, $where['column']);
         }
@@ -186,7 +185,6 @@ trait CompilesWhereClauses
         $predicate = [];
 
         $where = $this->normalizeOperator($where);
-
         $predicate[0] = $this->normalizeColumn($query, $where['first']);
         $predicate[1] = $where['operator'];
         $predicate[2] = $this->normalizeColumn($query, $where['second']);
@@ -381,7 +379,7 @@ trait CompilesWhereClauses
 
         $where = $this->normalizeOperator($where);
 
-        $predicate[0] = 'DATE_YEAR('. $this->normalizeColumn($query, $where['column']) . ')';
+        $predicate[0] = 'DATE_YEAR(' . $this->normalizeColumn($query, $where['column']) . ')';
         $predicate[1] = $where['operator'];
         $predicate[2] = $this->parameter($where['value']);
 
@@ -422,7 +420,7 @@ trait CompilesWhereClauses
 
         $where = $this->normalizeOperator($where);
 
-        $predicate[0] = 'DATE_DAY('. $this->normalizeColumn($query, $where['column']) . ')';
+        $predicate[0] = 'DATE_DAY(' . $this->normalizeColumn($query, $where['column']) . ')';
         $predicate[1] = $where['operator'];
         $predicate[2] = $this->parameter($where['value']);
 
@@ -476,17 +474,17 @@ trait CompilesWhereClauses
      * @throws \Exception
      */
     protected function whereSub(IlluminateQueryBuilder $query, $where)
-        {
-            $predicate = [];
+    {
+        $predicate = [];
 
-            $where = $this->normalizeOperator($where);
+        $where = $this->normalizeOperator($where);
 
-            $predicate[0] = $this->normalizeColumn($query, $where['column']);
-            $predicate[1] = $where['operator'];
-            $predicate[2] = $where['subquery'];
+        $predicate[0] = $this->normalizeColumn($query, $where['column']);
+        $predicate[1] = $where['operator'];
+        $predicate[2] = $where['subquery'];
 
-            return implode(' ', $predicate);
-        }
+        return implode(' ', $predicate);
+    }
 
     /**
      * Compile a where exists clause.
@@ -496,9 +494,9 @@ trait CompilesWhereClauses
      * @return string
      */
     protected function whereExists(IlluminateQueryBuilder $query, $where)
-        {
-            RETURN 'LENGTH('.$where['subquery'].') > 0';
-        }
+    {
+        return 'LENGTH(' . $where['subquery'] . ') > 0';
+    }
 
     /**
      * Compile a where exists clause.
@@ -509,5 +507,6 @@ trait CompilesWhereClauses
      */
     protected function whereNotExists(IlluminateQueryBuilder $query, $where)
     {
-        RETURN 'LENGTH('.$where['subquery'].') == 0';
-    }}
+        return 'LENGTH(' . $where['subquery'] . ') == 0';
+    }
+}

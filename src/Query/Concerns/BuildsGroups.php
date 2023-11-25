@@ -7,11 +7,29 @@ namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 use Carbon\CarbonPeriod;
 use Closure;
 use Illuminate\Contracts\Database\Query\ConditionExpression;
-use Illuminate\Contracts\Database\Query\Expression as ExpressionContract;
+use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Support\Arr;
 
-trait BuildsHavingClauses
+trait BuildsGroups
 {
+    /**
+     * Add a "group by" clause to the query.
+     *
+     * @param array|\Illuminate\Contracts\Database\Query\Expression|string ...$groups
+     * @return $this
+     */
+    public function groupBy(...$groups)
+    {
+        foreach ($groups as $group) {
+            $this->groups = array_merge(
+                (array)$this->groups,
+                Arr::wrap($group)
+            );
+        }
+
+        return $this;
+    }
+
     public function having($column, $operator = null, $value = null, $boolean = 'and')
     {
         $type = 'Basic';
@@ -48,9 +66,9 @@ trait BuildsHavingClauses
             $type = 'Bitwise';
         }
 
-        if (! $value instanceof ExpressionContract) {
+        if (!$value instanceof Expression) {
             $this->addBinding($this->flattenValue($value), 'having');
-            $value = '@'. array_key_last($this->getBindings());
+            $value = '@' . array_key_last($this->getBindings());
         }
 
         $this->havings[] = compact('type', 'column', 'operator', 'value', 'boolean');
@@ -72,7 +90,7 @@ trait BuildsHavingClauses
 
         $this->havings[] = compact('type', 'sql', 'boolean');
 
-        if (! empty($bindings)) {
+        if (!empty($bindings)) {
             $this->addBinding($bindings, 'having');
         }
 
@@ -151,10 +169,10 @@ trait BuildsHavingClauses
         $bindings = array_slice($this->cleanBindings(Arr::flatten($values)), 0, 2);
 
         $this->addBinding($bindings[0], 'having');
-        $values[0] = '@'. array_key_last($this->getBindings());
+        $values[0] = '@' . array_key_last($this->getBindings());
 
         $this->addBinding($bindings[1], 'having');
-        $values[1]= '@'. array_key_last($this->getBindings());
+        $values[1] = '@' . array_key_last($this->getBindings());
 
         $this->havings[] = compact('type', 'column', 'values', 'boolean', 'not');
 

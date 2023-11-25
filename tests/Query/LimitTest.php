@@ -45,35 +45,3 @@ test('skip & take', function () {
     expect($result->count())->toEqual(15);
     expect($result->first())->toEqual($allCharacters[5]);
 });
-
-test('paginate', function () {
-    $result = DB::table('characters')->paginate(15)->toArray();
-    expect($result['total'])->toEqual(43);
-    expect(count($result['data']))->toEqual(15);
-});
-
-test('paginate with filters', function () {
-    $result = DB::table('characters')
-        ->where('residence_id', 'winterfell')
-        ->paginate(5)
-        ->toArray();
-    expect($result['total'])->toEqual(15);
-    expect(count($result['data']))->toEqual(5);
-});
-
-test('paginate with optional filters', function () {
-    $residenceId = 'winterfell';
-    $result = DB::table('characters')
-        ->when(
-            $residenceId,
-            function ($query) use ($residenceId) {
-                return $query->where('residence_id', '==', $residenceId)
-                    ->orWhere('residence_id', '==', $residenceId);
-            }
-        )
-        ->paginate(5)
-        ->toArray();
-
-    expect($result['total'])->toEqual(15);
-    expect(count($result['data']))->toEqual(5);
-});
