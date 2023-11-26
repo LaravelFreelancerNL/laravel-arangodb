@@ -16,7 +16,7 @@ test('set variable', function () {
         ->set('y', [1,2,3,4,5]);
 
     $this->assertSame(
-        'LET y = @' . $builder->getQueryId() . '_variable_1 FOR yDoc IN y',
+        'LET y = @' . $builder->getQueryId() . '_variable_1 FOR yDoc IN y RETURN yDoc',
         $builder->toSql()
     );
 
@@ -30,7 +30,7 @@ test('set expression', function () {
         ->set('y', new Expression('1..10'));
 
     $this->assertSame(
-        'LET y = 1..10 FOR yDoc IN y',
+        'LET y = 1..10 FOR yDoc IN y RETURN yDoc',
         $builder->toSql()
     );
 

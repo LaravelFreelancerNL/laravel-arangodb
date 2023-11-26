@@ -14,6 +14,7 @@ use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesColumns;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesFilters;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesGroups;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesJoins;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesUnions;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesWheres;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\ConvertsIdToKey;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\HandlesAqlGrammar;
@@ -26,6 +27,7 @@ class Grammar extends IlluminateQueryGrammar
     use CompilesFilters;
     use CompilesJoins;
     use CompilesGroups;
+    use CompilesUnions;
     use CompilesWheres;
     use ConvertsIdToKey;
     use HandlesAqlGrammar;
@@ -71,6 +73,7 @@ class Grammar extends IlluminateQueryGrammar
         'from',
         'search',
         'joins',
+        // insert variables?
         'wheres',
         'groups',
         'aggregate',
@@ -152,6 +155,32 @@ class Grammar extends IlluminateQueryGrammar
 
         return $this->isExpression($value) ? $this->getValue($value) : $value;
     }
+
+    /**
+     * Compile the components necessary for a select clause.
+     *
+     * @param  IlluminateQueryBuilder  $query
+     * @return array
+     */
+    protected function compileComponents(IlluminateQueryBuilder $query)
+    {
+        $aql = [];
+
+        foreach ($this->selectComponents as $component) {
+            if ($component === 'unions') {
+                continue;
+            }
+
+            if (isset($query->$component)) {
+                $method = 'compile'.ucfirst($component);
+
+                $aql[$component] = $this->$method($query, $query->$component);
+            }
+        }
+
+        return $aql;
+    }
+
 
     /**
      * Compile an insert statement into AQL.
@@ -238,9 +267,14 @@ class Grammar extends IlluminateQueryGrammar
      */
     public function compileSelect(IlluminateQueryBuilder $query)
     {
-        //        if ($builder->unions && $builder->aggregate) {
-        //            return $this->compileUnionAggregate($builder);
-        //        }
+        // If the query does not have any columns set, we'll set the columns to the
+        // * character to just get all of the columns from the database. Then we
+        // can build the query and concatenate all the pieces together as one.
+        $original = $query->columns;
+
+        if (is_null($query->columns)) {
+            $query->columns = ['*'];
+        }
 
         // To compile the query, we'll spin through each component of the query and
         // see if that component exists. If it does we'll just call the compiler
@@ -252,9 +286,14 @@ class Grammar extends IlluminateQueryGrammar
             )
         );
 
-        //        if ($builder->unions) {
-        //            $aql = $this->wrapUnion($aql).' '.$this->compileUnions($builder);
-        //        }
+//        if ($query->unions && $query->aggregate) {
+//            return $this->compileUnionAggregate($query);
+//        }
+        if ($query->unions) {
+            return $this->compileUnions($query, $aql);
+        }
+
+        $query->columns = $original;
 
         return $aql;
     }

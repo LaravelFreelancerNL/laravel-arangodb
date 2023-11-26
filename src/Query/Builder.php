@@ -184,13 +184,29 @@ class Builder extends IlluminateQueryBuilder
 
         foreach ($columns as $as => $column) {
             if (is_string($as) && $this->isQueryable($column)) {
-
                 $this->selectSub($column, $as);
             } else {
                 $this->addColumns([$as => $column]);
             }
         }
 
+        return $this;
+    }
+    /**
+     * Add a subselect expression to the query.
+     *
+     * @param  \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder|string  $query
+     * @param  string  $as
+     * @return $this
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function selectSub($query, $as)
+    {
+        [$query, $bindings] = $this->createSub($query);
+
+        $this->addColumns([$as => new Expression('('.$query.')')]);
+        $this->registerTableAlias($as, $as);
         return $this;
     }
 
@@ -233,6 +249,24 @@ class Builder extends IlluminateQueryBuilder
 
             $this->columns[] = $column;
         }
+    }
+
+    /**
+     * Add a union statement to the query.
+     *
+     * @param  \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder  $query
+     * @param  bool  $all
+     * @return $this
+     */
+    public function union($query, $all = false)
+    {
+        if ($query instanceof \Closure) {
+            $query($query = $this->newQuery());
+        }
+        $this->importBindings($query);
+        $this->unions[] = compact('query', 'all');
+
+        return $this;
     }
 
 

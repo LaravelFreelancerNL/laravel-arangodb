@@ -3,6 +3,7 @@
 namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
+use Illuminate\Database\Query\Expression;
 
 trait CompilesGroups
 {
@@ -19,6 +20,11 @@ trait CompilesGroups
 
         $aqlGroups = [];
         foreach ($groups as $group) {
+            if ($group instanceof Expression) {
+                $aqlGroups[] = $group->getValue($this);
+                continue;
+            }
+
             $aqlGroups[] = $group . " = " . $this->normalizeColumn($query, $group);
         }
 

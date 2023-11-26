@@ -24,7 +24,7 @@ test('orderByDesc', function () {
         ->orderByDesc('age')
         ->toSql();
 
-    expect($results)->toEqual('FOR characterDoc IN characters SORT `characterDoc`.`age` DESC');
+    expect($results)->toEqual('FOR characterDoc IN characters SORT `characterDoc`.`age` DESC RETURN characterDoc');
 });
 
 test('latest', function () {
@@ -32,7 +32,7 @@ test('latest', function () {
         ->latest()
         ->toSql();
 
-    expect($results)->toEqual('FOR characterDoc IN characters SORT `characterDoc`.`created_at` DESC');
+    expect($results)->toEqual('FOR characterDoc IN characters SORT `characterDoc`.`created_at` DESC RETURN characterDoc');
 });
 
 test('oldest', function () {
@@ -40,7 +40,7 @@ test('oldest', function () {
         ->oldest()
         ->toSql();
 
-    expect($results)->toEqual('FOR characterDoc IN characters SORT `characterDoc`.`created_at` ASC');
+    expect($results)->toEqual('FOR characterDoc IN characters SORT `characterDoc`.`created_at` ASC RETURN characterDoc');
 });
 
 test('inRandomOrder', function () {
@@ -48,7 +48,7 @@ test('inRandomOrder', function () {
         ->inRandomOrder()
         ->toSql();
 
-    expect($results)->toEqual('FOR characterDoc IN characters SORT RAND()');
+    expect($results)->toEqual('FOR characterDoc IN characters SORT RAND() RETURN characterDoc');
 });
 
 test('orderByRaw', function () {
@@ -56,6 +56,20 @@ test('orderByRaw', function () {
     $builder->select('*')->from('users')->orderByRaw('userDoc.age @direction', ['@direction' => 'ASC']);
     $this->assertSame(
         'FOR userDoc IN users SORT userDoc.age @direction RETURN userDoc',
+        $builder->toSql()
+    );
+});
+
+
+test('reorder', function () {
+    $builder = getBuilder();
+    $builder->select('*')
+        ->from('users')
+        ->orderByRaw('userDoc.age @direction', ['@direction' => 'ASC'])
+        ->reorder();
+
+    $this->assertSame(
+        'FOR userDoc IN users RETURN userDoc',
         $builder->toSql()
     );
 });

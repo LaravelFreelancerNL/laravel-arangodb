@@ -10,7 +10,7 @@ uses(
     DatabaseTransactions::class
 );
 
-test('search', function () {
+test('searchView', function () {
     $query = \DB::table('house_view')
         ->searchView('en.description', 'dragon lannister');
 
@@ -21,7 +21,7 @@ test('search', function () {
     expect($results[1]->name)->toBe('Lannister');
 });
 
-test('search multiple fields', function () {
+test('searchView with multiple fields', function () {
     $query = \DB::table('house_view')
         ->searchView(['en.description', 'en.words'], 'fire north');
 
@@ -32,7 +32,7 @@ test('search multiple fields', function () {
     expect($results[1]->name)->toBe('Stark');
 });
 
-test('search order by best matching', function () {
+test('searchView and order by best matching', function () {
     $query = \DB::table('house_view')
         ->searchView(['en.description', 'en.words'], 'westeros dragon house fire north')
         ->orderByBestMatching();
@@ -45,7 +45,7 @@ test('search order by best matching', function () {
     expect($results[2]->name)->toBe('Lannister');
 });
 
-test('search order by frequency', function () {
+test('searchView and order by frequency', function () {
     $query = \DB::table('house_view')
         ->searchView(['en.description', 'en.words'], 'westeros dragon house fire north')
         ->orderByFrequency();

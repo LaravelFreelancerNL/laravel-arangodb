@@ -147,3 +147,17 @@ test('addSelect with alias', function () {
     expect((array)$house->en)->toHaveCount(2);
 });
 
+test('select subquery', function () {
+    //find people connected to the seat of house stark
+    $locationQuery = DB::table('houses')
+        ->select('location_id')
+        ->where('name', 'Stark')
+        ->limit(1);
+
+    $query = DB::table('characters')
+        ->select(['location' => $locationQuery], 'name')
+        ->where('residence_id', 'location')
+    ;
+
+    ray($query, $query->toSql());
+})->only();

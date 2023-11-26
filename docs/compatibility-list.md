@@ -1,43 +1,52 @@
 # Compatibility list
-This page shows a list of tried and tested compatible abilities and methods. Unmentioned methods & abilities 
-might work but your mileage may vary. 
+This page shows a list of tried and tested compatible features as well as incompatibilities. 
 
-**_Note_**: This list is limited to database interactions. For example it lists 'create' but not 'make'.
+Features annotated with a question mark are untested. Known incompatibilities are explicitly mentioned.
+Untested features might work but your mileage may vary. 
+
+**_Note_**: This list is limited to database interactions. For example, it lists 'create' but not 'make'.
 
 - [Query Builder](#query-builder)
 - [Eloquent](#eloquent)
+- [Testing](#testing)
 - [Database Connection](#database-connection)
 - [Known Incompatibilities](#known-incompatibilities)
 
 ## <a name="query-builder"></a>Query Builder
 
 ### Data retrieval
-find / first / get / pluck / chunk? / chunkById? / lazy? / lazyById?
+find / first / get / value / pluck / sole / 
+chunk / chunkById / orderedChunkById / lazy / lazyById / lazyByIdDesc / 
 paginate / simplePaginate / cursorPaginate
 
 ### Aggregates
 average / avg / count / doesntExist / exists / max / min / sum
 
 ### Selections
-addSelect / distinct / select / selectRaw
+addSelect / distinct / select / selectRaw (use AQL) / selectSub?
+
+### Unions
+union / unionAll /  
+
+#### Unsupported union clauses
+Union orders / Union aggregates / Union groupBy
 
 ### Expressions
 Expression / raw
 
 ### Joins
-crossJoin / join / joinSub / leftJoin / leftJoinSub
+crossJoin / join / joinSub? / leftJoin / leftJoinSub?
 
 #### Unsupported join clauses
 rightJoin / rightJoinSub
 
 ### Where clauses
 where / orWhere / whereNot / orWhereNot / whereColumn / whereExists
-
 whereBetween / whereNotBetween / whereBetweenColumns / whereNotBetweenColumns /
 whereJsonContains / whereJsonLength /
 whereIn / whereNotIn / whereNull / whereNotNull /
 whereDate / whereMonth / whereDay / whereYear / whereTime /
-whereRaw /
+whereRaw (use AQL)
 
 nested wheres / subquery wheres on both operands 
 
@@ -45,37 +54,40 @@ nested wheres / subquery wheres on both operands
 whereFullText (use searchView instead)
 
 ### Ordering
-orderBy / latest / oldest / inRandomOrder / reorder? /
+orderBy / latest / oldest / inRandomOrder / reorder /
 orderByRaw (use AQL)
 
 ### Grouping
 groupBy /
-groupByRaw?(use AQL) /
 having / havingBetween / havingNull / havingNotNull / 
 havingRaw (use AQL) /
-
 Nested havings
 
-### Limit & Offset
+#### Incompatible grouping
+groupByRaw
+
+### Limit & offset
 limit / offset / take / skip
 
-### Conditional Clauses
-when?
+### Conditional clauses
+when
 
-### Insert Statements
+### Insert statements
 insert / insertOrIgnore / insertUsing? / insertGetId
 
-### Update Statements
+### Update statements
 update / updateOrInsert / upsert /
-increment / incrementEach / decrement / decrementEach
+increment / incrementEach / decrement / decrementEach /
+update with join
 
-### Delete Statements
+### Delete statements
 delete / truncate
 
 ### Debugging
-dd? / dump? /
-dumpRawSql? / ddRawSql? /
-toSql
+dd / dump / toSql
+
+#### Incompatible debugging functions
+dumpRawSql / ddRawSql
 
 ## <a name="eloquent"></a>Eloquent
 The methods listed below are specific to Eloquent.
@@ -135,12 +147,11 @@ assertModelExists / assertModelMissing /
 assertDeleted  / assertSoftDeleted / assertNotSoftDeleted /
 castAsJson (dummy method)
 
+## <a name="database-connection"></a> Database connection
+escape
+
 ## <a name="known-incompatibilities"></a> Known incompatibilities
 Not all features can be made compatible. Known issues are listed below:
-
-### Query Builder incompatibilities
- / union / unionAll? / 
-
 
 ### Transactions
 [At the beginning of a transaction you must declare collections that are used in (write) statements.](transactions.md)

@@ -123,4 +123,13 @@ test('having not null', function () {
     expect($names[1])->toEqual("Bran");
 });
 
-test("keep selected columns after groupBy")->todo();
+test("keep selected columns after groupBy", function () {
+    $names = DB::table('characters')
+        ->select('name')
+        ->groupBy('name', 'residence_id')
+        ->havingNotNull('residence_id')
+        ->get();
+
+    expect($names)->toHaveCount(33);
+    expect($names[1])->toEqual("Bran");
+});

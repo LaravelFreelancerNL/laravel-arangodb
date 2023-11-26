@@ -108,7 +108,7 @@ test('get id conversion with wheres', function () {
 
     $this->assertSame(
         'FOR characterDoc IN characters FILTER `characterDoc`.`_key` == @' . $query->getQueryId() . '_where_1'
-        . ' LIMIT 1',
+        . ' LIMIT 1 RETURN characterDoc',
         $query->toSql()
     );
 

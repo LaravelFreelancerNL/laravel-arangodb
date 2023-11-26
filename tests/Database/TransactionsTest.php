@@ -42,7 +42,9 @@ test('commit transaction', function () {
     expect($runningTransactions)->toBeEmpty();
 });
 
-test('rollback transaction', function () {
+test(/**
+ * @throws Throwable
+ */ 'rollback transaction', function () {
     $startingCharacters = Character::all();
     $startingLocations = Location::all();
 

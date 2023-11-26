@@ -1,8 +1,10 @@
 <?php
 
+use Illuminate\Database\MultipleRecordsFoundException;
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\TestCase;
+use \Illuminate\Support\Collection;
 
 uses(
     TestCase::class,
@@ -28,6 +30,14 @@ test('get', function () {
     expect($result->count())->toBe(1);
     expect($result->first()->id)->toBe('NedStark');
 });
+
+test('value', function () {
+    $query = \DB::table('characters')->where('id', '=', 'NedStark');
+    $result = $query->value('name');
+
+    expect($result)->toBe('Ned');
+});
+
 
 test('paginate', function () {
     $result = DB::table('characters')->paginate(15)->toArray();
@@ -80,3 +90,87 @@ test('pluck', function () {
     expect($results['NedStark'])->toEqual('Ned');
 });
 
+test('chunk', function () {
+    $count = 0;
+    DB::table('characters')->orderBy('id')->chunk(10, function (Collection $characters) use (&$count) {
+        foreach ($characters as $character) {
+            $count++;
+        }
+    });
+
+    expect($count)->toBe(43);
+});
+
+
+test('chunk stop', function () {
+    $count = 0;
+    DB::table('characters')->orderBy('id')->chunk(10, function (Collection $characters) use (&$count) {
+        foreach ($characters as $character) {
+            $count++;
+        }
+        if($count > 20) {
+            return false;
+        }
+        return true;
+    });
+
+    expect($count)->toBe(30);
+});
+
+test('chunkById', function () {
+    $count = 0;
+    DB::table('characters')->where('alive', true)->chunkById(10, function (Collection $characters) use (&$count) {
+        foreach ($characters as $character) {
+            $count++;
+        }
+    });
+
+    expect($count)->toBe(27);
+});
+
+test('lazy', function () {
+    $count = 0;
+    DB::table('characters')->orderBy('id')->lazy()->each(function (object $character) use (&$count) {
+        $count++;
+    });
+
+    expect($count)->toBe(43);
+});
+
+test('lazyById', function () {
+    $count = 0;
+    DB::table('characters')->lazyById()->each(function (object $character) use (&$count) {
+        $count++;
+    });
+
+    expect($count)->toBe(43);
+});
+
+test('lazyByIdDesc', function () {
+    $asc = [];
+    $desc = [];
+    DB::table('characters')->lazyById()->each(function (object $character) use (&$asc) {
+        $asc[] = $character->id;
+    });
+
+    DB::table('characters')->lazyByIdDesc()->each(function (object $character) use (&$desc) {
+        $desc[] = $character->id;
+    });
+
+    expect(count($asc))->toBe(43);
+    expect(count($desc))->toBe(43);
+    expect($asc[0])->toBe(end($desc));
+    expect($desc[0])->toBe(end($asc));
+});
+
+test('sole', function () {
+    $result = DB::table('characters')->where('name', 'Gilly')->sole();
+
+    expect($result->name)->toBe('Gilly');
+});
+
+test('sole on more than one result', function () {
+    $result = DB::table('characters')->sole();
+
+    expect($result->name)->toBe('Gilly');
+})->throws(MultipleRecordsFoundException::class);
