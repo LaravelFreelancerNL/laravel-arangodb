@@ -4,7 +4,7 @@ use Illuminate\Database\MultipleRecordsFoundException;
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\TestCase;
-use \Illuminate\Support\Collection;
+use Illuminate\Support\Collection;
 
 uses(
     TestCase::class,
@@ -12,27 +12,27 @@ uses(
 );
 
 test('find', function () {
-    $result = \DB::table('characters')->find('NedStark');
+    $result = DB::table('characters')->find('NedStark');
 
     expect($result->id)->toBe('NedStark');
 });
 
 test('first', function () {
-    $query = \DB::table('characters')->where('id', '=', 'NedStark');
+    $query = DB::table('characters')->where('id', '=', 'NedStark');
     $result = $query->first();
 
     expect($result->id)->toBe('NedStark');
 });
 
 test('get', function () {
-    $result = \DB::table('characters')->where('id', '=', 'NedStark')->get();
+    $result = DB::table('characters')->where('id', '=', 'NedStark')->get();
 
     expect($result->count())->toBe(1);
     expect($result->first()->id)->toBe('NedStark');
 });
 
 test('value', function () {
-    $query = \DB::table('characters')->where('id', '=', 'NedStark');
+    $query = DB::table('characters')->where('id', '=', 'NedStark');
     $result = $query->value('name');
 
     expect($result)->toBe('Ned');

@@ -64,6 +64,8 @@ trait CompilesJoins
 
     protected function compileLeftJoin(IlluminateBuilder $query, $join)
     {
+        assert($query instanceof Builder);
+
         //        $table = $this->wrapTable($join->table);
         //        $alias = $this->generateTableAlias($join->table);
         //        $query->registerTableAlias($join->table, $alias);

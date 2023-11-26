@@ -205,7 +205,7 @@ class Builder extends IlluminateQueryBuilder
     {
         [$query, $bindings] = $this->createSub($query);
 
-        $this->addColumns([$as => new Expression('('.$query.')')]);
+        $this->addColumns([$as => new Expression('(' . $query . ')')]);
         $this->registerTableAlias($as, $as);
         return $this;
     }
@@ -425,8 +425,8 @@ class Builder extends IlluminateQueryBuilder
             return $this;
         }
 
-        if ($value instanceof IlluminateQueryBuilder) {
-            $value->grammar->registerTableAlias($this->from);
+        if ($value instanceof Builder) {
+            $value->registerTableAlias($this->from);
             $value->grammar->compileSelect($value);
 
             $subquery = '(' . $value->toSql() . ')';
@@ -460,7 +460,10 @@ class Builder extends IlluminateQueryBuilder
      */
     protected function forSubQuery()
     {
+
         $query = $this->newQuery();
+
+        assert($query instanceof Builder);
 
         $query->importTableAliases($this);
 

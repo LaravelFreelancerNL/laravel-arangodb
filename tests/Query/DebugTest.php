@@ -35,19 +35,19 @@ test('toSql', function () {
 
 
 test('toRawSql', function () {
-//    $query = DB::table('characters')
-//        ->where('name', 'Gilly')
-//        ->toRawSql();
+    //    $query = DB::table('characters')
+    //        ->where('name', 'Gilly')
+    //        ->toRawSql();
 
-// apparently the connection isn't set for grammar generating an error when trying to escape values.
+    // apparently the connection isn't set for grammar generating an error when trying to escape values.
 })->todo();
 
 test('dumpRawSql', function () {
-//    $query = DB::table('characters')
-//        ->where('name', 'Gilly')
-//        ->dumpRawSql();
+    //    $query = DB::table('characters')
+    //        ->where('name', 'Gilly')
+    //        ->dumpRawSql();
 
-// Same problem as toRawSql
+    // Same problem as toRawSql
 })->todo();
 
 

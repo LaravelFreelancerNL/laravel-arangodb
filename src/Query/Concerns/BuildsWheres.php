@@ -362,6 +362,9 @@ trait BuildsWheres
         // of the sub-select's conditions to itself, and then we can cache it off
         // in the array of where clauses for the "main" parent query instance.
         call_user_func($callback, $query = $this->forSubQuery());
+
+        assert($query instanceof Builder);
+
         $query->grammar->compileSelect($query);
 
         $subquery = '(' . $query->toSql() . ')';

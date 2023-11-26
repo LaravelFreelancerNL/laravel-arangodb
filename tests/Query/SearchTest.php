@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
@@ -11,7 +12,7 @@ uses(
 );
 
 test('searchView', function () {
-    $query = \DB::table('house_view')
+    $query = DB::table('house_view')
         ->searchView('en.description', 'dragon lannister');
 
     $results = $query->get();
@@ -22,7 +23,7 @@ test('searchView', function () {
 });
 
 test('searchView with multiple fields', function () {
-    $query = \DB::table('house_view')
+    $query = DB::table('house_view')
         ->searchView(['en.description', 'en.words'], 'fire north');
 
     $results = $query->get();
@@ -33,7 +34,7 @@ test('searchView with multiple fields', function () {
 });
 
 test('searchView and order by best matching', function () {
-    $query = \DB::table('house_view')
+    $query = DB::table('house_view')
         ->searchView(['en.description', 'en.words'], 'westeros dragon house fire north')
         ->orderByBestMatching();
 
@@ -46,7 +47,7 @@ test('searchView and order by best matching', function () {
 });
 
 test('searchView and order by frequency', function () {
-    $query = \DB::table('house_view')
+    $query = DB::table('house_view')
         ->searchView(['en.description', 'en.words'], 'westeros dragon house fire north')
         ->orderByFrequency();
 

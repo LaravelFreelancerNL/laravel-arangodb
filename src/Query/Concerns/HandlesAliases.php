@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Str;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
+use LaravelFreelancerNL\Aranguent\Query\Builder;
 
 trait HandlesAliases
 {
@@ -94,7 +95,7 @@ trait HandlesAliases
 
     public function importTableAliases(array|IlluminateQueryBuilder $aliases): void
     {
-        if ($aliases instanceof IlluminateQueryBuilder) {
+        if ($aliases instanceof Builder) {
             $aliases = $aliases->getTableAliases();
         }
         foreach($aliases as $key => $value) {

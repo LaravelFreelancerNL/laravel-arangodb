@@ -21,6 +21,8 @@ trait CompilesColumns
      */
     protected function compileColumns(IlluminateQueryBuilder $query, $columns)
     {
+        assert($query instanceof Builder);
+
         $returnDocs = [];
         $returnAttributes = [];
 
@@ -72,7 +74,9 @@ trait CompilesColumns
      */
     protected function normalizeColumn(IlluminateQueryBuilder $query, mixed $column, string $table = null): mixed
     {
-        if ($column instanceof QueryBuilder || $column instanceof Expression) {
+        assert($query instanceof Builder);
+
+        if ( $column instanceof Expression) {
             return $column;
         }
 
@@ -124,7 +128,7 @@ trait CompilesColumns
 
 
     /**
-     * @param Builder $builder
+     * @param Builder $query
      * @param string $column
      * @param string|null $table
      * @return string
@@ -231,6 +235,8 @@ trait CompilesColumns
 
     protected function mergeJoinResults(IlluminateQueryBuilder $query, $baseTable): string
     {
+        assert($query instanceof Builder);
+
         $tablesToJoin = [];
         foreach ($query->joins as $key => $join) {
             $tableAlias = $query->getTableAlias($join->table);

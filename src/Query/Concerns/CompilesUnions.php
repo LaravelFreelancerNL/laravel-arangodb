@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
 use Illuminate\Database\Query\Builder as IlluminateBuilder;
-use Illuminate\Database\Query\Expression;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 
 trait CompilesUnions
@@ -14,13 +13,13 @@ trait CompilesUnions
      * Compile the "union" queries attached to the main query.
      *
      * @param Builder $query
-     * @param string $aql
+     * @param string $firstQuery
      * @return string
      */
     protected function compileUnions(IlluminateBuilder $query, $firstQuery = '')
     {
-        $unionResultsId = 'union'.$query->getQueryId().'Results';
-        $unionDocId = 'union'.$query->getQueryId().'Results';
+        $unionResultsId = 'union' . $query->getQueryId() . 'Results';
+        $unionDocId = 'union' . $query->getQueryId() . 'Results';
 
         $firstQuery = $this->wrapUnion($firstQuery);
         $unions = '';
@@ -29,21 +28,21 @@ trait CompilesUnions
             $unions = $this->compileUnion($union, $prefix);
         }
 
-        $aql = 'LET '.$unionResultsId.' = '.$unions
-            .' FOR '.$unionDocId.'Doc IN '.$unionResultsId;
-        $aql .= ' RETURN '.$unionDocId.'Doc';
+        $aql = 'LET ' . $unionResultsId . ' = ' . $unions
+            . ' FOR ' . $unionDocId . 'Doc IN ' . $unionResultsId;
+        $aql .= ' RETURN ' . $unionDocId . 'Doc';
 
-//        if (! empty($query->unionOrders)) {
-//            $sql .= ' '.$this->compileOrders($query, $query->unionOrders);
-//        }
-//
-//        if (isset($query->unionLimit)) {
-//            $sql .= ' '.$this->compileLimit($query, $query->unionLimit);
-//        }
-//
-//        if (isset($query->unionOffset)) {
-//            $sql .= ' '.$this->compileOffset($query, $query->unionOffset);
-//        }
+        //        if (! empty($query->unionOrders)) {
+        //            $sql .= ' '.$this->compileOrders($query, $query->unionOrders);
+        //        }
+        //
+        //        if (isset($query->unionLimit)) {
+        //            $sql .= ' '.$this->compileLimit($query, $query->unionLimit);
+        //        }
+        //
+        //        if (isset($query->unionOffset)) {
+        //            $sql .= ' '.$this->compileOffset($query, $query->unionOffset);
+        //        }
 
         return $aql;
     }
@@ -58,7 +57,7 @@ trait CompilesUnions
     {
         $unionType = $union['all'] ? 'UNION' : 'UNION_DISTINCT';
 
-        return $unionType.'('.$aql.', '.$this->wrapUnion($union['query']->toSql()).')';
+        return $unionType . '(' . $aql . ', ' . $this->wrapUnion($union['query']->toSql()) . ')';
     }
 
     /**
@@ -82,19 +81,19 @@ trait CompilesUnions
         $unions[] = $this->wrapUnion($aql);
 
 
-//        if (!empty($query->unionOrders)) {
-//            $sql .= ' ' . $this->compileOrders($query, $query->unionOrders);
-//        }
-//
-//        if (isset($query->unionLimit)) {
-//            $sql .= ' ' . $this->compileLimit($query, $query->unionLimit);
-//        }
-//
-//        if (isset($query->unionOffset)) {
-//            $sql .= ' ' . $this->compileOffset($query, $query->unionOffset);
-//        }
-//
-//        return ltrim($sql);
+        //        if (!empty($query->unionOrders)) {
+        //            $sql .= ' ' . $this->compileOrders($query, $query->unionOrders);
+        //        }
+        //
+        //        if (isset($query->unionLimit)) {
+        //            $sql .= ' ' . $this->compileLimit($query, $query->unionLimit);
+        //        }
+        //
+        //        if (isset($query->unionOffset)) {
+        //            $sql .= ' ' . $this->compileOffset($query, $query->unionOffset);
+        //        }
+        //
+        //        return ltrim($sql);
         return $aql;
     }
 }

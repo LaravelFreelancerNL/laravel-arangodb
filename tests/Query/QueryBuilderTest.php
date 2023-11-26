@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\TestCase;
@@ -12,10 +13,10 @@ uses(
 test('when false', function () {
     $id = null;
 
-    $query = \DB::table('characters')
+    $query = DB::table('characters')
         ->when($id, function (Builder $query, string $id) {
-        $query->where('id', $id);
-    });
+            $query->where('id', $id);
+        });
 
     $aql = $query->toAql();
     $results = $query->get();
@@ -29,7 +30,7 @@ test('when false', function () {
 test('when true', function () {
     $id = 'NedStark';
 
-    $query = \DB::table('characters')
+    $query = DB::table('characters')
         ->when($id, function (Builder $query, string $id) {
             $query->where('id', $id);
         });

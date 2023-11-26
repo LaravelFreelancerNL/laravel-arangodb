@@ -119,6 +119,8 @@ trait BuildsJoins
      */
     public function joinSub($query, $as, $first, $operator = null, $second = null, $type = 'inner', $where = false)
     {
+        assert($query instanceof Builder);
+
         $query->importTableAliases($this);
         $query->importTableAliases([$as => $as]);
 

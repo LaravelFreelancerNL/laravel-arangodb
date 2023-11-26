@@ -172,7 +172,7 @@ class Grammar extends IlluminateQueryGrammar
             }
 
             if (isset($query->$component)) {
-                $method = 'compile'.ucfirst($component);
+                $method = 'compile' . ucfirst($component);
 
                 $aql[$component] = $this->$method($query, $query->$component);
             }
@@ -197,12 +197,12 @@ class Grammar extends IlluminateQueryGrammar
         $table = $this->prefixTable($query->from);
 
         if (empty($values)) {
-            $aql = 'INSERT {} INTO ' . $table . ' RETURN NEW._key';
+            $aql = /** @lang AQL */ 'INSERT {} INTO ' . $table . ' RETURN NEW._key';
 
             return $aql;
         }
 
-        return 'LET values = ' . $bindVar
+        return /** @lang AQL */ 'LET values = ' . $bindVar
                 . ' FOR value IN values'
                 . ' INSERT value INTO ' . $table
                 . ' RETURN NEW._key';
@@ -220,12 +220,12 @@ class Grammar extends IlluminateQueryGrammar
         $sequence = $this->convertIdToKey($sequence);
 
         if (empty($values)) {
-            $aql = 'INSERT {} INTO ' . $table . ' RETURN NEW.' . $sequence;
+            $aql = /** @lang AQL */ 'INSERT {} INTO ' . $table . ' RETURN NEW.' . $sequence;
 
             return $aql;
         }
 
-        $aql = 'LET values = ' . $bindVar
+        $aql = /** @lang AQL */ 'LET values = ' . $bindVar
             . ' FOR value IN values'
             . ' INSERT value INTO ' . $table
             . ' RETURN NEW.' . $sequence;
@@ -245,12 +245,12 @@ class Grammar extends IlluminateQueryGrammar
         $table = $this->prefixTable($query->from);
 
         if (empty($values)) {
-            $aql = "INSERT {} INTO $table RETURN NEW._key";
+            $aql = /** @lang AQL */ "INSERT {} INTO $table RETURN NEW._key";
 
             return $aql;
         }
 
-        $aql = "LET values = $bindVar "
+        $aql = /** @lang AQL */ "LET values = $bindVar "
             . "FOR value IN values "
             . "INSERT value INTO $table "
             . "OPTIONS { ignoreErrors: true } "
@@ -286,9 +286,9 @@ class Grammar extends IlluminateQueryGrammar
             )
         );
 
-//        if ($query->unions && $query->aggregate) {
-//            return $this->compileUnionAggregate($query);
-//        }
+        //        if ($query->unions && $query->aggregate) {
+        //            return $this->compileUnionAggregate($query);
+        //        }
         if ($query->unions) {
             return $this->compileUnions($query, $aql);
         }
@@ -315,10 +315,12 @@ class Grammar extends IlluminateQueryGrammar
      * @param IlluminateQueryBuilder $query
      * @param string  $table
      *
-     * @return Builder
+     * @return string
      */
     protected function compileFrom(IlluminateQueryBuilder $query, $table)
     {
+        assert($query instanceof Builder);
+
         // FIXME: wrapping/quoting
         $table = $this->prefixTable($table);
 
@@ -379,13 +381,13 @@ class Grammar extends IlluminateQueryGrammar
                 $key = 'sql';
             }
 
-            if ( $order[$key] instanceof Expression) {
+            if ($order[$key] instanceof Expression) {
                 $order[$key] = $order[$key]->getValue($this);
             } else {
                 $order[$key] = $this->normalizeColumn($query, $order[$key]);
             }
 
-            return array_key_exists('direction', $order) ? $order[$key].' '.$order['direction'] : $order[$key];
+            return array_key_exists('direction', $order) ? $order[$key] . ' ' . $order['direction'] : $order[$key];
         }, $orders);
     }
 
@@ -442,6 +444,8 @@ class Grammar extends IlluminateQueryGrammar
      */
     public function compileUpdate(IlluminateQueryBuilder $query, array|string $values)
     {
+        assert($query instanceof Builder);
+
         $table = $query->from;
         $alias = $query->getTableAlias($query->from);
 
@@ -531,6 +535,7 @@ class Grammar extends IlluminateQueryGrammar
      */
     protected function compileDeleteWithoutJoins(IlluminateQueryBuilder $query, $table, $where)
     {
+        assert($query instanceof Builder);
 
         $alias = $this->normalizeColumn($query, $query->registerTableAlias($table));
 
