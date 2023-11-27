@@ -1,14 +1,32 @@
 <?php
 
-namespace Tests\Setup;
+namespace Tests;
 
-use Illuminate\Config\Repository;
+use Illuminate\Contracts\Foundation\Application;
+use Spatie\Ray\Settings\Settings;
 
-class TestConfig
+use function Orchestra\Testbench\after_resolving;
+
+/**
+ * @internal
+ *
+ * @phpstan-type TLaravel \Illuminate\Contracts\Foundation\Application
+ */
+class BootstrapTestbench
 {
-    public static function set($app)
+    /**
+     * Bootstrap the given application.
+     *
+     * @param  TLaravel  $app
+     * @return void
+     *
+     * @codeCoverageIgnore
+     */
+    public function bootstrap(Application $app): void
     {
-        tap($app->make('config'), function (Repository $config) {
+        after_resolving($app, Settings::class, static function ($settings, $app) {
+            $config = $app->make('config');
+
             $config->set('database.connections.arangodb', [
                 'name'                                      => 'arangodb',
                 'driver'                                    => 'arangodb',

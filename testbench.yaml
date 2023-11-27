@@ -5,6 +5,9 @@ env:
   - DB_USERNAME="root"
   - DB_PASSWORD=
 
+bootstrappers:
+  - Tests\BootstrapTestbench
+
 providers:
   - LaravelFreelancerNL\Aranguent\AranguentServiceProvider
   - LaravelFreelancerNL\Aranguent\Providers\CommandServiceProvider
