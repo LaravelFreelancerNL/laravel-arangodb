@@ -25,6 +25,9 @@ class BootstrapTestbench
     public function bootstrap(Application $app): void
     {
         after_resolving($app, Settings::class, static function ($settings, $app) {
+            dump('BootstrapTestbench is used!');
+            die;
+
             $config = $app->make('config');
 
             $config->set('database.connections.arangodb', [
