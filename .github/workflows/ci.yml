@@ -20,14 +20,14 @@ jobs:
         arangodb: [3.10, 3.11]
         dependency-version: [ prefer-lowest, prefer-stable ]
         include:
-          - laravel: 10.*
-            testbench: ^8.0
           - laravel: 9.*
             testbench: ^7.0
-        exclude:
           - laravel: 10.*
-            php: 8.0
-    name:  QA L ${{ matrix.laravel }} / P ${{ matrix.php }} / A ${{ matrix.arangodb }}
+            testbench: ^8.0
+#        exclude:
+#          - laravel: 11.*
+#            php: 8.1
+    name:  QA L ${{ matrix.laravel }} / P ${{ matrix.php }} / A ${{ matrix.arangodb }} / ${{ matrix.dependency-version }}
 
     services:
       arangodb:
