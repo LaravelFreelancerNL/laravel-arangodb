@@ -18,17 +18,13 @@ jobs:
         arangodb: [3.10, 3.11]
         dependency-version: [prefer-lowest, prefer-stable]
         php: [8.1, 8.2, 8.3]
-        laravel: [^9.0, ^10.0]
+        laravel: [^10.0]
 #        exclude:
 #          - laravel: 11.*
 #            php: 8.1
         include:
-          - laravel: ^9.0
-            testbench: ^7.0
-            pestphp: ^1.0
           - laravel: ^10.0
             testbench: ^8.0
-            pestphp: ^2.0
     name:  QA L ${{ matrix.laravel }} / P ${{ matrix.php }} / A ${{ matrix.arangodb }} - ${{ matrix.dependency-version }}
 
     services:
@@ -60,8 +56,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer require laravel/framework:${{ matrix.laravel }} orchestra/testbench:${{ matrix.testbench }} pestphp/pest-plugin-laravel:${{ matrix.pestphp }} --no-interaction --no-update
-          composer update --prefer-dist --no-interaction
+          composer require laravel/framework:${{ matrix.laravel }} orchestra/testbench:${{ matrix.testbench }} --no-interaction --no-update
+          composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction
 
       - name: Prepare test database
         run: |
