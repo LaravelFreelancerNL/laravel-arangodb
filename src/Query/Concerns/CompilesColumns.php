@@ -8,7 +8,6 @@ use Exception;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Database\Query\Expression;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
-use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
 trait CompilesColumns
 {
@@ -76,7 +75,7 @@ trait CompilesColumns
     {
         assert($query instanceof Builder);
 
-        if ( $column instanceof Expression) {
+        if ($column instanceof Expression) {
             return $column;
         }
 

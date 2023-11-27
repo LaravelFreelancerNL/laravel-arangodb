@@ -5,9 +5,10 @@ echo "Fix coding style"
 echo "Run PHPMD"
 ./vendor/bin/phpmd src/ text phpmd-ruleset.xml
 
+echo "Test package from within phpunit"
+./vendor/bin/testbench migrate:fresh --path=tests/Setup/Database/Migrations --realpath --seed
+./vendor/bin/testbench package:test
+
 echo "Run PHPStan"
 ./vendor/bin/phpstan analyse -c phpstan.neon
 
-echo "Test package from within phpunit"
-./vendor/bin/testbench migrate:fresh --path=tests/Setup/Database/Migrations --realpath --seed --seeder=Tests\\Setup\\Database\\Seeds\\DatabaseSeeder
-./vendor/bin/testbench package:test
