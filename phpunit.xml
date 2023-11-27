@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" backupGlobals="false" bootstrap="vendor/autoload.php" colors="true" processIsolation="false" stopOnFailure="true" beStrictAboutTestsThatDoNotTestAnything="false" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.2/phpunit.xsd" cacheDirectory=".phpunit.cache" backupStaticProperties="false">
+<phpunit
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        backupGlobals="false"
+        bootstrap="vendor/autoload.php"
+        colors="true"
+        processIsolation="false"
+        stopOnFailure="true"
+        beStrictAboutTestsThatDoNotTestAnything="false"
+        xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.4/phpunit.xsd"
+        cacheDirectory=".phpunit.cache"
+        backupStaticProperties="false"
+>
   <testsuites>
     <testsuite name="all">
       <directory suffix=".php">tests/</directory>
@@ -18,7 +29,7 @@
   </coverage>
   <php>
     <env name="APP_KEY" value="AckfSECXIvnK5r28GVIWUAxmbBSjTsmF"/>
-    <env name="ARANGODB_VERSION" value="3.8"/>
+    <env name="ARANGODB_VERSION" value="3.10"/>
     <env name="RAY_ENABLED" value="(true)"/>
     <env name="SEND_CACHE_TO_RAY" value="(false)"/>
     <env name="SEND_DUMPS_TO_RAY" value="(true)"/>

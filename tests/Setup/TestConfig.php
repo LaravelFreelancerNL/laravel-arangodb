@@ -11,7 +11,6 @@ class TestConfig
     public static function set($app)
     {
         tap($app->make('config'), function (Repository $config) {
-            $config->set('database.default', 'arangodb');
             $config->set('database.connections.arangodb', [
                 'name'                                      => 'arangodb',
                 'driver'                                    => 'arangodb',
@@ -20,6 +19,7 @@ class TestConfig
                 'password'                                  => env('DB_PASSWORD', null),
                 'database'                                  => env('DB_DATABASE', 'aranguent__test'),
             ]);
+            $config->set('database.default', 'arangodb');
         });
     }
 }
