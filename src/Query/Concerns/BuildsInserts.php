@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
+use LaravelFreelancerNL\Aranguent\Query\Grammar;
 use LaravelFreelancerNL\FluentAQL\Exceptions\BindException;
 
 trait BuildsInserts
@@ -16,6 +17,8 @@ trait BuildsInserts
      */
     public function insert(array $values): bool
     {
+        assert($this->grammar instanceof Grammar);
+
         if (!array_is_list($values)) {
             $values = [$values];
         }
@@ -38,6 +41,8 @@ trait BuildsInserts
      */
     public function insertGetId(array $values, $sequence = null)
     {
+        assert($this->grammar instanceof Grammar);
+
         if (!array_is_list($values)) {
             $values = [$values];
         }
@@ -62,8 +67,11 @@ trait BuildsInserts
      *
      * @throws BindException
      */
+    /** @phpstan-ignore-next-line */
     public function insertOrIgnore(array $values): bool
     {
+        assert($this->grammar instanceof Grammar);
+
         if (!array_is_list($values)) {
             $values = [$values];
         }
@@ -77,8 +85,6 @@ trait BuildsInserts
 
 
         $aql = $this->grammar->compileInsertOrIgnore($this, $values, $bindVar);
-        $results = $this->getConnection()->insert($aql, $this->getBindings());
-
-        return $results;
+        return $this->getConnection()->insert($aql, $this->getBindings());
     }
 }

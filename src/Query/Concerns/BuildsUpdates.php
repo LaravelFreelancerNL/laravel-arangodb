@@ -7,6 +7,7 @@ namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Arr;
 use InvalidArgumentException;
+use LaravelFreelancerNL\Aranguent\Query\Grammar;
 use LaravelFreelancerNL\FluentAQL\Exceptions\BindException;
 
 /**
@@ -37,6 +38,8 @@ trait BuildsUpdates
      */
     public function update(array $values)
     {
+        assert($this->grammar instanceof Grammar);
+
         $this->applyBeforeQueryCallbacks();
 
         $values = Arr::undot($this->grammar->convertJsonFields($values));
@@ -129,6 +132,8 @@ trait BuildsUpdates
      */
     public function upsert(array $values, $uniqueBy, $update = null)
     {
+        assert($this->grammar instanceof Grammar);
+
         if (empty($values)) {
             return 0;
         } elseif ($update === []) {

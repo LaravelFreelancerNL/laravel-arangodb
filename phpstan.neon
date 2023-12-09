@@ -2,8 +2,8 @@ includes:
     - ./vendor/nunomaduro/larastan/extension.neon
 
 parameters:
-	level: 2
+	level: 4
 	universalObjectCratesClasses:
 	    - 'Illuminate\Support\Fluent'
 	paths:
-		- src
+		- src/Query

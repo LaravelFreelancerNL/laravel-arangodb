@@ -8,6 +8,7 @@ use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
+use LaravelFreelancerNL\Aranguent\Query\Grammar;
 
 trait BuildsSearches
 {
@@ -19,6 +20,8 @@ trait BuildsSearches
         string $searchText,
         string $analyzer = null
     ): IlluminateQueryBuilder {
+        assert($this->grammar instanceof Grammar);
+
         if(!is_array($fields)) {
             $fields = Arr::wrap($fields);
         }

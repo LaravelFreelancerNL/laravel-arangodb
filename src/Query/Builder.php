@@ -67,14 +67,14 @@ class Builder extends IlluminateQueryBuilder
     public $connection;
 
     /**
-     * @var Grammar
+     * @var \Illuminate\Database\Query\Grammars\Grammar
      */
     public $grammar;
 
     /**
      * The current query value bindings.
      *
-     * @var null|array{fields: array<string>, searchTokens: array<string>, analyzer: string|null}
+     * @var null|array{fields: mixed, searchText: mixed, analyzer: non-falsy-string}
      */
     public ?array $search = null;
 

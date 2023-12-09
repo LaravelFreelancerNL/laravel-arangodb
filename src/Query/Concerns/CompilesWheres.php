@@ -351,9 +351,10 @@ trait CompilesWheres
     /**
      * Compile a where date clause.
      *
-     * @param  IlluminateQueryBuilder  $query
-     * @param  array  $where
-     * @return array
+     * @param IlluminateQueryBuilder $query
+     * @param array $where
+     * @return string
+     * @throws \Exception
      */
     protected function whereDate(IlluminateQueryBuilder $query, $where)
     {
@@ -370,9 +371,10 @@ trait CompilesWheres
     /**
      * Compile a where year clause.
      *
-     * @param  IlluminateQueryBuilder $query
-     * @param  array  $where
-     * @return array
+     * @param IlluminateQueryBuilder $query
+     * @param array $where
+     * @return string
+     * @throws \Exception
      */
     protected function whereYear(IlluminateQueryBuilder $query, $where)
     {
@@ -390,9 +392,10 @@ trait CompilesWheres
     /**
      * Compile a where month clause.
      *
-     * @param  IlluminateQueryBuilder  $query
-     * @param  array  $where
-     * @return array
+     * @param IlluminateQueryBuilder $query
+     * @param array $where
+     * @return string
+     * @throws \Exception
      */
     protected function whereMonth(IlluminateQueryBuilder $query, $where)
     {
@@ -411,9 +414,10 @@ trait CompilesWheres
     /**
      * Compile a where day clause.
      *
-     * @param  IlluminateQueryBuilder  $query
-     * @param  array  $where
+     * @param IlluminateQueryBuilder $query
+     * @param array $where
      * @return string
+     * @throws \Exception
      */
     protected function whereDay(IlluminateQueryBuilder $query, $where)
     {

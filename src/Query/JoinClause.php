@@ -28,14 +28,14 @@ class JoinClause extends Builder
     /**
      * The connection of the parent query builder.
      *
-     * @var Connection
+     * @var \Illuminate\Database\ConnectionInterface
      */
     protected $parentConnection;
 
     /**
      * The grammar of the parent query builder.
      *
-     * @var Grammar
+     * @var \Illuminate\Database\Query\Grammars\Grammar
      */
     protected $parentGrammar;
 
@@ -133,7 +133,7 @@ class JoinClause extends Builder
     /**
      * Create a new query instance for sub-query.
      *
-     * @return Builder
+     * @return \Illuminate\Database\Query\Builder
      */
     protected function forSubQuery()
     {

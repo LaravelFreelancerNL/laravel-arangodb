@@ -7,6 +7,7 @@ namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 use Closure;
 use Illuminate\Database\Eloquent\Builder as IlluminateEloquentBuilder;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
+use Illuminate\Database\Query\JoinClause as IlluminateJoinClause;
 use Illuminate\Database\Query\Expression;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 use LaravelFreelancerNL\Aranguent\Query\JoinClause;
@@ -78,7 +79,7 @@ trait BuildsJoins
      * @param  string  $type
      * @param  bool  $where
      */
-    public function join($table, $first, $operator = null, $second = null, $type = 'inner', $where = false): Builder
+    public function join($table, $first, $operator = null, $second = null, $type = 'inner', $where = false): IlluminateQueryBuilder
     {
         $join = $this->newJoinClause($this, $type, $table);
 
@@ -114,11 +115,10 @@ trait BuildsJoins
      * @param  string|null  $second
      * @param  string  $type
      * @param  bool  $where
-     * @return $this
      *
      * @throws \InvalidArgumentException
      */
-    public function joinSub($query, $as, $first, $operator = null, $second = null, $type = 'inner', $where = false)
+    public function joinSub($query, $as, $first, $operator = null, $second = null, $type = 'inner', $where = false): IlluminateQueryBuilder
     {
         assert($query instanceof Builder);
 
@@ -138,9 +138,8 @@ trait BuildsJoins
      * @param Closure|string  $first
      * @param  string|null  $operator
      * @param  \Illuminate\Contracts\Database\Query\Expression|string|null  $second
-     * @return $this
      */
-    public function leftJoin($table, $first, $operator = null, $second = null)
+    public function leftJoin($table, $first, $operator = null, $second = null): IlluminateQueryBuilder
     {
         return $this->join($table, $first, $operator, $second, 'left');
     }
@@ -153,9 +152,8 @@ trait BuildsJoins
      * @param Closure|string  $first
      * @param  string|null  $operator
      * @param  \Illuminate\Contracts\Database\Query\Expression|string|null  $second
-     * @return $this
      */
-    public function leftJoinSub($query, $as, $first, $operator = null, $second = null)
+    public function leftJoinSub($query, $as, $first, $operator = null, $second = null): IlluminateQueryBuilder
     {
         return $this->joinSub($query, $as, $first, $operator, $second, 'left');
     }
@@ -167,8 +165,9 @@ trait BuildsJoins
      * @param  string  $type
      * @param  string  $table
      */
-    protected function newJoinClause(IlluminateQueryBuilder $parentQuery, $type, $table): JoinClause
+    protected function newJoinClause(IlluminateQueryBuilder $parentQuery, $type, $table)
     {
+        // @phpstan-ignore-next-line
         return new JoinClause($parentQuery, $type, $table);
     }
 

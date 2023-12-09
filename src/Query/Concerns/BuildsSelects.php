@@ -7,6 +7,8 @@ namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 use Exception;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Database\Query\Expression;
+use InvalidArgumentException;
+use LaravelFreelancerNL\Aranguent\Query\Grammar;
 
 /**
  * @method isQueryable(mixed $column)
@@ -184,6 +186,8 @@ trait BuildsSelects
      */
     public function inRandomOrder($seed = '')
     {
+        assert($this->grammar instanceof Grammar);
+
         // ArangoDB's random function doesn't accept a seed.
         unset($seed);
 

@@ -30,6 +30,8 @@ trait CompilesJoins
 
     protected function compileCrossJoin(IlluminateQueryBuilder $query, $join)
     {
+        assert($query instanceof Builder);
+
         $table = $this->wrapTable($join->table);
         $alias = $query->generateTableAlias($join->table);
         $query->registerTableAlias($join->table, $alias);
@@ -39,6 +41,8 @@ trait CompilesJoins
 
     protected function compileInnerJoin(IlluminateQueryBuilder $query, $join)
     {
+        assert($query instanceof Builder);
+
         if ($join->table instanceof Expression) {
             $tableParts = [];
             preg_match("/(^.*) as (.*?)$/", $join->table->getValue($query->grammar), $tableParts);

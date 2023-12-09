@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder as IlluminateEloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use InvalidArgumentException;
+use LaravelFreelancerNL\Aranguent\Query\Grammar;
 
 trait BuildsSubqueries
 {
@@ -65,6 +66,7 @@ trait BuildsSubqueries
 
             $this->importBindings($query);
 
+            assert($this->grammar instanceof Grammar);
             $queryString = $this->grammar->wrapSubquery($query->toSql());
 
             if ($this->hasLimitOfOne($query)) {

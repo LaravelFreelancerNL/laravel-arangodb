@@ -7,6 +7,7 @@ namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use InvalidArgumentException;
+use LaravelFreelancerNL\Aranguent\Query\Grammar;
 
 trait HandlesBindings
 {
@@ -33,6 +34,8 @@ trait HandlesBindings
 
     protected function bindValue($value, string $type = 'where')
     {
+        assert($this->grammar instanceof Grammar);
+
         if ($this->grammar->isBind($value, $type)) {
             return $value;
         }

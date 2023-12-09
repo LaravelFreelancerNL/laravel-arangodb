@@ -67,7 +67,7 @@ class Grammar extends IlluminateQueryGrammar
     /**
      * The components that make up a select clause.
      *
-     * @var array
+     * @var array<string>
      */
     protected $selectComponents = [
         'preIterationVariables',
@@ -577,7 +577,7 @@ class Grammar extends IlluminateQueryGrammar
         return str_contains($value, '->');
     }
 
-    public function convertJsonFields($data): array|string
+    public function convertJsonFields($data): mixed
     {
         if (!is_array($data) && !is_string($data)) {
             return $data;
