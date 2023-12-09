@@ -1,19 +1,10 @@
 <?php
 
-use Mockery as M;
+use Tests\TestCase;
 
-beforeEach(function () {
-    $this->packageMigrationPath = __DIR__ . '/../Setup/Database/Migrations';
-    $this->aranguentMigrationStubPath = __DIR__ . '/../../stubs';
-    $this->laravelMigrationPath = base_path() . '/database/migrations';
-
-    // Clear to make migration test stubs
-    array_map('unlink', array_filter((array) glob($this->laravelMigrationPath . '/*')));
-});
-
-afterEach(function () {
-    M::close();
-});
+uses(
+    TestCase::class,
+);
 
 /**
  * migrate.

@@ -26,6 +26,7 @@ trait IsAranguentModel
     protected function insertAndSetId(\Illuminate\Database\Eloquent\Builder $query, $attributes)
     {
         $keyName = $this->getKeyName();
+
         $id = $query->insertGetId($attributes, $keyName);
 
         $this->setAttribute($keyName, $id);

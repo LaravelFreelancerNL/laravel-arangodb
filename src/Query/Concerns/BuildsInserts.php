@@ -37,7 +37,7 @@ trait BuildsInserts
     /**
      * Insert a new record and get the value of the primary key.
      *
-     * @param array<mixed> $values
+     * @param array<mixed>|string $values
      */
     public function insertGetId(array $values, $sequence = null)
     {

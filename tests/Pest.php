@@ -1,5 +1,6 @@
 <?php
 
+use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\Artisan;
 use LaravelFreelancerNL\Aranguent\Connection as Connection;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
@@ -8,7 +9,7 @@ use LaravelFreelancerNL\Aranguent\Query\Processor;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
 use Mockery as m;
-use Tests\Setup\Database\Seeds\DatabaseSeeder;
+use Tests\TestCase;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,7 +25,7 @@ use Tests\Setup\Database\Seeds\DatabaseSeeder;
 /** @link https://pestphp.com/docs/underlying-test-case */
 
 uses(
-    Tests\TestCase::class,
+    TestCase::class,
 );
 
 /*
@@ -63,11 +64,13 @@ function getBuilder()
 
 function refreshDatabase()
 {
+    // TODO: add path to testbench migrations
     //migrate & seed
     Artisan::call('migrate:fresh', [
         '--path' => [
             database_path('migrations'),
-            'tests/Setup/Database/Migrations'
+            'tests/Setup/Database/Migrations',
+            __DIR__ . '/../vendor/orchestra/testbench-core/laravel/migrations/'
         ],
         '--realpath' => true,
         '--seed' => true,

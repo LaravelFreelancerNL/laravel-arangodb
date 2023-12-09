@@ -13,16 +13,6 @@ class Builder extends IlluminateBuilder
     use QueriesAranguentRelationships;
 
     /**
-     * The methods that should be returned from query builder.
-     *
-     * @var array
-     */
-    protected $passthru = [
-        'insert', 'insertOrIgnore', 'insertGetId', 'insertUsing', 'getBindings', 'toSql', 'dump', 'dd',
-        'exists', 'doesntExist', 'count', 'min', 'max', 'avg', 'average', 'sum', 'getConnection',
-    ];
-
-    /**
      * Get the first record matching the attributes or create it.
      *
      * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder

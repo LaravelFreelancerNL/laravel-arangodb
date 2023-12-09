@@ -24,9 +24,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     public function __construct(IlluminateResolver $resolver, string $table)
     {
-        $this->table = $table;
-
-        $this->resolver = $resolver;
+        parent::__construct($resolver, $table);
     }
 
     /**

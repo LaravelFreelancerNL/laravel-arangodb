@@ -3,6 +3,10 @@
 use ArangoClient\Exceptions\ArangoException;
 use LaravelFreelancerNL\Aranguent\Migrations\DatabaseMigrationRepository;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder;
+use Tests\TestCase;
+
+
+uses(TestCase::class);
 
 beforeEach(function () {
     $this->databaseMigrationRepository = new DatabaseMigrationRepository(app('db'), 'migrations');

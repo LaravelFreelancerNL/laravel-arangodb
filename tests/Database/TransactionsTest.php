@@ -73,6 +73,7 @@ test(/**
 
     expect($startingCharacters->count())->toEqual(43);
     expect($endingCharacters->count())->toEqual(43);
+
     expect($startingLocations->count())->toEqual(9);
     expect($endingLocations->count())->toEqual(9);
 });

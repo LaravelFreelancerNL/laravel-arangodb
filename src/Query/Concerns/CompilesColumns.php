@@ -187,11 +187,9 @@ trait CompilesColumns
         }
 
         $returnAttributesObjectString = $this->mergeReturnAttributes($query, $returnAttributes, $returnDocs);
-        ray('determineReturnValues', $returnAttributesObjectString);
 
         $values = $this->mergeReturnDocs($returnAttributesObjectString, $returnAttributes, $returnDocs);
 
-        ray('determineReturnValues', $values);
         return $values;
     }
 
