@@ -2,12 +2,10 @@
 
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
-use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 uses(
     TestCase::class,
-    DatabaseTransactions::class
 );
 
 test('when false', function () {

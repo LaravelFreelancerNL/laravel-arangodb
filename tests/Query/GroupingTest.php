@@ -3,11 +3,9 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\DB;
-use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 
 uses(
     \Tests\TestCase::class,
-    DatabaseTransactions::class
 );
 
 test('group by', function () {
@@ -32,6 +30,18 @@ test('group by multiple', function () {
     expect($groups[5][0])->toEqual('Baelish');
     expect($groups[5][1])->toEqual('the-red-keep');
 });
+
+test('groupByRaw', function () {
+    $ageGroups = DB::table('characters')
+        ->select('ageGroup')
+        ->groupByRaw('ageGroup = FLOOR(characterDoc.age / 5) * 5')
+        ->get();
+
+    expect($ageGroups->count())->toBe(7);
+    expect($ageGroups->first())->toEqual(0);
+    expect($ageGroups->last())->toEqual(45);
+});
+
 
 test('having', function () {
     $surnames = DB::table('characters')
@@ -124,12 +134,13 @@ test('having not null', function () {
 });
 
 test("keep selected columns after groupBy", function () {
-    $names = DB::table('characters')
-        ->select('name')
-        ->groupBy('name', 'residence_id')
-        ->havingNotNull('residence_id')
-        ->get();
+    $query = DB::table('characters')
+       ->select('surname', 'residence_id')
+       ->groupBy('surname')
+       ->havingNotNull('residence_id');
 
-    expect($names)->toHaveCount(33);
-    expect($names[1])->toEqual("Bran");
+    $familyResidences = $query->get();
+    expect($familyResidences)->toHaveCount(21);
+    expect($familyResidences[1]->surname)->toEqual("Baelish");
+    expect(count($familyResidences[1]->residence_id))->toEqual(1);
 });

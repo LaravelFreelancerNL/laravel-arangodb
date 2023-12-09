@@ -25,8 +25,17 @@ average / avg / count / doesntExist / exists / max / min / sum
 ### Selections
 addSelect / distinct / select / selectRaw (use AQL) / selectSub?
 
+### Raw Expressions
+**Note** that all raw expressions need to use AQL instead of SQL, so if a third-party
+package uses raw SQL you'll need to override it.
+
+selectRaw / raw / whereRaw / orWhereRaw / havingRaw / orHavingRaw
+
+#### Unsupported raw Expressions
+groupByRaw
+
 ### Unions
-union / unionAll /  
+union / unionAll
 
 #### Unsupported union clauses
 Union orders / Union aggregates / Union groupBy
@@ -38,7 +47,7 @@ Expression / raw
 crossJoin / join / joinSub? / leftJoin / leftJoinSub?
 
 #### Unsupported join clauses
-rightJoin / rightJoinSub
+rightJoin / rightJoinSub / joinWhere?
 
 ### Where clauses
 where / orWhere / whereNot / orWhereNot / whereColumn / whereExists
@@ -58,13 +67,9 @@ orderBy / latest / oldest / inRandomOrder / reorder /
 orderByRaw (use AQL)
 
 ### Grouping
-groupBy /
+groupBy / groupByRaw /
 having / havingBetween / havingNull / havingNotNull / 
-havingRaw (use AQL) /
-Nested havings
-
-#### Incompatible grouping
-groupByRaw
+havingRaw (use AQL) / Nested havings
 
 ### Limit & offset
 limit / offset / take / skip
@@ -73,7 +78,7 @@ limit / offset / take / skip
 when
 
 ### Insert statements
-insert / insertOrIgnore / insertUsing? / insertGetId
+insert / insertOrIgnore / insertUsing / insertGetId
 
 ### Update statements
 update / updateOrInsert / upsert /
@@ -153,19 +158,12 @@ escape
 ## <a name="known-incompatibilities"></a> Known incompatibilities
 Not all features can be made compatible. Known issues are listed below:
 
-### Transactions
-[At the beginning of a transaction you must declare collections that are used in (write) statements.](transactions.md)
-
-### Locking: sharedLock / lockForUpdate
-These methods don't work as ArangoDB requires you to declare the locking mechanics at the start of a transaction. 
-They fail silently and just run the query. (???)
-
-### Separate read and write connections
-Aranguent currently doesn't support the combination of a separate read and write connection  
+### Cross database queries
+ArangoDB does not support cross database queries.
 
 ### Foreign keys
-ArangoDB doesn't support foreign keys. So if a package depends on that for cascading updates or deletes you'll 
-have to extend those parts of the package. 
+ArangoDB doesn't support foreign keys. So if a package depends on that for cascading updates or deletes you'll
+have to extend those parts of the package.
 
 You can set up an event listener in the Model's boot method or use an
 observer besides that you want to override any delete action that is performed directly on the database.
@@ -174,5 +172,15 @@ Note that you'll want to delete child models before deleting the model itself. T
 all child models in case of mass deletion. As you'll be dealing with multiple delete queries it is a good idea to
 wrap it in a transaction.
 
+### Locking: sharedLock / lockForUpdate
+These methods don't work as ArangoDB requires you to declare the locking mechanics at the start of a transaction.
+They fail silently and just run the query. (???)
+
 ### Raw SQL
-Any raw SQL needs to be replaced by AQL.
+Any raw SQL needs to be replaced by raw AQL.
+
+### Separate read and write connections
+Aranguent currently doesn't support the combination of a separate read and write connection  
+
+### Transactions
+[At the beginning of a transaction you must declare collections that are used in (write) statements.](transactions.md)

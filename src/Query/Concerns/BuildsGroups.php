@@ -7,15 +7,20 @@ namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 use Carbon\CarbonPeriod;
 use Closure;
 use Illuminate\Contracts\Database\Query\ConditionExpression;
-use Illuminate\Contracts\Database\Query\Expression;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Arr;
 
 trait BuildsGroups
 {
     /**
+     * @var array<string>|null
+     */
+    public $groupVariables = null;
+
+    /**
      * Add a "group by" clause to the query.
      *
-     * @param array|\Illuminate\Contracts\Database\Query\Expression|string ...$groups
+     * @param array|Expression|string ...$groups
      * @return $this
      */
     public function groupBy(...$groups)
@@ -28,6 +33,30 @@ trait BuildsGroups
         }
 
         return $this;
+    }
+
+    /**
+     * Add a raw groupBy clause to the query.
+     *
+     * @param  string  $aql
+     * @param  array  $bindings
+     * @return $this
+     */
+    public function groupByRaw($aql, array $bindings = [])
+    {
+        $this->groups[] = new Expression($aql);
+
+        if (!empty($bindings)) {
+            $this->addBinding($bindings, 'groupBy');
+        }
+
+        return $this;
+    }
+
+    public function cleanGroupVariables()
+    {
+        $this->tableAliases = array_diff($this->tableAliases, $this->groupVariables);
+        $this->groupVariables = null;
     }
 
     public function having($column, $operator = null, $value = null, $boolean = 'and')

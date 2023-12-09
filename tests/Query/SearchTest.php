@@ -3,12 +3,10 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\DB;
-use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 uses(
     TestCase::class,
-    DatabaseTransactions::class
 );
 
 test('searchView', function () {
@@ -18,8 +16,8 @@ test('searchView', function () {
     $results = $query->get();
 
     expect($results->count())->toBe(2);
-    expect($results[0]->name)->toBe('Targaryen');
-    expect($results[1]->name)->toBe('Lannister');
+    expect($results[0]->name)->toBe('Lannister');
+    expect($results[1]->name)->toBe('Targaryen');
 });
 
 test('searchView with multiple fields', function () {
@@ -29,8 +27,8 @@ test('searchView with multiple fields', function () {
     $results = $query->get();
 
     expect($results->count())->toBe(2);
-    expect($results[0]->name)->toBe('Targaryen');
-    expect($results[1]->name)->toBe('Stark');
+    expect($results[0]->name)->toBe('Stark');
+    expect($results[1]->name)->toBe('Targaryen');
 });
 
 test('searchView and order by best matching', function () {

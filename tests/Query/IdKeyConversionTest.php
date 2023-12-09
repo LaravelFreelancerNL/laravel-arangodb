@@ -1,13 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\DB;
-use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\Setup\Models\Character;
 use Tests\TestCase;
 
 uses(
     TestCase::class,
-    DatabaseTransactions::class,
 );
 
 test('output conversion with whole document', function () {

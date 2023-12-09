@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
-use Illuminate\Database\Query\Builder as IlluminateBuilder;
+use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Database\Query\Expression;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 
@@ -13,11 +13,11 @@ trait CompilesJoins
     /**
      * Compile the "join" portions of the query.
      *
-     * @param  \Illuminate\Database\Query\Builder  $query
+     * @param IlluminateQueryBuilder $query
      * @param  array  $joins
      * @return string
      */
-    protected function compileJoins(IlluminateBuilder $query, $joins)
+    protected function compileJoins(IlluminateQueryBuilder $query, $joins)
     {
         return collect($joins)->map(function ($join) use ($query) {
             return match ($join->type) {
@@ -28,7 +28,7 @@ trait CompilesJoins
         })->implode(' ');
     }
 
-    protected function compileCrossJoin(Builder $query, $join)
+    protected function compileCrossJoin(IlluminateQueryBuilder $query, $join)
     {
         $table = $this->wrapTable($join->table);
         $alias = $query->generateTableAlias($join->table);
@@ -37,7 +37,7 @@ trait CompilesJoins
         return 'FOR ' . $alias . ' IN ' . $table;
     }
 
-    protected function compileInnerJoin(Builder $query, $join)
+    protected function compileInnerJoin(IlluminateQueryBuilder $query, $join)
     {
         if ($join->table instanceof Expression) {
             $tableParts = [];
@@ -62,13 +62,10 @@ trait CompilesJoins
         return $aql;
     }
 
-    protected function compileLeftJoin(IlluminateBuilder $query, $join)
+    protected function compileLeftJoin(IlluminateQueryBuilder $query, $join)
     {
         assert($query instanceof Builder);
 
-        //        $table = $this->wrapTable($join->table);
-        //        $alias = $this->generateTableAlias($join->table);
-        //        $query->registerTableAlias($join->table, $alias);
         if ($join->table instanceof Expression) {
             $tableParts = [];
             preg_match("/(^.*) as (.*?)$/", $join->table->getValue($query->grammar), $tableParts);
@@ -90,9 +87,9 @@ trait CompilesJoins
         }
         $resultsToJoin .= ' RETURN ' . $alias;
 
-        $aql = 'LET ' . $table . ' = (' . $resultsToJoin . ')';
-        $aql .= ' FOR ' . $alias . ' IN (LENGTH(' . $table . ') > 0) ? ' . $table . ' : []';
-
+        $aql = 'LET ' . $alias . 'List = (' . $resultsToJoin . ')';
+        $aql .= ' FOR ' . $alias . ' IN (LENGTH(' . $alias . 'List) > 0) ? ' . $alias . 'List : [{}]';
+        ray('compileLeftJoin', $aql, $table, $alias);
         return $aql;
     }
 }

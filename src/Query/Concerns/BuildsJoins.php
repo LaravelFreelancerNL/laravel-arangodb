@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
 use Closure;
+use Illuminate\Database\Eloquent\Builder as IlluminateEloquentBuilder;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Database\Query\Expression;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
@@ -17,7 +18,7 @@ trait BuildsJoins
      * Add a right join to the query.
      *
      * @param  \Illuminate\Contracts\Database\Query\Expression|string  $table
-     * @param  \Closure|string  $first
+     * @param Closure|string  $first
      * @param  string|null  $operator
      * @param  \Illuminate\Contracts\Database\Query\Expression|string|null  $second
      * @return $this
@@ -36,9 +37,9 @@ trait BuildsJoins
     /**
      * Add a subquery right join to the query.
      *
-     * @param  \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder|string  $query
+     * @param Closure|IlluminateQueryBuilder|IlluminateEloquentBuilder|string  $query
      * @param  string  $as
-     * @param  \Closure|string  $first
+     * @param Closure|string  $first
      * @param  string|null  $operator
      * @param  \Illuminate\Contracts\Database\Query\Expression|string|null  $second
      * @return $this
@@ -52,7 +53,7 @@ trait BuildsJoins
      * Add a "right join where" clause to the query.
      *
      * @param  \Illuminate\Contracts\Database\Query\Expression|string  $table
-     * @param  \Closure|string  $first
+     * @param Closure|string  $first
      * @param  string  $operator
      * @param  \Illuminate\Contracts\Database\Query\Expression|string  $second
      * @return $this
@@ -71,7 +72,7 @@ trait BuildsJoins
      * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      *
      * @param  mixed  $table
-     * @param  \Closure|string  $first
+     * @param Closure|string  $first
      * @param  string|null  $operator
      * @param  string|null  $second
      * @param  string  $type
@@ -106,9 +107,9 @@ trait BuildsJoins
     /**
      * Add a subquery join clause to the query.
      *
-     * @param  \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder|string  $query
+     * @param Closure|IlluminateQueryBuilder|IlluminateEloquentBuilder|string  $query
      * @param  string  $as
-     * @param  \Closure|string  $first
+     * @param Closure|string  $first
      * @param  string|null  $operator
      * @param  string|null  $second
      * @param  string  $type
@@ -126,9 +127,37 @@ trait BuildsJoins
 
         [$query, $bindings] = $this->createSub($query);
 
-        $this->bindings['join'] = array_merge($this->bindings['join'], $bindings);
+        return  $this->join(new Expression($query . ' as ' . $as), $first, $operator, $second, $type, $where);
+    }
 
-        return  $this->join(new Expression('(' . $query . ') as ' . $as), $first, $operator, $second, $type, $where);
+
+    /**
+     * Add a left join to the query.
+     *
+     * @param  \Illuminate\Contracts\Database\Query\Expression|string  $table
+     * @param Closure|string  $first
+     * @param  string|null  $operator
+     * @param  \Illuminate\Contracts\Database\Query\Expression|string|null  $second
+     * @return $this
+     */
+    public function leftJoin($table, $first, $operator = null, $second = null)
+    {
+        return $this->join($table, $first, $operator, $second, 'left');
+    }
+
+    /**
+     * Add a subquery left join to the query.
+     *
+     * @param Closure|IlluminateQueryBuilder|IlluminateEloquentBuilder|string  $query
+     * @param  string  $as
+     * @param Closure|string  $first
+     * @param  string|null  $operator
+     * @param  \Illuminate\Contracts\Database\Query\Expression|string|null  $second
+     * @return $this
+     */
+    public function leftJoinSub($query, $as, $first, $operator = null, $second = null)
+    {
+        return $this->joinSub($query, $as, $first, $operator, $second, 'left');
     }
 
 
@@ -141,26 +170,6 @@ trait BuildsJoins
     protected function newJoinClause(IlluminateQueryBuilder $parentQuery, $type, $table): JoinClause
     {
         return new JoinClause($parentQuery, $type, $table);
-    }
-
-    /**
-     * Creates a subquery and parse it.
-     *
-     * @param  \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder|string  $query
-     * @return array
-     */
-    protected function createSub($query)
-    {
-        // If the given query is a Closure, we will execute it while passing in a new
-        // query instance to the Closure. This will give the developer a chance to
-        // format and work with the query before we cast it to a raw SQL string.
-        if ($query instanceof Closure) {
-            $callback = $query;
-
-            $callback($query = $this->forSubQuery());
-        }
-
-        return $this->parseSub($query);
     }
 
 }

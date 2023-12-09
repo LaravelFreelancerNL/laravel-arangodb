@@ -9,6 +9,7 @@ use Closure;
 use Illuminate\Contracts\Database\Query\ConditionExpression;
 use Illuminate\Contracts\Database\Query\Expression as ExpressionContract;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Database\Eloquent\Builder as IlluminateEloquentBuilder;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Arr;
@@ -106,11 +107,9 @@ trait BuildsWheres
     {
         $type = $not ? 'NotExists' : 'Exists';
 
-        $subquery = '(' . $query->toSql() . ')';
+        [$subquery] = $this->parseSub($query);
 
         $this->wheres[] = compact('type', 'subquery', 'boolean');
-
-        $this->importBindings($query);
 
         return $this;
     }
@@ -118,7 +117,7 @@ trait BuildsWheres
     /**
      * Add a basic where clause to the query.
      *
-     * @param  \Closure|Expression|string|array  $column
+     * @param  \Closure|IlluminateQueryBuilder|IlluminateEloquentBuilder|Expression|string|array  $column
      * @param  mixed  $operator
      * @param  mixed  $value
      * @param  string  $boolean
@@ -161,15 +160,9 @@ trait BuildsWheres
         // assume the developer wants to run a subquery and then compare the result
         // of that subquery with the given value that was provided to the method.
         if ($this->isQueryable($column) && !is_null($operator)) {
-            [$sub, $bindings] = $this->createSub($column);
+            [$subquery, $bindings] = $this->createSub($column);
 
-            //FIXME: Check for limit in query, if limit 1, surround subquery with first(());
-
-            if (!empty($bindings)) {
-                $this->addBinding($bindings, 'where');
-            }
-
-            return $this->where(new Expression('(' . $sub . ')'), $operator, $value, $boolean);
+            return $this->where(new Expression($subquery), $operator, $value, $boolean);
         }
 
         // If the given operator is not found in the list of valid operators we will
@@ -214,7 +207,10 @@ trait BuildsWheres
             $type = 'Bitwise';
         }
 
-        if (!$value instanceof ExpressionContract) {
+        if (
+            !$value instanceof ExpressionContract
+            && !$this->isReference($value)
+        ) {
             $value = $this->bindValue($this->flattenValue($value));
         }
 
@@ -228,8 +224,6 @@ trait BuildsWheres
             'value',
             'boolean'
         );
-
-
 
         return $this;
     }
@@ -350,12 +344,14 @@ trait BuildsWheres
      *
      * @param  \Illuminate\Contracts\Database\Query\Expression|string  $column
      * @param  string  $operator
-     * @param  \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder  $callback
+     * @param  \Closure|\Illuminate\Database\Query\Builder|IlluminateEloquentBuilder $callback
      * @param  string  $boolean
      * @return $this
      */
     protected function whereSub($column, $operator, $callback, $boolean)
     {
+        assert($this instanceof Builder);
+
         $type = 'Sub';
 
         // Once we have the query instance we can simply execute it so it can add all
@@ -363,22 +359,7 @@ trait BuildsWheres
         // in the array of where clauses for the "main" parent query instance.
         call_user_func($callback, $query = $this->forSubQuery());
 
-        assert($query instanceof Builder);
-
-        $query->grammar->compileSelect($query);
-
-        $subquery = '(' . $query->toSql() . ')';
-
-        // ArangoDB always returns an array of results. SQL will return a singular result
-        // To mimic the same behaviour we take the first result.
-        if ($query->hasLimitOfOne($query)) {
-            $subquery = 'FIRST(' . $subquery . ')';
-        }
-
-        $this->bindings = array_merge(
-            $this->bindings,
-            $query->bindings
-        );
+        [$subquery] = $this->parseSub($query);
 
         $this->wheres[] = compact(
             'type',

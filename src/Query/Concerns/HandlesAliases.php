@@ -12,9 +12,9 @@ use LaravelFreelancerNL\Aranguent\Query\Builder;
 
 trait HandlesAliases
 {
-    protected $tableAliases = [];
+    public array $tableAliases = [];
 
-    protected $columnAliases = [];
+    public array $columnAliases = [];
 
     /**
      * @param  array<mixed>|string  $column
@@ -98,9 +98,16 @@ trait HandlesAliases
         if ($aliases instanceof Builder) {
             $aliases = $aliases->getTableAliases();
         }
-        foreach($aliases as $key => $value) {
-            $this->tableAliases[$key] = $value;
-        }
+
+        $this->tableAliases = array_merge($this->tableAliases, $aliases);
+    }
+
+    public function exchangeTableAliases(IlluminateQueryBuilder $query): void
+    {
+        assert($query instanceof Builder);
+
+        $this->importTableAliases($query);
+        $query->importTableAliases($this);
     }
 
     public function isTableAlias(string $alias)

@@ -50,7 +50,7 @@ test('update with join', function () {
     expect($updateResult)->toBe(1)
         ->and($result->age)->toBe(42)
         ->and($result->alive)->toBeFalse();
-})->todo();
+});
 
 test('update with json syntax', function () {
     $words = 'Hear me Roar!';

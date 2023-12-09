@@ -13,18 +13,19 @@ use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesAggregates;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesColumns;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesFilters;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesGroups;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesInserts;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesJoins;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesUnions;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesWheres;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\ConvertsIdToKey;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\HandlesAqlGrammar;
-use LaravelFreelancerNL\FluentAQL\Exceptions\BindException as BindException;
 
 class Grammar extends IlluminateQueryGrammar
 {
     use CompilesAggregates;
     use CompilesColumns;
     use CompilesFilters;
+    use CompilesInserts;
     use CompilesJoins;
     use CompilesGroups;
     use CompilesUnions;
@@ -69,11 +70,11 @@ class Grammar extends IlluminateQueryGrammar
      * @var array
      */
     protected $selectComponents = [
-        'variables',
+        'preIterationVariables',
         'from',
         'search',
         'joins',
-        // insert variables?
+        'postIterationVariables',
         'wheres',
         'groups',
         'aggregate',
@@ -182,82 +183,6 @@ class Grammar extends IlluminateQueryGrammar
     }
 
 
-    /**
-     * Compile an insert statement into AQL.
-     *
-     * @param IlluminateQueryBuilder $query
-     * @param array   $values
-     *
-     * @throws BindException
-     *
-     * @return string
-     */
-    public function compileInsert(Builder|IlluminateQueryBuilder $query, array $values, string $bindVar = null)
-    {
-        $table = $this->prefixTable($query->from);
-
-        if (empty($values)) {
-            $aql = /** @lang AQL */ 'INSERT {} INTO ' . $table . ' RETURN NEW._key';
-
-            return $aql;
-        }
-
-        return /** @lang AQL */ 'LET values = ' . $bindVar
-                . ' FOR value IN values'
-                . ' INSERT value INTO ' . $table
-                . ' RETURN NEW._key';
-    }
-
-    /**
-     * Compile an insert and get ID statement into SQL.
-     *
-     * @param array<mixed> $values
-     */
-    public function compileInsertGetId(IlluminateQueryBuilder $query, $values, $sequence = '_key', string $bindVar = null)
-    {
-        $table = $this->prefixTable($query->from);
-
-        $sequence = $this->convertIdToKey($sequence);
-
-        if (empty($values)) {
-            $aql = /** @lang AQL */ 'INSERT {} INTO ' . $table . ' RETURN NEW.' . $sequence;
-
-            return $aql;
-        }
-
-        $aql = /** @lang AQL */ 'LET values = ' . $bindVar
-            . ' FOR value IN values'
-            . ' INSERT value INTO ' . $table
-            . ' RETURN NEW.' . $sequence;
-
-        return $aql;
-    }
-
-    /**
-     * Compile an insert statement into AQL.
-     *
-     * @param IlluminateQueryBuilder $query
-     * @param array<mixed> $values
-     * @return string
-     */
-    public function compileInsertOrIgnore(IlluminateQueryBuilder $query, array $values, string $bindVar = null)
-    {
-        $table = $this->prefixTable($query->from);
-
-        if (empty($values)) {
-            $aql = /** @lang AQL */ "INSERT {} INTO $table RETURN NEW._key";
-
-            return $aql;
-        }
-
-        $aql = /** @lang AQL */ "LET values = $bindVar "
-            . "FOR value IN values "
-            . "INSERT value INTO $table "
-            . "OPTIONS { ignoreErrors: true } "
-            . "RETURN NEW._key";
-
-        return $aql;
-    }
 
     /**
      * Compile a select query into SQL.
@@ -267,6 +192,8 @@ class Grammar extends IlluminateQueryGrammar
      */
     public function compileSelect(IlluminateQueryBuilder $query)
     {
+        assert($query instanceof Builder);
+
         // If the query does not have any columns set, we'll set the columns to the
         // * character to just get all of the columns from the database. Then we
         // can build the query and concatenate all the pieces together as one.
@@ -294,6 +221,10 @@ class Grammar extends IlluminateQueryGrammar
         }
 
         $query->columns = $original;
+
+        if ($query->groupVariables !== null) {
+            $query->cleanGroupVariables();
+        }
 
         return $aql;
     }
@@ -336,9 +267,31 @@ class Grammar extends IlluminateQueryGrammar
      * @param array $variables
      * @return string
      */
+    protected function compilePreIterationVariables(IlluminateQueryBuilder $query, array $variables): string
+    {
+        return $this->compileVariables($query, $variables);
+    }
+
+    /**
+     * @param IlluminateQueryBuilder $query
+     * @param array $variables
+     * @return string
+     */
+    protected function compilePostIterationVariables(IlluminateQueryBuilder $query, array $variables): string
+    {
+        return $this->compileVariables($query, $variables);
+    }
+
+
+    /**
+     * @param IlluminateQueryBuilder $query
+     * @param array $variables
+     * @return string
+     */
     protected function compileVariables(IlluminateQueryBuilder $query, array $variables): string
     {
-        $aql = "";
+        $aql = '';
+
         foreach ($variables as $variable => $value) {
             if ($value instanceof Expression) {
                 $value = $value->getValue($this);
@@ -357,10 +310,10 @@ class Grammar extends IlluminateQueryGrammar
      * @param  array  $orders
      * @return string
      */
-    protected function compileOrders(IlluminateQueryBuilder $query, $orders)
+    protected function compileOrders(IlluminateQueryBuilder $query, $orders, $table = null)
     {
         if (!empty($orders)) {
-            return 'SORT ' . implode(', ', $this->compileOrdersToArray($query, $orders));
+            return 'SORT ' . implode(', ', $this->compileOrdersToArray($query, $orders, $table));
         }
 
         return '';
@@ -373,9 +326,9 @@ class Grammar extends IlluminateQueryGrammar
      * @param  array  $orders
      * @return array
      */
-    protected function compileOrdersToArray(IlluminateQueryBuilder $query, $orders)
+    protected function compileOrdersToArray(IlluminateQueryBuilder $query, $orders, $table = null)
     {
-        return array_map(function ($order) use ($query) {
+        return array_map(function ($order) use ($query, $table) {
             $key = 'column';
             if (array_key_exists('sql', $order)) {
                 $key = 'sql';
@@ -384,7 +337,7 @@ class Grammar extends IlluminateQueryGrammar
             if ($order[$key] instanceof Expression) {
                 $order[$key] = $order[$key]->getValue($this);
             } else {
-                $order[$key] = $this->normalizeColumn($query, $order[$key]);
+                $order[$key] = $this->normalizeColumn($query, $order[$key], $table);
             }
 
             return array_key_exists('direction', $order) ? $order[$key] . ' ' . $order['direction'] : $order[$key];

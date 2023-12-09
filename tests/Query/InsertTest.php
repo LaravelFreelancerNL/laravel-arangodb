@@ -104,4 +104,14 @@ test('insert embedded empty array', function () {
     expect($result->first()->tags)->toBeEmpty();
 });
 
-test('insert using', function () {})->todo();
+test('insert using', function () {
+    // Let's give Baelish a user, what could possibly go wrong?
+    $baelishes = DB::table('characters')
+        ->where('surname', 'Baelish');
+
+    DB::table('users')->insertUsing(['name', 'surname'], $baelishes);
+
+    $user = DB::table('users')->first();
+
+    expect($user->surname)->toBe('Baelish');
+});

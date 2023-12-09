@@ -2,13 +2,11 @@
 
 use Illuminate\Database\MultipleRecordsFoundException;
 use Illuminate\Support\Facades\DB;
-use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\TestCase;
 use Illuminate\Support\Collection;
 
 uses(
     TestCase::class,
-    DatabaseTransactions::class,
 );
 
 test('find', function () {

@@ -1,14 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\DB;
-use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
-use LaravelFreelancerNL\Aranguent\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 uses(
     TestCase::class,
-    //    DatabaseTransactions::class,
-    //        RefreshDatabase::class
 );
 
 test('basic select', function () {
@@ -155,9 +151,14 @@ test('select subquery', function () {
         ->limit(1);
 
     $query = DB::table('characters')
-        ->select(['location' => $locationQuery], 'name')
-        ->where('residence_id', 'location')
-    ;
+        ->select(['location' => $locationQuery, 'name'])
+        ->where('residence_id', 'location');
 
-    ray($query, $query->toSql());
-})->only();
+    $results = $query->get();
+
+    expect($results->count())->toBe(15);
+    expect($results->first()->name)->toBe('Ned');
+    expect($results->first()->location)->toBe('winterfell');
+    expect($results->last()->name)->toBe('Margaery');
+    expect($results->last()->location)->toBe('winterfell');
+});

@@ -39,7 +39,7 @@ test('toRawSql', function () {
     //        ->where('name', 'Gilly')
     //        ->toRawSql();
 
-    // apparently the connection isn't set for grammar generating an error when trying to escape values.
+    // TODO: apparently the connection isn't set for grammar generating an error when trying to escape values.
 })->todo();
 
 test('dumpRawSql', function () {

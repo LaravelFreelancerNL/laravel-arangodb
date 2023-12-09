@@ -174,11 +174,24 @@ trait HandlesAqlGrammar
      */
     protected function wrapValue($value)
     {
+        $postfix = '';
+        if ($value === 'groupsVariable') {
+            $postfix = '[*]';
+        }
+
         if ($value === '*') {
             return $value;
         }
 
-        return '`' . str_replace('`', '``', $value) . '`';
+        return '`' . str_replace('`', '``', $value) . '`' . $postfix;
+    }
+
+    /**
+     * Wrap a subquery single string in braces.
+     */
+    public function wrapSubquery(string $subquery): string
+    {
+        return '(' . $subquery . ')';
     }
 
     public function generateAqlObject(array $data): string
@@ -192,7 +205,7 @@ trait HandlesAqlGrammar
     {
         foreach($data as $key => $value) {
             $prefix = $key . ': ';
-            if (array_is_list($data)) {
+            if (array_is_list($data) || is_numeric($key)) {
                 $prefix = '';
             }
 
@@ -206,14 +219,15 @@ trait HandlesAqlGrammar
                 continue;
             }
 
-            //TODO: check if value needs additional assurances for regular strings vs binds and references
             $data[$key] = $prefix . $value;
         }
 
         $returnString = implode(', ', $data);
+
         if (array_is_list($data)) {
             return '[' . $returnString . ']';
         }
+
         return '{' . $returnString . '}';
     }
 }

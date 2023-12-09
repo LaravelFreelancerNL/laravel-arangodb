@@ -77,6 +77,7 @@ class TestCase extends AranguentTestCase implements \Orchestra\Testbench\Contrac
                 'locations',
                 'tags',
                 'taggables',
+                'users'
             ]]);
 
         parent::setUp();
@@ -101,16 +102,16 @@ class TestCase extends AranguentTestCase implements \Orchestra\Testbench\Contrac
         ]);
     }
 
-        /**
-         * Define environment setup.
-         *
-         * @param  \Illuminate\Foundation\Application  $app
-         * @return void
-         */
-        protected function defineEnvironment($app)
-        {
-            TestConfig::set($app);
-        }
+    /**
+     * Define environment setup.
+     *
+     * @param  \Illuminate\Foundation\Application  $app
+     * @return void
+     */
+    protected function defineEnvironment($app)
+    {
+        TestConfig::set($app);
+    }
 
 
     protected function skipTestOnArangoVersionsBefore(string $version)

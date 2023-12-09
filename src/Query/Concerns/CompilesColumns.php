@@ -46,7 +46,6 @@ trait CompilesColumns
 
             if (is_string($column) && $column != null && $column != '*') {
                 [$column, $alias] = $this->normalizeStringColumn($query, $key, $column);
-
                 if (isset($returnAttributes[$alias]) && is_array($column)) {
                     $returnAttributes[$alias] = array_merge_recursive(
                         $returnAttributes[$alias],
@@ -58,14 +57,14 @@ trait CompilesColumns
             }
         }
 
-        $values = $this->determineReturnValues($query, $returnAttributes, $returnDocs);
+        $returnValues = $this->determineReturnValues($query, $returnAttributes, $returnDocs);
 
         $return = 'RETURN ';
         if ($query->distinct) {
             $return .= 'DISTINCT ';
         }
 
-        return $return . $values;
+        return $return . $returnValues;
     }
 
     /**
@@ -96,7 +95,7 @@ trait CompilesColumns
             return $column;
         }
 
-        if (key_exists($column, $query->variables)) {
+        if ($query->isVariable($column)) {
             return $this->wrap($column);
         }
 
@@ -134,18 +133,37 @@ trait CompilesColumns
      */
     protected function normalizeColumnReferences(IlluminateQueryBuilder $query, string $column, string $table = null): string
     {
+        if ($query->isReference($column)) {
+            return $column;
+        }
+
         if ($table == null) {
             $table = $query->from;
         }
 
         $references = explode('.', $column);
 
+
         $tableAlias = $query->getTableAlias($references[0]);
+
         if (isset($tableAlias)) {
             $references[0] = $tableAlias;
         }
 
-        if ($tableAlias === null && $table != null && !$query->isTableAlias($references[0])) {
+        if (array_key_exists('groupsVariable', $query->tableAliases)) {
+            $tableAlias = 'groupsVariable';
+            array_unshift($references, $tableAlias);
+        }
+
+        // check table alias for first element
+        // not just aliases but also variables.
+
+
+        if ($tableAlias === null  && array_key_exists($table, $query->tableAliases)) {
+            array_unshift($references, $query->tableAliases[$table]);
+        }
+
+        if ($tableAlias === null && !$query->isReference($references[0])) {
             $tableAlias = $query->generateTableAlias($table);
             array_unshift($references, $tableAlias);
         }
@@ -156,79 +174,61 @@ trait CompilesColumns
 
     protected function determineReturnValues($query, $returnAttributes = [], $returnDocs = []): string
     {
-        $values = $this->mergeReturnAttributes($returnAttributes, $returnDocs);
-
-        $values = $this->mergeReturnDocs($values, $returnAttributes, $returnDocs);
+        if (empty($returnAttributes) && empty($returnDocs)) {
+            $returnDocs[] = $query->getTableAlias($query->from);
+            // FIXME: shouldn't this be dependent on the selected documents & attributes?
+            //            if (is_array($query->joins) && !empty($query->joins)) {
+            //                $values = $this->mergeJoinResults($query, $values);
+            //            }
+        }
 
         if ($query->aggregate !== null) {
-            $values = ['`aggregate`' => 'aggregateResult'];
+            $returnDocs = [];
         }
 
-        if (empty($values)) {
-            $values = $query->getTableAlias($query->from);
-            if (is_array($query->joins) && !empty($query->joins)) {
-                $values = $this->mergeJoinResults($query, $values);
-            }
-        }
+        $returnAttributesObjectString = $this->mergeReturnAttributes($query, $returnAttributes, $returnDocs);
+        ray('determineReturnValues', $returnAttributesObjectString);
 
-        if (is_array($values)) {
-            $values = $this->generateAqlObject($values);
-        }
+        $values = $this->mergeReturnDocs($returnAttributesObjectString, $returnAttributes, $returnDocs);
 
+        ray('determineReturnValues', $values);
         return $values;
     }
 
-    protected function formatReturnData($values)
-    {
-        $object = "";
-        foreach ($values as $key => $value) {
-            if ($object !== "") {
-                $object .= ", ";
-            }
-            if (is_array($value)) {
-                $value = $this->formatReturnData($value);
-            }
-
-            if (array_is_list($values)) {
-                $object .= $value;
-                continue;
-            }
-
-            $object .= $key . ': ' . $value;
-        }
-
-        if (array_is_list($values)) {
-            return '[' . $object . ']';
-        }
-        return '{' . $object . '}';
-    }
-
-    protected function mergeReturnAttributes($returnAttributes, $returnDocs)
+    protected function mergeReturnAttributes(IlluminateQueryBuilder $query, $returnAttributes, $returnDocs)
     {
         $values = [];
-        if (!empty($returnAttributes)) {
-            $values = $returnAttributes;
+
+        if ($query->aggregate !== null) {
+            $returnAttributes = ['`aggregate`' => 'aggregateResult'];
         }
 
         // If there is just one attribute/column given we assume that you want a list of values
         //  instead of a list of objects
-        if (count($returnAttributes) == 1 && empty($returnDocs)) {
-            $values = reset($returnAttributes);
+        if ($query->aggregate === null && count($returnAttributes) == 1 && empty($returnDocs)) {
+            return reset($returnAttributes);
         }
 
-        return $values;
+        if (!empty($returnAttributes)) {
+            return $this->generateAqlObject($returnAttributes);
+        }
+
+        return null;
     }
 
-    protected function mergeReturnDocs($values, $returnAttributes, $returnDocs)
+    protected function mergeReturnDocs($values, $returnAttributeObject, $returnDocs)
     {
-        if (!empty($returnAttributes) && !empty($returnDocs)) {
-            $returnDocs[] = $returnAttributes;
+        if (!empty($values) && !empty($returnDocs)) {
+            $returnDocs[] = $values;
         }
 
-        if (!empty($returnDocs)) {
-            $returnDocString = implode(', ', $returnDocs);
-            $values = `MERGE($returnDocString)`;
+        if (sizeOf($returnDocs) > 1) {
+            return 'MERGE(' . implode(', ', $returnDocs) . ')';
         }
+        if (sizeOf($returnDocs) === 1) {
+            return $returnDocs[0];
+        }
+
         return $values;
     }
 

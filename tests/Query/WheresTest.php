@@ -1,12 +1,11 @@
 <?php
 
-use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\DB;
 use Tests\Setup\Models\Character;
 use Tests\TestCase;
 
 uses(
     TestCase::class,
-    DatabaseTransactions::class
 );
 
 test('basic wheres', function () {
@@ -360,15 +359,17 @@ test('where nested', function () {
 });
 
 test('subquery where', function () {
-    $query = Character::where(function ($query) {
-        $query->select('name')
-            ->from('locations')
-            ->whereColumn('locations.led_by', 'characters.id')
-            ->limit(1);
-    }, 'Astapor');
+    $subquery = DB::table('locations')
+        ->select('name')
+        ->whereColumn('locations.led_by', 'characters.id')
+        ->limit(1);
+
+    $query = DB::table('characters')
+        ->where($subquery, 'Winterfell');
+
     $characters = $query->get();
 
-    expect($characters[0]->id)->toEqual('DaenerysTargaryen');
+    expect($characters[0]->id)->toEqual('SansaStark');
 });
 
 test('where sub', function () {
@@ -417,12 +418,13 @@ test('where not exists with multiple results', function () {
 });
 
 test('where not exists with limit', function () {
-    $characters = Character::whereNotExists(function ($query) {
+    $query = Character::whereNotExists(function ($query) {
         $query->select('name')
             ->from('locations')
             ->whereColumn('locations.led_by', 'characters.id')
             ->limit(1);
-    })
-        ->get();
+    });
+
+    $characters = $query->get();
     expect(count($characters))->toEqual(40);
 });

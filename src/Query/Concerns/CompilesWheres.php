@@ -74,7 +74,7 @@ trait CompilesWheres
      *
      * @param  IlluminateQueryBuilder  $query
      * @param  array  $where
-     * @return array
+     * @return string
      */
     protected function whereBasic(IlluminateQueryBuilder $query, $where)
     {
@@ -83,7 +83,7 @@ trait CompilesWheres
         $where = $this->normalizeOperator($where);
 
         if ($where['column'] instanceof expression) {
-            $column = 'FIRST(' . $where['column']->getValue($this) . ')';
+            $column = $where['column']->getValue($this);
         } else {
             $column = $this->normalizeColumn($query, $where['column']);
         }
@@ -172,13 +172,13 @@ trait CompilesWheres
 
     }
 
-
     /**
      * Compile a where clause comparing two columns..
      *
-     * @param  IlluminateQueryBuilder  $query
-     * @param  array  $where
+     * @param IlluminateQueryBuilder $query
+     * @param array $where
      * @return string
+     * @throws \Exception
      */
     protected function whereColumn(IlluminateQueryBuilder $query, $where)
     {
@@ -195,9 +195,10 @@ trait CompilesWheres
     /**
      * Compile a "where null" clause.
      *
-     * @param  IlluminateQueryBuilder  $query
-     * @param  array  $where
+     * @param IlluminateQueryBuilder $query
+     * @param array $where
      * @return string
+     * @throws \Exception
      */
     protected function whereNull(IlluminateQueryBuilder $query, $where)
     {
