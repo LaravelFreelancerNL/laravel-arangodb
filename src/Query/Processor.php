@@ -19,6 +19,10 @@ class Processor extends IlluminateProcessor
      */
     public function processSelect(Builder $query, $results)
     {
+        if ($results === null) {
+            return $results;
+        }
+
         foreach ($results as &$val) {
             if (is_object($val) && isset($val->_key)) {
                 $val = (array) $val;

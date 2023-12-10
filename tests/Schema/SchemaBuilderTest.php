@@ -12,11 +12,6 @@ use LaravelFreelancerNL\Aranguent\Schema\Builder;
 use LaravelFreelancerNL\Aranguent\Schema\Grammar;
 use Mockery as M;
 use Tests\Setup\ClassStubs\CustomBlueprint;
-use Tests\TestCase;
-
-uses(
-    TestCase::class,
-);
 
 afterEach(function () {
     M::close();

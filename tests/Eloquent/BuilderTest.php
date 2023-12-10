@@ -5,10 +5,8 @@ use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Mockery as M;
 use Tests\Setup\Models\Character;
-use Tests\TestCase;
 
 uses(
-    TestCase::class,
     DatabaseTransactions::class
 );
 beforeEach(function () {

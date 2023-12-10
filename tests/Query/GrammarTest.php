@@ -1,11 +1,5 @@
 <?php
 
-use Tests\TestCase;
-
-uses(
-    TestCase::class,
-);
-
 test('wrap multiple columns', function () {
     $builder = getBuilder();
     $builder = $builder->select(['id', '_id', 'email'])

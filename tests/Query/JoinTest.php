@@ -2,11 +2,6 @@
 
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Query\JoinClause;
-use Tests\TestCase;
-
-uses(
-    TestCase::class,
-);
 
 test('cross join', function () {
     $characters = DB::table('characters')

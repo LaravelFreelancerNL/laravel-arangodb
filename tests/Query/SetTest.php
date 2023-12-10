@@ -5,11 +5,6 @@ declare(strict_types=1);
 use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Query\Enums\VariablePosition;
-use Tests\TestCase;
-
-uses(
-    TestCase::class,
-);
 
 test('set variable', function () {
     $query = DB::table('y')

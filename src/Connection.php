@@ -76,10 +76,10 @@ class Connection extends IlluminateConnection
     /**
      * Get the default query grammar instance.
      */
-    protected function getDefaultQueryGrammar(): QueryGrammar
-    {
-        return new QueryGrammar();
-    }
+//    protected function getDefaultQueryGrammar(): QueryGrammar
+//    {
+//        return new QueryGrammar();
+//    }
 
     /**
      * Get the default post processor instance.
@@ -87,6 +87,18 @@ class Connection extends IlluminateConnection
     protected function getDefaultPostProcessor(): Processor
     {
         return new Processor();
+    }
+
+    /**
+     * Get the default query grammar instance.
+     *
+     * @return QueryGrammar
+     */
+    protected function getDefaultQueryGrammar()
+    {
+        ($grammar = new QueryGrammar())->setConnection($this);
+
+        return $grammar;
     }
 
     /**

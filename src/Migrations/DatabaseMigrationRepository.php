@@ -32,30 +32,29 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      *
      * @return Connection
      */
-    public function getConnection()
-    {
-        return $this->resolver->connection($this->connection);
-    }
+//    public function getConnection()
+//    {
+//        return $this->resolver->connection($this->connection);
+//    }
 
     /**
      * Get the completed migrations.
      *
      * @return array
+     * @throws \Exception
      */
-    public function getRan()
-    {
-        $qb = (new QueryBuilder())->for('m', 'migrations')
-            ->sort('m.batch', 'm.migrations')
-            ->return('m.migration')
-            ->get();
-
-        return $this->getConnection()->select($qb->query);
-
-        //        return $this->table()
-        //                ->orderBy('batch', 'asc')
-        //                ->orderBy('migration', 'asc')
-        //                ->pluck('migration')->all();
-    }
+//    public function getRan()
+//    {
+////        $qb = (new QueryBuilder())->for('m', 'migrations')
+////            ->sort('m.batch', 'm.migrations')
+////            ->return('m.migration')
+////            ->get();
+////
+////        return $this->getConnection()->select($qb->query);
+//
+//
+//
+//    }
 
     /**
      * Get list of migrations.

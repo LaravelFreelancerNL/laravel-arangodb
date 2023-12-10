@@ -2,11 +2,6 @@
 
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
-use Tests\TestCase;
-
-uses(
-    TestCase::class,
-);
 
 test('when false', function () {
     $id = null;

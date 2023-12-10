@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\DB;
 
-uses(
-    \Tests\TestCase::class,
-);
-
 test('limit', function () {
     $allCharacters = DB::table('characters')->get();
     $result = DB::table('characters')->limit(15)->get();

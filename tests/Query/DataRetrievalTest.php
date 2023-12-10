@@ -2,12 +2,7 @@
 
 use Illuminate\Database\MultipleRecordsFoundException;
 use Illuminate\Support\Facades\DB;
-use Tests\TestCase;
 use Illuminate\Support\Collection;
-
-uses(
-    TestCase::class,
-);
 
 test('find', function () {
     $result = DB::table('characters')->find('NedStark');

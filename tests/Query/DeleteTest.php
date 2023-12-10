@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 
 uses(
-    \Tests\TestCase::class,
     DatabaseTransactions::class
 );
 

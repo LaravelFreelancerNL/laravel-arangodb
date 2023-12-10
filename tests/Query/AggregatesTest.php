@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\DB;
 
-uses(
-    \Tests\TestCase::class,
-);
-
 test('count', function () {
     $results = DB::table('characters')->count();
     expect($results)->toEqual(43);

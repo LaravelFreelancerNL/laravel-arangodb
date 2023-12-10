@@ -4,10 +4,8 @@ use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Tag;
 use Tests\Setup\Models\Taggable;
-use Tests\TestCase;
 
 uses(
-    TestCase::class,
     DatabaseTransactions::class
 );
 

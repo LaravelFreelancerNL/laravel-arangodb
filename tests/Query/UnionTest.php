@@ -1,11 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\DB;
-use Tests\TestCase;
-
-uses(
-    TestCase::class,
-);
 
 test('union', function () {
     $charactersWithoutAge = DB::table('characters')

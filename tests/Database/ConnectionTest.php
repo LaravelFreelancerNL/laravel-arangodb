@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Schema;
 use LaravelFreelancerNL\Aranguent\QueryException;
 use Tests\TestCase;
 
-uses(TestCase::class);
+//uses(TestCase::class);
 
 test('connection is made', function () {
     $connection = $this->connection;

@@ -5,6 +5,7 @@ namespace LaravelFreelancerNL\Aranguent\Query;
 use Exception;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Database\Query\Expression;
+use Illuminate\Database\Query\Grammars\Grammar as IlluminateQueryGrammar;
 use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsGroups;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsSearches;
@@ -67,7 +68,7 @@ class Builder extends IlluminateQueryBuilder
     public $connection;
 
     /**
-     * @var \Illuminate\Database\Query\Grammars\Grammar
+     * @var IlluminateQueryGrammar
      */
     public $grammar;
 
@@ -105,15 +106,15 @@ class Builder extends IlluminateQueryBuilder
      * Create a new query builder instance.
      */
     public function __construct(
-        Connection $connection,
-        Grammar $grammar = null,
-        Processor $processor = null,
-        AQB $aqb = null
+        Connection             $connection,
+        IlluminateQueryGrammar $grammar = null,
+        Processor              $processor = null,
+        AQB                    $aqb = null
     ) {
-        //        parent::__construct($connection, $grammar, $processor);
-        $this->connection = $connection;
-        $this->grammar = $grammar ?: $connection->getQueryGrammar();
-        $this->processor = $processor ?: $connection->getPostProcessor();
+        parent::__construct($connection, $grammar, $processor);
+//        $this->connection = $connection;
+//        $this->grammar = $grammar ?: $connection->getQueryGrammar();
+//        $this->processor = $processor ?: $connection->getPostProcessor();
 
         if (!$aqb instanceof AQB) {
             $aqb = new AQB();
@@ -229,9 +230,8 @@ class Builder extends IlluminateQueryBuilder
             ->setAggregate($function, $columns)
             ->get($columns);
 
-
         if (!$results->isEmpty()) {
-            return array_change_key_case((array)$results[0])['aggregate'];
+            return ($results->first())->aggregate;
         }
 
         return false;

@@ -3,11 +3,6 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\DB;
-use Tests\TestCase;
-
-uses(
-    TestCase::class,
-);
 
 test('searchView', function () {
     $query = DB::table('house_view')

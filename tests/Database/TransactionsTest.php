@@ -14,7 +14,7 @@ use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Location;
 use Tests\TestCase;
 
-uses(TestCase::class);
+//uses(TestCase::class);
 
 afterEach(function () {
     M::close();

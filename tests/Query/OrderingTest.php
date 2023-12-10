@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\DB;
 
-uses(
-    \Tests\TestCase::class,
-);
-
 test('orderBy', function () {
     $builder = getBuilder();
     $builder->select('*')->from('users')->orderBy('email')->orderBy('age', 'desc');

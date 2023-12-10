@@ -2,11 +2,6 @@
 
 use Illuminate\Support\Facades\DB;
 use Tests\Setup\Models\Character;
-use Tests\TestCase;
-
-uses(
-    TestCase::class,
-);
 
 test('basic wheres', function () {
     $builder = getBuilder();

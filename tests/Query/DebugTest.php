@@ -1,11 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\DB;
-use Tests\TestCase;
-
-uses(
-    TestCase::class,
-);
 
 test('toAql', function () {
     $query = DB::table('characters')->where('id', '=', 'NedStark');

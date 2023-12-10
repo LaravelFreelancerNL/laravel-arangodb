@@ -1,11 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\DB;
-use Tests\TestCase;
-
-uses(
-    TestCase::class,
-);
 
 test('basic select', function () {
     $results = DB::table('characters')->select()->get();

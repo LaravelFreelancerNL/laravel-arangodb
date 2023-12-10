@@ -203,6 +203,7 @@ trait CompilesColumns
 
         // If there is just one attribute/column given we assume that you want a list of values
         //  instead of a list of objects
+        // FIXME: nope???
         if ($query->aggregate === null && count($returnAttributes) == 1 && empty($returnDocs)) {
             return reset($returnAttributes);
         }

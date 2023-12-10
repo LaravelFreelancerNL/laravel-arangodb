@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\DB;
 
-uses(
-    \Tests\TestCase::class,
-);
-
 test('group by', function () {
     $surnames = DB::table('characters')
         ->select('surname')

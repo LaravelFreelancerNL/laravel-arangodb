@@ -4,11 +4,6 @@ declare(strict_types=1);
 
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
-use Tests\TestCase;
-
-uses(
-    TestCase::class,
-);
 
 beforeEach(function () {
     $this->schemaManager = $this->connection->getArangoClient()->schema();
