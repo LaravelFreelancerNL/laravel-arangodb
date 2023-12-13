@@ -30,26 +30,70 @@ test('toSql', function () {
 
 
 test('toRawSql', function () {
-    //    $query = DB::table('characters')
-    //        ->where('name', 'Gilly')
-    //        ->toRawSql();
+    $query = DB::table('characters')
+        ->where('name', 'Gilly');
 
-    // TODO: apparently the connection isn't set for grammar generating an error when trying to escape values.
-})->todo();
+    $aql = $query->toRawSql();
+
+    expect($aql)->toBe(
+        'FOR characterDoc IN characters FILTER `characterDoc`.`name` == "Gilly" RETURN characterDoc'
+    );
+});
+
+test('toRawSql with single quote', function () {
+    $query = DB::table('characters')
+        ->where('name', "H'ghar");
+
+    $aql = $query->toRawSql();
+
+    expect($aql)->toBe(
+        'FOR characterDoc IN characters FILTER `characterDoc`.`name` == "'."H\'ghar".'" RETURN characterDoc'
+    );
+});
+
+
+test('toRawSql with multiple binds', function () {
+    $names = [
+        "Ned",
+        "Robert",
+        "Jaime",
+        "Catelyn",
+        "Cersei",
+        "Daenerys",
+        "Jorah",
+        "Petyr",
+        "Viserys",
+    ];
+
+    $query = DB::table('characters');
+    $query->where('name', 'Gilly');
+
+    for($i = 0; $i < 9; $i++) {
+        $query->orWhere('name', $names[$i]);
+    }
+
+    $aql = $query->toRawSql();
+
+    $rawAql = 'FOR characterDoc IN characters FILTER `characterDoc`.`name` == "Gilly"';
+    for($i = 0; $i < 9; $i++) {
+        $rawAql .= ' or `characterDoc`.`name` == "'.$names[$i].'"';
+    }
+    $rawAql .= ' RETURN characterDoc';
+
+    expect($aql)->toBe(
+         $rawAql
+    );
+});
 
 test('dumpRawSql', function () {
-    //    $query = DB::table('characters')
-    //        ->where('name', 'Gilly')
-    //        ->dumpRawSql();
-
-    // Same problem as toRawSql
-})->todo();
+        $query = DB::table('characters')
+            ->where('name', 'Gilly')
+            ->dumpRawSql();
+})->throwsNoExceptions();
 
 
 test('dump', function () {
     $query = DB::table('characters')
         ->where('name', 'Gilly')
         ->dump();
-
-    //TODO: apparently the connection isn't set for grammar generating an error when trying to escape values.
 })->throwsNoExceptions();

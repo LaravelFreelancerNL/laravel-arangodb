@@ -12,7 +12,6 @@ use LaravelFreelancerNL\Aranguent\Query\Grammar;
 
 /**
  * @method isQueryable(mixed $column)
- * @method createSub(\Closure|\Illuminate\Database\Eloquent\Builder|IlluminateQueryBuilder|string $query)
  */
 trait BuildsSelects
 {
@@ -73,7 +72,7 @@ trait BuildsSelects
      */
     public function selectSub($query, $as)
     {
-        [$query] = $this->createSub($query);
+        [$query] = $this->createSub($query, true);
 
         $this->set($as, new Expression($query), 'postTraversalVariable');
 

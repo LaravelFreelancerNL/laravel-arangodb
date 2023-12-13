@@ -28,7 +28,7 @@ test('get id conversion single attribute', function () {
     $builder = $builder->select('id')->from('users');
 
     $this->assertSame(
-        'FOR userDoc IN users RETURN `userDoc`.`_key`',
+        'FOR userDoc IN users RETURN {id: `userDoc`.`_key`}',
         $builder->toSql()
     );
 });

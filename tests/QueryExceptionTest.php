@@ -3,11 +3,6 @@
 use Illuminate\Database\QueryException as IlluminateQueryException;
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\QueryException;
-use Tests\TestCase;
-
-uses(
-    TestCase::class,
-);
 
 test('bad query throws query exception', function () {
     $this->expectException(QueryException::class);

@@ -13,12 +13,21 @@ use LaravelFreelancerNL\Aranguent\Query\Grammar;
 trait BuildsSubqueries
 {
     /**
+     * IN SQL subqueries in selects and where's need to return a single value,
+     * whereas subqueries in joins return an object. This variable lets the
+     * compiler know how to return a single value.
+     *
+     * @var bool
+     */
+    public bool $returnSingleValue = false;
+
+    /**
      * Creates a subquery and parse it.
      *
      * @param  \Closure|IlluminateQueryBuilder|IlluminateEloquentBuilder|string $query
      * @return array
      */
-    protected function createSub($query)
+    protected function createSub($query, bool $returnSingleValue = false)
     {
         // If the given query is a Closure, we will execute it while passing in a new
         // query instance to the Closure. This will give the developer a chance to
@@ -27,6 +36,10 @@ trait BuildsSubqueries
             $callback = $query;
 
             $callback($query = $this->forSubQuery());
+        }
+
+        if ($returnSingleValue) {
+            $query->returnSingleValue = $returnSingleValue;
         }
 
         return $this->parseSub($query);

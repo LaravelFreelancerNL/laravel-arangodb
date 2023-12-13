@@ -205,7 +205,7 @@ trait HandlesAqlGrammar
     {
         foreach($data as $key => $value) {
             $prefix = $key . ': ';
-            if (array_is_list($data) || is_numeric($key)) {
+            if (is_numeric($key)) {
                 $prefix = '';
             }
 
@@ -224,10 +224,31 @@ trait HandlesAqlGrammar
 
         $returnString = implode(', ', $data);
 
-        if (array_is_list($data)) {
-            return '[' . $returnString . ']';
+        return '{' . $returnString . '}';
+    }
+
+    /**
+     * Substitute the given bindings into the given raw AQL query.
+     *
+     * @param  string  $sql
+     * @param  array  $bindings
+     * @return string
+     */
+    public function substituteBindingsIntoRawSql($sql, $bindings)
+    {
+        $bindings = array_map(fn ($value) => $this->escape($value), $bindings);
+
+        $bindings = array_reverse($bindings);
+
+        foreach($bindings as $key => $value) {
+            $pattern = '/(@'.$key.')(?![^a-zA-Z_ ,\}\]])/';
+            $sql = preg_replace(
+                $pattern,
+                '"'.$value.'"',
+                $sql
+            );
         }
 
-        return '{' . $returnString . '}';
+        return $sql;
     }
 }

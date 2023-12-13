@@ -160,7 +160,7 @@ trait BuildsWheres
         // assume the developer wants to run a subquery and then compare the result
         // of that subquery with the given value that was provided to the method.
         if ($this->isQueryable($column) && !is_null($operator)) {
-            [$subquery, $bindings] = $this->createSub($column);
+            [$subquery, $bindings] = $this->createSub($column, true);
 
             return $this->where(new Expression($subquery), $operator, $value, $boolean);
         }
@@ -358,6 +358,8 @@ trait BuildsWheres
         // of the sub-select's conditions to itself, and then we can cache it off
         // in the array of where clauses for the "main" parent query instance.
         call_user_func($callback, $query = $this->forSubQuery());
+
+        $query->returnSingleValue = true;
 
         [$subquery] = $this->parseSub($query);
 

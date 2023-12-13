@@ -89,10 +89,7 @@ update with join
 delete / truncate
 
 ### Debugging
-dd / dump / toSql
-
-#### Incompatible debugging functions
-dumpRawSql / ddRawSql
+dd  / dump / toSql / ddRawSql / dumpRawSql / toRawSql
 
 ## <a name="eloquent"></a>Eloquent
 The methods listed below are specific to Eloquent.

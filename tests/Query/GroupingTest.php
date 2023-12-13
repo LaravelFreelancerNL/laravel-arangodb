@@ -5,11 +5,11 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\DB;
 
 test('group by', function () {
-    $surnames = DB::table('characters')
+    $query  = DB::table('characters')
         ->select('surname')
-        ->groupBy('surname')
-        ->get();
+        ->groupBy('surname');
 
+    $surnames = $query->pluck('surname');
     expect($surnames)->toHaveCount(21);
     expect($surnames[1])->toEqual('Baelish');
 });
@@ -21,17 +21,18 @@ test('group by multiple', function () {
         ->get();
 
     expect($groups)->toHaveCount(29);
-    expect($groups[4][0])->toEqual(null);
-    expect($groups[4][1])->toEqual('the-red-keep');
-    expect($groups[5][0])->toEqual('Baelish');
-    expect($groups[5][1])->toEqual('the-red-keep');
+
+    expect(($groups[4])->surname)->toEqual(null);
+    expect(($groups[4])->residence_id)->toEqual('the-red-keep');
+    expect(($groups[5])->surname)->toEqual('Baelish');
+    expect(($groups[5])->residence_id)->toEqual('the-red-keep');
 });
 
 test('groupByRaw', function () {
     $ageGroups = DB::table('characters')
         ->select('ageGroup')
         ->groupByRaw('ageGroup = FLOOR(characterDoc.age / 5) * 5')
-        ->get();
+        ->pluck('ageGroup');
 
     expect($ageGroups->count())->toBe(7);
     expect($ageGroups->first())->toEqual(0);
@@ -44,7 +45,7 @@ test('having', function () {
         ->select('surname')
         ->groupBy('surname')
         ->having('surname', 'LIKE', '%S%')
-        ->get();
+        ->pluck('surname');
 
     expect($surnames)->toHaveCount(4);
     expect($surnames[1])->toEqual('Seaworth');
@@ -56,12 +57,12 @@ test('having raw', function () {
         ->groupBy('surname')
         ->havingRaw('`surname` LIKE "Lannister"', []);
 
-    $surnames = $query->get();
+    $surnames = $query->pluck('surname');
 
     $this->assertSame(
         'FOR characterDoc IN characters COLLECT surname = `characterDoc`.`surname`'
         . ' FILTER `surname` LIKE "Lannister"'
-        . ' RETURN `surname`',
+        . ' RETURN {`surname`}',
         $query->toSql()
     );
 
@@ -75,7 +76,7 @@ test('or having', function () {
         ->groupBy('age')
         ->having('age', '<', 20)
         ->orHaving('age', '>', 40)
-        ->get();
+        ->pluck('age');
 
     expect($ages)->toHaveCount(9);
     expect($ages[1])->toEqual(10);
@@ -88,7 +89,8 @@ test('Nested having', function () {
         ->having(function ($query) {
             $query->having('surname', '=', 'Lannister')
                 ->orHaving('surname', '==', 'Stark');
-        })->get();
+        })
+        ->pluck('surname');
 
     expect($surnames)->toHaveCount(2);
     expect($surnames[0])->toEqual('Lannister');
@@ -100,7 +102,7 @@ test('having between', function () {
         ->select('age')
         ->groupBy('age')
         ->havingBetween('age', [20, 40])
-        ->get();
+        ->pluck('age');
 
     expect($ages)->toHaveCount(3);
     expect($ages[1])->toEqual(36);
@@ -112,7 +114,7 @@ test('having null', function () {
         ->select('name')
         ->groupBy('name', 'residence_id')
         ->havingNull('residence_id')
-        ->get();
+        ->pluck('name');
 
     expect($names)->toHaveCount(10);
     expect($names[1])->toEqual("Daario");
@@ -123,7 +125,7 @@ test('having not null', function () {
         ->select('name')
         ->groupBy('name', 'residence_id')
         ->havingNotNull('residence_id')
-        ->get();
+        ->pluck('name');
 
     expect($names)->toHaveCount(33);
     expect($names[1])->toEqual("Bran");

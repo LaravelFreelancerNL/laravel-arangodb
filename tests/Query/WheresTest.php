@@ -374,6 +374,7 @@ test('where sub', function () {
             ->where('name', 'Dragonstone')
             ->limit(1);
     });
+
     $characters = $query->get();
 
     expect($characters[0]->id)->toEqual('DaenerysTargaryen');

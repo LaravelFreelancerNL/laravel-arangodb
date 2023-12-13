@@ -15,8 +15,9 @@ trait CompilesColumns
      * Compile the "select *" portion of the query.
      *
      * @param IlluminateQueryBuilder $query
-     * @param  array  $columns
+     * @param array $columns
      * @return string|null
+     * @throws Exception
      */
     protected function compileColumns(IlluminateQueryBuilder $query, $columns)
     {
@@ -55,6 +56,11 @@ trait CompilesColumns
                 }
                 $returnAttributes[$alias] = $column;
             }
+
+            if (is_string($column) && $column === '*') {
+                //TODO place table alias and join aliases in returnDocuments?
+            }
+
         }
 
         $returnValues = $this->determineReturnValues($query, $returnAttributes, $returnDocs);
@@ -121,6 +127,8 @@ trait CompilesColumns
 
         $column = $this->wrap($this->normalizeColumnReferences($query, $column, $table));
 
+        $alias = $this->cleanAlias($query, $alias);
+
         return [$column, $alias];
     }
 
@@ -155,10 +163,6 @@ trait CompilesColumns
             array_unshift($references, $tableAlias);
         }
 
-        // check table alias for first element
-        // not just aliases but also variables.
-
-
         if ($tableAlias === null  && array_key_exists($table, $query->tableAliases)) {
             array_unshift($references, $query->tableAliases[$table]);
         }
@@ -171,83 +175,90 @@ trait CompilesColumns
         return implode('.', $references);
     }
 
+    protected function cleanAlias(IlluminateQueryBuilder $query,  int|null|string $alias): int|string|null
+    {
+        if (!is_string($alias)) {
+            return $alias;
+        }
+
+        if (!str_contains($alias, '.')) {
+            return $alias;
+        }
+
+        $elements = explode('.', $alias);
+
+        if(
+            !$query->isTable($elements[0])
+            && !$query->isVariable($elements[0])
+        ) {
+            return $alias;
+        }
+
+        array_shift($elements);
+
+        return implode($elements);
+    }
+
 
     protected function determineReturnValues($query, $returnAttributes = [], $returnDocs = []): string
     {
+        // If nothing was specifically requested, we return everything.
         if (empty($returnAttributes) && empty($returnDocs)) {
             $returnDocs[] = $query->getTableAlias($query->from);
-            // FIXME: shouldn't this be dependent on the selected documents & attributes?
-            //            if (is_array($query->joins) && !empty($query->joins)) {
-            //                $values = $this->mergeJoinResults($query, $values);
-            //            }
+
+            if ($query->joins !== null) {
+                $returnDocs = $this->mergeJoinResults($query, $returnDocs);
+            }
         }
 
+        // clean up returnAttributes?
+
+        // Aggregate functions only return the aggregate, so we can clear out everything else.
         if ($query->aggregate !== null) {
             $returnDocs = [];
-        }
-
-        $returnAttributesObjectString = $this->mergeReturnAttributes($query, $returnAttributes, $returnDocs);
-
-        $values = $this->mergeReturnDocs($returnAttributesObjectString, $returnAttributes, $returnDocs);
-
-        return $values;
-    }
-
-    protected function mergeReturnAttributes(IlluminateQueryBuilder $query, $returnAttributes, $returnDocs)
-    {
-        $values = [];
-
-        if ($query->aggregate !== null) {
             $returnAttributes = ['`aggregate`' => 'aggregateResult'];
         }
 
-        // If there is just one attribute/column given we assume that you want a list of values
-        //  instead of a list of objects
-        // FIXME: nope???
-        if ($query->aggregate === null && count($returnAttributes) == 1 && empty($returnDocs)) {
+        // Return a single value for certain subqueries
+        if (
+            $query->returnSingleValue === true
+            && count($returnAttributes) === 1
+            && empty($returnDocs)
+        ) {
             return reset($returnAttributes);
         }
 
         if (!empty($returnAttributes)) {
-            return $this->generateAqlObject($returnAttributes);
+            $returnDocs[] = $this->generateAqlObject($returnAttributes);
         }
 
-        return null;
-    }
-
-    protected function mergeReturnDocs($values, $returnAttributeObject, $returnDocs)
-    {
-        if (!empty($values) && !empty($returnDocs)) {
-            $returnDocs[] = $values;
-        }
-
-        if (sizeOf($returnDocs) > 1) {
-            return 'MERGE(' . implode(', ', $returnDocs) . ')';
-        }
-        if (sizeOf($returnDocs) === 1) {
-            return $returnDocs[0];
-        }
+        $values = $this->mergeReturnDocs($returnDocs);
 
         return $values;
     }
 
-    protected function mergeJoinResults(IlluminateQueryBuilder $query, $baseTable): string
+    protected function mergeReturnDocs($returnDocs)
+    {
+        if (sizeOf($returnDocs) > 1) {
+            return 'MERGE(' . implode(', ', $returnDocs) . ')';
+        }
+
+        return reset($returnDocs);
+    }
+
+    protected function mergeJoinResults(IlluminateQueryBuilder $query, $returnDocs = []): array
     {
         assert($query instanceof Builder);
 
-        $tablesToJoin = [];
         foreach ($query->joins as $key => $join) {
             $tableAlias = $query->getTableAlias($join->table);
 
             if (!isset($tableAlias)) {
                 $tableAlias = $query->generateTableAlias($join->table);
             }
-            $tablesToJoin[$key] = $tableAlias;
+            $returnDocs[] = $tableAlias;
         }
 
-        $tablesToJoin = array_reverse($tablesToJoin);
-        $tablesToJoin[] = $baseTable;
-
-        return 'MERGE(' . implode(', ', $tablesToJoin) . ')';
+        return $returnDocs;
     }
 }

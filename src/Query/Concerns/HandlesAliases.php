@@ -110,9 +110,14 @@ trait HandlesAliases
         $query->importTableAliases($this);
     }
 
-    public function isTableAlias(string $alias)
+    public function isTableAlias(string $value)
     {
-        return in_array($alias, $this->tableAliases);
+        return in_array($value, $this->tableAliases);
+    }
+
+    public function isTable(string $value): bool
+    {
+        return array_key_exists($value, $this->tableAliases);
     }
 
     public function prefixAlias(string $target, string $value): string

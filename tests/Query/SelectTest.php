@@ -11,9 +11,9 @@ test('basic select', function () {
 });
 
 test('basic select with specific column', function () {
-    $results = DB::table('characters')->select('name')->get();
+    $results = DB::table('characters')->select('name')->first();
 
-    expect($results[0])->toBe('Ned');
+    expect($results->name)->toBe('Ned');
 });
 
 test('basic select with specific columns', function () {

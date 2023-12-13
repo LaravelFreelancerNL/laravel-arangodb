@@ -185,4 +185,45 @@ class Connection extends IlluminateConnection
     {
         return new ArangoQueryBuilder();
     }
+
+    /**
+     * Escape a binary value for safe SQL embedding.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    protected function escapeBinary($value)
+    {
+        if (mb_detect_encoding($value, ['UTF-8'])) {
+            return $value;
+        }
+
+        return base64_encode($value);
+    }
+
+    /**
+     * Escape a boolean value for safe SQL embedding.
+     *
+     * @param  bool  $value
+     * @return string
+     */
+    protected function escapeBool($value)
+    {
+        return $value ? 'true' : 'false';
+    }
+
+    /**
+     * Escape a string value for safe SQL embedding.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    protected function escapeString($value)
+    {
+        return str_replace(
+            ['\\', "\0", "\n", "\r", "'", '"', "\x1a"],
+            ['\\\\', '\\0', '\\n', '\\r', "\\'", '\\"', '\\Z'],
+            $value
+        );
+    }
 }

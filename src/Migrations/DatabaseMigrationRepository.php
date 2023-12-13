@@ -27,150 +27,38 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
         parent::__construct($resolver, $table);
     }
 
-    /**
-     * Resolve the database connection instance.
-     *
-     * @return Connection
-     */
-//    public function getConnection()
+//    /**
+//     * Get the next migration batch number.
+//     *
+//     * @return int
+//     */
+//    public function getNextBatchNumber()
 //    {
-//        return $this->resolver->connection($this->connection);
+//        return $this->getLastBatchNumber() + 1;
 //    }
-
-    /**
-     * Get the completed migrations.
-     *
-     * @return array
-     * @throws \Exception
-     */
-//    public function getRan()
+//
+//    /**
+//     * Get the last migration batch number.
+//     *
+//     * @return int
+//     */
+//    public function getLastBatchNumber()
 //    {
-////        $qb = (new QueryBuilder())->for('m', 'migrations')
-////            ->sort('m.batch', 'm.migrations')
-////            ->return('m.migration')
-////            ->get();
-////
-////        return $this->getConnection()->select($qb->query);
+//        $qb = new QueryBuilder();
+//        $qb = $qb->for('m', 'migrations')
+//            ->collect()
+//            ->aggregate('maxBatch', $qb->max('m.batch'))
+//            ->return('maxBatch')
+//            ->get();
 //
+//        $results = current($this->getConnection()->select($qb->query));
+//        if ($results === null) {
+//            $results = 0;
+//        }
 //
-//
+//        return $results;
+//        //        return $this->table()->max('batch');
 //    }
-
-    /**
-     * Get list of migrations.
-     *
-     * @param  int  $steps
-     * @return array
-     */
-    public function getMigrations($steps)
-    {
-        $qb = (new QueryBuilder())->for('m', 'migrations')
-            ->filter('m.batch', '>=', 1)
-            ->sort([['m.batch', 'DESC'], ['m.migration', 'DESC']])
-            ->limit($steps)
-            ->return(['migration' => 'm.migration', 'batch' => 'm.batch'])
-            ->get();
-
-        return $this->getConnection()->select($qb->query);
-    }
-
-    public function getLast()
-    {
-        $batch = $this->getLastBatchNumber();
-
-        $qb = (new QueryBuilder())->for('m', 'migrations')
-            ->filter('m.batch', '==', $batch)
-            ->sort('m.migration', 'desc')
-            ->return('m')
-            ->get();
-
-        return $this->getConnection()->select($qb->query);
-    }
-
-    /**
-     * Get the completed migrations with their batch numbers.
-     *
-     * @return array
-     */
-    public function getMigrationBatches()
-    {
-        $qb = (new QueryBuilder())->for('m', 'migrations')
-            ->sort([['m.batch'], ['m.migration']])
-            ->return(['batch' => 'm.batch', 'migration' => 'm.migration'])
-            ->get();
-
-        return $this->getConnection()->select($qb->query);
-    }
-
-    /**
-     * Log that a migration was run.
-     *
-     * @param  string  $file
-     * @param  int  $batch
-     */
-    public function log($file, $batch)
-    {
-        $qb = (new QueryBuilder())->insert(['migration' => $file, 'batch' => $batch], 'migrations')->get();
-
-        $this->getConnection()->insert($qb->query, $qb->binds);
-
-        //        $record = ['migration' => $file, 'batch' => $batch];
-        //
-        //        $this->table()->insert($record);
-    }
-
-    /**
-     * Remove a migration from the log.
-     *
-     * @param  object|string  $migration
-     * @return void
-     */
-    public function delete($migration)
-    {
-        if (is_object($migration)) {
-            $migration = $migration->migration;
-        }
-
-        $qb = (new QueryBuilder())->for('m', 'migrations')
-                ->filter('m.migration', '==', $migration)
-                ->remove('m', 'migrations')
-                ->get();
-
-        $this->getConnection()->delete($qb->query, $qb->binds);
-    }
-
-    /**
-     * Get the next migration batch number.
-     *
-     * @return int
-     */
-    public function getNextBatchNumber()
-    {
-        return $this->getLastBatchNumber() + 1;
-    }
-
-    /**
-     * Get the last migration batch number.
-     *
-     * @return int
-     */
-    public function getLastBatchNumber()
-    {
-        $qb = new QueryBuilder();
-        $qb = $qb->for('m', 'migrations')
-            ->collect()
-            ->aggregate('maxBatch', $qb->max('m.batch'))
-            ->return('maxBatch')
-            ->get();
-
-        $results = current($this->getConnection()->select($qb->query));
-        if ($results === null) {
-            $results = 0;
-        }
-
-        return $results;
-        //        return $this->table()->max('batch');
-    }
 
     /**
      * Create the migration repository data store.
@@ -193,6 +81,25 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
         //            $collection->string('migration');
         //            $collection->integer('batch');
         //        });
+    }
+
+    /**
+     * Get the list of migrations.
+     *
+     * @param  int  $steps
+     * @return array
+     */
+    public function getMigrations($steps)
+    {
+        $query = $this->table()
+            ->where('batch', '>=', '1')
+            ->orderBy('batch', 'desc')
+            ->orderBy('migration', 'desc')
+            ->take($steps);
+
+        ray('getMigrations X', $query, $query->toSql(),$query->bindings, $query->get());
+
+        return $query->get()->all();
     }
 
     /**

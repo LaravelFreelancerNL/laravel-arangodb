@@ -6,9 +6,6 @@ use ArangoClient\ArangoClient;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use LaravelFreelancerNL\Aranguent\QueryException;
-use Tests\TestCase;
-
-//uses(TestCase::class);
 
 test('connection is made', function () {
     $connection = $this->connection;

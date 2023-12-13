@@ -19,8 +19,21 @@ test('join', function () {
     $characters = $query->get();
 
     expect($characters)->toHaveCount(15);
-    expect($characters[0]->id)->toEqual('NedStark');
+    expect($characters[0]->id)->toEqual('winterfell');
 });
+
+test('join with specific selection', function () {
+    $query = DB::table('characters')
+        ->select('characters.surname', 'locations.name')
+        ->join('locations', 'characters.residence_id', '=', 'locations.id')
+        ->where('residence_id', '=', 'winterfell');
+
+    $characters = $query->get();
+
+    expect($characters)->toHaveCount(15);
+    expect($characters[0]->name)->toEqual('Winterfell');
+});
+
 
 test('joinSub', function () {
     $locations = DB::table('locations')
@@ -35,23 +48,25 @@ test('joinSub', function () {
     $characters = $builder->get();
 
     expect($characters)->toHaveCount(7);
-    expect($characters[0]->id)->toEqual('DaenerysTargaryen');
+    expect($characters[0]->id)->toEqual('dragonstone');
+    expect($characters[0]->age)->toEqual(16);
+    expect($characters[0]->surname)->toEqual('Targaryen');
 });
 
 
-test('left join', function () {
+test('leftJoin', function () {
     $query = DB::table('characters')
         ->leftJoin('locations', 'characterDoc.residence_id', '=', 'locationDoc._key');
     $characters = $query->get();
-
-    ray('leftJoin', $query, $query->toSql());
 
     $charactersWithoutResidence = DB::table('characters')
         ->whereNull('residence_id')
         ->get();
 
     expect($characters)->toHaveCount(43);
-    expect($characters[0]->id)->toEqual('NedStark');
+    expect($characters[0]->id)->toEqual('winterfell');
+    expect($characters[0]->age)->toEqual(41);
+    expect($characters[0]->surname)->toEqual('Stark');
     expect($charactersWithoutResidence)->toHaveCount(10);
 });
 
