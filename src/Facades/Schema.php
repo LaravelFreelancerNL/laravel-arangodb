@@ -27,6 +27,13 @@ use LaravelFreelancerNL\Aranguent\Schema\Builder;
  * @method static Builder dropView(string $name)
  * @method static Builder dropAllViews()
  *
+ * Analyzer handling:
+ * @method static Builder createAnalyzer($name, array $properties)
+ * @method static Builder getAnalyzer(string $name)
+ * @method static Builder replaceAnalyzer($name, array $properties)
+ * @method static Builder dropAnalyzer(string $name)
+ * @method static Builder dropAnalyzerIfExists(string $name)
+ *
  * @see \LaravelFreelancerNL\Aranguent\Schema\Builder
  */
 class Schema extends IlluminateSchema {}
