@@ -92,26 +92,23 @@ delete / truncate
 dd  / dump / toSql / ddRawSql / dumpRawSql / toRawSql
 
 ## <a name="eloquent"></a>Eloquent
-The methods listed below are specific to Eloquent.
-Note that a lot of Eloquent's featured are leveraging the query builder. Those methods are listed in the corresponding
-chapter below.
+The methods listed below are **specific** to Eloquent.
+_Functions handed off to the **Query Builder** are specified 
+in the chapter above._
 
 ### Model CRUD
-- all
-- create
-- delete
-- destroy
-- find
-- first
-- firstOr
-- firstOrFail
-- firstOrCreate
-- firstOrNew
-- firstWhere
-- fresh
-- paginate
-- save
-- updateOrCreate
+all / first / firstWhere / firstOr / firstOrFail /
+firstOrCreate? / firstOrNew? / 
+find / findOr / fresh? / refresh? /  
+create / fill / save / update / updateOrCreate /
+upsert / replicate / delete / destroy / truncate / softDeletes / 
+trashed? / restore? / withTrashed? / forceDelete
+isDirty? / isClean / wasChanged / getOriginal /
+pruning / query scopes? / saveQuietly / deleteQuietly /
+forceDeleteQuietly / restoreQuietly
+
+#### Model comparison
+is / isNot
 
 ### Relationships
 - One To One
@@ -121,21 +118,43 @@ chapter below.
 - One To Many (Polymorphic)
 - Many To Many (Polymorphic)
 
-Methods:
-- belongsTo
-- belongsToMany
-- doesntHave
-- enforceMorphMap
-- has
-- hasMany
-- hasOne
-- morphedByMany
-- morphMany
-- morphOne
-- morphTo
-- with
-- withCount
+belongsTo / belongsToMany / 
+morphOne / morphTo / morphMany / morphMany / morphedByMany / 
+ofMany / latestOfMany / oldestOfMany
+hasOne / hasMany / hasX / hasOneThrough / hasManyThrough / 
+throughX /
+whereBelongsTo /
+as / 
+withTimestamps /
 
+#### Pivot functions
+withPivot / 
+wherePivot / wherePivotIn /wherePivotNotIn /
+wherePivotBetween / wherePivotNotBetween /
+wherePivotNull / wherePivotNotNull / orderByPivot /
+using
+
+enforceMorphMap / getMorphClass / getMorphedModel / resolveRelationUsing
+
+#### Query relationships
+has / orHas / whereHas / whereRelation / doesntHave /
+whereDoesntHave / whereHasMorph / whereDoesntHaveMorph
+
+#### Aggregating related models
+withCount / loadCount /
+withSum / loadSum / withExists / morphWithCount /loadMorphCount /
+
+loadMorphCount
+#### Eager loading
+with / without / withOnly / constrain /
+load / loadMissing / loadMorph / preventLazyLoading
+
+#### Inserting and updating related models
+save / saveMany / refresh / push / pushQuietly / 
+create / createMany / createQuietly / createManyQuietly /
+associate / dissociate / attach / detach / 
+sync / syncWithPivotValues / syncWithoutDetaching / toggle /
+updateExistingPivot / 
 
 ## <a name="testing"></a> Testing
 
@@ -171,7 +190,7 @@ wrap it in a transaction.
 
 ### Locking: sharedLock / lockForUpdate
 These methods don't work as ArangoDB requires you to declare the locking mechanics at the start of a transaction.
-They fail silently and just run the query. (???)
+**_They fail silently and just run the query. (???)_**
 
 ### Raw SQL
 Any raw SQL needs to be replaced by raw AQL.

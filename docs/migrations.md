@@ -48,7 +48,6 @@ attributes in existing documents.
 `renameAttribute($from, $to)` renames the attribute in all documents within the collection.
 
 
-
 ## Views (ArangoSearch)
 You can create, edit or delete an ArangoDB view.
 

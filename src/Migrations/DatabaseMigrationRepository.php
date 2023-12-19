@@ -6,9 +6,7 @@ namespace LaravelFreelancerNL\Aranguent\Migrations;
 
 use Illuminate\Database\ConnectionResolverInterface as IlluminateResolver;
 use Illuminate\Database\Migrations\DatabaseMigrationRepository as IlluminateDatabaseMigrationRepository;
-use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
-use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
 class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
 {
@@ -27,39 +25,6 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
         parent::__construct($resolver, $table);
     }
 
-//    /**
-//     * Get the next migration batch number.
-//     *
-//     * @return int
-//     */
-//    public function getNextBatchNumber()
-//    {
-//        return $this->getLastBatchNumber() + 1;
-//    }
-//
-//    /**
-//     * Get the last migration batch number.
-//     *
-//     * @return int
-//     */
-//    public function getLastBatchNumber()
-//    {
-//        $qb = new QueryBuilder();
-//        $qb = $qb->for('m', 'migrations')
-//            ->collect()
-//            ->aggregate('maxBatch', $qb->max('m.batch'))
-//            ->return('maxBatch')
-//            ->get();
-//
-//        $results = current($this->getConnection()->select($qb->query));
-//        if ($results === null) {
-//            $results = 0;
-//        }
-//
-//        return $results;
-//        //        return $this->table()->max('batch');
-//    }
-
     /**
      * Create the migration repository data store.
      *
@@ -70,17 +35,6 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
         $schemaManager = $this->getConnection()->getArangoClient()->schema();
 
         $schemaManager->createCollection($this->table);
-
-        //        $schema = $this->getConnection()->getSchemaBuilder();
-        //
-        //        $schema->create($this->table, function ($collection) {
-        //            // The migrations collection is responsible for keeping track of which of the
-        //            // migrations have actually run for the application. We'll create the
-        //            // collection to hold the migration file's path as well as the batch ID.
-        //            $collection->increments('id');
-        //            $collection->string('migration');
-        //            $collection->integer('batch');
-        //        });
     }
 
     /**
@@ -91,16 +45,19 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     public function getMigrations($steps)
     {
+        //TODO: the only difference with the parent function is that type of the batch value:
+        // 1 instead of '1'. This should probably be changed in the Laravel framework as it
+        // seems unnecessary to use a numeric string here.
+
         $query = $this->table()
-            ->where('batch', '>=', '1')
+            ->where('batch', '>=', 1)
             ->orderBy('batch', 'desc')
             ->orderBy('migration', 'desc')
             ->take($steps);
 
-        ray('getMigrations X', $query, $query->toSql(),$query->bindings, $query->get());
-
         return $query->get()->all();
     }
+
 
     /**
      * Determine if the migration repository exists.
@@ -125,16 +82,6 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     protected function collection()
     {
-        return $this->getConnection()->table($this->table);
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return Builder
-     */
-    protected function table()
-    {
-        return $this->collection();
+        return $this->table();
     }
 }

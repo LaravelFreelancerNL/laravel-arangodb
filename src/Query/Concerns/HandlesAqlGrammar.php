@@ -244,7 +244,7 @@ trait HandlesAqlGrammar
             $pattern = '/(@'.$key.')(?![^a-zA-Z_ ,\}\]])/';
             $sql = preg_replace(
                 $pattern,
-                '"'.$value.'"',
+                $value,
                 $sql
             );
         }

@@ -202,6 +202,58 @@ class Connection extends IlluminateConnection
     }
 
     /**
+     * Escape a value for safe SQL embedding.
+     *
+     * @param  array|string|float|int|bool|null  $value
+     * @param  bool  $binary
+     * @return string
+     */
+    public function escape($value, $binary = false)
+    {
+        if ($value === null) {
+            return 'null';
+        } elseif ($binary) {
+            return $this->escapeBinary($value);
+        } elseif (is_int($value) || is_float($value)) {
+            return (string) $value;
+        } elseif (is_bool($value)) {
+            return $this->escapeBool($value);
+        } elseif (is_array($value)) {
+            return $this->escapeArray($value);
+        } else {
+            if (str_contains($value, "\00")) {
+                throw new RuntimeException('Strings with null bytes cannot be escaped. Use the binary escape option.');
+            }
+
+            if (preg_match('//u', $value) === false) {
+                throw new RuntimeException('Strings with invalid UTF-8 byte sequences cannot be escaped.');
+            }
+
+            return $this->escapeString($value);
+        }
+    }
+
+    /**
+     * Escape an array value for safe SQL embedding.
+     *
+     * @param  array  $value
+     * @return string
+     */
+    protected function escapeArray(array $array): string
+    {
+        foreach($array as $key => $value) {
+            $array[$key] = $this->escape($value);
+        }
+
+        if (array_is_list($array)) {
+            return '['.implode(', ', $array).']';
+        }
+
+        $grammar = $this->getDefaultQueryGrammar();
+        return $grammar->generateAqlObject($array);
+    }
+
+    /**
      * Escape a boolean value for safe SQL embedding.
      *
      * @param  bool  $value
@@ -220,10 +272,10 @@ class Connection extends IlluminateConnection
      */
     protected function escapeString($value)
     {
-        return str_replace(
+        return '"'.str_replace(
             ['\\', "\0", "\n", "\r", "'", '"', "\x1a"],
             ['\\\\', '\\0', '\\n', '\\r', "\\'", '\\"', '\\Z'],
             $value
-        );
+        ).'"';
     }
 }
