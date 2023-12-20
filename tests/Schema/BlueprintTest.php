@@ -111,3 +111,20 @@ test('default', function () {
         expect($commands[1]['method'])->toEqual('default');
     });
 });
+
+test('invertedIndex', function () {
+    Schema::table('characters', function (Blueprint $collection) {
+        $collection->invertedIndex(
+            ['name'],
+            'inv-ind',
+            [
+                'searchField' => true,
+                'includeAllFields' => true
+            ]);
+    });
+    $name = 'inv-ind';
+
+    $index = $this->schemaManager->getIndexByName('characters', $name);
+
+    expect($index->name)->toEqual($name);
+});

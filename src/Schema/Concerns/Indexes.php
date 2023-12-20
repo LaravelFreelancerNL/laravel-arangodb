@@ -87,6 +87,19 @@ trait Indexes
     }
 
     /**
+     *  Specify a inverted index for the table.
+     *
+     * @param  array<mixed>|null  $columns
+     * @param  null  $name
+     * @param  array  $indexOptions
+     * @return Fluent
+     */
+    public function invertedIndex(array $columns = null, $name = null, $indexOptions = [])
+    {
+        return $this->indexCommand('inverted', $columns, $name, $indexOptions);
+    }
+
+    /**
      * Specify a spatial index for the table.
      *
      * @param  string|array  $columns
