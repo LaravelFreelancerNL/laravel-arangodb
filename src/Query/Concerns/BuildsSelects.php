@@ -74,7 +74,7 @@ trait BuildsSelects
     {
         [$query] = $this->createSub($query, true);
 
-        $this->set($as, new Expression($query), 'postTraversalVariable');
+        $this->set($as, new Expression($query), 'postIterationVariables');
 
         $this->addColumns([$as]);
 

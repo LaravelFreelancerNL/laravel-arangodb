@@ -33,9 +33,11 @@ test('insert handles array attributes', function ($character) {
 })->with('character');
 
 test('update sets correct updated at', function ($character) {
+
     Character::insert($character);
 
     $retrievedBeforeUpdate = Character::find($character['id']);
+
     $retrievedBeforeUpdate->update(['alive' => false]);
 
     $retrievedAfterUpdate = Character::find($character['id']);

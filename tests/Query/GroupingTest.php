@@ -5,6 +5,8 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\DB;
 
 test('group by', function () {
+    ray()->showQueries();
+
     $query  = DB::table('characters')
         ->select('surname')
         ->groupBy('surname');
@@ -62,7 +64,7 @@ test('having raw', function () {
     $this->assertSame(
         'FOR characterDoc IN characters COLLECT surname = `characterDoc`.`surname`'
         . ' FILTER `surname` LIKE "Lannister"'
-        . ' RETURN {`surname`}',
+        . ' RETURN {surname: `surname`}',
         $query->toSql()
     );
 

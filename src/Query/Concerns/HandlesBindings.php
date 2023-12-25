@@ -82,6 +82,30 @@ trait HandlesBindings
         $this->bindings = array_merge_recursive($this->bindings, $query->bindings);
     }
 
+    /**
+     * Set the bindings on the query builder.
+     *
+     * @param  array  $bindings
+     * @param  string  $type
+     * @return $this
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function setBindings(array $bindings, $type = 'where')
+    {
+        if (! array_key_exists($type, $this->bindings)) {
+            throw new InvalidArgumentException("Invalid binding type: {$type}.");
+        }
+
+        if (empty($bindings)) {
+            return $this;
+        }
+
+        $this->bindings[$type] = array_merge($this->bindings[$type], $bindings);
+
+        return $this;
+    }
+
 
     protected function replaceValueWithBindVariable(string $type = 'where')
     {

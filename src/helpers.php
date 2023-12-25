@@ -7,7 +7,7 @@ use Illuminate\Support\Arr;
 if (!function_exists('associativeFlatten')) {
     /**
      * Flatten a multi-dimensional associative array with dots.
-     * List arrays are left untouched
+     * List arrays are left untouched.
      *
      * @return array
      */

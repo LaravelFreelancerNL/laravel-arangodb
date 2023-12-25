@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace LaravelFreelancerNL\Aranguent\Eloquent\Concerns;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Builder as IlluminateBuilder;
+use Illuminate\Database\Eloquent\Builder as IlluminateEloquentBuilder;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Str;
@@ -17,22 +19,21 @@ trait QueriesAranguentRelationships
     /**
      * Add a sub-query count clause to this query.
      *
-     * @param  QueryBuilder  $query
+     * @param  \Illuminate\Database\Query\Builder  $query
      * @param  string  $operator
      * @param  int  $count
      * @param  string  $boolean
+     * @return $this
      */
-    protected function addWhereCountQuery(
-        IlluminateQueryBuilder $query,
-        $operator = '>=',
-        $count = 1,
-        $boolean = 'and'
-    ): IlluminateBuilder {
+    protected function addWhereCountQuery(IlluminateQueryBuilder $query, $operator = '>=', $count = 1, $boolean = 'and')
+    {
 
-        $query->grammar->compileSelect($query);
+        $this->getQuery()->exchangeTableAliases($query);
+
+        $this->getQuery()->importBindings($query);
 
         return $this->where(
-            $query->aqb->count($query->aqb),
+            new Expression('LENGTH(('.$query->toSql().'))'),
             $operator,
             is_numeric($count) ? new Expression($count) : $count,
             $boolean
@@ -40,24 +41,48 @@ trait QueriesAranguentRelationships
     }
 
     /**
+     * Merge the where constraints from another query to the current query.
+     *
+     * @param IlluminateEloquentBuilder $from
+     * @return IlluminateEloquentBuilder|static
+     */
+    public function mergeConstraintsFrom(Builder $from)
+    {
+        $whereBindings = $this->getQuery()->getBindings() ?? [];
+
+        $wheres = $from->getQuery()->from !== $this->getQuery()->from
+            ? $this->requalifyWhereTables(
+                $from->getQuery()->wheres,
+                $from->getQuery()->grammar->getValue($from->getQuery()->from),
+                $this->getModel()->getTable()
+            ) : $from->getQuery()->wheres;
+
+        // Here we have some other query that we want to merge the where constraints from. We will
+        // copy over any where constraints on the query as well as remove any global scopes the
+        // query might have removed. Then we will return ourselves with the finished merging.
+        return $this->withoutGlobalScopes(
+            $from->removedScopes()
+        )->mergeWheres(
+            $wheres, $whereBindings
+        );
+    }
+
+    /**
      * Add subselect queries to include an aggregate value for a relationship.
-     * Overrides method in QueriesRelationships trait
      *
      * @param  mixed  $relations
-     * @param  string|null  $column
+     * @param  string  $column
      * @param  string  $function
      * @return $this
      */
     public function withAggregate($relations, $column, $function = null)
     {
-        $result = null;
-
         if (empty($relations)) {
             return $this;
         }
 
         if (is_null($this->query->columns)) {
-            $this->query->select([$this->query->from . '.*']);
+            $this->query->select([$this->query->from.'.*']);
         }
 
         $relations = is_array($relations) ? $relations : [$relations];
@@ -76,13 +101,24 @@ trait QueriesAranguentRelationships
 
             $relation = $this->getRelationWithoutConstraints($name);
 
+            if ($function) {
+                $hashedColumn = $this->getRelationHashedColumn($column, $relation);
+
+                $wrappedColumn = $this->getQuery()->getGrammar()->wrap(
+                    $column === '*' ? $column : $relation->getRelated()->qualifyColumn($hashedColumn)
+                );
+
+                $expression = $function === 'exists' ? $wrappedColumn : sprintf('%s(%s)', $function, $wrappedColumn);
+            } else {
+                $expression = $column;
+            }
+
             // Here, we will grab the relationship sub-query and prepare to add it to the main query
             // as a sub-select. First, we'll get the "has" query and use that to get the relation
             // sub-query. We'll format this relationship name and append this column if needed.
             $query = $relation->getRelationExistenceQuery(
-                $relation->getRelated()->newQuery(),
-                $this
-            );
+                $relation->getRelated()->newQuery(), $this, new Expression($expression)
+            )->setBindings([], 'select');
 
             $query->callScope($constraints);
 
@@ -92,42 +128,39 @@ trait QueriesAranguentRelationships
             // then we will remove those elements from the query so that it will execute properly
             // when given to the database. Otherwise, we may receive SQL errors or poor syntax.
             $query->orders = null;
+            $query->setBindings([], 'order');
 
             if (count($query->columns) > 1) {
                 $query->columns = [$query->columns[0]];
                 $query->bindings['select'] = [];
             }
 
-            $result = $this->getAggregateResultQuery($query, $function);
-
             // Finally, we will make the proper column alias to the query and run this sub-select on
             // the query builder. Then, we will return the builder instance back to the developer
             // for further constraint chaining that needs to take place on the query as needed.
-            $alias = $alias ?? Str::snake(
+            $alias ??= Str::snake(
                 preg_replace('/[^[:alnum:][:space:]_]/u', '', "$name $function $column")
             );
 
-            /** @phpstan-ignore-next-line */
-            $this->selectSub(
-                $result,
-                $alias
-            );
+            if ($function === 'exists') {
+                //FIXME: test for results from the subquery -> whereHas?
+                $this->selectRaw(
+                    sprintf('exists(%s) as %s', $query->toSql(), $this->getQuery()->grammar->wrap($alias)),
+                    $query->getBindings()
+                )->withCasts([$alias => 'bool']);
+            } else {
+                if ($function === null) {
+                    $query->limit(1);
+                }
+
+                $this->getQuery()->exchangeTableAliases($query);
+                $this->getQuery()->importBindings($query);
+
+                $this->set($alias, new Expression(strtoupper($function).'(('.$query->toSql().'))'), 'postIterationVariables');
+                $this->addSelect($alias);
+            }
         }
 
         return $this;
-    }
-
-    protected function getAggregateResultQuery(QueryBuilder $query, string $function): QueryBuilder|FunctionExpression
-    {
-        if ($function) {
-            $query->grammar->compileSelect($query);
-            $result = (new ArangoQueryBuilder())->$function($query->aqb);
-        }
-        if (!$function) {
-            $query->limit(1);
-            $result = $query;
-        }
-
-        return $result;
     }
 }

@@ -40,7 +40,7 @@ trait CompilesColumns
 
             // Extract groups
             if (is_array($query->groups) && in_array($column, $query->groups)) {
-                $returnAttributes[$key] = $this->normalizeColumn($query, $column);
+                $returnAttributes[$column] = $this->normalizeColumn($query, $column);
 
                 continue;
             }

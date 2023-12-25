@@ -531,11 +531,15 @@ class Grammar extends IlluminateQueryGrammar
     /**
      * Get the value of a raw expression.
      *
-     * @param  \Illuminate\Database\Query\Expression  $expression
+     * @param Expression $expression
      * @return string
      */
     public function getValue($expression)
     {
+        if (!$expression instanceof Expression) {
+            return $expression;
+        }
+
         return $expression->getValue($this);
     }
 

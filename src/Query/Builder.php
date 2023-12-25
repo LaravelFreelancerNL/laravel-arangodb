@@ -252,7 +252,6 @@ class Builder extends IlluminateQueryBuilder
         if (is_string($variablePosition)) {
             $variablePosition = VariablePosition::tryFrom($variablePosition) ?? VariablePosition::preIterations;
         }
-
         if ($value instanceof Expression) {
             $this->{$variablePosition->value}[$variable] = $value->getValue($this->grammar);
 

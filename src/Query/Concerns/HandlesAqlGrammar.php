@@ -86,7 +86,7 @@ trait HandlesAqlGrammar
 
     public function isBind($value, string $type): bool
     {
-        if (is_string($value) && preg_match('/^@?[0-9]{4}_' . $value . '_[0-9_]+$/', $value)) {
+        if (is_string($value) && preg_match('/^@?[0-9]{4}_' . json_encode($value) . '_[0-9_]+$/', $value)) {
             return true;
         }
 
@@ -223,6 +223,10 @@ trait HandlesAqlGrammar
         }
 
         $returnString = implode(', ', $data);
+
+        if (array_is_list($data)) {
+            return '[' . $returnString . ']';
+        }
 
         return '{' . $returnString . '}';
     }

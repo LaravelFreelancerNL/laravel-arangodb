@@ -4,45 +4,13 @@ declare(strict_types=1);
 
 namespace LaravelFreelancerNL\Aranguent\Eloquent;
 
-use Illuminate\Database\Eloquent\Builder as IlluminateBuilder;
+use Illuminate\Database\Eloquent\Builder as IlluminateEloquentBuilder;
 use Illuminate\Support\Arr;
 use LaravelFreelancerNL\Aranguent\Eloquent\Concerns\QueriesAranguentRelationships;
 
-class Builder extends IlluminateBuilder
+class Builder extends IlluminateEloquentBuilder
 {
     use QueriesAranguentRelationships;
-
-    /**
-     * Get the first record matching the attributes or create it.
-     *
-     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder
-     */
-    public function firstOrCreate(array $attributes = [], array $values = [])
-    {
-        $instance = $this->where(associativeFlatten($attributes))->first();
-        if (!is_null($instance)) {
-            return $instance;
-        }
-
-        return tap($this->newModelInstance(array_merge($attributes, $values)), function ($instance) {
-            $instance->save();
-        });
-    }
-
-    /**
-     * Get the first record matching the attributes or instantiate it.
-     *
-     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder
-     */
-    public function firstOrNew(array $attributes = [], array $values = [])
-    {
-        $instance = $this->where(associativeFlatten($attributes))->first();
-        if (!is_null($instance)) {
-            return $instance;
-        }
-
-        return $this->newModelInstance(array_merge($attributes, $values));
-    }
 
     /**
      * Insert a record in the database.

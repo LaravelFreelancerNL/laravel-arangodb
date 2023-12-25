@@ -57,6 +57,25 @@ trait BuildsWheres
     }
 
     /**
+     * Add an array of where clauses to the query.
+     *
+     * @param  array  $column
+     * @param  string  $boolean
+     * @param  string  $method
+     * @return $this
+     */
+    protected function addArrayOfWheres($column, $boolean, $method = 'where')
+    {
+        $column = associativeFlatten($column);
+
+        return $this->whereNested(function ($query) use ($column, $method, $boolean) {
+            foreach ($column as $key => $value) {
+                $query->{$method}($key, '==', $value, $boolean);
+            }
+        }, $boolean);
+    }
+
+    /**
      * Add a date based (year, month, day, time) statement to the query.
      *
      * @param  string  $type
@@ -115,6 +134,22 @@ trait BuildsWheres
     }
 
     /**
+     * Merge an array of where clauses and bindings.
+     *
+     * @param  array  $wheres
+     * @param  array  $bindings
+     * @return $this
+     */
+    public function mergeWheres($wheres, $bindings)
+    {
+        $this->wheres = array_merge($this->wheres, (array) $wheres);
+
+        $this->bindings['where'] = array_merge($this->bindings['where'], (array) $bindings);
+
+        return $this;
+    }
+
+    /**
      * Add a basic where clause to the query.
      *
      * @param  \Closure|IlluminateQueryBuilder|IlluminateEloquentBuilder|Expression|string|array  $column
@@ -136,7 +171,7 @@ trait BuildsWheres
         // If the column is an array, we will assume it is an array of key-value pairs
         // and can add them each as a where clause. We will maintain the boolean we
         // received when the method was called and pass it into the nested where.
-        if (is_array($column)) {
+        if (is_array($column) && !array_is_list($column)) {
             return $this->addArrayOfWheres($column, $boolean);
         }
 
@@ -211,7 +246,7 @@ trait BuildsWheres
             !$value instanceof ExpressionContract
             && !$this->isReference($value)
         ) {
-            $value = $this->bindValue($this->flattenValue($value));
+            $value = $this->bindValue($value);
         }
 
         // Now that we are working with just a simple query we can put the elements
@@ -252,6 +287,44 @@ trait BuildsWheres
 
         return $this;
     }
+
+    /**
+     * Add a "where" clause comparing two columns to the query.
+     *
+     * @param  string|array  $first
+     * @param  string|null  $operator
+     * @param  string|null  $second
+     * @param  string|null  $boolean
+     * @return $this
+     */
+    public function whereColumn($first, $operator = null, $second = null, $boolean = 'and')
+    {
+        // If the column is an array, we will assume it is an array of key-value pairs
+        // and can add them each as a where clause. We will maintain the boolean we
+        // received when the method was called and pass it into the nested where.
+        if (is_array($first) && !array_is_list($first)) {
+            return $this->addArrayOfWheres($first, $boolean, 'whereColumn');
+        }
+
+        // If the given operator is not found in the list of valid operators we will
+        // assume that the developer is just short-cutting the '=' operators and
+        // we will set the operators to '=' and set the values appropriately.
+        if ($this->invalidOperator($operator)) {
+            [$second, $operator] = [$operator, '='];
+        }
+
+        // Finally, we will add this where clause into this array of clauses that we
+        // are building for the query. All of them will be compiled via a grammar
+        // once the query is about to be executed and run against the database.
+        $type = 'Column';
+
+        $this->wheres[] = compact(
+            'type', 'first', 'operator', 'second', 'boolean'
+        );
+
+        return $this;
+    }
+
 
     /**
      * Add a "where in" clause to the query.

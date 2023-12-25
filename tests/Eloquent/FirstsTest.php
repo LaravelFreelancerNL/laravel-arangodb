@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Location;
@@ -58,7 +59,7 @@ test('first or create', function () {
     expect($model->id)->toBe($ned->id);
 });
 
-test('first or create with nested data', function () {
+test('firstOrCreate with nested data', function () {
     $char = [
         "_key" => "NedStark",
         "name" => "Ned",
@@ -127,7 +128,7 @@ test('first or new none existing', function ($character) {
     $model = Character::firstOrNew($character);
 
     expect($edmure)->toBeNull();
-    $this->assertObjectNotHasAttribute('id', $model);
+    $this->assertFalse(property_exists($model, 'id'));
 })->with('character');
 
 test('first where', function () {

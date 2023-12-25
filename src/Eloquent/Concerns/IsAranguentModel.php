@@ -136,16 +136,16 @@ trait IsAranguentModel
         return Str::snake(class_basename($this)) . $keyName;
     }
 
-    public function fromAqb(ArangoQueryBuilder|Closure $aqb): Collection
+    public static function fromAqb(ArangoQueryBuilder|Closure $aqb): Collection
     {
         if ($aqb instanceof Closure) {
             /** @phpstan-ignore-next-line */
-            $aqb = $aqb(DB::aqb());
+            $aqb = $aqb(new ArangoQueryBuilder());
         }
-        $connection = $this->getConnection();
+        $connection = static::resolveConnection(self::$connection);
         $results = $connection->execute($aqb->get());
 
-        return $this->hydrate($results);
+        return self::hydrate($results);
     }
 
     /**

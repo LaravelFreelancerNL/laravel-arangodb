@@ -17,21 +17,25 @@ test('has with minimum relation count', function () {
     expect(count($characters))->toEqual(1);
 });
 
-test('has morph', function () {
+test('doesntHave', function () {
+    $characters = Character::doesntHave('leads')->get();
+    expect(count($characters))->toEqual(40);
+});
+
+test('has on morphed relation', function () {
     $characters = Character::has('tags')->get();
 
     expect(count($characters))->toEqual(2);
 });
 
-test('doesnt have', function () {
-    $characters = Character::doesntHave('leads')->get();
-    expect(count($characters))->toEqual(40);
-});
+test('withCount', function () {
+    ray()->showQueries();
 
-test('with count', function () {
     $characters = Character::withCount('leads')
         ->where('leads_count', '>', 0)
         ->get();
 
     expect(count($characters))->toEqual(3);
 });
+
+test('withExists')->todo();
