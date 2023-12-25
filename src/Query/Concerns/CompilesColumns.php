@@ -134,13 +134,15 @@ trait CompilesColumns
 
 
     /**
-     * @param Builder $query
+     * @param IlluminateQueryBuilder $query
      * @param string $column
      * @param string|null $table
      * @return string
      */
     protected function normalizeColumnReferences(IlluminateQueryBuilder $query, string $column, string $table = null): string
     {
+        assert($query instanceof Builder);
+
         if ($query->isReference($column)) {
             return $column;
         }

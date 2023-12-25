@@ -88,7 +88,7 @@ trait CompilesInserts
     /**
      * Compile an insert statement using a subquery into SQL.
      *
-     * @param  \Illuminate\Database\Query\Builder  $query
+     * @param  IlluminateQueryBuilder  $query
      * @param  array  $columns
      * @param  string  $sql
      * @return string

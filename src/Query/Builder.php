@@ -3,9 +3,11 @@
 namespace LaravelFreelancerNL\Aranguent\Query;
 
 use Exception;
+use Illuminate\Database\ConnectionInterface as IlluminateConnectionInterface;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Database\Query\Grammars\Grammar as IlluminateQueryGrammar;
+use Illuminate\Database\Query\Processors\Processor as IlluminateProcessor;
 use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsGroups;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsSearches;
@@ -106,15 +108,15 @@ class Builder extends IlluminateQueryBuilder
      * Create a new query builder instance.
      */
     public function __construct(
-        Connection             $connection,
-        IlluminateQueryGrammar $grammar = null,
-        Processor              $processor = null,
-        AQB                    $aqb = null
+        IlluminateConnectionInterface $connection,
+        IlluminateQueryGrammar        $grammar = null,
+        IlluminateProcessor           $processor = null,
+        AQB                           $aqb = null
     ) {
+        assert($connection instanceof IlluminateConnectionInterface);
+        assert($processor instanceof IlluminateProcessor);
+
         parent::__construct($connection, $grammar, $processor);
-        //        $this->connection = $connection;
-        //        $this->grammar = $grammar ?: $connection->getQueryGrammar();
-        //        $this->processor = $processor ?: $connection->getPostProcessor();
 
         if (!$aqb instanceof AQB) {
             $aqb = new AQB();
