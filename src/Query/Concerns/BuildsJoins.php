@@ -123,8 +123,9 @@ trait BuildsJoins
 
         $query->importTableAliases($this);
         $query->importTableAliases([$as => $as]);
+        $this->importTableAliases($query);
 
-        [$query, $bindings] = $this->createSub($query);
+        [$query] = $this->createSub($query);
 
         return  $this->join(new Expression($query . ' as ' . $as), $first, $operator, $second, $type, $where);
     }

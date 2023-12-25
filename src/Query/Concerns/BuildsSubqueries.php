@@ -28,7 +28,7 @@ trait BuildsSubqueries
      * @param  \Closure|IlluminateQueryBuilder|IlluminateEloquentBuilder|string $query
      * @return array
      */
-    protected function createSub($query, bool $returnSingleValue = false)
+    public function createSub($query, bool $returnSingleValue = false)
     {
         // If the given query is a Closure, we will execute it while passing in a new
         // query instance to the Closure. This will give the developer a chance to
@@ -60,7 +60,9 @@ trait BuildsSubqueries
 
     protected function hasLimitOfOne(IlluminateQueryBuilder $query)
     {
-        if ($query->limit === 1) {
+        assert($query instanceof Builder);
+
+        if ($query->limit === 1 || $query->returnSingleValue === true) {
             return true;
         }
 

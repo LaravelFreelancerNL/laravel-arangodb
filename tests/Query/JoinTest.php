@@ -70,24 +70,45 @@ test('leftJoin', function () {
 });
 
 test('leftJoinSub', function () {
+    ray()->showQueries();
+
     $locations = DB::table('locations')
         ->where('name', '=', "King's Landing");
 
     $query = DB::table('characters')
-        ->select('characters', 'leads_locations')
+        ->select('characters.*', 'leads_locations.*')
         ->where('surname', 'Lannister')
         ->leftJoinSub($locations, 'leads_locations', function (JoinClause $join) {
             $join->on('characters.id', '=', 'leads_locations.led_by');
             // needs to be set on the join query
         });
 
-
-    $characters = ($query->get())->toArray();
+    $characters = $query->get();
 
     expect($characters)->toHaveCount(4);
-    expect(($characters[1])->id)->toEqual('CerseiLannister');
-    expect(($characters[1])->location)->toEqual([
-        42.639752,
-        18.110189
+    expect($characters->where('id', 'king-s-landing')->first())->toHaveKeys([
+        'capturable_id',
+        'capturable_type',
+        'coordinate',
+        'led_by',
     ]);
-})->todo();
+});
+
+test('leftJoinSub with selection of attributes', function () {
+    $locations = DB::table('locations')
+        ->where('name', '=', "King's Landing");
+
+    $query = DB::table('characters')
+        ->select('characters.*', 'leads_locations.coordinate')
+        ->where('surname', 'Lannister')
+        ->leftJoinSub($locations, 'leads_locations', function (JoinClause $join) {
+            $join->on('characters.id', '=', 'leads_locations.led_by');
+        });
+
+    $characters = $query->get();
+
+    expect($characters)->toHaveCount(4);
+    expect($characters->where('id', 'CerseiLannister')->first())->toHaveKeys([
+        'coordinate',
+    ]);
+});

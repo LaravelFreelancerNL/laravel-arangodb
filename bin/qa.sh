@@ -7,7 +7,7 @@ echo "Run PHPMD"
 
 echo "Test package from within phpunit"
 ./vendor/bin/testbench migrate:fresh --path=tests/Setup/Database/Migrations --realpath --seed
-./vendor/bin/testbench package:test tests
+./vendor/bin/testbench package:test --coverage --min=80 tests
 
 echo "Run PHPStan"
 ./vendor/bin/phpstan analyse -c phpstan.neon

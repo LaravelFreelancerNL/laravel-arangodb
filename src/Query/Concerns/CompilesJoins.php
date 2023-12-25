@@ -93,7 +93,7 @@ trait CompilesJoins
 
         $aql = 'LET ' . $alias . 'List = (' . $resultsToJoin . ')';
         $aql .= ' FOR ' . $alias . ' IN (LENGTH(' . $alias . 'List) > 0) ? ' . $alias . 'List : [{}]';
-        ray('compileLeftJoin', $aql, $table, $alias);
+
         return $aql;
     }
 }

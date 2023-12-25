@@ -5,8 +5,6 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\DB;
 
 test('group by', function () {
-    ray()->showQueries();
-
     $query  = DB::table('characters')
         ->select('surname')
         ->groupBy('surname');

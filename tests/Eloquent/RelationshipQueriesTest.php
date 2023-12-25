@@ -29,8 +29,6 @@ test('has on morphed relation', function () {
 });
 
 test('withCount', function () {
-    ray()->showQueries();
-
     $characters = Character::withCount('leads')
         ->where('leads_count', '>', 0)
         ->get();
@@ -38,4 +36,12 @@ test('withCount', function () {
     expect(count($characters))->toEqual(3);
 });
 
-test('withExists')->todo();
+test('withExists', function () {
+    ray()->showQueries();
+
+    $characters = Character::withExists('leads')
+        ->get();
+
+    expect(count($characters))->toEqual(43);
+    expect($characters->where('leads_exists', true)->count())->toEqual(3);
+});

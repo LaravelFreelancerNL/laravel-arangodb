@@ -23,13 +23,10 @@ trait QueriesAranguentRelationships
      */
     protected function addWhereCountQuery(IlluminateQueryBuilder $query, $operator = '>=', $count = 1, $boolean = 'and')
     {
-
-        $this->getQuery()->exchangeTableAliases($query);
-
-        $this->getQuery()->importBindings($query);
+        [$subquery] = $this->getQuery()->createSub($query);
 
         return $this->where(
-            new Expression('LENGTH((' . $query->toSql() . '))'),
+            new Expression('LENGTH(' . $subquery . ')'),
             $operator,
             is_numeric($count) ? new Expression($count) : $count,
             $boolean
@@ -142,20 +139,28 @@ trait QueriesAranguentRelationships
             );
 
             if ($function === 'exists') {
-                //FIXME: test for results from the subquery -> whereHas?
-                $this->selectRaw(
-                    sprintf('exists(%s) as %s', $query->toSql(), $this->getQuery()->grammar->wrap($alias)),
-                    $query->getBindings()
-                )->withCasts([$alias => 'bool']);
+                [$subquery] = $this->getQuery()->createSub($query);
+
+                $expression = new Expression(sprintf('(COUNT(%s)) > 0 ? true : false ', $subquery));
+
+                $this->getQuery()->set(
+                    $alias,
+                    $expression,
+                    'postIterationVariables'
+                )
+                    ->addSelect($alias);
             } else {
                 if ($function === null) {
                     $query->limit(1);
                 }
 
-                $this->getQuery()->exchangeTableAliases($query);
-                $this->getQuery()->importBindings($query);
+                [$subquery] = $this->getQuery()->createSub($query);
 
-                $this->set($alias, new Expression(strtoupper($function) . '((' . $query->toSql() . '))'), 'postIterationVariables');
+                $this->getQuery()->set(
+                    $alias,
+                    new Expression(strtoupper($function) . '(' . $subquery . ')'),
+                    'postIterationVariables'
+                );
                 $this->addSelect($alias);
             }
         }
