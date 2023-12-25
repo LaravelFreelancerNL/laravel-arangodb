@@ -123,7 +123,7 @@ trait HandlesAqlGrammar
     /**
      * Wrap a value in keyword identifiers.
      *
-     * @param  \Illuminate\Contracts\Database\Query\Expression|string  $value
+     * @param  Array<mixed>|Expression|string  $value
      * @param  bool  $prefixAlias
      * @return string|array
      */
@@ -240,12 +240,12 @@ trait HandlesAqlGrammar
      */
     public function substituteBindingsIntoRawSql($sql, $bindings)
     {
-        $bindings = array_map(fn ($value) => $this->escape($value), $bindings);
+        $bindings = array_map(fn($value) => $this->escape($value), $bindings);
 
         $bindings = array_reverse($bindings);
 
         foreach($bindings as $key => $value) {
-            $pattern = '/(@'.$key.')(?![^a-zA-Z_ ,\}\]])/';
+            $pattern = '/(@' . $key . ')(?![^a-zA-Z_ ,\}\]])/';
             $sql = preg_replace(
                 $pattern,
                 $value,

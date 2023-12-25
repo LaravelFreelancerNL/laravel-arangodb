@@ -47,7 +47,7 @@ test('toRawSql with single quote', function () {
     $aql = $query->toRawSql();
 
     expect($aql)->toBe(
-        'FOR characterDoc IN characters FILTER `characterDoc`.`name` == "'."H\'ghar".'" RETURN characterDoc'
+        'FOR characterDoc IN characters FILTER `characterDoc`.`name` == "' . "H\'ghar" . '" RETURN characterDoc'
     );
 });
 
@@ -76,19 +76,19 @@ test('toRawSql with multiple binds', function () {
 
     $rawAql = 'FOR characterDoc IN characters FILTER `characterDoc`.`name` == "Gilly"';
     for($i = 0; $i < 9; $i++) {
-        $rawAql .= ' or `characterDoc`.`name` == "'.$names[$i].'"';
+        $rawAql .= ' or `characterDoc`.`name` == "' . $names[$i] . '"';
     }
     $rawAql .= ' RETURN characterDoc';
 
     expect($aql)->toBe(
-         $rawAql
+        $rawAql
     );
 });
 
 test('dumpRawSql', function () {
-        $query = DB::table('characters')
-            ->where('name', 'Gilly')
-            ->dumpRawSql();
+    $query = DB::table('characters')
+        ->where('name', 'Gilly')
+        ->dumpRawSql();
 })->throwsNoExceptions();
 
 

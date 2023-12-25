@@ -175,8 +175,10 @@ trait CompilesColumns
         return implode('.', $references);
     }
 
-    protected function cleanAlias(IlluminateQueryBuilder $query,  int|null|string $alias): int|string|null
+    protected function cleanAlias(IlluminateQueryBuilder $query, int|null|string $alias): int|string|null
     {
+        assert($query instanceof Builder);
+
         if (!is_string($alias)) {
             return $alias;
         }

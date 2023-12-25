@@ -103,7 +103,7 @@ trait BuildsSelects
     {
         foreach ($columns as $as => $column) {
             if (is_string($as) && $this->isQueryable($column)) {
-                if (is_null($this->columns)) {
+                if (empty($this->columns)) {
                     $this->select($this->from . '.*');
                 }
 

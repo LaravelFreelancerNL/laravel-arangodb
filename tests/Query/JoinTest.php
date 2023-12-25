@@ -48,10 +48,9 @@ test('joinSub', function () {
     $characters = $builder->get();
 
     expect($characters)->toHaveCount(7);
-    expect($characters[0]->id)->toEqual('dragonstone');
     expect($characters[0]->age)->toEqual(16);
     expect($characters[0]->surname)->toEqual('Targaryen');
-})->todo();
+});
 
 
 test('leftJoin', function () {

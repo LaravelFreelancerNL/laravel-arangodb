@@ -319,7 +319,11 @@ trait BuildsWheres
         $type = 'Column';
 
         $this->wheres[] = compact(
-            'type', 'first', 'operator', 'second', 'boolean'
+            'type',
+            'first',
+            'operator',
+            'second',
+            'boolean'
         );
 
         return $this;
@@ -431,6 +435,8 @@ trait BuildsWheres
         // of the sub-select's conditions to itself, and then we can cache it off
         // in the array of where clauses for the "main" parent query instance.
         call_user_func($callback, $query = $this->forSubQuery());
+
+        assert($query instanceof Builder);
 
         $query->returnSingleValue = true;
 

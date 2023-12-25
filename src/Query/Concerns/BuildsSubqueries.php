@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder as IlluminateEloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use InvalidArgumentException;
+use LaravelFreelancerNL\Aranguent\Query\Builder;
 use LaravelFreelancerNL\Aranguent\Query\Grammar;
 
 trait BuildsSubqueries
@@ -38,6 +39,8 @@ trait BuildsSubqueries
             $callback($query = $this->forSubQuery());
         }
 
+        assert($query instanceof Builder);
+
         if ($returnSingleValue) {
             $query->returnSingleValue = $returnSingleValue;
         }
@@ -57,7 +60,7 @@ trait BuildsSubqueries
 
     protected function hasLimitOfOne(IlluminateQueryBuilder $query)
     {
-        if (isset($query->limit) && $query->limit == 1) {
+        if ($query->limit === 1) {
             return true;
         }
 

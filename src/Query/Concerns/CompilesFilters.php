@@ -162,13 +162,13 @@ trait CompilesFilters
         $value = $this->parameter($filter['value']);
 
         $bitExpression = match ($filter['operator']) {
-            '&' =>  $this->bitExpressionAnd($column, $value),
             '|' => $this->bitExpressionOr($column, $value),
             '^' => $this->bitExpressionXor($column, $value),
             '~' => $this->bitExpressionNegate($column),
             '&~' => $this->bitExpressionNegatedAnd($column, $value),
             '<<' => $this->bitExpressionLeftShift($column, $value),
-            '>>' => $this->bitExpressionRightShift($column, $value)
+            '>>' => $this->bitExpressionRightShift($column, $value),
+            default =>  $this->bitExpressionAnd($column, $value),
         };
 
         return '(' . $bitExpression . ') != 0';

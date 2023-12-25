@@ -12,7 +12,7 @@ test('has', function () {
     expect(count($characters))->toEqual(3);
 });
 
-test('has with minimum relation count', function () {
+test('has, with minimum relation count', function () {
     $characters = Character::has('leads', '>=', 3)->get();
     expect(count($characters))->toEqual(1);
 });

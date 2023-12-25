@@ -6,7 +6,6 @@ namespace LaravelFreelancerNL\Aranguent\Eloquent\Concerns;
 
 use Closure;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Eloquent\Builder;

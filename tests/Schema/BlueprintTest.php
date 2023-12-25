@@ -120,7 +120,8 @@ test('invertedIndex', function () {
             [
                 'searchField' => true,
                 'includeAllFields' => true
-            ]);
+            ]
+        );
     });
     $name = 'inv-ind';
 

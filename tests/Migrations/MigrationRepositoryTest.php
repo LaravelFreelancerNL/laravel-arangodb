@@ -2,7 +2,6 @@
 
 use ArangoClient\Exceptions\ArangoException;
 use LaravelFreelancerNL\Aranguent\Migrations\DatabaseMigrationRepository;
-use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 
 beforeEach(function () {
     $this->databaseMigrationRepository = new DatabaseMigrationRepository(app('db'), 'migrations');
@@ -152,7 +151,7 @@ test('log', function () {
 test('repositoryExists', function () {
     $this->connection->getArangoClient()->schema()->truncateCollection('migrations');
 
-   $result = $this->databaseMigrationRepository->repositoryExists();
+    $result = $this->databaseMigrationRepository->repositoryExists();
 
     expect($result)->toBeTrue();
 });

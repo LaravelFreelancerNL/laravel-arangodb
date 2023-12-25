@@ -5,14 +5,10 @@ declare(strict_types=1);
 namespace LaravelFreelancerNL\Aranguent\Eloquent\Concerns;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Builder as IlluminateBuilder;
 use Illuminate\Database\Eloquent\Builder as IlluminateEloquentBuilder;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Str;
-use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
-use LaravelFreelancerNL\FluentAQL\Expressions\FunctionExpression;
-use LaravelFreelancerNL\FluentAQL\QueryBuilder as ArangoQueryBuilder;
 
 trait QueriesAranguentRelationships
 {
@@ -33,7 +29,7 @@ trait QueriesAranguentRelationships
         $this->getQuery()->importBindings($query);
 
         return $this->where(
-            new Expression('LENGTH(('.$query->toSql().'))'),
+            new Expression('LENGTH((' . $query->toSql() . '))'),
             $operator,
             is_numeric($count) ? new Expression($count) : $count,
             $boolean
@@ -63,7 +59,8 @@ trait QueriesAranguentRelationships
         return $this->withoutGlobalScopes(
             $from->removedScopes()
         )->mergeWheres(
-            $wheres, $whereBindings
+            $wheres,
+            $whereBindings
         );
     }
 
@@ -82,7 +79,7 @@ trait QueriesAranguentRelationships
         }
 
         if (is_null($this->query->columns)) {
-            $this->query->select([$this->query->from.'.*']);
+            $this->query->select([$this->query->from . '.*']);
         }
 
         $relations = is_array($relations) ? $relations : [$relations];
@@ -117,7 +114,9 @@ trait QueriesAranguentRelationships
             // as a sub-select. First, we'll get the "has" query and use that to get the relation
             // sub-query. We'll format this relationship name and append this column if needed.
             $query = $relation->getRelationExistenceQuery(
-                $relation->getRelated()->newQuery(), $this, new Expression($expression)
+                $relation->getRelated()->newQuery(),
+                $this,
+                new Expression($expression)
             )->setBindings([], 'select');
 
             $query->callScope($constraints);
@@ -156,7 +155,7 @@ trait QueriesAranguentRelationships
                 $this->getQuery()->exchangeTableAliases($query);
                 $this->getQuery()->importBindings($query);
 
-                $this->set($alias, new Expression(strtoupper($function).'(('.$query->toSql().'))'), 'postIterationVariables');
+                $this->set($alias, new Expression(strtoupper($function) . '((' . $query->toSql() . '))'), 'postIterationVariables');
                 $this->addSelect($alias);
             }
         }

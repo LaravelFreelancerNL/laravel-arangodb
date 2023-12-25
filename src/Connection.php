@@ -76,10 +76,10 @@ class Connection extends IlluminateConnection
     /**
      * Get the default query grammar instance.
      */
-//    protected function getDefaultQueryGrammar(): QueryGrammar
-//    {
-//        return new QueryGrammar();
-//    }
+    //    protected function getDefaultQueryGrammar(): QueryGrammar
+    //    {
+    //        return new QueryGrammar();
+    //    }
 
     /**
      * Get the default post processor instance.
@@ -246,7 +246,7 @@ class Connection extends IlluminateConnection
         }
 
         if (array_is_list($array)) {
-            return '['.implode(', ', $array).']';
+            return '[' . implode(', ', $array) . ']';
         }
 
         $grammar = $this->getDefaultQueryGrammar();
@@ -272,10 +272,10 @@ class Connection extends IlluminateConnection
      */
     protected function escapeString($value)
     {
-        return '"'.str_replace(
+        return '"' . str_replace(
             ['\\', "\0", "\n", "\r", "'", '"', "\x1a"],
             ['\\\\', '\\0', '\\n', '\\r', "\\'", '\\"', '\\Z'],
             $value
-        ).'"';
+        ) . '"';
     }
 }

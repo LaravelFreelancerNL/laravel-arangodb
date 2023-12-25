@@ -22,8 +22,8 @@ trait CompilesJoins
         return collect($joins)->map(function ($join) use ($query) {
             return match ($join->type) {
                 'cross' => $this->compileCrossJoin($query, $join),
-                'inner' => $this->compileInnerJoin($query, $join),
                 'left' => $this->compileLeftJoin($query, $join),
+                default => $this->compileInnerJoin($query, $join),
             };
         })->implode(' ');
     }

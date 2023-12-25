@@ -112,9 +112,9 @@ class Builder extends IlluminateQueryBuilder
         AQB                    $aqb = null
     ) {
         parent::__construct($connection, $grammar, $processor);
-//        $this->connection = $connection;
-//        $this->grammar = $grammar ?: $connection->getQueryGrammar();
-//        $this->processor = $processor ?: $connection->getPostProcessor();
+        //        $this->connection = $connection;
+        //        $this->grammar = $grammar ?: $connection->getQueryGrammar();
+        //        $this->processor = $processor ?: $connection->getPostProcessor();
 
         if (!$aqb instanceof AQB) {
             $aqb = new AQB();

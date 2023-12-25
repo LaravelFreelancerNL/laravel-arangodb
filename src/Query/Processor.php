@@ -14,13 +14,13 @@ class Processor extends IlluminateProcessor
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      *
-     * @param  array<mixed>  $results
+     * @param  array<mixed>|null  $results
      * @return array<mixed>
      */
     public function processSelect(Builder $query, $results)
     {
         if ($results === null) {
-            return $results;
+            return [];
         }
 
         foreach ($results as &$val) {

@@ -7,7 +7,6 @@ namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 use Closure;
 use Illuminate\Database\Eloquent\Builder as IlluminateEloquentBuilder;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
-use Illuminate\Database\Query\JoinClause as IlluminateJoinClause;
 use Illuminate\Database\Query\Expression;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 use LaravelFreelancerNL\Aranguent\Query\JoinClause;

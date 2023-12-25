@@ -199,7 +199,7 @@ class Grammar extends IlluminateQueryGrammar
         // can build the query and concatenate all the pieces together as one.
         $original = $query->columns;
 
-        if (is_null($query->columns)) {
+        if (empty($query->columns)) {
             $query->columns = ['*'];
         }
 
@@ -411,7 +411,7 @@ class Grammar extends IlluminateQueryGrammar
         $aqlElements = [];
         $aqlElements[] = $this->compileFrom($query, $query->from);
 
-        if (isset($query->joins)) {
+        if (!empty($query->joins)) {
             $aqlElements[] = $this->compileJoins($query, $query->joins);
         }
 
@@ -471,7 +471,7 @@ class Grammar extends IlluminateQueryGrammar
         $where = $this->compileWheres($query);
 
         return trim(
-            isset($query->joins)
+            !empty($query->joins)
                 ? $this->compileDeleteWithJoins($query, $table, $where)
                 : $this->compileDeleteWithoutJoins($query, $table, $where)
         );

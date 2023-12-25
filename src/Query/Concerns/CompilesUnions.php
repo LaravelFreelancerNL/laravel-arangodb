@@ -39,11 +39,11 @@ trait CompilesUnions
             $aql .= ' ' . $this->compileOrders($query, $query->unionOrders, $unionResultsId);
         }
 
-        if (isset($query->unionOffset)) {
+        if ($query->unionOffset) {
             $aql .= ' ' . $this->compileOffset($query, $query->unionOffset);
         }
 
-        if (isset($query->unionLimit)) {
+        if ($query->unionLimit) {
             $aql .= ' ' . $this->compileLimit($query, $query->unionLimit);
         }
 
