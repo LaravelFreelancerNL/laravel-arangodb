@@ -156,8 +156,6 @@ trait CompilesFilters
      */
     protected function compileFilterBit(IlluminateQueryBuilder $query, $filter)
     {
-        $predicate = [];
-
         $column = $this->normalizeColumn($query, $filter['column']);
         $value = $this->parameter($filter['value']);
 

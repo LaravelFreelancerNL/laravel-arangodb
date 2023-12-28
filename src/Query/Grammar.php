@@ -287,6 +287,8 @@ class Grammar extends IlluminateQueryGrammar
      * @param IlluminateQueryBuilder $query
      * @param array $variables
      * @return string
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     protected function compileVariables(IlluminateQueryBuilder $query, array $variables): string
     {
@@ -350,6 +352,8 @@ class Grammar extends IlluminateQueryGrammar
      * @param  \Illuminate\Database\Query\Builder  $query
      * @param  int  $offset
      * @return string
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     protected function compileOffset(IlluminateQueryBuilder $query, $offset)
     {
@@ -364,6 +368,8 @@ class Grammar extends IlluminateQueryGrammar
      * @param  \Illuminate\Database\Query\Builder  $query
      * @param  int  $limit
      * @return string
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     protected function compileLimit(IlluminateQueryBuilder $query, $limit)
     {

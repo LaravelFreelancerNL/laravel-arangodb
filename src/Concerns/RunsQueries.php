@@ -6,7 +6,6 @@ namespace LaravelFreelancerNL\Aranguent\Concerns;
 
 use Closure;
 use Exception;
-use Iterator;
 use LaravelFreelancerNL\Aranguent\Exceptions\NoArangoClientException;
 use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 use LaravelFreelancerNL\Aranguent\Exceptions\QueryException;
@@ -22,6 +21,7 @@ trait RunsQueries
      * @param  array<mixed>  $bindings
      * @param  bool  $useReadPdo
      * @return \Generator
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public function cursor($query, $bindings = [], $useReadPdo = true)
     {

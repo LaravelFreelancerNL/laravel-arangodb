@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace LaravelFreelancerNL\Aranguent\Testing\Concerns;
 
-use Illuminate\Contracts\Support\Jsonable;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Testing\Constraints\HasInDatabase;
 use Illuminate\Testing\Constraints\NotSoftDeletedInDatabase;
@@ -26,7 +24,7 @@ trait InteractsWithDatabase
     {
         $this->assertThat(
             $this->getTable($table),
-            new HasInDatabase($this->getConnection($connection),associativeFlatten($data))
+            new HasInDatabase($this->getConnection($connection), associativeFlatten($data))
         );
 
         return $this;

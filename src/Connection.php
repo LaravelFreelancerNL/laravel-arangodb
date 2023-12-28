@@ -16,7 +16,6 @@ use LaravelFreelancerNL\Aranguent\Query\Grammar as QueryGrammar;
 use LaravelFreelancerNL\Aranguent\Query\Processor;
 use LaravelFreelancerNL\Aranguent\Schema\Builder as SchemaBuilder;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder as ArangoQueryBuilder;
-use LogicException;
 use RuntimeException;
 use Spatie\DataTransferObject\Exceptions\UnknownProperties;
 
@@ -67,9 +66,9 @@ class Connection extends IlluminateConnection
      */
     public function getSchemaBuilder(): SchemaBuilder
     {
-//        if (!isset($this->schemaGrammar)) {
-//            $this->useDefaultSchemaGrammar();
-//        }
+        //        if (!isset($this->schemaGrammar)) {
+        //            $this->useDefaultSchemaGrammar();
+        //        }
 
         return new SchemaBuilder($this);
     }
@@ -207,6 +206,8 @@ class Connection extends IlluminateConnection
      * @param  array<mixed>|string|float|int|bool|null  $value
      * @param  bool  $binary
      * @return string
+     *
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public function escape($value, $binary = false)
     {

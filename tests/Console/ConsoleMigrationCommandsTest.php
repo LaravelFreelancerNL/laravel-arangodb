@@ -9,3 +9,5 @@ test('migrate', function () {
 
     $this->artisan('migrate', ['--force' => true, '--path' => $path])->run();
 });
+
+test('migrate Refresh with drop analyzers')->todo();

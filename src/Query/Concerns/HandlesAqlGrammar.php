@@ -84,7 +84,7 @@ trait HandlesAqlGrammar
         return 'Y-m-d\TH:i:s.vp';
     }
 
-    public function isBind($value, string $type): bool
+    public function isBind($value): bool
     {
         if (is_string($value) && preg_match('/^@?[0-9]{4}_' . json_encode($value) . '_[0-9_]+$/', $value)) {
             return true;
@@ -126,6 +126,8 @@ trait HandlesAqlGrammar
      * @param  Array<mixed>|Expression|string  $value
      * @param  bool  $prefixAlias
      * @return string|array
+     *
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public function wrap($value, $prefixAlias = false)
     {

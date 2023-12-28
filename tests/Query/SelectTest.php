@@ -157,3 +157,5 @@ test('select subquery', function () {
     expect($results->last()->name)->toBe('Margaery');
     expect($results->last()->location)->toBe('winterfell');
 });
+
+test('fromOptions')->todo();

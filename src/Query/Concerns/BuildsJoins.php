@@ -22,6 +22,8 @@ trait BuildsJoins
      * @param  string|null  $operator
      * @param  \Illuminate\Contracts\Database\Query\Expression|string|null  $second
      * @return $this
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function rightJoin($table, $first, $operator = null, $second = null)
     {
@@ -43,6 +45,8 @@ trait BuildsJoins
      * @param  string|null  $operator
      * @param  \Illuminate\Contracts\Database\Query\Expression|string|null  $second
      * @return $this
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function rightJoinSub($query, $as, $first, $operator = null, $second = null)
     {
@@ -57,6 +61,8 @@ trait BuildsJoins
      * @param  string  $operator
      * @param  \Illuminate\Contracts\Database\Query\Expression|string  $second
      * @return $this
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function rightJoinWhere($table, $first, $operator, $second)
     {
@@ -116,6 +122,8 @@ trait BuildsJoins
      * @param  bool  $where
      *
      * @throws \InvalidArgumentException
+     *
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public function joinSub($query, $as, $first, $operator = null, $second = null, $type = 'inner', $where = false): IlluminateQueryBuilder
     {

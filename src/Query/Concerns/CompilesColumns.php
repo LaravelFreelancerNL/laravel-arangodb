@@ -254,7 +254,7 @@ trait CompilesColumns
     {
         assert($query instanceof Builder);
 
-        foreach ($query->joins as $key => $join) {
+        foreach ($query->joins as $join) {
             $tableAlias = $query->getTableAlias($join->table);
 
             if (!isset($tableAlias)) {

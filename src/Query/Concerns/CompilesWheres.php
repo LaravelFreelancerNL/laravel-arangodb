@@ -14,6 +14,8 @@ trait CompilesWheres
      * @param IlluminateQueryBuilder $query
      * @param  array  $sql
      * @return string
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     protected function concatenateWhereClauses($query, $sql)
     {
@@ -497,6 +499,8 @@ trait CompilesWheres
      * @param  \Illuminate\Database\Query\Builder  $query
      * @param  array  $where
      * @return string
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     protected function whereExists(IlluminateQueryBuilder $query, $where)
     {
@@ -509,6 +513,8 @@ trait CompilesWheres
      * @param  \Illuminate\Database\Query\Builder  $query
      * @param  array  $where
      * @return string
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     protected function whereNotExists(IlluminateQueryBuilder $query, $where)
     {

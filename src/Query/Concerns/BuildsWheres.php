@@ -26,6 +26,8 @@ trait BuildsWheres
      * @param  string  $value
      * @param  string  $boolean
      * @return $this
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function whereFullText($columns, $value, array $options = [], $boolean = 'and')
     {
@@ -44,6 +46,8 @@ trait BuildsWheres
      * @return array
      *
      * @throws \InvalidArgumentException
+     *
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public function prepareValueAndOperator($value, $operator, $useDefault = false)
     {
@@ -121,6 +125,8 @@ trait BuildsWheres
      * @param  string  $boolean
      * @param  bool  $not
      * @return $this
+     *
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public function addWhereExistsQuery(IlluminateQueryBuilder $query, $boolean = 'and', $not = false)
     {
@@ -195,7 +201,7 @@ trait BuildsWheres
         // assume the developer wants to run a subquery and then compare the result
         // of that subquery with the given value that was provided to the method.
         if ($this->isQueryable($column) && !is_null($operator)) {
-            [$subquery, $bindings] = $this->createSub($column, true);
+            [$subquery] = $this->createSub($column, true);
 
             return $this->where(new Expression($subquery), $operator, $value, $boolean);
         }
@@ -270,6 +276,8 @@ trait BuildsWheres
      * @param  string  $boolean
      * @param  bool  $not
      * @return IlluminateQueryBuilder
+     *
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public function whereBetween($column, iterable $values, $boolean = 'and', $not = false)
     {
@@ -338,6 +346,8 @@ trait BuildsWheres
      * @param  string  $boolean
      * @param  bool  $not
      * @return IlluminateQueryBuilder
+     *
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public function whereIn($column, $values, $boolean = 'and', $not = false)
     {

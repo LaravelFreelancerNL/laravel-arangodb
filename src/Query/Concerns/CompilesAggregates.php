@@ -37,6 +37,8 @@ trait CompilesAggregates
 
     /**
      * Compile AQL for count aggregate.
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     protected function compileCount(Builder $query)
     {
