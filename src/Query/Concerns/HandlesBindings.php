@@ -36,7 +36,7 @@ trait HandlesBindings
     {
         assert($this->grammar instanceof Grammar);
 
-        if ($this->grammar->isBind($value, $type)) {
+        if ($this->grammar->isBind($value)) {
             return $value;
         }
         if (!$value instanceof Expression) {

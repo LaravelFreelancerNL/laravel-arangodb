@@ -13,7 +13,7 @@ use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesAggregates;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesColumns;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesFilters;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesGroups;
-use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesInserts;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesDataManipulations;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesJoins;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesUnions;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesWheres;
@@ -25,7 +25,7 @@ class Grammar extends IlluminateQueryGrammar
     use CompilesAggregates;
     use CompilesColumns;
     use CompilesFilters;
-    use CompilesInserts;
+    use CompilesDataManipulations;
     use CompilesJoins;
     use CompilesGroups;
     use CompilesUnions;
@@ -230,17 +230,6 @@ class Grammar extends IlluminateQueryGrammar
     }
 
     /**
-     * Compile a truncate table statement into SQL.
-     *
-     * @param  IlluminateQueryBuilder  $query
-     * @return array
-     */
-    public function compileTruncate(IlluminateQueryBuilder $query)
-    {
-        return [$this->compileDelete($query) => []];
-    }
-
-    /**
      * Compile the "from" portion of the query -> FOR in AQL.
      *
      * @param IlluminateQueryBuilder $query
@@ -380,129 +369,6 @@ class Grammar extends IlluminateQueryGrammar
         return "LIMIT " . (int) $limit;
     }
 
-    protected function createUpdateObject($values)
-    {
-        $valueStrings = [];
-        foreach($values as $key => $value) {
-            if (is_array($value)) {
-                $valueStrings[] = $key . ': ' . $this->createUpdateObject($value);
-            } else {
-                $valueStrings[] = $key . ': ' . $value;
-            }
-        }
-
-        return '{ ' . implode(', ', $valueStrings) . ' }';
-    }
-
-    /**
-     * Compile an update statement into AQL.
-     *
-     * @param  \Illuminate\Database\Query\Builder  $query
-     * @param  array  $values
-     * @return string
-     */
-    public function compileUpdate(IlluminateQueryBuilder $query, array|string $values)
-    {
-        assert($query instanceof Builder);
-
-        $table = $query->from;
-        $alias = $query->getTableAlias($query->from);
-
-        if (!is_array($values)) {
-            $values = Arr::wrap($values);
-        }
-
-        $updateValues = $this->generateAqlObject($values);
-
-        $aqlElements = [];
-        $aqlElements[] = $this->compileFrom($query, $query->from);
-
-        if (!empty($query->joins)) {
-            $aqlElements[] = $this->compileJoins($query, $query->joins);
-        }
-
-        $aqlElements[] = $this->compileWheres($query);
-
-        $aqlElements[] = 'UPDATE ' . $alias . ' WITH ' . $updateValues . ' IN ' . $table;
-
-        return implode(' ', $aqlElements);
-    }
-
-    /**
-     * Compile an "upsert" statement into AQL.
-     *
-     * @param  \Illuminate\Database\Query\Builder  $query
-     * @param  array  $values
-     * @param  array  $uniqueBy
-     * @param  array  $update
-     * @return string
-     */
-    public function compileUpsert(IlluminateQueryBuilder $query, array $values, array $uniqueBy, array $update)
-    {
-        $searchFields = [];
-        foreach($uniqueBy as $key => $field) {
-            $searchFields[$field] = 'doc.' . $field;
-        }
-        $searchObject = $this->generateAqlObject($searchFields);
-
-        $updateFields = [];
-        foreach($update as $key => $field) {
-            $updateFields[$field] = 'doc.' . $field;
-        }
-        $updateObject = $this->generateAqlObject($updateFields);
-
-        $valueObjects = [];
-        foreach($values as $data) {
-            $valueObjects[] = $this->generateAqlObject($data);
-        }
-
-        return 'LET docs = [' . implode(', ', $valueObjects) . ']'
-            . ' FOR doc IN docs'
-            . ' UPSERT ' . $searchObject
-            . ' INSERT doc'
-            . ' UPDATE ' . $updateObject
-            . ' IN ' . $query->from;
-    }
-
-    /**
-     * Compile a delete statement into SQL.
-     *
-     * @param  \Illuminate\Database\Query\Builder  $query
-     * @return string
-     */
-    public function compileDelete(IlluminateQueryBuilder $query)
-    {
-        $table = $query->from;
-
-        $where = $this->compileWheres($query);
-
-        return trim(
-            !empty($query->joins)
-                ? $this->compileDeleteWithJoins($query, $table, $where)
-                : $this->compileDeleteWithoutJoins($query, $table, $where)
-        );
-    }
-
-
-    /**
-     * Compile a delete statement without joins into SQL.
-     *
-     * @param  \Illuminate\Database\Query\Builder  $query
-     * @param  string  $table
-     * @param  string  $where
-     * @return string
-     */
-    protected function compileDeleteWithoutJoins(IlluminateQueryBuilder $query, $table, $where)
-    {
-        assert($query instanceof Builder);
-
-        $alias = $this->normalizeColumn($query, $query->registerTableAlias($table));
-
-        $table = $this->wrapTable($this->prefixTable($table));
-
-        return "FOR {$alias} IN {$table} {$where} REMOVE {$alias} IN {$table}";
-    }
-
     /**
      * Compile the random statement into SQL.
      *
@@ -570,58 +436,5 @@ class Grammar extends IlluminateQueryGrammar
         return Arr::collapse(
             Arr::except($bindings, 'select')
         );
-    }
-
-    /**
-     * Determine if the given string is a JSON selector.
-     *
-     * @param  string  $value
-     * @return bool
-     */
-    public function isJsonSelector($value)
-    {
-        if(!is_string($value)) {
-            return false;
-        }
-
-        return str_contains($value, '->');
-    }
-
-    public function convertJsonFields($data): mixed
-    {
-        if (!is_array($data) && !is_string($data)) {
-            return $data;
-        }
-
-        if (is_string($data)) {
-            return str_replace('->', '.', $data);
-        }
-
-        if (array_is_list($data)) {
-            return $this->convertJsonValuesToDotNotation($data);
-        }
-
-        return $this->convertJsonKeysToDotNotation($data);
-    }
-
-    public function convertJsonValuesToDotNotation(array $fields): array
-    {
-        foreach($fields as $key => $value) {
-            if ($this->isJsonSelector($value)) {
-                $fields[$key] = str_replace('->', '.', $value);
-            }
-        }
-        return $fields;
-    }
-
-    public function convertJsonKeysToDotNotation(array $fields): array
-    {
-        foreach($fields as $key => $value) {
-            if ($this->isJsonSelector($key)) {
-                $fields[str_replace('->', '.', $key)] = $value;
-                unset($fields[$key]);
-            }
-        }
-        return $fields;
     }
 }

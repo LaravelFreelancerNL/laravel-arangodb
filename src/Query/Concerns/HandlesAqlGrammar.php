@@ -257,4 +257,57 @@ trait HandlesAqlGrammar
 
         return $sql;
     }
+
+    /**
+     * Determine if the given string is a JSON selector.
+     *
+     * @param  string  $value
+     * @return bool
+     */
+    public function isJsonSelector($value)
+    {
+        if(!is_string($value)) {
+            return false;
+        }
+
+        return str_contains($value, '->');
+    }
+
+    public function convertJsonFields($data): mixed
+    {
+        if (!is_array($data) && !is_string($data)) {
+            return $data;
+        }
+
+        if (is_string($data)) {
+            return str_replace('->', '.', $data);
+        }
+
+        if (array_is_list($data)) {
+            return $this->convertJsonValuesToDotNotation($data);
+        }
+
+        return $this->convertJsonKeysToDotNotation($data);
+    }
+
+    public function convertJsonValuesToDotNotation(array $fields): array
+    {
+        foreach($fields as $key => $value) {
+            if ($this->isJsonSelector($value)) {
+                $fields[$key] = str_replace('->', '.', $value);
+            }
+        }
+        return $fields;
+    }
+
+    public function convertJsonKeysToDotNotation(array $fields): array
+    {
+        foreach($fields as $key => $value) {
+            if ($this->isJsonSelector($key)) {
+                $fields[str_replace('->', '.', $key)] = $value;
+                unset($fields[$key]);
+            }
+        }
+        return $fields;
+    }
 }

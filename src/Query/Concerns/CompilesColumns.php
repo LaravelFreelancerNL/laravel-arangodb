@@ -23,12 +23,33 @@ trait CompilesColumns
     {
         assert($query instanceof Builder);
 
+        $columns = $this->convertJsonFields($columns);
+
+        [$returnAttributes, $returnDocs] = $this->prepareColumns($query, $columns);
+
+        $returnValues = $this->determineReturnValues($query, $returnAttributes, $returnDocs);
+
+        $return = 'RETURN ';
+        if ($query->distinct) {
+            $return .= 'DISTINCT ';
+        }
+
+        return $return . $returnValues;
+    }
+
+    /**
+     * @param IlluminateQueryBuilder $query
+     * @param array<mixed> $columns
+     * @return array<mixed>
+     * @throws Exception
+     */
+    protected function prepareColumns(IlluminateQueryBuilder $query, array $columns)
+    {
+        assert($query instanceof Builder);
+
         $returnDocs = [];
         $returnAttributes = [];
 
-        $columns = $this->convertJsonFields($columns);
-
-        // Prepare columns
         foreach ($columns as $key => $column) {
             // Extract complete documents
             if (is_string($column) && substr($column, strlen($column) - 2)  === '.*') {
@@ -47,6 +68,7 @@ trait CompilesColumns
 
             if (is_string($column) && $column != null && $column != '*') {
                 [$column, $alias] = $this->normalizeStringColumn($query, $key, $column);
+
                 if (isset($returnAttributes[$alias]) && is_array($column)) {
                     $returnAttributes[$alias] = array_merge_recursive(
                         $returnAttributes[$alias],
@@ -56,21 +78,12 @@ trait CompilesColumns
                 }
                 $returnAttributes[$alias] = $column;
             }
-
-            if (is_string($column) && $column === '*') {
-                //TODO place table alias and join aliases in returnDocuments?
-            }
-
         }
 
-        $returnValues = $this->determineReturnValues($query, $returnAttributes, $returnDocs);
-
-        $return = 'RETURN ';
-        if ($query->distinct) {
-            $return .= 'DISTINCT ';
-        }
-
-        return $return . $returnValues;
+        return [
+            $returnAttributes,
+            $returnDocs
+        ];
     }
 
     /**
