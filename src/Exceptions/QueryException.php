@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace LaravelFreelancerNL\Aranguent;
+namespace LaravelFreelancerNL\Aranguent\Exceptions;
 
 use Illuminate\Database\QueryException as IlluminateQueryException;
 use Throwable;
@@ -13,7 +13,7 @@ class QueryException extends IlluminateQueryException
      * Format the SQL error message.
      *
      * @param  string  $sql
-     * @param  array  $bindings
+     * @param  array<mixed>  $bindings
      * @return string
      */
     protected function formatMessage($connectionName, $sql, $bindings, Throwable $previous)

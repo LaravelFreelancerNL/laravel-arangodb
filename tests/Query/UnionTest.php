@@ -80,20 +80,3 @@ test('union limit offset', function () {
 
 
 test('union aggregates')->todo();
-
-
-test('union groupBy', function () {
-    $charactersWithoutAge = DB::table('characters')
-        ->whereNull('age');
-
-    $query = DB::table('characters')
-        ->where('surname', 'Targaryen')
-        ->union($charactersWithoutAge)
-        ->groupBy('surname');
-
-    $results = $query->get();
-
-    expect($results->count())->toBe(29);
-    expect(($results->first())->name)->toBe('Ygritte');
-    expect(($results->last())->name)->toBe('Margaery');
-})->todo();

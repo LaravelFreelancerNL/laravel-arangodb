@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Query\Expression;
 use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Tag;
@@ -86,5 +87,5 @@ test('cast as json', function () {
     ];
     $result = $this->castAsJson($value);
 
-    expect($result)->toBe($value);
+    expect($result)->toBeInstanceOf(Expression::class);
 });

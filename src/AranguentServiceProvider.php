@@ -15,7 +15,7 @@ class AranguentServiceProvider extends ServiceProvider
     /**
      * Components to register on the provider.
      *
-     * @var array
+     * @var array<string>
      */
     protected $components = [
         'Migration',
@@ -28,9 +28,13 @@ class AranguentServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Model::setConnectionResolver($this->app['db']);
+        if (isset($this->app['db'])) {
+            Model::setConnectionResolver($this->app['db']);
+        }
 
-        Model::setEventDispatcher($this->app['events']);
+        if (isset($this->app['events'])) {
+            Model::setEventDispatcher($this->app['events']);
+        }
     }
 
     /**

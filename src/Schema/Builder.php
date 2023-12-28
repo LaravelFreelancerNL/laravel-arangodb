@@ -10,7 +10,7 @@ use Closure;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Fluent;
 use LaravelFreelancerNL\Aranguent\Connection;
-use LaravelFreelancerNL\Aranguent\QueryException;
+use LaravelFreelancerNL\Aranguent\Exceptions\QueryException;
 use LaravelFreelancerNL\Aranguent\Schema\Concerns\HandlesAnalyzers;
 use LaravelFreelancerNL\Aranguent\Schema\Concerns\HandlesViews;
 use LaravelFreelancerNL\Aranguent\Schema\Concerns\UsesBlueprints;

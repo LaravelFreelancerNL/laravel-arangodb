@@ -9,15 +9,17 @@ if (!function_exists('associativeFlatten')) {
      * Flatten a multi-dimensional associative array with dots.
      * List arrays are left untouched.
      *
-     * @return array
+     * @param array<mixed> $array
+     * @param string $prepend
+     * @return array<mixed>
      */
-    function associativeFlatten(iterable $array, string $prepend = ''): iterable
+    function associativeFlatten(array $array, string $prepend = ''): array
     {
         $results = [];
 
         if (Arr::isAssoc((array) $array)) {
             foreach ($array as $key => $value) {
-                if (is_iterable($value) && !empty($value)) {
+                if (is_array($value) && !empty($value)) {
                     $dot = '';
                     if (Arr::isAssoc($value)) {
                         $dot = '.';

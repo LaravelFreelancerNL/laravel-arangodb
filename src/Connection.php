@@ -17,6 +17,7 @@ use LaravelFreelancerNL\Aranguent\Query\Processor;
 use LaravelFreelancerNL\Aranguent\Schema\Builder as SchemaBuilder;
 use LaravelFreelancerNL\FluentAQL\QueryBuilder as ArangoQueryBuilder;
 use LogicException;
+use RuntimeException;
 use Spatie\DataTransferObject\Exceptions\UnknownProperties;
 
 class Connection extends IlluminateConnection
@@ -39,7 +40,7 @@ class Connection extends IlluminateConnection
     /**
      * Connection constructor.
      *
-     * @param  array  $config
+     * @param  array<mixed>  $config
      *
      * @throws UnknownProperties
      */
@@ -66,9 +67,9 @@ class Connection extends IlluminateConnection
      */
     public function getSchemaBuilder(): SchemaBuilder
     {
-        if (is_null($this->schemaGrammar)) {
-            $this->useDefaultSchemaGrammar();
-        }
+//        if (!isset($this->schemaGrammar)) {
+//            $this->useDefaultSchemaGrammar();
+//        }
 
         return new SchemaBuilder($this);
     }
@@ -137,14 +138,8 @@ class Connection extends IlluminateConnection
     public function reconnect()
     {
         if (is_callable($this->reconnector)) {
-            //            $this->arangoClient = null;
-
-            $result = call_user_func($this->reconnector, $this);
-
-            return $result;
+            return call_user_func($this->reconnector, $this);
         }
-
-        throw new LogicException('Lost connection and no reconnector available.');
     }
 
     /**
@@ -165,13 +160,18 @@ class Connection extends IlluminateConnection
     }
 
     /**
-     * @param  string|null  $database
+     * Set the name of the connected database.
+     *
+     * @param  string  $database
      * @return $this
      */
     public function setDatabaseName($database)
     {
         $this->database = $database;
-        $this->arangoClient->setDatabase($database);
+
+        if ($this->arangoClient !== null) {
+            $this->arangoClient->setDatabase($database);
+        }
 
         return $this;
     }
@@ -204,7 +204,7 @@ class Connection extends IlluminateConnection
     /**
      * Escape a value for safe SQL embedding.
      *
-     * @param  array|string|float|int|bool|null  $value
+     * @param  array<mixed>|string|float|int|bool|null  $value
      * @param  bool  $binary
      * @return string
      */
@@ -212,7 +212,7 @@ class Connection extends IlluminateConnection
     {
         if ($value === null) {
             return 'null';
-        } elseif ($binary) {
+        } elseif (is_string($value) && $binary === true) {
             return $this->escapeBinary($value);
         } elseif (is_int($value) || is_float($value)) {
             return (string) $value;
@@ -236,7 +236,7 @@ class Connection extends IlluminateConnection
     /**
      * Escape an array value for safe SQL embedding.
      *
-     * @param  array  $value
+     * @param  array<mixed>  $array
      * @return string
      */
     protected function escapeArray(array $array): string
@@ -277,5 +277,16 @@ class Connection extends IlluminateConnection
             ['\\\\', '\\0', '\\n', '\\r', "\\'", '\\"', '\\Z'],
             $value
         ) . '"';
+    }
+
+    /**
+     * Get the elapsed time since a given starting point.
+     *
+     * @param  int|float  $start
+     * @return float
+     */
+    protected function getElapsedTime($start)
+    {
+        return round((microtime(true) - $start) * 1000, 2);
     }
 }

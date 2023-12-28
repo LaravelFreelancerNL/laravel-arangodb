@@ -6,7 +6,7 @@ use ArangoClient\Schema\SchemaManager;
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
-use LaravelFreelancerNL\Aranguent\QueryException;
+use LaravelFreelancerNL\Aranguent\Exceptions\QueryException;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
 use LaravelFreelancerNL\Aranguent\Schema\Builder;
 use LaravelFreelancerNL\Aranguent\Schema\Grammar;

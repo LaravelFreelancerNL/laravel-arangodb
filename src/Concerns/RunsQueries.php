@@ -7,24 +7,25 @@ namespace LaravelFreelancerNL\Aranguent\Concerns;
 use Closure;
 use Exception;
 use Iterator;
-use LaravelFreelancerNL\Aranguent\Query\Builder as ArangoBuilder;
+use LaravelFreelancerNL\Aranguent\Exceptions\NoArangoClientException;
 use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
-use LaravelFreelancerNL\Aranguent\QueryException;
-use LaravelFreelancerNL\FluentAQL\QueryBuilder as ArangoQueryBuilder;
+use LaravelFreelancerNL\Aranguent\Exceptions\QueryException;
+use LaravelFreelancerNL\FluentAQL\QueryBuilder as FluentAqlBuilder;
 use stdClass;
 
 trait RunsQueries
 {
     /**
      * Run a select statement against the database and returns a generator.
-     * ($useReadPdo is a dummy to adhere to the interface).
      *
      * @param  string  $query
-     * @param  array  $bindings
-     * @param  bool|null  $useReadPdo
+     * @param  array<mixed>  $bindings
+     * @param  bool  $useReadPdo
+     * @return \Generator
      */
-    public function cursor($query, $bindings = [], $useReadPdo = null): ?Iterator
+    public function cursor($query, $bindings = [], $useReadPdo = true)
     {
+
         // Usage of a separate DB to read date isn't supported at this time
         $useReadPdo = null;
 
@@ -33,6 +34,9 @@ trait RunsQueries
                 return [];
             }
 
+            if ($this->arangoClient === null) {
+                throw new NoArangoClientException();
+            }
             $statement = $this->arangoClient->prepare($query, $bindings);
 
             return $statement->execute();
@@ -40,12 +44,13 @@ trait RunsQueries
     }
 
     /**
-     * Execute an AQL statement and return the boolean result.
+     * Execute an SQL statement and return the boolean result.
      *
-     * @param  string|ArangoQueryBuilder  $query
-     * @param  array  $bindings
+     * @param  string  $query
+     * @param  array<mixed>  $bindings
+     * @return bool
      */
-    public function statement($query, $bindings = []): bool
+    public function statement($query, $bindings = [])
     {
         [$query, $bindings] = $this->handleQueryBuilder(
             $query,
@@ -57,6 +62,9 @@ trait RunsQueries
                 return true;
             }
 
+            if ($this->arangoClient === null) {
+                throw new NoArangoClientException();
+            }
             $statement = $this->arangoClient->prepare($query, $bindings);
 
             $statement->execute();
@@ -69,12 +77,13 @@ trait RunsQueries
     }
 
     /**
-     * Run an AQL statement and get the number of rows affected.
+     * Run an SQL statement and get the number of rows affected.
      *
-     * @param  string|ArangoQueryBuilder  $query
-     * @param  array  $bindings
+     * @param  string  $query
+     * @param  array<mixed>  $bindings
+     * @return int
      */
-    public function affectingStatement($query, $bindings = []): int
+    public function affectingStatement($query, $bindings = [])
     {
         [$query, $bindings] = $this->handleQueryBuilder(
             $query,
@@ -84,6 +93,10 @@ trait RunsQueries
         return $this->run($query, $bindings, function () use ($query, $bindings) {
             if ($this->pretending()) {
                 return 0;
+            }
+
+            if ($this->arangoClient === null) {
+                throw new NoArangoClientException();
             }
 
             // For update or delete statements, we want to get the number of rows affected
@@ -130,33 +143,37 @@ trait RunsQueries
      * @param  string  $query
      * @param  array<mixed>  $bindings
      */
-    public function explain(string|ArangoQueryBuilder $query, $bindings = []): stdClass
+    public function explain(string|FluentAqlBuilder $query, $bindings = []): stdClass
     {
         [$query, $bindings] = $this->handleQueryBuilder(
             $query,
             $bindings
         );
 
+        if ($this->arangoClient === null) {
+            throw new NoArangoClientException();
+        }
         $statement = $this->arangoClient->prepare($query, $bindings);
 
         return $statement->explain();
     }
 
     /**
-     * @param  ArangoQueryBuilder|string  $query
+     * @param FluentAqlBuilder|string|QueryBuilder $query
+     * @param array<mixed> $bindings
+     * @return array<mixed>
      */
     protected function handleQueryBuilder($query, array $bindings): array
     {
 
-        if ($query instanceof ArangoQueryBuilder) {
+        if ($query instanceof FluentAqlBuilder) {
             $bindings = $query->binds;
             $query = $query->query;
         }
 
-        if ($query instanceof ArangoBuilder) {
+        if ($query instanceof QueryBuilder) {
             $bindings = $query->getBindings();
             $query = $query->toSql();
-            //            dd("handleQueryBuilder query", $query->toSql(), "bindings", $query->getBindings());
         }
 
         return [$query, $bindings];
@@ -167,8 +184,8 @@ trait RunsQueries
      *
      * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      *
-     * @param  string|ArangoQueryBuilder  $query
-     * @param  array  $bindings
+     * @param  string|FluentAqlBuilder  $query
+     * @param  array<mixed>  $bindings
      * @param  bool  $useReadPdo
      * @return mixed
      */
@@ -182,12 +199,12 @@ trait RunsQueries
      *
      * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      *
-     * @param  string|ArangoQueryBuilder  $query
-     * @param  array<mixed>|null  $bindings
+     * @param  string|FluentAqlBuilder  $query
+     * @param  array<mixed>  $bindings
      * @param  bool  $useReadPdo
      * @return mixed
      */
-    public function execute($query, ?array $bindings = [], $useReadPdo = true)
+    public function execute($query, array $bindings = [], $useReadPdo = true)
     {
         // Usage of a separate DB to read date isn't supported at this time
         $useReadPdo = null;
@@ -200,6 +217,10 @@ trait RunsQueries
         return $this->run($query, $bindings, function () use ($query, $bindings) {
             if ($this->pretending()) {
                 return [];
+            }
+
+            if ($this->arangoClient === null) {
+                throw new NoArangoClientException();
             }
 
             $statement = $this->arangoClient->prepare($query, $bindings);
@@ -226,7 +247,7 @@ trait RunsQueries
      * Run a SQL statement and log its execution context.
      *
      * @param  string  $query
-     * @param  array  $bindings
+     * @param  array<mixed>  $bindings
      * @return mixed
      *
      * @throws QueryException
@@ -261,7 +282,7 @@ trait RunsQueries
         $this->logQuery(
             $query,
             $bindings,
-            $this->getElapsedTime($start)
+            $this->getElapsedTime((int) $start)
         );
 
         return $result;
@@ -271,7 +292,7 @@ trait RunsQueries
      * Run a SQL statement.
      *
      * @param  string  $query
-     * @param  array  $bindings
+     * @param  array<mixed>  $bindings
      * @return mixed
      *
      * @throws QueryException
@@ -289,7 +310,7 @@ trait RunsQueries
             // lot more helpful to the developer instead of just the database's errors.
 
             throw new QueryException(
-                $this->getName(),
+                (string) $this->getName(),
                 $query,
                 $this->prepareBindings($bindings),
                 $e

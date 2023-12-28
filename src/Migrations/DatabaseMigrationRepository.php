@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 namespace LaravelFreelancerNL\Aranguent\Migrations;
 
+use ArangoClient\Exceptions\ArangoException;
+use ArangoClient\Schema\SchemaManager;
 use Illuminate\Database\ConnectionResolverInterface as IlluminateResolver;
 use Illuminate\Database\Migrations\DatabaseMigrationRepository as IlluminateDatabaseMigrationRepository;
+use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
+use LaravelFreelancerNL\Aranguent\Connection;
+use LaravelFreelancerNL\Aranguent\Exceptions\AranguentException;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 
 class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
@@ -25,6 +30,21 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
         parent::__construct($resolver, $table);
     }
 
+    protected function getSchemaManager(): SchemaManager
+    {
+        $connection = $this->getConnection();
+        assert($connection instanceof Connection);
+
+        $arangoClient = $connection->getArangoClient();
+
+        if ($arangoClient === null) {
+            throw new AranguentException('No arangodb client set.');
+        }
+
+        return $arangoClient->schema();
+
+    }
+
     /**
      * Create the migration repository data store.
      *
@@ -32,7 +52,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     public function createRepository()
     {
-        $schemaManager = $this->getConnection()->getArangoClient()->schema();
+        $schemaManager = $this->getSchemaManager();
 
         $schemaManager->createCollection($this->table);
     }
@@ -41,7 +61,7 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      * Get the list of migrations.
      *
      * @param  int  $steps
-     * @return array
+     * @return array<mixed>
      */
     public function getMigrations($steps)
     {
@@ -63,22 +83,20 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      * Determine if the migration repository exists.
      *
      * @return bool
+     * @throws ArangoException
+     * @throws AranguentException
      */
     public function repositoryExists()
     {
-        $schemaManager = $this->getConnection()->getArangoClient()->schema();
+        $schemaManager = $this->getSchemaManager();
 
         return $schemaManager->hasCollection($this->table);
-
-        //        $schema = $this->getConnection()->getSchemaBuilder();
-        //
-        //        return $schema->hasCollection($this->table);
     }
 
     /**
      * Get a query builder for the migration collection.
      *
-     * @return Builder
+     * @return IlluminateQueryBuilder
      */
     protected function collection()
     {

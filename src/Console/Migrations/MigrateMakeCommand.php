@@ -47,7 +47,7 @@ class MigrateMakeCommand extends IlluminateMigrateMakeCommand
         // It's possible for the developer to specify the tables to modify in this
         // schema operation. The developer may also specify if this table needs
         // to be freshly created so we can create the appropriate migrations.
-        $name = Str::snake(trim($this->input->getArgument('name')));
+        $name = Str::snake(trim((string) $this->input->getArgument('name')));
 
         $collection = $this->input->getOption('collection');
         if (!$collection) {

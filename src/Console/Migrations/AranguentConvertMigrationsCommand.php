@@ -68,7 +68,7 @@ class AranguentConvertMigrationsCommand extends BaseCommand
         }
     }
 
-    public function convertMigrationFile($filePath)
+    public function convertMigrationFile(string $filePath): void
     {
         // Check for additional information to make sure we
         // partial matches aren't accidentally replaced.
@@ -78,7 +78,10 @@ class AranguentConvertMigrationsCommand extends BaseCommand
         ];
 
         $content = file_get_contents($filePath);
-        $content = str_replace(array_keys($replacements), $replacements, $content);
-        file_put_contents($filePath, $content);
+
+        if ($content !== false) {
+            $content = str_replace(array_keys($replacements), $replacements, $content);
+            file_put_contents($filePath, $content);
+        }
     }
 }
