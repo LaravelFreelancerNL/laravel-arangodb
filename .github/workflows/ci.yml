@@ -50,7 +50,7 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: mbstring, intl
           ini-values: post_max_size=256M, short_open_tag=On
-          coverage: none
+          coverage: xdebug
           tools: composer:v2
 
       - name: Install dependencies
