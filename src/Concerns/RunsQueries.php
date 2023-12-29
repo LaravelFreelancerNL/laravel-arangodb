@@ -70,6 +70,7 @@ trait RunsQueries
             $statement->execute();
 
             $affectedDocumentCount = $statement->getWritesExecuted();
+
             $this->recordsHaveBeenModified($changed = $affectedDocumentCount > 0);
 
             return $changed;

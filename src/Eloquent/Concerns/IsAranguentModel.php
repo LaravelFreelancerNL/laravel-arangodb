@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace LaravelFreelancerNL\Aranguent\Eloquent\Concerns;
 
 use Closure;
+use Illuminate\Database\Eloquent\Builder as IlluminateEloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 use LaravelFreelancerNL\Aranguent\Connection;
@@ -22,11 +23,13 @@ trait IsAranguentModel
      * @param  array  $attributes
      * @return void
      */
-    protected function insertAndSetId(\Illuminate\Database\Eloquent\Builder $query, $attributes)
+    protected function insertAndSetId(IlluminateEloquentBuilder $query, $attributes)
     {
+        assert($query instanceof Builder);
+
         $keyName = $this->getKeyName();
 
-        $id = $query->insertGetId($attributes, $keyName);
+        $id = (string) $query->insertGetId($attributes, $keyName);
 
         $this->setAttribute($keyName, $id);
         if ($keyName === '_id') {
@@ -135,17 +138,18 @@ trait IsAranguentModel
         return Str::snake(class_basename($this)) . $keyName;
     }
 
-    public static function fromAqb(ArangoQueryBuilder|Closure $aqb): Collection
-    {
-        if ($aqb instanceof Closure) {
-            /** @phpstan-ignore-next-line */
-            $aqb = $aqb(new ArangoQueryBuilder());
-        }
-        $connection = static::resolveConnection(self::$connection);
-        $results = $connection->execute($aqb->get());
-
-        return self::hydrate($results);
-    }
+    // TODO: see if we can get this working.
+//    public static function fromAqb(ArangoQueryBuilder|Closure $aqb): Collection
+//    {
+//        if ($aqb instanceof Closure) {
+//            /** @phpstan-ignore-next-line */
+//            $aqb = $aqb(new ArangoQueryBuilder());
+//        }
+//        $connection = static::resolveConnection(self::$connection);
+//        $results = $connection->execute($aqb->get());
+//
+//        return self::hydrate($results);
+//    }
 
     /**
      * Get the database connection for the model.
@@ -154,6 +158,10 @@ trait IsAranguentModel
      */
     public function getConnection()
     {
-        return static::resolveConnection($this->getConnectionName());
+        $connection = static::resolveConnection($this->getConnectionName());
+
+        assert($connection instanceof Connection);
+
+        return $connection;
     }
 }

@@ -66,10 +66,6 @@ class Connection extends IlluminateConnection
      */
     public function getSchemaBuilder(): SchemaBuilder
     {
-        //        if (!isset($this->schemaGrammar)) {
-        //            $this->useDefaultSchemaGrammar();
-        //        }
-
         return new SchemaBuilder($this);
     }
 

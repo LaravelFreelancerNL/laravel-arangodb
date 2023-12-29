@@ -9,4 +9,4 @@ parameters:
 		- src
 	excludePaths:
 	    - src/Schema
-	    - src/Eloquent
+	    - src/Query

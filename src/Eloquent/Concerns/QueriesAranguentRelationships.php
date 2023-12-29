@@ -16,7 +16,6 @@ trait QueriesAranguentRelationships
      * @param mixed $function
      * @param IlluminateQueryBuilder $query
      * @param string $alias
-     * @return Expression
      */
     public function handleAggregateFunction(IlluminateQueryBuilder $query, mixed $function, string $alias): void
     {
@@ -50,6 +49,7 @@ trait QueriesAranguentRelationships
             new Expression(strtoupper($function) . '(' . $subquery . ')'),
             'postIterationVariables'
         );
+
         $this->addSelect($alias);
     }
 
@@ -75,7 +75,7 @@ trait QueriesAranguentRelationships
      * @param  string  $operator
      * @param  int  $count
      * @param  string  $boolean
-     * @return $this
+     * @return self
      */
     protected function addWhereCountQuery(IlluminateQueryBuilder $query, $operator = '>=', $count = 1, $boolean = 'and')
     {
@@ -84,7 +84,7 @@ trait QueriesAranguentRelationships
         return $this->where(
             new Expression('LENGTH(' . $subquery . ')'),
             $operator,
-            is_numeric($count) ? new Expression($count) : $count,
+            new Expression($count),
             $boolean
         );
     }
@@ -97,7 +97,7 @@ trait QueriesAranguentRelationships
      */
     public function mergeConstraintsFrom(Builder $from)
     {
-        $whereBindings = $this->getQuery()->getBindings() ?? [];
+        $whereBindings = $this->getQuery()->getBindings();
 
         $wheres = $from->getQuery()->from !== $this->getQuery()->from
             ? $this->requalifyWhereTables(
@@ -131,7 +131,7 @@ trait QueriesAranguentRelationships
             return $this;
         }
 
-        if (is_null($this->query->columns)) {
+        if (empty($this->query->columns)) {
             $this->query->select([$this->query->from . '.*']);
         }
 
@@ -175,7 +175,7 @@ trait QueriesAranguentRelationships
             // If the query contains certain elements like orderings / more than one column selected
             // then we will remove those elements from the query so that it will execute properly
             // when given to the database. Otherwise, we may receive SQL errors or poor syntax.
-            $query->orders = null;
+            unset($query->orders);
             $query->setBindings([], 'order');
 
             if (count($query->columns) > 1) {

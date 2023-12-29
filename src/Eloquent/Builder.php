@@ -7,16 +7,24 @@ namespace LaravelFreelancerNL\Aranguent\Eloquent;
 use Illuminate\Database\Eloquent\Builder as IlluminateEloquentBuilder;
 use Illuminate\Support\Arr;
 use LaravelFreelancerNL\Aranguent\Eloquent\Concerns\QueriesAranguentRelationships;
+use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 
 class Builder extends IlluminateEloquentBuilder
 {
     use QueriesAranguentRelationships;
 
     /**
+     * The base query builder instance.
+     *
+     * @var QueryBuilder
+     */
+    protected $query;
+
+    /**
      * Insert a record in the database.
      *
      *
-     * @return int
+     * @return bool
      */
     public function insert(array $values)
     {
@@ -104,5 +112,15 @@ class Builder extends IlluminateEloquentBuilder
         );
 
         return $values;
+    }
+
+    /**
+     * Get the underlying query builder instance.
+     *
+     * @return QueryBuilder
+     */
+    public function getQuery()
+    {
+        return $this->query;
     }
 }

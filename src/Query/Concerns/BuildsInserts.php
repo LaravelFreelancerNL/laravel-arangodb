@@ -39,7 +39,7 @@ trait BuildsInserts
      *
      * @param  array  $values
      * @param  string|null  $sequence
-     * @return int
+     * @return string
      */
     public function insertGetId(array $values, $sequence = null)
     {
