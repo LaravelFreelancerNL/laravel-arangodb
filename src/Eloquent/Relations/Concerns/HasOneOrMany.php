@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace LaravelFreelancerNL\Aranguent\Eloquent\Relations\Concerns;
 
+use Illuminate\Database\Eloquent\Model;
+
 trait HasOneOrMany
 {
     /**
      * Get the first related record matching the attributes or create it.
      *
-     * @return \Illuminate\Database\Eloquent\Model
+     * @param array<mixed> $attributes
+     * @param array<mixed> $values
+     * @return Model
      */
     public function firstOrCreate(array $attributes = [], array $values = [])
     {

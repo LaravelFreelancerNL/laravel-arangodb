@@ -24,6 +24,7 @@ class Builder extends IlluminateEloquentBuilder
      * Insert a record in the database.
      *
      *
+     * @param array<mixed> $values
      * @return bool
      */
     public function insert(array $values)
@@ -60,8 +61,8 @@ class Builder extends IlluminateEloquentBuilder
     /**
      * Add the "updated at" column to an array of values.
      *
-     *
-     * @return array
+     * @param array<string, string> $values
+     * @return array<string, string>
      */
     protected function updateTimestamps(array $values)
     {
@@ -94,6 +95,9 @@ class Builder extends IlluminateEloquentBuilder
 
     /**
      * Add the "updated at" column to an array of values.
+     *
+     * @param array<string> $values
+     * @return array<string>
      */
     protected function addUpdatedAtColumn(array $values): array
     {

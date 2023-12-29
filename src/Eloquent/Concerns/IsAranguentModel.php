@@ -20,7 +20,7 @@ trait IsAranguentModel
     /**
      * Insert the given attributes and set the ID on the model.
      *
-     * @param  array  $attributes
+     * @param  array<mixed>  $attributes
      * @return void
      */
     protected function insertAndSetId(IlluminateEloquentBuilder $query, $attributes)
@@ -100,7 +100,7 @@ trait IsAranguentModel
         $this->updateIdWithKey($value);
     }
 
-    protected function updateIdWithKey(string $key)
+    protected function updateIdWithKey(string $key): void
     {
         $this->attributes['_id'] = $this->getTable() . '/' . $key;
     }
