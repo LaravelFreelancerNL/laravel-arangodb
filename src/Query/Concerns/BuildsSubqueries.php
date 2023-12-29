@@ -94,12 +94,14 @@ trait BuildsSubqueries
             }
 
             return [$queryString, $query->getBindings()];
-        } elseif (is_string($query)) {
+        }
+
+        if (is_string($query)) {
             return [$query, []];
-        } else {
-            throw new InvalidArgumentException(
+        }
+
+        throw new InvalidArgumentException(
                 'A subquery must be a query builder instance, a Relation, a Closure, or a string.'
             );
-        }
     }
 }

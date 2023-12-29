@@ -13,6 +13,62 @@ use Illuminate\Support\Str;
 trait QueriesAranguentRelationships
 {
     /**
+     * @param mixed $function
+     * @param IlluminateQueryBuilder $query
+     * @param string $alias
+     * @return Expression
+     */
+    public function handleAggregateFunction(IlluminateQueryBuilder $query, mixed $function, string $alias): void
+    {
+        if ($function === null) {
+            $query->limit(1);
+
+            return;
+        }
+
+
+        if ($function === 'exists') {
+            [$subquery] = $this->getQuery()->createSub($query);
+
+            $expression = new Expression(sprintf('(COUNT(%s)) > 0 ? true : false ', $subquery));
+
+            $this->getQuery()->set(
+                $alias,
+                $expression,
+                'postIterationVariables'
+            )
+                ->addSelect($alias);
+
+            return;
+        }
+
+
+        [$subquery] = $this->getQuery()->createSub($query);
+
+        $this->getQuery()->set(
+            $alias,
+            new Expression(strtoupper($function) . '(' . $subquery . ')'),
+            'postIterationVariables'
+        );
+        $this->addSelect($alias);
+    }
+
+    /**
+     * @param array $segments
+     * @param string $name
+     * @return array
+     */
+    public function extractNameAndAlias(array $segments, string $name): array
+    {
+        $alias = null;
+
+        if (count($segments) === 3 && Str::lower($segments[1]) === 'as') {
+            [$name, $alias] = [$segments[0], $segments[2]];
+        }
+        return [$name, $alias];
+    }
+
+    /**
      * Add a sub-query count clause to this query.
      *
      * @param  \Illuminate\Database\Query\Builder  $query
@@ -87,13 +143,11 @@ trait QueriesAranguentRelationships
             // the resulting column. This allows multiple aggregates on the same relationships.
             $segments = explode(' ', $name);
 
-            unset($alias);
-
-            if (count($segments) === 3 && Str::lower($segments[1]) === 'as') {
-                [$name, $alias] = [$segments[0], $segments[2]];
-            }
+            [$name, $alias] = $this->extractNameAndAlias($segments, $name);
 
             $relation = $this->getRelationWithoutConstraints($name);
+
+            $expression = $column;
 
             if ($function) {
                 $hashedColumn = $this->getRelationHashedColumn($column, $relation);
@@ -103,8 +157,6 @@ trait QueriesAranguentRelationships
                 );
 
                 $expression = $function === 'exists' ? $wrappedColumn : sprintf('%s(%s)', $function, $wrappedColumn);
-            } else {
-                $expression = $column;
             }
 
             // Here, we will grab the relationship sub-query and prepare to add it to the main query
@@ -138,31 +190,7 @@ trait QueriesAranguentRelationships
                 preg_replace('/[^[:alnum:][:space:]_]/u', '', "$name $function $column")
             );
 
-            if ($function === 'exists') {
-                [$subquery] = $this->getQuery()->createSub($query);
-
-                $expression = new Expression(sprintf('(COUNT(%s)) > 0 ? true : false ', $subquery));
-
-                $this->getQuery()->set(
-                    $alias,
-                    $expression,
-                    'postIterationVariables'
-                )
-                    ->addSelect($alias);
-            } else {
-                if ($function === null) {
-                    $query->limit(1);
-                }
-
-                [$subquery] = $this->getQuery()->createSub($query);
-
-                $this->getQuery()->set(
-                    $alias,
-                    new Expression(strtoupper($function) . '(' . $subquery . ')'),
-                    'postIterationVariables'
-                );
-                $this->addSelect($alias);
-            }
+            $this->handleAggregateFunction($query, $function, $alias);
         }
 
         return $this;

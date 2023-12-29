@@ -39,7 +39,7 @@ trait HandlesBindings
         if ($this->grammar->isBind($value)) {
             return $value;
         }
-        if (!$value instanceof Expression) {
+        if (!$value instanceof Expression && !$this->isReference($value)) {
             $this->addBinding($value, $type);
             $value = $this->replaceValueWithBindVariable($type);
         }

@@ -211,27 +211,43 @@ class Connection extends IlluminateConnection
      */
     public function escape($value, $binary = false)
     {
-        if ($value === null) {
-            return 'null';
-        } elseif (is_string($value) && $binary === true) {
+        return match(gettype($value)) {
+            'array' => $this->escapeArray($value),
+            'boolean' => $this->escapeBool($value),
+            'double' => (string) $value,
+            'integer' => (string) $value,
+            'NULL' => 'null',
+            default => $this->escapeString($value, $binary = false),
+        };
+    }
+
+    /**
+     * Escape a string value for safe SQL embedding.
+     *
+     * @param  string  $value
+     * @return string
+     *
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     */
+    protected function escapeString($value, bool $binary = false)
+    {
+        if ($binary === true) {
             return $this->escapeBinary($value);
-        } elseif (is_int($value) || is_float($value)) {
-            return (string) $value;
-        } elseif (is_bool($value)) {
-            return $this->escapeBool($value);
-        } elseif (is_array($value)) {
-            return $this->escapeArray($value);
-        } else {
-            if (str_contains($value, "\00")) {
-                throw new RuntimeException('Strings with null bytes cannot be escaped. Use the binary escape option.');
-            }
-
-            if (preg_match('//u', $value) === false) {
-                throw new RuntimeException('Strings with invalid UTF-8 byte sequences cannot be escaped.');
-            }
-
-            return $this->escapeString($value);
         }
+
+        if (str_contains($value, "\00")) {
+            throw new RuntimeException('Strings with null bytes cannot be escaped. Use the binary escape option.');
+        }
+
+        if (preg_match('//u', $value) === false) {
+            throw new RuntimeException('Strings with invalid UTF-8 byte sequences cannot be escaped.');
+        }
+
+        return '"' . str_replace(
+                ['\\', "\0", "\n", "\r", "'", '"', "\x1a"],
+                ['\\\\', '\\0', '\\n', '\\r', "\\'", '\\"', '\\Z'],
+                $value
+            ) . '"';
     }
 
     /**
@@ -263,21 +279,6 @@ class Connection extends IlluminateConnection
     protected function escapeBool($value)
     {
         return $value ? 'true' : 'false';
-    }
-
-    /**
-     * Escape a string value for safe SQL embedding.
-     *
-     * @param  string  $value
-     * @return string
-     */
-    protected function escapeString($value)
-    {
-        return '"' . str_replace(
-            ['\\', "\0", "\n", "\r", "'", '"', "\x1a"],
-            ['\\\\', '\\0', '\\n', '\\r', "\\'", '\\"', '\\Z'],
-            $value
-        ) . '"';
     }
 
     /**

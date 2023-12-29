@@ -325,10 +325,12 @@ class Grammar extends IlluminateQueryGrammar
                 $key = 'sql';
             }
 
+            if (!$order[$key] instanceof Expression) {
+                $order[$key] = $this->normalizeColumn($query, $order[$key], $table);
+            }
+
             if ($order[$key] instanceof Expression) {
                 $order[$key] = $order[$key]->getValue($this);
-            } else {
-                $order[$key] = $this->normalizeColumn($query, $order[$key], $table);
             }
 
             return array_key_exists('direction', $order) ? $order[$key] . ' ' . $order['direction'] : $order[$key];

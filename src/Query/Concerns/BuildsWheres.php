@@ -80,6 +80,37 @@ trait BuildsWheres
     }
 
     /**
+     * @param mixed $operator
+     * @param mixed $value
+     * @return array
+     */
+    public function validateOperator(mixed $operator, mixed $value): array
+    {
+        // If the given operator is not found in the list of valid operators we will
+        // assume that the developer is just short-cutting the '==' operators and
+        // we will set the operators to '==' and set the values appropriately.
+        if ($this->invalidOperator($operator)) {
+            [$value, $operator] = [$operator, '=='];
+        }
+        return array($value, $operator);
+    }
+
+    /**
+     * @param mixed $operator
+     * @return string
+     */
+    public function getType(mixed $operator): string
+    {
+        $type = 'Basic';
+
+        if ($this->isBitwiseOperator($operator)) {
+            $type = 'Bitwise';
+        }
+
+        return $type;
+    }
+
+    /**
      * Add a date based (year, month, day, time) statement to the query.
      *
      * @param  string  $type
@@ -163,6 +194,9 @@ trait BuildsWheres
      * @param  mixed  $value
      * @param  string  $boolean
      * @return IlluminateQueryBuilder
+     *
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
      */
     public function where($column, $operator = null, $value = null, $boolean = 'and')
     {
@@ -206,12 +240,7 @@ trait BuildsWheres
             return $this->where(new Expression($subquery), $operator, $value, $boolean);
         }
 
-        // If the given operator is not found in the list of valid operators we will
-        // assume that the developer is just short-cutting the '==' operators and
-        // we will set the operators to '==' and set the values appropriately.
-        if ($this->invalidOperator($operator)) {
-            [$value, $operator] = [$operator, '=='];
-        }
+        list($value, $operator) = $this->validateOperator($operator, $value);
 
         // If the value is a Closure, it means the developer is performing an entire
         // sub-select within the query and we will need to compile the sub-select
@@ -227,33 +256,9 @@ trait BuildsWheres
             return $this->whereNull($column, $boolean, $operator !== '==');
         }
 
-        $type = 'Basic';
+        $type = $this->getType($operator);
 
-        $columnString = ($column instanceof ExpressionContract)
-            ? $this->grammar->getValue($column)
-            : $column;
-
-        // If the column is making a JSON reference we'll check to see if the value
-        // is a boolean. If it is, we'll add the raw boolean string as an actual
-        // value to the query to ensure this is properly handled by the query.
-        if (str_contains($columnString, '->') && is_bool($value)) {
-            $value = new Expression($value ? 'true' : 'false');
-
-            if (is_string($column)) {
-                $type = 'JsonBoolean';
-            }
-        }
-
-        if ($this->isBitwiseOperator($operator)) {
-            $type = 'Bitwise';
-        }
-
-        if (
-            !$value instanceof ExpressionContract
-            && !$this->isReference($value)
-        ) {
-            $value = $this->bindValue($value);
-        }
+        $value = $this->bindValue($value);
 
         // Now that we are working with just a simple query we can put the elements
         // in our array and add the query binding to our array of bindings that

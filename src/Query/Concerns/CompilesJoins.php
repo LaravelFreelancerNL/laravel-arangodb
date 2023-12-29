@@ -11,6 +11,31 @@ use LaravelFreelancerNL\Aranguent\Query\Builder;
 trait CompilesJoins
 {
     /**
+     * @param $join
+     * @param Builder $query
+     * @return array
+     */
+    public function extractTableAndAlias(Builder $query, $join): array
+    {
+        if ($join->table instanceof Expression) {
+            $tableParts = [];
+            preg_match("/(^.*) as (.*?)$/", $join->table->getValue($query->grammar), $tableParts);
+            $table = $tableParts[1];
+            $alias = $tableParts[2];
+
+            $query->registerTableAlias($join->table, $alias);
+
+            return [$table, $alias];
+        }
+
+        $table = $this->wrapTable($join->table);
+        $alias = $query->generateTableAlias($join->table);
+        $query->registerTableAlias($join->table, $alias);
+
+        return [$table, $alias];
+    }
+
+    /**
      * Compile the "join" portions of the query.
      *
      * @param IlluminateQueryBuilder $query
@@ -43,18 +68,7 @@ trait CompilesJoins
     {
         assert($query instanceof Builder);
 
-        if ($join->table instanceof Expression) {
-            $tableParts = [];
-            preg_match("/(^.*) as (.*?)$/", $join->table->getValue($query->grammar), $tableParts);
-            $table = $tableParts[1];
-            $alias = $tableParts[2];
-
-            $query->registerTableAlias($join->table, $alias);
-        } else {
-            $table = $this->wrapTable($join->table);
-            $alias = $query->generateTableAlias($join->table);
-            $query->registerTableAlias($join->table, $alias);
-        }
+        list($table, $alias) = $this->extractTableAndAlias($query, $join);
 
         $filter = $this->compileWheres($join);
 
@@ -70,18 +84,7 @@ trait CompilesJoins
     {
         assert($query instanceof Builder);
 
-        if ($join->table instanceof Expression) {
-            $tableParts = [];
-            preg_match("/(^.*) as (.*?)$/", $join->table->getValue($query->grammar), $tableParts);
-            $table = $tableParts[1];
-            $alias = $tableParts[2];
-
-            $query->registerTableAlias($join->table, $alias);
-        } else {
-            $table = $this->wrapTable($join->table);
-            $alias = $query->generateTableAlias($join->table);
-            $query->registerTableAlias($join->table, $alias);
-        }
+        list($table, $alias) = $this->extractTableAndAlias($query, $join);
 
         $filter = $this->compileWheres($join);
 

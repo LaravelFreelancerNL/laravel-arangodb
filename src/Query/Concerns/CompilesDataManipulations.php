@@ -132,9 +132,11 @@ trait CompilesDataManipulations
         foreach($values as $key => $value) {
             if (is_array($value)) {
                 $valueStrings[] = $key . ': ' . $this->createUpdateObject($value);
-            } else {
-                $valueStrings[] = $key . ': ' . $value;
+
+                continue;
             }
+
+            $valueStrings[] = $key . ': ' . $value;
         }
 
         return '{ ' . implode(', ', $valueStrings) . ' }';

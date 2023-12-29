@@ -20,11 +20,16 @@ trait BuildsUpdates
         foreach($values as $key => $value) {
             if ($value instanceof Expression) {
                 $values[$key] = $value->getValue($this->grammar);
-            } elseif (is_array($value)) {
-                $values[$key] = $this->prepareValuesForUpdate($value);
-            } else {
-                $values[$key]  = $this->bindValue($value, 'update');
+
+                continue;
             }
+
+            if (is_array($value)) {
+                $values[$key] = $this->prepareValuesForUpdate($value);
+                continue;
+            }
+
+            $values[$key]  = $this->bindValue($value, 'update');
         }
 
         return $values;
@@ -145,11 +150,9 @@ trait BuildsUpdates
         }
 
         foreach($values as $key => $value) {
-            $values[$key] = Arr::undot($this->grammar->convertJsonFields($value));
-        }
-
-        foreach($values as $key => $value) {
-            $values[$key] = $this->convertIdToKey($value);
+            $values[$key] = $this->grammar->convertJsonFields($value);
+            $values[$key] = $this->convertIdToKey($values[$key]);
+            $values[$key] = Arr::undot($values[$key]);
         }
 
         foreach($values as $key => $value) {
@@ -158,18 +161,16 @@ trait BuildsUpdates
             }
         }
 
-        // unique id value should already be converted to _key
-        foreach ($uniqueBy as $key => $value) {
-            $uniqueBy[$key] = $this->convertIdToKey($value);
-        }
         $uniqueBy = $this->grammar->convertJsonFields($uniqueBy);
 
         if (is_null($update)) {
             $update = array_keys(reset($values));
         }
+
         foreach ($update as $key => $value) {
             $update[$key] = $this->convertIdToKey($value);
         }
+
         $update = $this->grammar->convertJsonFields($update);
 
         $this->applyBeforeQueryCallbacks();

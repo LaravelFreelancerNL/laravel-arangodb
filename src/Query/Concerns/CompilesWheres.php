@@ -84,10 +84,11 @@ trait CompilesWheres
 
         $where = $this->normalizeOperator($where);
 
+        if (! $where['column'] instanceof expression) {
+            $column = $this->normalizeColumn($query, $where['column']);
+        }
         if ($where['column'] instanceof expression) {
             $column = $where['column']->getValue($this);
-        } else {
-            $column = $this->normalizeColumn($query, $where['column']);
         }
 
         $predicate[0] = $column;

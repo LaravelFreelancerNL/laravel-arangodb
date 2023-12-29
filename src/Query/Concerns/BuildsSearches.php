@@ -32,10 +32,10 @@ trait BuildsSearches
 
         $locale = App::getLocale();
         $analyzerLocales = ['de','en','es','fi','fr','it','nl','no','pt','ru','sv','zh'];
-        if ($analyzer === null && in_array($locale, $analyzerLocales)) {
+
+        $analyzer = 'text_en';
+        if (in_array($locale, $analyzerLocales)) {
             $analyzer = 'text_' . $locale;
-        } else {
-            $analyzer = 'text_en';
         }
 
         $this->search = [
