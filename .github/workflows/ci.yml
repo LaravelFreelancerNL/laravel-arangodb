@@ -64,9 +64,10 @@ jobs:
           "${GITHUB_WORKSPACE}/bin/prepare-test-db.sh"
 
       - name: Run all QA tests
-        if: ${{ always() }}
         run: |
-          chmod +x "${GITHUB_WORKSPACE}/bin/qa.sh"
-          "${GITHUB_WORKSPACE}/bin/qa.sh"
+          ./vendor/bin/phpmd src/ text phpmd-ruleset.xml
+          ./vendor/bin/phpstan analyse -c phpstan.neon
+          ./vendor/bin/testbench migrate:fresh --path=tests/Setup/Database/Migrations --realpath --seed
+          ./vendor/bin/testbench package:test --coverage --min=80 tests
         env:
           ARANGODB_VERSION: ${{ matrix.arangodb }}
