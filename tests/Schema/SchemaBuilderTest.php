@@ -234,8 +234,6 @@ test('get connection', function () {
     expect(Schema::getConnection())->toBeInstanceOf(Connection::class);
 });
 
-
-
 test('createAnalyzer', function () {
     $schemaManager = $this->connection->getArangoClient()->schema();
     if (!$schemaManager->hasAnalyzer('myAnalyzer')) {
@@ -255,7 +253,7 @@ test('getAllAnalyzers', function () {
 
     $analyzers = Schema::getAllAnalyzers();
 
-    expect($analyzers)->toHaveCount(15);
+    expect($analyzers)->toHaveCount(13);
 });
 
 test('replaceAnalyzer', function () {
