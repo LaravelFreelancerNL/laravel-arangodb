@@ -7,7 +7,6 @@ namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 use Carbon\CarbonPeriod;
 use Closure;
 use Illuminate\Contracts\Database\Query\ConditionExpression;
-use Illuminate\Contracts\Database\Query\Expression as ExpressionContract;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Builder as IlluminateEloquentBuilder;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
