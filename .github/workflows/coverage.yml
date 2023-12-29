@@ -7,9 +7,9 @@ env:
 
 jobs:
   run:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
 
-    name:  Test coverage
+    name:  Test coverage (Scrutinizer)
 
     services:
       arangodb:
@@ -21,12 +21,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v4
+        uses: shivammathur/setup-php@v2
         with:
           php-version: 8.1
           extensions: mbstring, intl
