@@ -139,17 +139,17 @@ trait IsAranguentModel
     }
 
     // TODO: see if we can get this working.
-//    public static function fromAqb(ArangoQueryBuilder|Closure $aqb): Collection
-//    {
-//        if ($aqb instanceof Closure) {
-//            /** @phpstan-ignore-next-line */
-//            $aqb = $aqb(new ArangoQueryBuilder());
-//        }
-//        $connection = static::resolveConnection(self::$connection);
-//        $results = $connection->execute($aqb->get());
-//
-//        return self::hydrate($results);
-//    }
+    //    public static function fromAqb(ArangoQueryBuilder|Closure $aqb): Collection
+    //    {
+    //        if ($aqb instanceof Closure) {
+    //            /** @phpstan-ignore-next-line */
+    //            $aqb = $aqb(new ArangoQueryBuilder());
+    //        }
+    //        $connection = static::resolveConnection(self::$connection);
+    //        $results = $connection->execute($aqb->get());
+    //
+    //        return self::hydrate($results);
+    //    }
 
     /**
      * Get the database connection for the model.
