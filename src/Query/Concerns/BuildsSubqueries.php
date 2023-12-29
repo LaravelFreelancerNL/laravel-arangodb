@@ -101,7 +101,7 @@ trait BuildsSubqueries
         }
 
         throw new InvalidArgumentException(
-                'A subquery must be a query builder instance, a Relation, a Closure, or a string.'
-            );
+            'A subquery must be a query builder instance, a Relation, a Closure, or a string.'
+        );
     }
 }

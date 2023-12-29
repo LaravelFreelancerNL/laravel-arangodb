@@ -84,7 +84,7 @@ trait CompilesWheres
 
         $where = $this->normalizeOperator($where);
 
-        if (! $where['column'] instanceof expression) {
+        if (!$where['column'] instanceof expression) {
             $column = $this->normalizeColumn($query, $where['column']);
         }
         if ($where['column'] instanceof expression) {
