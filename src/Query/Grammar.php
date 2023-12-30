@@ -16,7 +16,6 @@ use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesGroups;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesDataManipulations;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesJoins;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesUnions;
-use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesWheres;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\ConvertsIdToKey;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\HandlesAqlGrammar;
 
@@ -29,12 +28,11 @@ class Grammar extends IlluminateQueryGrammar
     use CompilesJoins;
     use CompilesGroups;
     use CompilesUnions;
-    use CompilesWheres;
     use ConvertsIdToKey;
     use HandlesAqlGrammar;
     use Macroable;
 
-    public $name;
+    public string $name;
 
     /**
      * The grammar table prefix.
@@ -53,7 +51,7 @@ class Grammar extends IlluminateQueryGrammar
     /**
      * The grammar specific operators.
      *
-     * @var array
+     * @var array<string>
      */
     protected $operators = [
         '==', '!=', '<', '>', '<=', '>=',
@@ -85,7 +83,10 @@ class Grammar extends IlluminateQueryGrammar
         'columns',
     ];
 
-    protected $operatorTranslations = [
+    /**
+     * @var array<string, string>
+     */
+    protected array $operatorTranslations = [
         '='          => '==',
         '<>'         => '!=',
         '<=>'        => '==',
@@ -95,7 +96,10 @@ class Grammar extends IlluminateQueryGrammar
         'not regexp' => '!~',
     ];
 
-    protected $whereTypeOperators = [
+    /**
+     * @var array<string, string>
+     */
+    protected array $whereTypeOperators = [
         'In'    => 'IN',
         'NotIn' => 'NOT IN',
     ];
@@ -103,7 +107,7 @@ class Grammar extends IlluminateQueryGrammar
     /**
      * The grammar specific bitwise operators.
      *
-     * @var array
+     * @var array<string>
      */
     public $bitwiseOperators = [
         '&', '|', '^', '<<', '>>', '~',
@@ -122,7 +126,7 @@ class Grammar extends IlluminateQueryGrammar
     /**
      * Get the grammar specific operators.
      *
-     * @return array
+     * @return array<string>
      */
     public function getOperators()
     {
@@ -139,7 +143,7 @@ class Grammar extends IlluminateQueryGrammar
         return $operator;
     }
 
-    protected function prefixTable($table)
+    protected function prefixTable(string $table): string
     {
         return $this->tablePrefix . $table;
     }
@@ -161,7 +165,7 @@ class Grammar extends IlluminateQueryGrammar
      * Compile the components necessary for a select clause.
      *
      * @param  IlluminateQueryBuilder  $query
-     * @return array
+     * @return array<string, string>
      */
     protected function compileComponents(IlluminateQueryBuilder $query)
     {
@@ -253,7 +257,7 @@ class Grammar extends IlluminateQueryGrammar
 
     /**
      * @param IlluminateQueryBuilder $query
-     * @param array $variables
+     * @param array<string, mixed> $variables
      * @return string
      */
     protected function compilePreIterationVariables(IlluminateQueryBuilder $query, array $variables): string
@@ -263,7 +267,7 @@ class Grammar extends IlluminateQueryGrammar
 
     /**
      * @param IlluminateQueryBuilder $query
-     * @param array $variables
+     * @param array<string, mixed> $variables
      * @return string
      */
     protected function compilePostIterationVariables(IlluminateQueryBuilder $query, array $variables): string
@@ -274,7 +278,7 @@ class Grammar extends IlluminateQueryGrammar
 
     /**
      * @param IlluminateQueryBuilder $query
-     * @param array $variables
+     * @param array<string, mixed> $variables
      * @return string
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
@@ -297,8 +301,9 @@ class Grammar extends IlluminateQueryGrammar
     /**
      * Compile the "order by" portions of the query.
      *
-     * @param  \Illuminate\Database\Query\Builder  $query
-     * @param  array  $orders
+     * @param Builder $query
+     * @param array<mixed> $orders
+     * @param null|string $table
      * @return string
      */
     protected function compileOrders(IlluminateQueryBuilder $query, $orders, $table = null)
@@ -313,9 +318,11 @@ class Grammar extends IlluminateQueryGrammar
     /**
      * Compile the query orders to an array.
      *
-     * @param  \Illuminate\Database\Query\Builder  $query
-     * @param  array  $orders
-     * @return array
+     * @param Builder $query
+     * @param array<mixed> $orders
+     * @param null|string $table
+     * @return array<string>
+     * @throws \Exception
      */
     protected function compileOrdersToArray(IlluminateQueryBuilder $query, $orders, $table = null)
     {
@@ -386,6 +393,7 @@ class Grammar extends IlluminateQueryGrammar
 
     /**
      * @param IlluminateQueryBuilder $query
+     * @param array<mixed> $search
      * @return string
      * @throws \Exception
      */
@@ -420,7 +428,7 @@ class Grammar extends IlluminateQueryGrammar
     /**
      * Get the grammar specific bit operators.
      *
-     * @return array
+     * @return array<string>
      */
     public function getBitwiseOperators()
     {
@@ -430,13 +438,24 @@ class Grammar extends IlluminateQueryGrammar
     /**
      * Prepare the bindings for a delete statement.
      *
-     * @param  array  $bindings
-     * @return array
+     * @param  array<mixed>  $bindings
+     * @return array<mixed>
      */
     public function prepareBindingsForDelete(array $bindings)
     {
         return Arr::collapse(
             Arr::except($bindings, 'select')
         );
+    }
+
+    /**
+     * Determine if the given value is a raw expression.
+     *
+     * @param  mixed  $value
+     * @return bool
+     */
+    public function isExpression($value)
+    {
+        return $value instanceof Expression;
     }
 }
