@@ -5,18 +5,15 @@ namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Support\Arr;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
-use LaravelFreelancerNL\FluentAQL\Exceptions\BindException as BindException;
 
 trait CompilesDataManipulations
 {
     /**
      * Compile an insert statement into AQL.
      *
-     * @param IlluminateQueryBuilder $query
-     * @param array   $values
-     *
-     * @throws BindException
-     *
+     * @param Builder|IlluminateQueryBuilder $query
+     * @param array<mixed> $values
+     * @param string|null $bindVar
      * @return string
      */
     public function compileInsert(Builder|IlluminateQueryBuilder $query, array $values, string $bindVar = null)
@@ -90,7 +87,7 @@ trait CompilesDataManipulations
      * Compile an insert statement using a subquery into SQL.
      *
      * @param  IlluminateQueryBuilder  $query
-     * @param  array  $columns
+     * @param  array<mixed>  $columns
      * @param  string  $sql
      * @return string
      */
@@ -112,11 +109,6 @@ trait CompilesDataManipulations
             $insertDoc = $this->generateAqlObject($insertValues);
         }
 
-
-        //        if ($insertDoc !== '') {
-        //            $insertValues;
-        //        }
-
         $aql = /** @lang AQL */ 'LET docs = ' . $sql
             . ' FOR docDoc IN docs'
             . ' INSERT ' . $insertDoc . ' INTO ' . $table
@@ -126,6 +118,10 @@ trait CompilesDataManipulations
         return $aql;
     }
 
+    /**
+     * @param array<mixed> $values
+     * @return string
+     */
     protected function createUpdateObject($values)
     {
         $valueStrings = [];
@@ -146,7 +142,7 @@ trait CompilesDataManipulations
      * Compile an update statement into AQL.
      *
      * @param  \Illuminate\Database\Query\Builder  $query
-     * @param  array  $values
+     * @param  array<mixed>  $values
      * @return string
      */
     public function compileUpdate(IlluminateQueryBuilder $query, array|string $values)
@@ -180,21 +176,21 @@ trait CompilesDataManipulations
      * Compile an "upsert" statement into AQL.
      *
      * @param  \Illuminate\Database\Query\Builder  $query
-     * @param  array  $values
-     * @param  array  $uniqueBy
-     * @param  array  $update
+     * @param  array<mixed>  $values
+     * @param  array<mixed>  $uniqueBy
+     * @param  array<mixed>  $update
      * @return string
      */
     public function compileUpsert(IlluminateQueryBuilder $query, array $values, array $uniqueBy, array $update)
     {
         $searchFields = [];
-        foreach($uniqueBy as $key => $field) {
+        foreach($uniqueBy as $field) {
             $searchFields[$field] = 'doc.' . $field;
         }
         $searchObject = $this->generateAqlObject($searchFields);
 
         $updateFields = [];
-        foreach($update as $key => $field) {
+        foreach($update as $field) {
             $updateFields[$field] = 'doc.' . $field;
         }
         $updateObject = $this->generateAqlObject($updateFields);
@@ -254,7 +250,7 @@ trait CompilesDataManipulations
      * Compile a truncate table statement into SQL.
      *
      * @param  IlluminateQueryBuilder  $query
-     * @return array
+     * @return array<mixed>
      */
     public function compileTruncate(IlluminateQueryBuilder $query)
     {

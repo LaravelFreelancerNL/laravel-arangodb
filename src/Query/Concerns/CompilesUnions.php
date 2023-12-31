@@ -54,7 +54,7 @@ trait CompilesUnions
     /**
      * Compile a single union statement.
      *
-     * @param array $union
+     * @param array<mixed> $union
      * @param string $aql
      * @return string
      */

@@ -15,7 +15,7 @@ trait CompilesColumns
      * Compile the "select *" portion of the query.
      *
      * @param IlluminateQueryBuilder $query
-     * @param array $columns
+     * @param array<mixed> $columns
      * @return string|null
      * @throws Exception
      */
@@ -189,6 +189,7 @@ trait CompilesColumns
             array_unshift($references, $tableAlias);
         }
 
+        /** @phpstan-ignore-next-line */
         return implode('.', $references);
     }
 
@@ -219,8 +220,16 @@ trait CompilesColumns
     }
 
 
-    protected function determineReturnValues($query, $returnAttributes = [], $returnDocs = []): string
+    /**
+     * @param IlluminateQueryBuilder $query
+     * @param array<string> $returnAttributes
+     * @param array<string>  $returnDocs
+     * @return string
+     */
+    protected function determineReturnValues(IlluminateQueryBuilder $query, $returnAttributes = [], $returnDocs = []): string
     {
+        assert($query instanceof Builder);
+
         // If nothing was specifically requested, we return everything.
         if (empty($returnAttributes) && empty($returnDocs)) {
             $returnDocs[] = $query->getTableAlias($query->from);
@@ -256,6 +265,10 @@ trait CompilesColumns
         return $values;
     }
 
+    /**
+     * @param array<string> $returnDocs
+     * @return string
+     */
     protected function mergeReturnDocs($returnDocs)
     {
         if (sizeOf($returnDocs) > 1) {
@@ -265,6 +278,11 @@ trait CompilesColumns
         return reset($returnDocs);
     }
 
+    /**
+     * @param IlluminateQueryBuilder $query
+     * @param array<string> $returnDocs
+     * @return array<string>
+     */
     protected function mergeJoinResults(IlluminateQueryBuilder $query, $returnDocs = []): array
     {
         assert($query instanceof Builder);

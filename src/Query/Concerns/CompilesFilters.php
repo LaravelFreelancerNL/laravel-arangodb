@@ -26,7 +26,7 @@ trait CompilesFilters
      * Get an array of all the where clauses for the query.
      *
      * @param  \Illuminate\Database\Query\Builder  $query
-     * @return array
+     * @return array<string>
      */
     protected function compileWheresToArray($query)
     {
@@ -39,16 +39,20 @@ trait CompilesFilters
      * Format the where clause statements into one string.
      *
      * @param IlluminateQueryBuilder $query
-     * @param  array  $sql
+     * @param  array<mixed>  $aql
      * @return string
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    protected function concatenateWhereClauses($query, $sql)
+    protected function concatenateWhereClauses($query, $aql)
     {
-        return 'FILTER ' . $this->removeLeadingBoolean(implode(' ', $sql));
+        return 'FILTER ' . $this->removeLeadingBoolean(implode(' ', $aql));
     }
 
+    /**
+     * @param string $type
+     * @return string
+     */
     protected function getOperatorByWhereType($type)
     {
         if (isset($this->whereTypeOperators[$type])) {
@@ -63,7 +67,7 @@ trait CompilesFilters
      * Compile a single having clause.
      *
      * @param IlluminateQueryBuilder $query
-     * @param array $filter
+     * @param array<mixed> $filter
      * @return string
      * @throws \Exception
      */
@@ -78,7 +82,7 @@ trait CompilesFilters
             'Null' => $this->filterNull($query, $filter),
             'NotNull' => $this->filterNotNull($query, $filter),
             'bit' => $this->filterBit($query, $filter),
-            'Expression' => $this->filterExpression($filter),
+            'Expression' => $this->filterExpression($query, $filter),
             'Nested' => $this->compileNestedHavings($filter),
             default => $this->filterBasic($query, $filter),
         };
@@ -88,7 +92,7 @@ trait CompilesFilters
      * Compile a basic having|filter clause.
      *
      * @param IlluminateQueryBuilder $query
-     * @param array $filter
+     * @param array<mixed> $filter
      * @return string
      * @throws \Exception
      */
@@ -117,7 +121,7 @@ trait CompilesFilters
      * Compile a "between" filter clause.
      *
      * @param IlluminateQueryBuilder $query
-     * @param $filter
+     * @param array<mixed> $filter
      * @return string
      * @throws \Exception
      */
@@ -147,7 +151,7 @@ trait CompilesFilters
      * Compile a "between columns" filter clause.
      *
      * @param IlluminateQueryBuilder $query
-     * @param array $filter
+     * @param array<mixed> $filter
      * @return string
      * @throws \Exception
      */
@@ -174,7 +178,7 @@ trait CompilesFilters
      * Compile a filter clause comparing two columns..
      *
      * @param IlluminateQueryBuilder $query
-     * @param array $filter
+     * @param array<mixed> $filter
      * @return string
      * @throws \Exception
      */
@@ -194,7 +198,7 @@ trait CompilesFilters
      * Compile a "filter null" clause.
      *
      * @param IlluminateQueryBuilder $query
-     * @param $filter
+     * @param array<mixed> $filter
      * @return string
      * @throws \Exception
      */
@@ -213,7 +217,7 @@ trait CompilesFilters
      * Compile a "filter not null" clause.
      *
      * @param IlluminateQueryBuilder $query
-     * @param $filter
+     * @param array<mixed> $filter
      * @return string
      * @throws \Exception
      */
@@ -232,7 +236,7 @@ trait CompilesFilters
      * Compile a "filter in" clause.
      *
      * @param  IlluminateQueryBuilder  $query
-     * @param  array  $filter
+     * @param  array<mixed>  $filter
      * @return string
      */
     protected function filterIn(IlluminateQueryBuilder $query, $filter)
@@ -292,7 +296,7 @@ trait CompilesFilters
      * For safety, filterIntegerInRaw ensures this method is only used with integer values.
      *
      * @param  IlluminateQueryBuilder  $query
-     * @param  array  $filter
+     * @param  array<mixed>  $filter
      * @return string
      */
     protected function filterNotInRaw(IlluminateQueryBuilder $query, array $filter): string
@@ -350,10 +354,12 @@ trait CompilesFilters
     }
 
     /**
-     * @param array $filter
+     * @param array<mixed> $filter
      * @return mixed
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    protected function filterExpression($filter)
+    protected function filterExpression(IlluminateQueryBuilder $query, $filter)
     {
         return $filter['column']->getValue($this);
     }
@@ -362,7 +368,7 @@ trait CompilesFilters
      * Compile a filter date clause.
      *
      * @param IlluminateQueryBuilder $query
-     * @param array $filter
+     * @param array<mixed> $filter
      * @return string
      * @throws \Exception
      */
@@ -382,7 +388,7 @@ trait CompilesFilters
      * Compile a filter year clause.
      *
      * @param IlluminateQueryBuilder $query
-     * @param array $filter
+     * @param array<mixed> $filter
      * @return string
      * @throws \Exception
      */
@@ -403,7 +409,7 @@ trait CompilesFilters
      * Compile a filter month clause.
      *
      * @param IlluminateQueryBuilder $query
-     * @param array $filter
+     * @param array<mixed> $filter
      * @return string
      * @throws \Exception
      */
@@ -425,7 +431,7 @@ trait CompilesFilters
      * Compile a filter day clause.
      *
      * @param IlluminateQueryBuilder $query
-     * @param array $filter
+     * @param array<mixed> $filter
      * @return string
      * @throws \Exception
      */
@@ -446,7 +452,7 @@ trait CompilesFilters
      * Compile a filter time clause.
      *
      * @param  IlluminateQueryBuilder  $query
-     * @param  array  $filter
+     * @param  array<mixed>  $filter
      * @return string
      */
     protected function filterTime(IlluminateQueryBuilder $query, $filter)
@@ -466,7 +472,7 @@ trait CompilesFilters
      * Compile a filter condition with a sub-select.
      *
      * @param IlluminateQueryBuilder $query
-     * @param array $filter
+     * @param array<mixed> $filter
      * @return string
      * @throws \Exception
      */
@@ -487,7 +493,7 @@ trait CompilesFilters
      * Compile a filter exists clause.
      *
      * @param  \Illuminate\Database\Query\Builder  $query
-     * @param  array  $filter
+     * @param  array<mixed>  $filter
      * @return string
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
@@ -501,7 +507,7 @@ trait CompilesFilters
      * Compile a filter exists clause.
      *
      * @param  \Illuminate\Database\Query\Builder  $query
-     * @param  array  $filter
+     * @param  array<mixed>  $filter
      * @return string
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
@@ -515,17 +521,19 @@ trait CompilesFilters
      * Compile a nested where clause.
      *
      * @param  \Illuminate\Database\Query\Builder  $query
-     * @param  array  $where
+     * @param  array<mixed>  $filter
      * @return string
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    protected function filterNested(Builder $query, $where)
+    protected function filterNested(IlluminateQueryBuilder $query, $filter)
     {
         // Here we will calculate what portion of the string we need to remove. If this
         // is a join clause query, we need to remove the "on" portion of the SQL and
         // if it is a normal query we need to take the leading "where" of queries.
-        $offset = $where['query'] instanceof JoinClause ? 3 : 6;
+        $offset = $filter['query'] instanceof JoinClause ? 3 : 6;
 
-        return '(' . substr($this->compileWheres($where['query']), $offset) . ')';
+        return '(' . substr($this->compileWheres($filter['query']), $offset) . ')';
     }
 
 
@@ -533,7 +541,7 @@ trait CompilesFilters
      * Compile a having clause involving a bit operator.
      *
      * @param IlluminateQueryBuilder $query
-     * @param array $filter
+     * @param array<mixed> $filter
      * @return string
      * @throws \Exception
      */
@@ -610,6 +618,10 @@ trait CompilesFilters
         return [$minOperator, $maxOperator, $boolean];
     }
 
+    /**
+     * @param array<mixed> $filter
+     * @return array<mixed>
+     */
     protected function normalizeOperator($filter)
     {
         if (isset($filter['operator'])) {

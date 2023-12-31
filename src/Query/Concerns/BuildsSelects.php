@@ -155,11 +155,16 @@ trait BuildsSelects
         return $this;
     }
 
-    public function orderByRaw($sql, $bindings = [])
+    /**
+     * @param string $aql
+     * @param array<mixed> $bindings
+     * @return $this
+     */
+    public function orderByRaw($aql, $bindings = [])
     {
         $type = 'Raw';
 
-        $sql = new Expression($sql);
+        $sql = new Expression($aql);
 
         $this->{$this->unions ? 'unionOrders' : 'orders'}[] = compact('type', 'sql');
 

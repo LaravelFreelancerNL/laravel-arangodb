@@ -37,13 +37,12 @@ class Builder extends IlluminateQueryBuilder
     use ConvertsIdToKey;
     use HandlesAliases;
     use HandlesBindings;
-
     public AQB $aqb;
 
     /**
      * The current query value bindings.
      *
-     * @var array
+     * @var array<mixed>
      */
     public $bindings = [
         'preIterationVariables' => [],
@@ -126,7 +125,7 @@ class Builder extends IlluminateQueryBuilder
         $this->queryId = spl_object_id($this);
     }
 
-    public function getQueryId()
+    public function getQueryId(): int
     {
         return $this->queryId;
     }
@@ -134,7 +133,7 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Get the current query value bindings in a flattened array.
      *
-     * @return array
+     * @return array<mixed>
      */
     public function getBindings()
     {
@@ -242,7 +241,7 @@ class Builder extends IlluminateQueryBuilder
     /**
      * Set a variable
      * @param string $variable
-     * @param IlluminateQueryBuilder|Expression|array|Int|Float|String|Boolean $value
+     * @param IlluminateQueryBuilder|Expression|array<mixed>|Int|Float|String|Boolean $value
      * @param string|VariablePosition $variablePosition
      * @return Builder
      */
@@ -285,6 +284,11 @@ class Builder extends IlluminateQueryBuilder
         return false;
     }
 
+    /**
+     * @param mixed $value
+     * @param array<mixed> $variables
+     * @return bool
+     */
     public function isReference(mixed $value, array $variables = []): bool
     {
         if (!is_string($value) || empty($value)) {

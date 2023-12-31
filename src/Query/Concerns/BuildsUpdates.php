@@ -15,6 +15,10 @@ use LaravelFreelancerNL\FluentAQL\Exceptions\BindException;
  */
 trait BuildsUpdates
 {
+    /**
+     * @param array<mixed> $values
+     * @return array<mixed>
+     */
     protected function prepareValuesForUpdate(array $values)
     {
         foreach($values as $key => $value) {
@@ -38,7 +42,7 @@ trait BuildsUpdates
     /**
      * Update records in the database.
      *
-     * @param  array  $values
+     * @param  array<mixed>  $values
      * @return int
      */
     public function update(array $values)
@@ -59,8 +63,8 @@ trait BuildsUpdates
     /**
      * Insert or update a record matching the attributes, and fill it with values.
      *
-     * @param array $attributes
-     * @param array $values
+     * @param array<mixed> $attributes
+     * @param array<mixed> $values
      * @return bool
      * @throws BindException
      */
@@ -129,9 +133,9 @@ trait BuildsUpdates
     /**
      * Insert new records or update the existing ones.
      *
-     * @param array $values
-     * @param array|string $uniqueBy
-     * @param array|null $update
+     * @param array<mixed> $values
+     * @param array<mixed>|string $uniqueBy
+     * @param array<mixed>|null $update
      * @return int
      * @throws BindException
      */

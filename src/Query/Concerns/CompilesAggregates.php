@@ -13,7 +13,7 @@ trait CompilesAggregates
      * Compile an aggregated select clause.
      *
      * @param  \Illuminate\Database\Query\Builder  $query
-     * @param  array  $aggregate
+     * @param  array<mixed>  $aggregate
      * @return string
      */
     protected function compileAggregate(IlluminateBuilder $query, $aggregate)
@@ -26,7 +26,9 @@ trait CompilesAggregates
     /**
      * Compile AQL for average aggregate.
      *
-     * @param  array<mixed>  $aggregate
+     * @param array<mixed> $aggregate
+     * @return string
+     * @throws \Exception
      */
     protected function compileAvg(Builder $query, array $aggregate)
     {
@@ -39,6 +41,8 @@ trait CompilesAggregates
      * Compile AQL for count aggregate.
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @param Builder $query
+     * @return string
      */
     protected function compileCount(Builder $query)
     {
@@ -78,7 +82,10 @@ trait CompilesAggregates
     /**
      * Compile AQL for min aggregate.
      *
-     * @param  array<mixed>  $aggregate
+     * @param Builder $query
+     * @param array<mixed> $aggregate
+     * @return string
+     * @throws \Exception
      */
     protected function compileMin(Builder $query, array $aggregate)
     {
@@ -88,10 +95,13 @@ trait CompilesAggregates
     }
 
     /**
-    * Compile AQL for sum aggregate.
-    *
-    * @param  array<mixed>  $aggregate
-    */
+     * Compile AQL for sum aggregate.
+     *
+     * @param Builder $query
+     * @param array<mixed> $aggregate
+     * @return string
+     * @throws \Exception
+     */
     protected function compileSum(Builder $query, array $aggregate)
     {
         $column = $this->normalizeColumn($query, $aggregate['columns'][0]);

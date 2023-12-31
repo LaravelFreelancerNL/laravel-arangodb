@@ -6,7 +6,7 @@ namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
 trait ConvertsIdToKey
 {
-    public function convertIdToKey($data)
+    public function convertIdToKey(mixed $data): mixed
     {
         if (is_array($data) && array_is_list($data)) {
             foreach($data as $key => $value) {

@@ -26,7 +26,7 @@ trait BuildsSubqueries
      * Creates a subquery and parse it.
      *
      * @param  \Closure|IlluminateQueryBuilder|IlluminateEloquentBuilder|string $query
-     * @return array
+     * @return array<mixed>
      *
      * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
@@ -60,6 +60,10 @@ trait BuildsSubqueries
         return $this->newQuery();
     }
 
+    /**
+     * @param IlluminateQueryBuilder $query
+     * @return bool
+     */
     protected function hasLimitOfOne(IlluminateQueryBuilder $query)
     {
         assert($query instanceof Builder);
@@ -74,8 +78,8 @@ trait BuildsSubqueries
     /**
      * Parse the subquery into AQL and bindings.
      *
-     * @param  mixed  $query
-     * @return array
+     * @param IlluminateEloquentBuilder|IlluminateQueryBuilder|Relation|string  $query
+     * @return array<mixed>
      *
      * @throws \InvalidArgumentException
      */

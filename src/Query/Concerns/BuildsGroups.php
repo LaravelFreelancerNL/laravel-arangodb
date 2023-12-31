@@ -7,6 +7,7 @@ namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 use Carbon\CarbonPeriod;
 use Closure;
 use Illuminate\Contracts\Database\Query\ConditionExpression;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Arr;
 
@@ -20,7 +21,7 @@ trait BuildsGroups
     /**
      * Add a "group by" clause to the query.
      *
-     * @param array|Expression|string ...$groups
+     * @param array<mixed>|Expression|string ...$groups
      * @return $this
      */
     public function groupBy(...$groups)
@@ -39,7 +40,7 @@ trait BuildsGroups
      * Add a raw groupBy clause to the query.
      *
      * @param  string  $aql
-     * @param  array  $bindings
+     * @param  array<mixed>  $bindings
      * @return $this
      */
     public function groupByRaw($aql, array $bindings = [])
@@ -53,7 +54,7 @@ trait BuildsGroups
         return $this;
     }
 
-    public function cleanGroupVariables()
+    public function cleanGroupVariables(): void
     {
         $this->tableAliases = array_diff($this->tableAliases, $this->groupVariables);
         $this->groupVariables = null;
@@ -109,7 +110,7 @@ trait BuildsGroups
      * Add a raw having clause to the query.
      *
      * @param  string  $sql
-     * @param  array  $bindings
+     * @param  array<mixed>  $bindings
      * @param  string  $boolean
      * @return $this
      */
@@ -129,7 +130,8 @@ trait BuildsGroups
     /**
      * Create a new query instance for nested where condition.
      *
-     * @return \Illuminate\Database\Query\Builder
+     * @param array<mixed> $aliases
+     * @return Builder
      */
     public function forNestedWhere($aliases = [])
     {
@@ -182,7 +184,7 @@ trait BuildsGroups
      * Add a "having between " clause to the query.
      *
      * @param  string  $column
-     * @param  iterable  $values
+     * @param  iterable<mixed>  $values
      * @param  string  $boolean
      * @param  bool  $not
      * @return $this

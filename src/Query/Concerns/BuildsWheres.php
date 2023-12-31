@@ -21,9 +21,10 @@ trait BuildsWheres
     /**
      * Add a "where fulltext" clause to the query.
      *
-     * @param  string|string[]  $columns
-     * @param  string  $value
-     * @param  string  $boolean
+     * @param string|string[] $columns
+     * @param string $value
+     * @param array<mixed> $options
+     * @param string $boolean
      * @return $this
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
@@ -42,7 +43,7 @@ trait BuildsWheres
      * @param  string  $value
      * @param  string  $operator
      * @param  bool  $useDefault
-     * @return array
+     * @return array<mixed>
      *
      * @throws \InvalidArgumentException
      *
@@ -62,7 +63,7 @@ trait BuildsWheres
     /**
      * Add an array of where clauses to the query.
      *
-     * @param  array  $column
+     * @param  array<mixed>  $column
      * @param  string  $boolean
      * @param  string  $method
      * @return $this
@@ -81,7 +82,7 @@ trait BuildsWheres
     /**
      * @param mixed $operator
      * @param mixed $value
-     * @return array
+     * @return array<mixed>
      */
     public function validateOperator(mixed $operator, mixed $value): array
     {
@@ -172,8 +173,8 @@ trait BuildsWheres
     /**
      * Merge an array of where clauses and bindings.
      *
-     * @param  array  $wheres
-     * @param  array  $bindings
+     * @param  array<mixed>  $wheres
+     * @param  array<mixed>  $bindings
      * @return $this
      */
     public function mergeWheres($wheres, $bindings)
@@ -188,7 +189,7 @@ trait BuildsWheres
     /**
      * Add a basic where clause to the query.
      *
-     * @param  \Closure|IlluminateQueryBuilder|IlluminateEloquentBuilder|Expression|string|array  $column
+     * @param  \Closure|IlluminateQueryBuilder|IlluminateEloquentBuilder|Expression|string|array<mixed>  $column
      * @param  mixed  $operator
      * @param  mixed  $value
      * @param  string  $boolean
@@ -276,9 +277,10 @@ trait BuildsWheres
     /**
      * Add a where between statement to the query.
      *
-     * @param  string|Expression  $column
-     * @param  string  $boolean
-     * @param  bool  $not
+     * @param string|Expression $column
+     * @param iterable<mixed> $values
+     * @param string $boolean
+     * @param bool $not
      * @return IlluminateQueryBuilder
      *
      * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
@@ -303,7 +305,7 @@ trait BuildsWheres
     /**
      * Add a "where" clause comparing two columns to the query.
      *
-     * @param  string|array  $first
+     * @param  string|array<mixed>  $first
      * @param  string|null  $operator
      * @param  string|null  $second
      * @param  string|null  $boolean

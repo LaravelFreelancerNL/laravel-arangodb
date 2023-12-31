@@ -14,6 +14,10 @@ trait BuildsSearches
 {
     /**
      * Search an ArangoSearch view.
+     * @param array<mixed>|Expression|string $fields
+     * @param string $searchText
+     * @param string|null $analyzer
+     * @return IlluminateQueryBuilder
      */
     public function searchView(
         array|Expression|string $fields,

@@ -12,7 +12,7 @@ trait CompilesGroups
      * Compile the "group by" portions of the query.
      *
      * @param IlluminateQueryBuilder $query
-     * @param array $groups
+     * @param array<mixed> $groups
      * @return string
      * @throws \Exception
      */
@@ -54,8 +54,8 @@ trait CompilesGroups
 
     /**
      * @param IlluminateQueryBuilder $query
-     * @param $groups
-     * @return array
+     * @param array<mixed> $groups
+     * @return array<string>
      * @throws \Exception
      */
     protected function keepColumns(IlluminateQueryBuilder $query, $groups)
@@ -83,7 +83,7 @@ trait CompilesGroups
         return $results;
     }
 
-    protected function extractGroupVariable(Expression $group)
+    protected function extractGroupVariable(Expression $group): string
     {
         return explode(' = ', $group->getValue($this))[0];
     }

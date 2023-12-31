@@ -7,13 +7,14 @@ namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Database\Query\Expression;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
+use LaravelFreelancerNL\Aranguent\Query\JoinClause;
 
 trait CompilesJoins
 {
     /**
-     * @param $join
+     * @param JoinClause $join
      * @param Builder $query
-     * @return array
+     * @return array<string>
      */
     public function extractTableAndAlias(Builder $query, $join): array
     {
@@ -39,7 +40,7 @@ trait CompilesJoins
      * Compile the "join" portions of the query.
      *
      * @param IlluminateQueryBuilder $query
-     * @param  array  $joins
+     * @param  array<mixed>  $joins
      * @return string
      */
     protected function compileJoins(IlluminateQueryBuilder $query, $joins)
@@ -53,6 +54,11 @@ trait CompilesJoins
         })->implode(' ');
     }
 
+    /**
+     * @param IlluminateQueryBuilder $query
+     * @param JoinClause $join
+     * @return string
+     */
     protected function compileCrossJoin(IlluminateQueryBuilder $query, $join)
     {
         assert($query instanceof Builder);
@@ -64,6 +70,11 @@ trait CompilesJoins
         return 'FOR ' . $alias . ' IN ' . $table;
     }
 
+    /**
+     * @param IlluminateQueryBuilder $query
+     * @param JoinClause $join
+     * @return string
+     */
     protected function compileInnerJoin(IlluminateQueryBuilder $query, $join)
     {
         assert($query instanceof Builder);
@@ -80,6 +91,11 @@ trait CompilesJoins
         return $aql;
     }
 
+    /**
+     * @param IlluminateQueryBuilder $query
+     * @param JoinClause $join
+     * @return string
+     */
     protected function compileLeftJoin(IlluminateQueryBuilder $query, $join)
     {
         assert($query instanceof Builder);

@@ -32,7 +32,7 @@ trait HandlesBindings
         return $this;
     }
 
-    protected function bindValue($value, string $type = 'where')
+    protected function bindValue(mixed $value, string $type = 'where'): mixed
     {
         assert($this->grammar instanceof Grammar);
 
@@ -50,8 +50,8 @@ trait HandlesBindings
     /**
      * Remove all of the expressions from a list of bindings.
      *
-     * @param array $bindings
-     * @return array
+     * @param array<mixed> $bindings
+     * @return array<mixed>
      */
     public function cleanBindings(array $bindings)
     {
@@ -68,7 +68,7 @@ trait HandlesBindings
         return $this->queryId . '_' . $type . '_' . (count($this->bindings[$type]) + 1);
     }
 
-    protected function getLastBindVariable(string $type = 'where')
+    protected function getLastBindVariable(string $type = 'where'): string
     {
         return array_key_last($this->bindings[$type]);
     }
@@ -85,7 +85,7 @@ trait HandlesBindings
     /**
      * Set the bindings on the query builder.
      *
-     * @param  array  $bindings
+     * @param  array<mixed>  $bindings
      * @param  string  $type
      * @return $this
      *
@@ -106,8 +106,7 @@ trait HandlesBindings
         return $this;
     }
 
-
-    protected function replaceValueWithBindVariable(string $type = 'where')
+    protected function replaceValueWithBindVariable(string $type = 'where'): string
     {
         return '@' . $this->getLastBindVariable($type);
     }

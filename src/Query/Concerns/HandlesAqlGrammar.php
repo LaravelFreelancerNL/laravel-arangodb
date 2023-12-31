@@ -50,7 +50,7 @@ trait HandlesAqlGrammar
     ];
 
     /**
-     * @var array|int[]
+     * @var array<string, int>
      */
     protected array $arithmeticOperators = [
         '+' => 1,
@@ -84,7 +84,7 @@ trait HandlesAqlGrammar
         return 'Y-m-d\TH:i:s.vp';
     }
 
-    public function isBind($value): bool
+    public function isBind(mixed $value): bool
     {
         if (is_string($value) && preg_match('/^@?[0-9]{4}_' . json_encode($value) . '_[0-9_]+$/', $value)) {
             return true;
@@ -107,7 +107,7 @@ trait HandlesAqlGrammar
     /**
      * Quote the given string literal.
      *
-     * @param  string|array  $value
+     * @param  string|array<string>  $value
      * @return string
      */
     public function quoteString($value)
@@ -125,7 +125,7 @@ trait HandlesAqlGrammar
      *
      * @param  Array<mixed>|Expression|string  $value
      * @param  bool  $prefixAlias
-     * @return string|array
+     * @return string|array<mixed>
      *
      * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
@@ -196,6 +196,10 @@ trait HandlesAqlGrammar
         return '(' . $subquery . ')';
     }
 
+    /**
+     * @param array<mixed> $data
+     * @return string
+     */
     public function generateAqlObject(array $data): string
     {
         $data = Arr::undot($data);
@@ -203,6 +207,10 @@ trait HandlesAqlGrammar
         return $this->generateAqlObjectString($data);
     }
 
+    /**
+     * @param array<mixed> $data
+     * @return string
+     */
     protected function generateAqlObjectString(array $data): string
     {
         foreach($data as $key => $value) {
@@ -237,7 +245,7 @@ trait HandlesAqlGrammar
      * Substitute the given bindings into the given raw AQL query.
      *
      * @param  string  $sql
-     * @param  array  $bindings
+     * @param  array<mixed>  $bindings
      * @return string
      */
     public function substituteBindingsIntoRawSql($sql, $bindings)
@@ -273,7 +281,7 @@ trait HandlesAqlGrammar
         return str_contains($value, '->');
     }
 
-    public function convertJsonFields($data): mixed
+    public function convertJsonFields(mixed $data): mixed
     {
         if (!is_array($data) && !is_string($data)) {
             return $data;
@@ -290,6 +298,10 @@ trait HandlesAqlGrammar
         return $this->convertJsonKeysToDotNotation($data);
     }
 
+    /**
+     * @param array<string> $fields
+     * @return array<string>
+     */
     public function convertJsonValuesToDotNotation(array $fields): array
     {
         foreach($fields as $key => $value) {
@@ -300,6 +312,10 @@ trait HandlesAqlGrammar
         return $fields;
     }
 
+    /**
+     * @param array<string> $fields
+     * @return array<string>
+     */
     public function convertJsonKeysToDotNotation(array $fields): array
     {
         foreach($fields as $key => $value) {
@@ -310,4 +326,21 @@ trait HandlesAqlGrammar
         }
         return $fields;
     }
+
+    /**
+     * Translate sql operators to their AQL equivalent where possible.
+     *
+     * @param string $operator
+     *
+     * @return mixed|string
+     */
+    protected function translateOperator(string $operator)
+    {
+        if (isset($this->operatorTranslations[strtolower($operator)])) {
+            $operator = $this->operatorTranslations[$operator];
+        }
+
+        return $operator;
+    }
+
 }

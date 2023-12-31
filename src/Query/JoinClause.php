@@ -6,6 +6,7 @@ namespace LaravelFreelancerNL\Aranguent\Query;
 
 use Closure;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Database\Query\Processors\Processor;
 use LaravelFreelancerNL\Aranguent\Connection;
 
@@ -21,7 +22,7 @@ class JoinClause extends Builder
     /**
      * The table the join clause is joining to.
      *
-     * @var string
+     * @var Expression|string
      */
     public $table;
 
@@ -93,7 +94,7 @@ class JoinClause extends Builder
      *
      * @param  \Closure|string  $first
      * @param  string|null  $operator
-     * @param  \Illuminate\Database\Query\Expression|string|null  $second
+     * @param  Expression|string|null  $second
      * @param  string  $boolean
      * @return $this
      *

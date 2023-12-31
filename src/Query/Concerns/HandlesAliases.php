@@ -12,8 +12,14 @@ use LaravelFreelancerNL\Aranguent\Query\Builder;
 
 trait HandlesAliases
 {
+    /**
+     * @var array<string, Expression|string>
+     */
     public array $tableAliases = [];
 
+    /**
+     * @var array<string, Expression|string>
+     */
     public array $columnAliases = [];
 
     /**
@@ -88,11 +94,18 @@ trait HandlesAliases
         return null;
     }
 
+    /**
+     * @return array<string, Expression|string>
+     */
     public function getTableAliases(): array
     {
         return $this->tableAliases;
     }
 
+    /**
+     * @param array<string, Expression|string>|IlluminateQueryBuilder $aliases
+     * @return void
+     */
     public function importTableAliases(array|IlluminateQueryBuilder $aliases): void
     {
         if ($aliases instanceof Builder) {
@@ -110,7 +123,7 @@ trait HandlesAliases
         $query->importTableAliases($this);
     }
 
-    public function isTableAlias(string $value)
+    public function isTableAlias(string $value): bool
     {
         return in_array($value, $this->tableAliases);
     }
@@ -176,7 +189,7 @@ trait HandlesAliases
         return $alias;
     }
 
-    public function replaceTableForAlias($reference): string
+    public function replaceTableForAlias(string $reference): string
     {
         $referenceParts = explode('.', $reference);
         $first = array_shift($referenceParts);
