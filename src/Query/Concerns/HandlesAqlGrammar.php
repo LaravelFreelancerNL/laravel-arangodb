@@ -125,14 +125,14 @@ trait HandlesAqlGrammar
      *
      * @param  Array<mixed>|Expression|string  $value
      * @param  bool  $prefixAlias
-     * @return string|array<mixed>
+     * @return array<mixed>|float|int|string
      *
      * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public function wrap($value, $prefixAlias = false)
     {
-        if ($this->isExpression($value)) {
-            return $this->getValue($value);
+        if ($value instanceof Expression) {
+            return $value->getValue($this);
         }
 
         if (is_array($value)) {
@@ -156,16 +156,20 @@ trait HandlesAqlGrammar
     /**
      * Wrap a table in keyword identifiers.
      *
-     * @param  \Illuminate\Database\Query\Expression|string  $table
-     * @return string
+     * @param Expression|string  $table
+     * @return float|int|string
      */
     public function wrapTable($table)
     {
-        if (!$this->isExpression($table)) {
-            return $this->wrap($this->tablePrefix . $table, true);
+        if (!$table instanceof Expression) {
+            $wrappedTable = $this->wrap($this->tablePrefix . $table, true);
+
+            assert(!is_array($wrappedTable));
+
+            return $wrappedTable;
         }
 
-        return $this->getValue($table);
+        return $table->getValue($this);
     }
 
     /**

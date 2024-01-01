@@ -130,7 +130,10 @@ trait CompilesColumns
     }
 
     /**
+     * @param Builder $query
+     * @param int|string $key
      * @param string $column
+     * @param string|null $table
      * @return array<mixed>
      * @throws Exception
      */
@@ -142,6 +145,7 @@ trait CompilesColumns
 
         $column = $this->wrap($this->normalizeColumnReferences($query, $column, $table));
 
+        /** @phpstan-ignore-next-line */
         $alias = $this->cleanAlias($query, $alias);
 
         return [$column, $alias];
@@ -232,14 +236,12 @@ trait CompilesColumns
 
         // If nothing was specifically requested, we return everything.
         if (empty($returnAttributes) && empty($returnDocs)) {
-            $returnDocs[] = $query->getTableAlias($query->from);
+            $returnDocs[] = (string) $query->getTableAlias($query->from);
 
             if ($query->joins !== null) {
                 $returnDocs = $this->mergeJoinResults($query, $returnDocs);
             }
         }
-
-        // clean up returnAttributes?
 
         // Aggregate functions only return the aggregate, so we can clear out everything else.
         if ($query->aggregate !== null) {
@@ -275,7 +277,7 @@ trait CompilesColumns
             return 'MERGE(' . implode(', ', $returnDocs) . ')';
         }
 
-        return reset($returnDocs);
+        return $returnDocs[0];
     }
 
     /**
@@ -293,7 +295,7 @@ trait CompilesColumns
             if (!isset($tableAlias)) {
                 $tableAlias = $query->generateTableAlias($join->table);
             }
-            $returnDocs[] = $tableAlias;
+            $returnDocs[] = (string) $tableAlias;
         }
 
         return $returnDocs;

@@ -50,7 +50,7 @@ class JoinClause extends Builder
     /**
      * The class name of the parent query builder.
      *
-     * @var string
+     * @var class-string<IlluminateQueryBuilder>
      */
     protected $parentClass;
 
@@ -58,7 +58,7 @@ class JoinClause extends Builder
      * Create a new join clause instance.
      *
      * @param  string  $type
-     * @param  string  $table
+     * @param  Expression|string  $table
      * @return void
      */
     public function __construct(IlluminateQueryBuilder $parentQuery, $type, $table)
@@ -150,6 +150,9 @@ class JoinClause extends Builder
     {
         $class = $this->parentClass;
 
-        return new $class($this->parentConnection, $this->parentGrammar, $this->parentProcessor);
+        $newParentQuery = new $class($this->parentConnection, $this->parentGrammar, $this->parentProcessor);
+        assert($newParentQuery instanceof Builder);
+
+        return $newParentQuery;
     }
 }

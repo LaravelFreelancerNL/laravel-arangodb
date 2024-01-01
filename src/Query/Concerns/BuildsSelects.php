@@ -5,14 +5,12 @@ declare(strict_types=1);
 namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
 use Exception;
+use Illuminate\Database\Eloquent\Builder as IlluminateEloquentBuilder;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Database\Query\Expression;
 use InvalidArgumentException;
 use LaravelFreelancerNL\Aranguent\Query\Grammar;
 
-/**
- * @method isQueryable(mixed $column)
- */
 trait BuildsSelects
 {
     /**
@@ -27,6 +25,9 @@ trait BuildsSelects
         if ($this->isQueryable($table)) {
             return $this->fromSub($table, $as);
         }
+
+        assert(is_string($table));
+
         $this->registerTableAlias($table, $as);
 
         $this->from = $table;
@@ -63,7 +64,7 @@ trait BuildsSelects
     /**
      * Add a subselect expression to the query.
      *
-     * @param \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder|string $query
+     * @param \Closure|IlluminateQueryBuilder|IlluminateEloquentBuilder|string $query
      * @param string $as
      * @return $this
      *
@@ -125,7 +126,7 @@ trait BuildsSelects
     /**
      * Add an "order by" clause to the query.
      *
-     * @param \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder|\Illuminate\Contracts\Database\Query\Expression|string $column
+     * @param \Closure|IlluminateQueryBuilder|IlluminateEloquentBuilder|Expression|string $column
      * @param string $direction
      * @return $this
      *
@@ -134,6 +135,7 @@ trait BuildsSelects
     public function orderBy($column, $direction = 'asc')
     {
         if ($this->isQueryable($column)) {
+            assert(!$column instanceof Expression);
             [$query, $bindings] = $this->createSub($column);
 
             $column = new Expression('(' . $query . ')');
@@ -201,7 +203,7 @@ trait BuildsSelects
     /**
      * Add a union statement to the query.
      *
-     * @param  \Closure|\Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder  $query
+     * @param  \Closure|IlluminateQueryBuilder|IlluminateEloquentBuilder $query
      * @param  bool  $all
      * @return $this
      *
@@ -212,6 +214,11 @@ trait BuildsSelects
         if ($query instanceof \Closure) {
             $query($query = $this->newQuery());
         }
+
+        if ($query instanceof IlluminateEloquentBuilder) {
+            $query = $query->getQuery();
+        }
+
         $this->importBindings($query);
         $this->unions[] = compact('query', 'all');
 

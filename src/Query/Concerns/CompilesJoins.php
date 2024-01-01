@@ -20,7 +20,7 @@ trait CompilesJoins
     {
         if ($join->table instanceof Expression) {
             $tableParts = [];
-            preg_match("/(^.*) as (.*?)$/", $join->table->getValue($query->grammar), $tableParts);
+            preg_match("/(^.*) as (.*?)$/", (string) $join->table->getValue($query->grammar), $tableParts);
             $table = $tableParts[1];
             $alias = $tableParts[2];
 
@@ -29,7 +29,7 @@ trait CompilesJoins
             return [$table, $alias];
         }
 
-        $table = $this->wrapTable($join->table);
+        $table = (string) $this->wrapTable($join->table);
         $alias = $query->generateTableAlias($join->table);
         $query->registerTableAlias($join->table, $alias);
 

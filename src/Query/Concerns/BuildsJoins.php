@@ -27,12 +27,6 @@ trait BuildsJoins
      */
     public function rightJoin($table, $first, $operator = null, $second = null)
     {
-        // TODO: right outer joins should be doable by basically transforming them to a left outer join.
-        // The right join would need to be checked before generating the FOR clause on the first called collection
-        // with the filter after that.
-        // FOR x IN rightJoinCollection
-        //  FOR x IN firstCollection
-        //    FILTER ...
         throw new LogicException('This database driver does not support the rightJoin method.');
     }
 
@@ -80,7 +74,7 @@ trait BuildsJoins
      * @param  mixed  $table
      * @param Closure|string  $first
      * @param  string|null  $operator
-     * @param  string|null  $second
+     * @param  float|int|string|null  $second
      * @param  string  $type
      * @param  bool  $where
      */
@@ -117,7 +111,7 @@ trait BuildsJoins
      * @param  string  $as
      * @param Closure|string  $first
      * @param  string|null  $operator
-     * @param  string|null  $second
+     * @param  float|int|string|null  $second
      * @param  string  $type
      * @param  bool  $where
      *
@@ -149,7 +143,13 @@ trait BuildsJoins
      */
     public function leftJoin($table, $first, $operator = null, $second = null): IlluminateQueryBuilder
     {
-        return $this->join($table, $first, $operator, $second, 'left');
+        return $this->join(
+            $table,
+            $first,
+            $operator,
+            $this->grammar->getValue($second),
+            'left'
+        );
     }
 
     /**
@@ -163,7 +163,7 @@ trait BuildsJoins
      */
     public function leftJoinSub($query, $as, $first, $operator = null, $second = null): IlluminateQueryBuilder
     {
-        return $this->joinSub($query, $as, $first, $operator, $second, 'left');
+        return $this->joinSub($query, $as, $first, $operator, $this->grammar->getValue($second), 'left');
     }
 
 

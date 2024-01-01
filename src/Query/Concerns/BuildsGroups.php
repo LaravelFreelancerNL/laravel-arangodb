@@ -60,6 +60,13 @@ trait BuildsGroups
         $this->groupVariables = null;
     }
 
+    /**
+     * @param ConditionExpression|string $column
+     * @param null|string $operator
+     * @param $value
+     * @param $boolean
+     * @return $this|\LaravelFreelancerNL\Aranguent\Query\Builder
+     */
     public function having($column, $operator = null, $value = null, $boolean = 'and')
     {
         $type = 'Basic';
@@ -81,6 +88,7 @@ trait BuildsGroups
             func_num_args() === 2
         );
 
+        /** @phpstan-ignore-next-line  */
         if ($column instanceof Closure && is_null($operator)) {
             return $this->havingNested($column, $boolean);
         }
@@ -199,8 +207,9 @@ trait BuildsGroups
             $values = [$values->start, $values->end];
         }
 
-        $bindings = array_slice($this->cleanBindings(Arr::flatten($values)), 0, 2);
+        assert(is_array($values));
 
+        $bindings = array_slice($this->cleanBindings(Arr::flatten($values)), 0, 2);
         $this->addBinding($bindings[0], 'having');
         $values[0] = '@' . array_key_last($this->getBindings());
 

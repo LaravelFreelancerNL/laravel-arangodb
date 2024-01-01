@@ -40,8 +40,8 @@ trait BuildsWheres
     /**
      * Prepare the value and operator for a where clause.
      *
-     * @param  string  $value
-     * @param  string  $operator
+     * @param  float|int|string|null  $value
+     * @param  string|null  $operator
      * @param  bool  $useDefault
      * @return array<mixed>
      *
@@ -235,6 +235,7 @@ trait BuildsWheres
         // assume the developer wants to run a subquery and then compare the result
         // of that subquery with the given value that was provided to the method.
         if ($this->isQueryable($column) && !is_null($operator)) {
+            /** @phpstan-ignore-next-line  */
             [$subquery] = $this->createSub($column, true);
 
             return $this->where(new Expression($subquery), $operator, $value, $boolean);
@@ -246,6 +247,7 @@ trait BuildsWheres
         // sub-select within the query and we will need to compile the sub-select
         // within the where clause to get the appropriate query record results.
         if ($this->isQueryable($value)) {
+            /** @phpstan-ignore-next-line  */
             return $this->whereSub($column, $operator, $value, $boolean);
         }
 
@@ -253,6 +255,7 @@ trait BuildsWheres
         // where null clause to the query. So, we will allow a short-cut here to
         // that method for convenience so the developer doesn't have to check.
         if (is_null($value)) {
+            /** @phpstan-ignore-next-line  */
             return $this->whereNull($column, $boolean, $operator !== '==');
         }
 
@@ -305,9 +308,9 @@ trait BuildsWheres
     /**
      * Add a "where" clause comparing two columns to the query.
      *
-     * @param  string|array<mixed>  $first
+     * @param  Expression|string|array<mixed>  $first
      * @param  string|null  $operator
-     * @param  string|null  $second
+     * @param  Expression|string|null  $second
      * @param  string|null  $boolean
      * @return $this
      */
@@ -433,11 +436,30 @@ trait BuildsWheres
     }
 
     /**
+     * Add a "where null" clause to the query.
+     *
+     * @param  string|array<mixed>|\Illuminate\Contracts\Database\Query\Expression  $columns
+     * @param  string  $boolean
+     * @param  bool  $not
+     * @return $this
+     */
+    public function whereNull($columns, $boolean = 'and', $not = false)
+    {
+        $type = $not ? 'NotNull' : 'Null';
+
+        foreach (Arr::wrap($columns) as $column) {
+            $this->wheres[] = compact('type', 'column', 'boolean');
+        }
+
+        return $this;
+    }
+
+    /**
      * Add a full sub-select to the query.
      *
      * @param  \Illuminate\Contracts\Database\Query\Expression|string  $column
      * @param  string  $operator
-     * @param  \Closure|\Illuminate\Database\Query\Builder|IlluminateEloquentBuilder $callback
+     * @param  mixed $callback
      * @param  string  $boolean
      * @return $this
      */

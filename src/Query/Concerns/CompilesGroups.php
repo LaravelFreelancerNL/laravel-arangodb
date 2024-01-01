@@ -85,6 +85,6 @@ trait CompilesGroups
 
     protected function extractGroupVariable(Expression $group): string
     {
-        return explode(' = ', $group->getValue($this))[0];
+        return explode(' = ', (string) $group->getValue($this))[0];
     }
 }

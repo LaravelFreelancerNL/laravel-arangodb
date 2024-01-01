@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
 use Exception;
+use Illuminate\Database\Eloquent\Builder as IlluminateEloquentBuilder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Str;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
@@ -39,7 +41,7 @@ trait HandlesAliases
     /**
      * Extract table and alias from sql alias notation (entity AS `alias`)
      *
-     * @return array<mixed>
+     * @return array<int|string, Expression|string>
      *
      * @throws Exception
      */
@@ -72,20 +74,20 @@ trait HandlesAliases
         return Str::camel(Str::singular($table)) . $postfix;
     }
 
-    public function getTableAlias(string|Expression $table): string|null
+    public function getTableAlias(string|Expression $table): float|int|null|string
     {
         if ($table instanceof Expression) {
             $table = 'Expression' . spl_object_id($table);
         }
 
-        if (isset($this->tableAliases[$table])) {
-            return $this->tableAliases[$table];
+        if (!isset($this->tableAliases[$table])) {
+            return null;
         }
 
-        return null;
+        return $this->grammar->getValue($this->tableAliases[$table]);
     }
 
-    public function getColumnAlias(string $column): string|null
+    public function getColumnAlias(string $column): Expression|null|string
     {
         if (isset($this->columnAliases[$column])) {
             return $this->columnAliases[$column];
@@ -108,14 +110,19 @@ trait HandlesAliases
      */
     public function importTableAliases(array|IlluminateQueryBuilder $aliases): void
     {
-        if ($aliases instanceof Builder) {
+        if ($aliases instanceof IlluminateQueryBuilder) {
+            assert($aliases instanceof Builder);
             $aliases = $aliases->getTableAliases();
         }
 
         $this->tableAliases = array_merge($this->tableAliases, $aliases);
     }
 
-    public function exchangeTableAliases(IlluminateQueryBuilder $query): void
+    /**
+     * @param IlluminateEloquentBuilder|IlluminateQueryBuilder|Relation $query
+     * @return void
+     */
+    public function exchangeTableAliases($query): void
     {
         assert($query instanceof Builder);
 
@@ -135,7 +142,7 @@ trait HandlesAliases
 
     public function prefixAlias(string $target, string $value): string
     {
-        $alias = $this->getTableAlias($target);
+        $alias =  $this->grammar->getValue($this->getTableAlias($target));
 
         if (Str::startsWith($value, $alias . '.')) {
             return $value;
@@ -153,7 +160,7 @@ trait HandlesAliases
             [$column, $alias] = $this->extractAlias($column);
         }
 
-        if (isset($alias)) {
+        if (isset($alias) && !$column instanceof Expression) {
             $this->columnAliases[$column] = $alias;
 
             return true;
@@ -173,8 +180,10 @@ trait HandlesAliases
             $alias = $table;
         }
 
+        /** @phpstan-ignore-next-line  */
         if ($alias == null && stripos($table, ' as ') !== false) {
             $tableParts = [];
+            /** @phpstan-ignore-next-line  */
             preg_match("/(^.*) as (.*?)$/", $table, $tableParts);
             $table = $tableParts[1];
             $alias = $tableParts[2];
@@ -184,6 +193,7 @@ trait HandlesAliases
             $alias = $this->generateTableAlias($table);
         }
 
+        /** @phpstan-ignore-next-line  */
         $this->tableAliases[$table] = $alias;
 
         return $alias;
@@ -193,7 +203,7 @@ trait HandlesAliases
     {
         $referenceParts = explode('.', $reference);
         $first = array_shift($referenceParts);
-        $alias = $this->getTableAlias($first);
+        $alias = $this->grammar->getValue($this->getTableAlias($first));
         if ($alias == null) {
             $alias = $first;
         }

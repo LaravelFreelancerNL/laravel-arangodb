@@ -414,7 +414,7 @@ class Grammar extends IlluminateQueryGrammar
      * Get the value of a raw expression.
      *
      * @param Expression $expression
-     * @return string
+     * @return float|int|string
      */
     public function getValue($expression)
     {

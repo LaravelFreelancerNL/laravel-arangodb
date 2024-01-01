@@ -85,7 +85,15 @@ trait BuildsSubqueries
      */
     protected function parseSub($query)
     {
-        if ($query instanceof self || $query instanceof EloquentBuilder || $query instanceof Relation) {
+        if (is_string($query)) {
+            return [$query, []];
+        }
+
+        if ($query instanceof EloquentBuilder || $query instanceof Relation) {
+            $query = $query->getQuery();
+        }
+
+        if ($query instanceof self) {
             $this->exchangeTableAliases($query);
 
             $this->importBindings($query);
@@ -98,10 +106,6 @@ trait BuildsSubqueries
             }
 
             return [$queryString, $query->getBindings()];
-        }
-
-        if (is_string($query)) {
-            return [$query, []];
         }
 
         throw new InvalidArgumentException(
