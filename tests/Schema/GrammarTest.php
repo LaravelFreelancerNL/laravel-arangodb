@@ -23,14 +23,14 @@ test('compile has attribute returns correct data', function () {
     $parameters['name'] = 'hasAttribute';
     $parameters['handler'] = 'aql';
     $parameters['explanation'] = "Checking if any document within the collection has the '"
-        .implode(', ', $attributes)."' attribute(s).";
+        . implode(', ', $attributes) . "' attribute(s).";
     $parameters['columns'] = $attributes;
     $command = new Fluent($parameters);
     $results = $this->grammar->compileHasColumn($collection, $command);
 
     $this->assertEquals(
         'FOR doc IN GrammarTestCollection FILTER doc.firstAttribute != null AND doc.SecondAttribute != null '
-        .'AND doc.@theThirdAttribute != null LIMIT 1 RETURN true',
+        . 'AND doc.@theThirdAttribute != null LIMIT 1 RETURN true',
         $results->aqb
     );
 });
@@ -46,14 +46,14 @@ test('compile drop attribute returns correct data', function () {
     $parameters['name'] = 'dropAttribute';
     $parameters['handler'] = 'aql';
     $parameters['attributes'] = $attributes;
-    $parameters['explanation'] = 'Drop the following attribute(s): '.implode(',', $attributes).'.';
+    $parameters['explanation'] = 'Drop the following attribute(s): ' . implode(',', $attributes) . '.';
     $command = new Fluent($parameters);
     $results = $this->grammar->compileDropAttribute($collection, $command);
     $this->assertEquals(
         'FOR doc IN GrammarTestCollection FILTER doc.firstAttribute != null OR doc.SecondAttribute != null '
-        .'OR doc.@theThirdAttribute != null UPDATE doc WITH '
-        .'{"firstAttribute":null,"SecondAttribute":null,"@theThirdAttribute":null} '
-        .'IN GrammarTestCollection OPTIONS {"keepNull":false}',
+        . 'OR doc.@theThirdAttribute != null UPDATE doc WITH '
+        . '{"firstAttribute":null,"SecondAttribute":null,"@theThirdAttribute":null} '
+        . 'IN GrammarTestCollection OPTIONS {"keepNull":false}',
         $results->aqb
     );
     expect($results->aqb->collections['write'])->toEqual([$collection]);
@@ -73,8 +73,8 @@ test('compile rename attribute returns correct data', function () {
     $results = $this->grammar->compileRenameAttribute($collection, $command);
     self::assertEquals(
         'FOR doc IN GrammarTestCollection FILTER doc.oldAttributeName != null AND doc.newAttributeName == null'
-        .' UPDATE doc WITH {"oldAttributeName":null,"newAttributeName":doc.oldAttributeName} '
-        .'IN GrammarTestCollection OPTIONS {"keepNull":true}',
+        . ' UPDATE doc WITH {"oldAttributeName":null,"newAttributeName":doc.oldAttributeName} '
+        . 'IN GrammarTestCollection OPTIONS {"keepNull":true}',
         $results->aqb->query
     );
     expect($results->aqb->collections['write'][0])->toEqual($collection);

@@ -16,7 +16,7 @@ test('connection is made', function () {
 test('change database name', function () {
     $initialName = $this->connection->getDatabaseName();
 
-    $newName = $initialName.'New';
+    $newName = $initialName . 'New';
     $this->connection->setDatabaseName($newName);
     $currentName = $this->connection->getDatabaseName();
 

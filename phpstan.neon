@@ -1,0 +1,12 @@
+includes:
+    - ./vendor/nunomaduro/larastan/extension.neon
+
+parameters:
+	level: 8
+	checkGenericClassInNonGenericObjectType: false
+	universalObjectCratesClasses:
+	    - 'Illuminate\Support\Fluent'
+	paths:
+		- src
+	excludePaths:
+	    - src/Schema
