@@ -442,6 +442,8 @@ trait BuildsWheres
      * @param  string  $boolean
      * @param  bool  $not
      * @return $this
+     *
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public function whereNull($columns, $boolean = 'and', $not = false)
     {
