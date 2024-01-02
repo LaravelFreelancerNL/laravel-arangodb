@@ -49,17 +49,17 @@ test(/**
 
     Character::create(
         [
-            'id'    => 'QuaitheOfTheShadow',
-            'name'    => 'Quaithe',
+            'id' => 'QuaitheOfTheShadow',
+            'name' => 'Quaithe',
             'surname' => 'of the Shaadow',
-            'alive'   => true,
-            'age'     => null,
+            'alive' => true,
+            'age' => null,
         ]
     );
     Location::create(
         [
-            'id'       => 'pyke',
-            'name'       => 'Pyke',
+            'id' => 'pyke',
+            'name' => 'Pyke',
             'coordinate' => [55.8833342, -6.1388807],
         ]
     );
@@ -83,17 +83,17 @@ test('commit transaction with queries', function () {
 
     Character::create(
         [
-            'id'    => 'QuaitheOfTheShadow',
-            'name'    => 'Quaithe',
+            'id' => 'QuaitheOfTheShadow',
+            'name' => 'Quaithe',
             'surname' => 'of the Shaadow',
-            'alive'   => true,
-            'age'     => null,
+            'alive' => true,
+            'age' => null,
         ]
     );
     Location::create(
         [
-            'id'       => 'pyke',
-            'name'       => 'Pyke',
+            'id' => 'pyke',
+            'name' => 'Pyke',
             'coordinate' => [55.8833342, -6.1388807],
         ]
     );

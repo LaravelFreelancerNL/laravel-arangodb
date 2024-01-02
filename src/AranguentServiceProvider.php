@@ -51,12 +51,12 @@ class AranguentServiceProvider extends ServiceProvider
         $this->app->when(MigrationCreator::class)
             ->needs('$customStubPath')
             ->give(function () {
-                return __DIR__ . '/../stubs';
+                return __DIR__.'/../stubs';
             });
         $this->app->when(IlluminateMigrationCreator::class)
             ->needs('$customStubPath')
             ->give(function () {
-                return __DIR__ . '/../stubs';
+                return __DIR__.'/../stubs';
             });
 
         $this->app->resolving(

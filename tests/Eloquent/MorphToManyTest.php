@@ -31,7 +31,6 @@ test('inverse relation', function () {
 test('attach', function () {
     $character = Character::find('Varys');
 
-
     $character->tags()->attach(['B', 'E', 'J', 'N', 'O']);
     $character->save();
 
@@ -70,12 +69,12 @@ test('sync', function () {
 
 test('morph with MorphType', function () {
     $newTag = Tag::create([
-        "id" => "1",
-        "en" => "One for all",
-        "de" => "einer für alle",
+        'id' => '1',
+        'en' => 'One for all',
+        'de' => 'einer für alle',
     ]);
 
-    $ned = Character::find("NedStark");
+    $ned = Character::find('NedStark');
     $ned->tags()->attach($newTag->id);
 
     $newNed = Character::with('tags')->where('id', 'NedStark')->first();

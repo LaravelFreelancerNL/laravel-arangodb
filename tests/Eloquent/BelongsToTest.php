@@ -45,9 +45,9 @@ test('associate', function () {
 
     $location = new Location(
         [
-            "id" => "pyke",
-            "name" => "Pyke",
-            "coordinate" => [55.8833342, -6.1388807]
+            'id' => 'pyke',
+            'name' => 'Pyke',
+            'coordinate' => [55.8833342, -6.1388807],
         ]
     );
 
@@ -72,12 +72,12 @@ test('dissociate', function () {
     $character->residence()->dissociate();
     $character->save();
 
-    $character ->fresh();
+    $character->fresh();
     expect($character->residence_id)->toBeNull();
 });
 
 test('with', function () {
-    $location = Location::with('leader')->find("winterfell");
+    $location = Location::with('leader')->find('winterfell');
 
     expect($location->leader)->toBeInstanceOf(Character::class);
     expect($location->leader->id)->toEqual('SansaStark');

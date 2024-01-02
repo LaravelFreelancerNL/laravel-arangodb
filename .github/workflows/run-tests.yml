@@ -1,0 +1,58 @@
+name: Run Tests
+
+on: [workflow_dispatch, push, pull_request]
+
+env:
+  DB_ENDPOINT: 'http://127.0.0.1:8529'
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest]
+        arangodb: [3.8, 3.9]
+        php: [8.0, 8.1, 8.2]
+        stability: [prefer-stable]
+
+    name: P${{ matrix.php }} - A${{ matrix.arangodb }} - ${{ matrix.stability }}
+
+    services:
+      arangodb:
+        image: arangodb:${{ matrix.arangodb }}
+        ports:
+          - 8529:8529
+        env:
+          ARANGO_NO_AUTH: 1
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, fileinfo
+          coverage: none
+
+      - name: Setup problem matchers
+        run: |
+          echo "::add-matcher::${{ runner.tool_cache }}/php.json"
+          echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+
+      - name: Install dependencies
+        run: |
+          composer update --${{ matrix.stability }} --prefer-dist --no-interaction
+
+      - name: Prepare test database
+        run: |
+          chmod +x "${GITHUB_WORKSPACE}/bin/prepare-test-db.sh"
+          "${GITHUB_WORKSPACE}/bin/prepare-test-db.sh"
+
+      - name: Execute tests
+        if: ${{ always() }}
+        run: |
+          chmod +x "${GITHUB_WORKSPACE}/bin/test.sh"
+          "${GITHUB_WORKSPACE}/bin/test.sh"
