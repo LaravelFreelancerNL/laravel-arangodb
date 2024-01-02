@@ -60,5 +60,5 @@ Aranguent supports the following functions of Laravel's query API.
 - dump
 
 ## Raw expressions (!)
-ArangoDB does not support SQL, so any raw expressions must be fed with AQL instead.
+ArangoDB does not support SQL, so any raw expressions must be fed AQL instead.
 This means that any package with raw SQL code is incompatible, at least partially.

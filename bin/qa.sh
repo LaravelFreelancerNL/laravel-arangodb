@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
-printf "\nRun PHPMD\n"
+echo "Fix coding style"
+./vendor/bin/pint
+
+echo "Run PHPMD"
 ./vendor/bin/phpmd src/ text phpmd-ruleset.xml
 
-printf "\nRun PHPCPD\n"
-./vendor/bin/phpcpd src
+echo "Test package from within phpunit"
+./vendor/bin/testbench migrate:fresh --path=tests/Setup/Database/Migrations --realpath --seed
+./vendor/bin/testbench package:test --coverage --min=80 tests
 
-printf "\nRun PHPStan\n"
-composer analyse
+echo "Run PHPStan"
+./vendor/bin/phpstan analyse -c phpstan.neon
+

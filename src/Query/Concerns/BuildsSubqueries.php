@@ -2,71 +2,114 @@
 
 namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
+use Closure;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Builder as IlluminateEloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use InvalidArgumentException;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
-use LaravelFreelancerNL\FluentAQL\Expressions\FunctionExpression;
-use LaravelFreelancerNL\FluentAQL\QueryBuilder;
+use LaravelFreelancerNL\Aranguent\Query\Grammar;
 
 trait BuildsSubqueries
 {
     /**
-     * Add a subselect expression to the query.
+     * IN SQL subqueries in selects and where's need to return a single value,
+     * whereas subqueries in joins return an object. This variable lets the
+     * compiler know how to return a single value.
      *
-     * @param  Builder  $query
-     * @param  string  $as
-     * @return $this
+     * @var bool
      */
-    public function selectSub($query, $as)
+    public bool $returnSingleValue = false;
+
+    /**
+     * Creates a subquery and parse it.
+     *
+     * @param  \Closure|IlluminateQueryBuilder|IlluminateEloquentBuilder|string $query
+     * @return array<mixed>
+     *
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     */
+    public function createSub($query, bool $returnSingleValue = false)
     {
-        $query = $this->createSub($query);
+        // If the given query is a Closure, we will execute it while passing in a new
+        // query instance to the Closure. This will give the developer a chance to
+        // format and work with the query before we cast it to a raw SQL string.
+        if ($query instanceof Closure) {
+            $callback = $query;
 
-        // Register $as as attribute alias
-        $this->grammar->registerColumnAlias($as, $as);
+            $callback($query = $this->forSubQuery());
+        }
 
-        // Set $as as return value
-        $this->columns[] = $as;
+        assert($query instanceof Builder);
 
-        // let alias = query
-        $this->variables[$as] = $query;
+        if ($returnSingleValue) {
+            $query->returnSingleValue = $returnSingleValue;
+        }
 
-        return $query;
+        return $this->parseSub($query);
     }
 
     /**
-     * Parse the subquery into SQL and bindings.
+     * Create a new query instance for sub-query.
      *
-     * @param  Builder|EloquentBuilder|Relation|QueryBuilder|FunctionExpression|string  $query
-     * @return array|QueryBuilder
+     * @return \Illuminate\Database\Query\Builder
+     */
+    protected function forSubQuery()
+    {
+        return $this->newQuery();
+    }
+
+    /**
+     * @param IlluminateQueryBuilder $query
+     * @return bool
+     */
+    protected function hasLimitOfOne(IlluminateQueryBuilder $query)
+    {
+        assert($query instanceof Builder);
+
+        if ($query->limit === 1 || $query->returnSingleValue === true) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Parse the subquery into AQL and bindings.
+     *
+     * @param IlluminateEloquentBuilder|IlluminateQueryBuilder|Relation|string  $query
+     * @return array<mixed>
      *
      * @throws \InvalidArgumentException
      */
     protected function parseSub($query)
     {
-        if ($query instanceof self || $query instanceof EloquentBuilder || $query instanceof Relation) {
-            $query = $this->prependDatabaseNameIfCrossDatabaseQuery($query);
-            $query->grammar->compileSelect($query);
+        if (is_string($query)) {
+            return [$query, []];
+        }
 
-            if (isset($query->limit) && $query->limit == 1) {
-                //Return the value, not an array of values
-                /** @phpstan-ignore-next-line */
-                return $query->aqb->first($query->aqb);
+        if ($query instanceof EloquentBuilder || $query instanceof Relation) {
+            $query = $query->getQuery();
+        }
+
+        if ($query instanceof self) {
+            $this->exchangeTableAliases($query);
+
+            $this->importBindings($query);
+
+            assert($this->grammar instanceof Grammar);
+            $queryString = $this->grammar->wrapSubquery($query->toSql());
+
+            if ($this->hasLimitOfOne($query)) {
+                $queryString = 'FIRST(' . $queryString . ')';
             }
 
-            return $query->aqb;
-        }
-
-        if ($query instanceof QueryBuilder || $query instanceof FunctionExpression) {
-            return $query;
-        }
-
-        if (is_string($query)) {
-            return $query;
+            return [$queryString, $query->getBindings()];
         }
 
         throw new InvalidArgumentException(
-            'A subquery must be a query builder instance, a Closure, or a string.'
+            'A subquery must be a query builder instance, a Relation, a Closure, or a string.'
         );
     }
 }

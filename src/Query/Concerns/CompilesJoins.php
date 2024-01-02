@@ -1,70 +1,118 @@
 <?php
 
+declare(strict_types=1);
+
 namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
+use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
+use Illuminate\Database\Query\Expression;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
-use LaravelFreelancerNL\FluentAQL\QueryBuilder;
+use LaravelFreelancerNL\Aranguent\Query\JoinClause;
 
 trait CompilesJoins
 {
     /**
-     * Compile the "join" portions of the query.
-     *
-     * @param  Builder  $builder
-     * @param  array  $joins
-     * @return string
+     * @param JoinClause $join
+     * @param Builder $query
+     * @return array<string>
      */
-    protected function compileJoins(Builder $builder, $joins)
+    public function extractTableAndAlias(Builder $query, $join): array
     {
-        foreach ($joins as $join) {
-            $compileMethod = 'compile'.ucfirst($join->type).'Join';
-            $builder = $this->$compileMethod($builder, $join);
+        if ($join->table instanceof Expression) {
+            $tableParts = [];
+            preg_match("/(^.*) as (.*?)$/", (string) $join->table->getValue($query->grammar), $tableParts);
+            $table = $tableParts[1];
+            $alias = $tableParts[2];
+
+            $query->registerTableAlias($join->table, $alias);
+
+            return [$table, $alias];
         }
 
-        return $builder;
+        $table = (string) $this->wrapTable($join->table);
+        $alias = $query->generateTableAlias($join->table);
+        $query->registerTableAlias($join->table, $alias);
+
+        return [$table, $alias];
     }
 
-    protected function compileInnerJoin(Builder $builder, $join)
+    /**
+     * Compile the "join" portions of the query.
+     *
+     * @param IlluminateQueryBuilder $query
+     * @param  array<mixed>  $joins
+     * @return string
+     */
+    protected function compileJoins(IlluminateQueryBuilder $query, $joins)
     {
-        $table = $join->table;
-        $alias = $this->generateTableAlias($table);
-        $this->registerTableAlias($table, $alias);
-        $builder->aqb = $builder->aqb->for($alias, $table)
-            ->filter($this->compileWheresToArray($join));
-
-        return $builder;
+        return collect($joins)->map(function ($join) use ($query) {
+            return match ($join->type) {
+                'cross' => $this->compileCrossJoin($query, $join),
+                'left' => $this->compileLeftJoin($query, $join),
+                default => $this->compileInnerJoin($query, $join),
+            };
+        })->implode(' ');
     }
 
-    protected function compileLeftJoin(Builder $builder, $join)
+    /**
+     * @param IlluminateQueryBuilder $query
+     * @param JoinClause $join
+     * @return string
+     */
+    protected function compileCrossJoin(IlluminateQueryBuilder $query, $join)
     {
-        $table = $join->table;
-        $alias = $this->generateTableAlias($table);
-        $this->registerTableAlias($table, $alias);
+        assert($query instanceof Builder);
 
-        $resultsToJoin = (new QueryBuilder())
-            ->for($alias, $table)
-            ->filter($this->compileWheresToArray($join))
-            ->return($alias);
+        $table = $this->wrapTable($join->table);
+        $alias = $query->generateTableAlias($join->table);
+        $query->registerTableAlias($join->table, $alias);
 
-        $builder->aqb = $builder->aqb->let($table, $resultsToJoin)
-            ->for(
-                $alias,
-                $builder->aqb->if(
-                    [$builder->aqb->length($table), '>', 0],
-                    $table,
-                    '[]'
-                )
-            );
-
-        return $builder;
+        return 'FOR ' . $alias . ' IN ' . $table;
     }
 
-    protected function compileCrossJoin(Builder $builder, $join)
+    /**
+     * @param IlluminateQueryBuilder $query
+     * @param JoinClause $join
+     * @return string
+     */
+    protected function compileInnerJoin(IlluminateQueryBuilder $query, $join)
     {
-        $table = $join->table;
-        $alias = $this->generateTableAlias($table);
-        $builder->aqb = $builder->aqb->for($alias, $table);
+        assert($query instanceof Builder);
 
-        return $builder;
+        list($table, $alias) = $this->extractTableAndAlias($query, $join);
+
+        $filter = $this->compileWheres($join);
+
+        $aql = 'FOR ' . $alias . ' IN ' . $table;
+        if ($filter) {
+            $aql .= ' ' . $filter;
+        }
+
+        return $aql;
+    }
+
+    /**
+     * @param IlluminateQueryBuilder $query
+     * @param JoinClause $join
+     * @return string
+     */
+    protected function compileLeftJoin(IlluminateQueryBuilder $query, $join)
+    {
+        assert($query instanceof Builder);
+
+        list($table, $alias) = $this->extractTableAndAlias($query, $join);
+
+        $filter = $this->compileWheres($join);
+
+        $resultsToJoin = 'FOR ' . $alias . ' IN ' . $table;
+        if ($filter) {
+            $resultsToJoin .= ' ' . $filter;
+        }
+        $resultsToJoin .= ' RETURN ' . $alias;
+
+        $aql = 'LET ' . $alias . 'List = (' . $resultsToJoin . ')';
+        $aql .= ' FOR ' . $alias . ' IN (LENGTH(' . $alias . 'List) > 0) ? ' . $alias . 'List : [{}]';
+
+        return $aql;
     }
 }

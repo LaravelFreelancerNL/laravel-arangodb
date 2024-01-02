@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace LaravelFreelancerNL\Aranguent\Console\Migrations;
 
 use Illuminate\Console\ConfirmableTrait;
@@ -36,7 +38,7 @@ class AranguentConvertMigrationsCommand extends BaseCommand
     /**
      * Create a new migration command instance.
      *
-     * @param  \Illuminate\Database\Migrations\Migrator  $migrator
+     *
      * @return void
      */
     public function __construct(Migrator $migrator)
@@ -53,7 +55,7 @@ class AranguentConvertMigrationsCommand extends BaseCommand
      */
     public function handle()
     {
-        if (! $this->confirmToProceed()) {
+        if (!$this->confirmToProceed()) {
             return;
         }
 
@@ -66,7 +68,7 @@ class AranguentConvertMigrationsCommand extends BaseCommand
         }
     }
 
-    public function convertMigrationFile($filePath)
+    public function convertMigrationFile(string $filePath): void
     {
         // Check for additional information to make sure we
         // partial matches aren't accidentally replaced.
@@ -76,7 +78,10 @@ class AranguentConvertMigrationsCommand extends BaseCommand
         ];
 
         $content = file_get_contents($filePath);
-        $content = str_replace(array_keys($replacements), $replacements, $content);
-        file_put_contents($filePath, $content);
+
+        if ($content !== false) {
+            $content = str_replace(array_keys($replacements), $replacements, $content);
+            file_put_contents($filePath, $content);
+        }
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace LaravelFreelancerNL\Aranguent;
 
 use Illuminate\Database\Migrations\MigrationCreator as IlluminateMigrationCreator;
@@ -13,7 +15,7 @@ class AranguentServiceProvider extends ServiceProvider
     /**
      * Components to register on the provider.
      *
-     * @var array
+     * @var array<string>
      */
     protected $components = [
         'Migration',
@@ -26,9 +28,13 @@ class AranguentServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Model::setConnectionResolver($this->app['db']);
+        if (isset($this->app['db'])) {
+            Model::setConnectionResolver($this->app['db']);
+        }
 
-        Model::setEventDispatcher($this->app['events']);
+        if (isset($this->app['events'])) {
+            Model::setEventDispatcher($this->app['events']);
+        }
     }
 
     /**
@@ -45,12 +51,12 @@ class AranguentServiceProvider extends ServiceProvider
         $this->app->when(MigrationCreator::class)
             ->needs('$customStubPath')
             ->give(function () {
-                return __DIR__.'/../stubs';
+                return __DIR__ . '/../stubs';
             });
         $this->app->when(IlluminateMigrationCreator::class)
             ->needs('$customStubPath')
             ->give(function () {
-                return __DIR__.'/../stubs';
+                return __DIR__ . '/../stubs';
             });
 
         $this->app->resolving(

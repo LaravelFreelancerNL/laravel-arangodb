@@ -6,17 +6,12 @@ use ArangoClient\Schema\SchemaManager;
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
-use LaravelFreelancerNL\Aranguent\QueryException;
+use LaravelFreelancerNL\Aranguent\Exceptions\QueryException;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
 use LaravelFreelancerNL\Aranguent\Schema\Builder;
 use LaravelFreelancerNL\Aranguent\Schema\Grammar;
 use Mockery as M;
 use Tests\Setup\ClassStubs\CustomBlueprint;
-use Tests\TestCase;
-
-uses(
-    TestCase::class,
-);
 
 afterEach(function () {
     M::close();
@@ -93,7 +88,7 @@ test('collection has columns', function () {
 
 test('create view', function () {
     $schemaManager = $this->connection->getArangoClient()->schema();
-    if (! $schemaManager->hasView('search')) {
+    if (!$schemaManager->hasView('search')) {
         Schema::createView('search', []);
     }
     $view = $schemaManager->getView('search');
@@ -105,7 +100,7 @@ test('create view', function () {
 
 test('get view', function () {
     $schemaManager = $this->connection->getArangoClient()->schema();
-    if (! $schemaManager->hasView('search')) {
+    if (!$schemaManager->hasView('search')) {
         Schema::createView('search', []);
     }
     $view = Schema::getView('search');
@@ -117,13 +112,13 @@ test('get view', function () {
 
 test('get all views', function () {
     $schemaManager = $this->connection->getArangoClient()->schema();
-    if (! $schemaManager->hasView('pages')) {
+    if (!$schemaManager->hasView('pages')) {
         Schema::createView('pages', []);
     }
-    if (! $schemaManager->hasView('products')) {
+    if (!$schemaManager->hasView('products')) {
         Schema::createView('products', []);
     }
-    if (! $schemaManager->hasView('search')) {
+    if (!$schemaManager->hasView('search')) {
         Schema::createView('search', []);
     }
 
@@ -142,7 +137,7 @@ test('get all views', function () {
 
 test('edit view', function () {
     $schemaManager = $this->connection->getArangoClient()->schema();
-    if (! $schemaManager->hasView('search')) {
+    if (!$schemaManager->hasView('search')) {
         Schema::createView('search', []);
     }
     Schema::editView('search', ['consolidationIntervalMsec' => 5]);
@@ -156,7 +151,7 @@ test('edit view', function () {
 
 test('rename view', function () {
     $schemaManager = $this->connection->getArangoClient()->schema();
-    if (! $schemaManager->hasView('search')) {
+    if (!$schemaManager->hasView('search')) {
         Schema::createView('search', []);
     }
     Schema::renameView('search', 'find');
@@ -175,7 +170,7 @@ test('rename view', function () {
 
 test('drop view', function () {
     $schemaManager = $this->connection->getArangoClient()->schema();
-    if (! $schemaManager->hasView('search')) {
+    if (!$schemaManager->hasView('search')) {
         Schema::createView('search', []);
     }
     Schema::dropView('search');
@@ -185,10 +180,10 @@ test('drop view', function () {
 
 test('drop all views', function () {
     $schemaManager = $this->connection->getArangoClient()->schema();
-    if (! $schemaManager->hasView('products')) {
+    if (!$schemaManager->hasView('products')) {
         Schema::createView('products', []);
     }
-    if (! $schemaManager->hasView('pages')) {
+    if (!$schemaManager->hasView('pages')) {
         Schema::createView('pages', []);
     }
     Schema::dropAllViews();
@@ -236,4 +231,71 @@ test('drop database if exists none existing db', function () {
 
 test('get connection', function () {
     expect(Schema::getConnection())->toBeInstanceOf(Connection::class);
+});
+
+test('createAnalyzer', function () {
+    $schemaManager = $this->connection->getArangoClient()->schema();
+    if (!$schemaManager->hasAnalyzer('myAnalyzer')) {
+        Schema::createAnalyzer('myAnalyzer', [
+            'type' => 'identity'
+        ]);
+    }
+    $analyzer = $schemaManager->getAnalyzer('myAnalyzer');
+
+    expect($analyzer->name)->toEqual('aranguent__test::myAnalyzer');
+
+    $schemaManager->deleteAnalyzer('myAnalyzer');
+});
+
+test('getAllAnalyzers', function () {
+    $schemaManager = $this->connection->getArangoClient()->schema();
+
+    $analyzers = Schema::getAllAnalyzers();
+
+    expect($analyzers)->toHaveCount(13);
+});
+
+test('replaceAnalyzer', function () {
+    $schemaManager = $this->connection->getArangoClient()->schema();
+    if (!$schemaManager->hasAnalyzer('myAnalyzer')) {
+        Schema::createAnalyzer('myAnalyzer', [
+            'type' => 'identity'
+        ]);
+    }
+
+    Schema::replaceAnalyzer('myAnalyzer', [
+        'type' => 'identity'
+    ]);
+
+    $schemaManager->deleteAnalyzer('myAnalyzer');
+});
+
+test('dropAnalyzer', function () {
+    $schemaManager = $this->connection->getArangoClient()->schema();
+    if (!$schemaManager->hasAnalyzer('myAnalyzer')) {
+        Schema::createAnalyzer('myAnalyzer', [
+            'type' => 'identity'
+        ]);
+    }
+    Schema::dropAnalyzer('myAnalyzer');
+
+    $schemaManager->getAnalyzer('myAnalyzer');
+})->throws(ArangoException::class);
+
+test('dropAnalyzerIfExists true', function () {
+    $schemaManager = $this->connection->getArangoClient()->schema();
+    if (!$schemaManager->hasAnalyzer('myAnalyzer')) {
+        Schema::createAnalyzer('myAnalyzer', [
+            'type' => 'identity'
+        ]);
+    }
+    Schema::dropAnalyzerIfExists('myAnalyzer');
+
+    $schemaManager->getAnalyzer('myAnalyzer');
+})->throws(ArangoException::class);
+
+test('dropAnalyzerIfExists false', function () {
+    $schemaManager = $this->connection->getArangoClient()->schema();
+
+    Schema::dropAnalyzerIfExists('none-existing-analyzer');
 });

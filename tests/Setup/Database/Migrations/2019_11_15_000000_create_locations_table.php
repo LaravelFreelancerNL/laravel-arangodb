@@ -14,8 +14,7 @@ class CreateLocationsTable extends Migration
      */
     public function up()
     {
-        Schema::create('locations', function (Blueprint $collection) {
-        });
+        Schema::create('locations', function (Blueprint $collection) {});
     }
 
     /**

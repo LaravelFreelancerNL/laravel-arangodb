@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace LaravelFreelancerNL\Aranguent\Concerns;
 
 use Throwable;
@@ -9,7 +11,7 @@ trait DetectsLostConnections
     /**
      * Determine if the given exception was caused by a lost connection.
      *
-     * @param  \Throwable  $e
+     *
      * @return bool
      */
     protected function causedByLostConnection(Throwable $e)

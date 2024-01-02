@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Setup\Database\Seeds;
+namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Tests\Setup\Models\Taggable;

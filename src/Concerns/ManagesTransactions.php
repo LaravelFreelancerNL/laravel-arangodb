@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace LaravelFreelancerNL\Aranguent\Concerns;
 
 use Closure;
+use LaravelFreelancerNL\Aranguent\Exceptions\NoArangoClientException;
 use Throwable;
 
 trait ManagesTransactions
@@ -10,14 +13,15 @@ trait ManagesTransactions
     /**
      * Execute a Closure within a transaction.
      *
-     * @param  Closure  $callback
+     * @param \Closure $callback
      * @param  int  $attempts
-     * @param  array  $collections
+     * @param  array<mixed> $collections
+     *
      * @return mixed
      *
-     * @throws Throwable
+     * @throws \Throwable
      */
-    public function transaction(Closure $callback, $attempts = 1, $collections = [])
+    public function transaction(Closure $callback, $attempts = 1, array $collections = [])
     {
         for ($currentAttempt = 1; $currentAttempt <= $attempts; $currentAttempt++) {
             $this->beginTransaction($collections);
@@ -92,6 +96,9 @@ trait ManagesTransactions
             $this->reconnectIfMissingConnection();
 
             try {
+                if ($this->arangoClient === null) {
+                    throw new NoArangoClientException();
+                }
                 $this->arangoClient->begin($collections);
             } catch (Throwable $e) {
                 $this->handleBeginTransactionException($e);
@@ -108,6 +115,10 @@ trait ManagesTransactions
      */
     public function commit()
     {
+        if ($this->arangoClient === null) {
+            throw new NoArangoClientException();
+        }
+
         if ($this->transactions == 1) {
             $this->arangoClient->commit();
         }
@@ -162,6 +173,10 @@ trait ManagesTransactions
      */
     protected function performRollBack($toLevel)
     {
+        if ($this->arangoClient === null) {
+            throw new NoArangoClientException();
+        }
+
         if ($toLevel == 0) {
             $this->arangoClient->abort();
         }

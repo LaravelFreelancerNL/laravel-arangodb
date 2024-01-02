@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace LaravelFreelancerNL\Aranguent\Console\Migrations;
 
 use Illuminate\Database\Console\Migrations\MigrateMakeCommand as IlluminateMigrateMakeCommand;
@@ -24,9 +26,6 @@ class MigrateMakeCommand extends IlluminateMigrateMakeCommand
 
     /**
      * Create a new migration install command instance.
-     *
-     * @param  MigrationCreator  $creator
-     * @param  Composer  $composer
      */
     public function __construct(MigrationCreator $creator, Composer $composer)
     {
@@ -48,10 +47,10 @@ class MigrateMakeCommand extends IlluminateMigrateMakeCommand
         // It's possible for the developer to specify the tables to modify in this
         // schema operation. The developer may also specify if this table needs
         // to be freshly created so we can create the appropriate migrations.
-        $name = Str::snake(trim($this->input->getArgument('name')));
+        $name = Str::snake(trim((string) $this->input->getArgument('name')));
 
         $collection = $this->input->getOption('collection');
-        if (! $collection) {
+        if (!$collection) {
             $collection = $this->input->getOption('table');
         }
 
@@ -60,7 +59,7 @@ class MigrateMakeCommand extends IlluminateMigrateMakeCommand
         // If no table was given as an option but a create option is given then we
         // will use the "create" option as the table name. This allows the devs
         // to pass a table name into this option as a short-cut for creating.
-        if (! $collection && is_string($create)) {
+        if (!$collection && is_string($create)) {
             $collection = $create;
 
             $create = true;
@@ -69,7 +68,7 @@ class MigrateMakeCommand extends IlluminateMigrateMakeCommand
         // Next, we will attempt to guess the table name if this the migration has
         // "create" in the name. This will allow us to provide a convenient way
         // of creating migrations that create new tables for the application.
-        if (! $collection) {
+        if (!$collection) {
             [$collection, $create] = TableGuesser::guess($name);
         }
 

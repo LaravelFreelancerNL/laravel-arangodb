@@ -12,9 +12,6 @@ use Illuminate\Support\Facades\DB;
 use Mockery as M;
 use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Location;
-use Tests\TestCase;
-
-uses(TestCase::class);
 
 afterEach(function () {
     M::close();
@@ -42,7 +39,9 @@ test('commit transaction', function () {
     expect($runningTransactions)->toBeEmpty();
 });
 
-test('rollback transaction', function () {
+test(/**
+ * @throws Throwable
+ */ 'rollback transaction', function () {
     $startingCharacters = Character::all();
     $startingLocations = Location::all();
 
@@ -71,6 +70,7 @@ test('rollback transaction', function () {
 
     expect($startingCharacters->count())->toEqual(43);
     expect($endingCharacters->count())->toEqual(43);
+
     expect($startingLocations->count())->toEqual(9);
     expect($endingLocations->count())->toEqual(9);
 });

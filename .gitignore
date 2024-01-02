@@ -7,3 +7,5 @@ phpunit.phar
 ray.php
 /vendor
 /*.cache
+/workbench
+phpstan.neon

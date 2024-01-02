@@ -10,11 +10,7 @@ trait Indexes
     /**
      * Add a new index command to the blueprint.
      *
-     * @param  string  $type
      * @param  string|array<string>|null  $columns
-     * @param  string|null  $name
-     * @param  array  $indexOptions
-     * @return Fluent
      */
     protected function indexCommand(
         string $type = '',
@@ -91,6 +87,19 @@ trait Indexes
     }
 
     /**
+     *  Specify a inverted index for the table.
+     *
+     * @param  array<mixed>|null  $columns
+     * @param  null  $name
+     * @param  array  $indexOptions
+     * @return Fluent
+     */
+    public function invertedIndex(array $columns = null, $name = null, $indexOptions = [])
+    {
+        return $this->indexCommand('inverted', $columns, $name, $indexOptions);
+    }
+
+    /**
      * Specify a spatial index for the table.
      *
      * @param  string|array  $columns
@@ -124,7 +133,6 @@ trait Indexes
      * @param  array<string>|null  $columns
      * @param  null  $name
      * @param  array  $indexOptions
-     * @return Fluent
      */
     public function ttlIndex(array $columns = null, $name = null, $indexOptions = []): Fluent
     {
@@ -137,7 +145,6 @@ trait Indexes
      * @param  string|array  $columns
      * @param  string  $name
      * @param  string|null  $algorithm
-     * @return Fluent
      */
     public function unique($columns = null, $name = null, $algorithm = null): Fluent
     {
@@ -155,7 +162,7 @@ trait Indexes
     public function executeIndexCommand(Fluent $command)
     {
         if ($this->connection->pretending()) {
-            $this->connection->logQuery('/* '.$command->explanation." */\n", []);
+            $this->connection->logQuery('/* ' . $command->explanation . " */\n", []);
 
             return;
         }
@@ -182,7 +189,7 @@ trait Indexes
         $parameters = [];
         $parameters['name'] = 'dropIndex';
         $parameters['index'] = $name;
-        $parameters['explanation'] = "Drop the '".$name."' index on the {$this->table} table.";
+        $parameters['explanation'] = "Drop the '" . $name . "' index on the {$this->table} table.";
         $parameters['handler'] = 'collection';
 
         return $this->addCommand('dropIndex', $parameters);
@@ -195,7 +202,7 @@ trait Indexes
     public function executeDropIndexCommand(Fluent $command)
     {
         if ($this->connection->pretending()) {
-            $this->connection->logQuery('/* '.$command->explanation." */\n", []); // @phpstan-ignore-line
+            $this->connection->logQuery('/* ' . $command->explanation . " */\n", []); // @phpstan-ignore-line
 
             return;
         }
@@ -227,14 +234,11 @@ trait Indexes
      * Create a default index name for the table.
      *
      * @param  string  $type
-     * @param  array  $columns
-     * @param  array  $options
-     * @return string
      */
     public function createIndexName($type, array $columns, array $options = []): string
     {
         $nameParts = [];
-        $nameParts[] = $this->prefix.$this->table;
+        $nameParts[] = $this->prefix . $this->table;
         $nameParts = array_merge($nameParts, $columns);
         $nameParts[] = $type;
         $nameParts = array_merge($nameParts, array_keys($options));

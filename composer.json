@@ -21,35 +21,35 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "composer/composer": "^1.12.23|>= 2.2.12",
-        "php": "^8.0",
-        "laravel/framework": "^8.83 || ^9.0",
+        "php": "^8.1",
         "ext-json": "*",
+        "composer/composer": "^2.2.12",
+        "laravel-freelancer-nl/arangodb-php-client": "^2.3.0",
         "laravel-freelancer-nl/fluentaql": "^2.0",
-        "laravel-freelancer-nl/arangodb-php-client": "^2.0",
-        "vlucas/phpdotenv": "^5.4",
-        "spatie/laravel-ray": "^1.29"
+        "laravel/framework": "^10.0",
+        "spatie/laravel-data": "^3.9",
+        "vlucas/phpdotenv": "^5.4"
     },
     "require-dev": {
-        "brianium/paratest": "^6.3",
-        "laravel/pint": "^1.2",
-        "mockery/mockery": "^1.4.3",
-        "nunomaduro/collision": "^5.0 || ^6.0",
-        "nunomaduro/larastan": "^1.0 || ^2.0",
-        "orchestra/testbench": "6.0 || ^7.0",
-        "pestphp/pest": "^1.20",
-        "pestphp/pest-plugin-faker": "^1.0",
-        "pestphp/pest-plugin-laravel": "^1.1",
-        "pestphp/pest-plugin-mock": "^1.0",
-        "pestphp/pest-plugin-parallel": "^1.0",
-        "phpmd/phpmd": "2.11",
+        "laravel/pint": "^1.10",
+        "mockery/mockery": "^1.5.0",
+        "nunomaduro/collision": "^7.8",
+        "nunomaduro/larastan": "^2.0",
+        "orchestra/testbench": "^8.5.5",
+        "pestphp/pest": "^2.6.1",
+        "pestphp/pest-plugin-faker": "^2.0",
+        "pestphp/pest-plugin-laravel": "^2.0",
+        "pestphp/pest-plugin-mock": "^2.0",
+        "phpmd/phpmd": "2.13",
         "phpstan/phpstan": "^1.0",
-        "sebastian/phpcpd": "^6.0"
+        "spatie/laravel-ray": "^1.32"
     },
     "repositories": [],
     "autoload": {
         "psr-4": {
-            "LaravelFreelancerNL\\Aranguent\\": "src/"
+            "LaravelFreelancerNL\\Aranguent\\": "src/",
+            "Tests\\": "tests/",
+            "Database\\Seeders\\": "tests/Setup/Database/Seeds"
         },
         "files": [
             "src/helpers.php"
@@ -68,10 +68,16 @@
         }
     },
     "scripts": {
-        "analyse": "vendor/bin/phpstan analyse",
-        "test": "vendor/bin/pest",
-        "test-coverage": "vendor/bin/pest --coverage",
-        "style": "vendor/bin/pint"
+        "analyse": "./vendor/bin/phpstan analyse",
+        "test": "./vendor/bin/pest",
+        "test-coverage": "./vendor/bin/pest --coverage",
+        "tests:migrate":  "./vendor/bin/testbench migrate",
+        "tests:seed":  "./vendor/bin/testbench db:seed",
+        "style": "vendor/bin/pint",
+        "lint": [
+            "@php vendor/bin/pint",
+            "@php vendor/bin/phpstan analyse"
+        ]
     },
     "config": {
         "sort-packages": true,

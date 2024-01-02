@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace LaravelFreelancerNL\Aranguent\Query;
 
 use Illuminate\Database\Query\Builder;
@@ -12,12 +14,15 @@ class Processor extends IlluminateProcessor
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      *
-     * @param  Builder  $query
-     * @param  array<mixed>  $results
+     * @param  array<mixed>|null  $results
      * @return array<mixed>
      */
     public function processSelect(Builder $query, $results)
     {
+        if ($results === null) {
+            return [];
+        }
+
         foreach ($results as &$val) {
             if (is_object($val) && isset($val->_key)) {
                 $val = (array) $val;

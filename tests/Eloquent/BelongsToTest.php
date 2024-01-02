@@ -6,10 +6,8 @@ use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Mockery as M;
 use Tests\Setup\Models\Character;
 use Tests\Setup\Models\Location;
-use Tests\TestCase;
 
 uses(
-    TestCase::class,
     DatabaseTransactions::class
 );
 

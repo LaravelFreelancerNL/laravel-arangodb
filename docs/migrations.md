@@ -48,7 +48,6 @@ attributes in existing documents.
 `renameAttribute($from, $to)` renames the attribute in all documents within the collection.
 
 
-
 ## Views (ArangoSearch)
 You can create, edit or delete an ArangoDB view.
 
@@ -65,4 +64,22 @@ Schema::editView($viewName, $options);
 ### Delete view
 ```php
 Schema::dropView($viewName);
+```
+
+## Analyzers (ArangoSearch)
+You can create, edit or delete an ArangoDB Analyzer.
+
+### New Analyzer
+```php
+Schema::createAnalyzer($name, $config);
+``` 
+
+### Replace Analyzer
+```php
+Schema::replaceAnalyzer($name, $config);
+```
+
+### Delete Analyzer
+```php
+Schema::dropAnalyzer($name);
 ```

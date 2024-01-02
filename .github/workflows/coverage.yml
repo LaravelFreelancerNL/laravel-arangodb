@@ -7,9 +7,18 @@ env:
 
 jobs:
   run:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        laravel: ['^10.0']
+        #        exclude:
+        #          - laravel: '^11.0'
+        #            php: '8.1'
+        include:
+          - laravel: '^10.0'
+            testbench: '^8.0'
 
-    name:  Test coverage
+    name:  Test coverage (Scrutinizer)
 
     services:
       arangodb:
@@ -21,14 +30,14 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.0
+          php-version: 8.1
           extensions: mbstring, intl
           ini-values: post_max_size=256M, short_open_tag=On
           coverage: xdebug
@@ -37,7 +46,9 @@ jobs:
         run: composer global require scrutinizer/ocular
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-suggest
+        run: |
+          composer require laravel/framework:${{ matrix.laravel }} orchestra/testbench:${{ matrix.testbench }} --no-interaction --no-update
+          composer update --prefer-dist --no-progress --no-interaction
 
       - name: Prepare test database
         run: |
@@ -46,7 +57,7 @@ jobs:
 
       - name: Test coverage
         run: |
-          ./vendor/bin/testbench migrate:fresh --path=tests/Setup/Database/Migrations --realpath --seed --seeder=Tests\\Setup\\Database\\Seeds\\DatabaseSeeder
-          ./vendor/bin/testbench package:test --coverage
+          ./vendor/bin/testbench migrate:fresh --path=tests/Setup/Database/Migrations --realpath --seed
+          ./vendor/bin/testbench package:test --coverage tests
           echo "Upload results to Scrutinizer-ci"
           ~/.composer/vendor/bin/ocular code-coverage:upload --format=php-clover clover.xml

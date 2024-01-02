@@ -4,11 +4,6 @@ declare(strict_types=1);
 
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
-use Tests\TestCase;
-
-uses(
-    TestCase::class,
-);
 
 beforeEach(function () {
     $this->schemaManager = $this->connection->getArangoClient()->schema();
@@ -115,4 +110,22 @@ test('default', function () {
         expect($commands[1]['name'])->toEqual('ignore');
         expect($commands[1]['method'])->toEqual('default');
     });
+});
+
+test('invertedIndex', function () {
+    Schema::table('characters', function (Blueprint $collection) {
+        $collection->invertedIndex(
+            ['name'],
+            'inv-ind',
+            [
+                'searchField' => true,
+                'includeAllFields' => true
+            ]
+        );
+    });
+    $name = 'inv-ind';
+
+    $index = $this->schemaManager->getIndexByName('characters', $name);
+
+    expect($index->name)->toEqual($name);
 });

@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
+use Illuminate\Database\Query\Builder as IlluminateBuilder;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 
 trait CompilesAggregates
@@ -9,84 +12,100 @@ trait CompilesAggregates
     /**
      * Compile an aggregated select clause.
      *
-     * @param  Builder  $builder
+     * @param  \Illuminate\Database\Query\Builder  $query
      * @param  array<mixed>  $aggregate
-     * @return Builder
+     * @return string
      */
-    protected function compileAggregate(Builder $builder, array $aggregate): Builder
+    protected function compileAggregate(IlluminateBuilder $query, $aggregate)
     {
-        $method = 'compile'.ucfirst($aggregate['function']);
+        $method = 'compile' . ucfirst($aggregate['function']);
 
-        return $this->$method($builder, $aggregate);
-    }
-
-    /**
-     * Compile AQL for count aggregate.
-     */
-    protected function compileCount(Builder $builder): Builder
-    {
-        $builder->aqb = $builder->aqb->collect()->withCount('aggregateResult');
-
-        return $builder;
-    }
-
-    /**
-     * Compile AQL for max aggregate.
-     *
-     * @param  Builder  $builder
-     * @param  array<mixed>  $aggregate
-     * @return Builder
-     */
-    protected function compileMax(Builder $builder, array $aggregate)
-    {
-        $column = $this->normalizeColumn($builder, $aggregate['columns'][0]);
-
-        $builder->aqb = $builder->aqb->collect()->aggregate('aggregateResult', $builder->aqb->max($column));
-
-        return $builder;
-    }
-
-    /**
-     * Compile AQL for min aggregate.
-     *
-     * @param  array<mixed>  $aggregate
-     */
-    protected function compileMin(Builder $builder, array $aggregate): Builder
-    {
-        $column = $this->normalizeColumn($builder, $aggregate['columns'][0]);
-
-        $builder->aqb = $builder->aqb->collect()->aggregate('aggregateResult', $builder->aqb->min($column));
-
-        return $builder;
+        return $this->$method($query, $aggregate);
     }
 
     /**
      * Compile AQL for average aggregate.
      *
-     * @param  array<mixed>  $aggregate
+     * @param array<mixed> $aggregate
+     * @return string
+     * @throws \Exception
      */
-    protected function compileAvg(Builder $builder, array $aggregate): Builder
+    protected function compileAvg(Builder $query, array $aggregate)
     {
-        $column = $this->normalizeColumn($builder, $aggregate['columns'][0]);
+        $column = $this->normalizeColumn($query, $aggregate['columns'][0]);
 
-        $builder->aqb = $builder->aqb->collect()->aggregate('aggregateResult', $builder->aqb->average($column));
+        return "COLLECT AGGREGATE aggregateResult = AVERAGE($column)";
+    }
 
-        return $builder;
+    /**
+     * Compile AQL for count aggregate.
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @param Builder $query
+     * @return string
+     */
+    protected function compileCount(Builder $query)
+    {
+        return "COLLECT WITH COUNT INTO aggregateResult";
+    }
+
+    /**
+     * Compile an exists statement into AQL.
+     *
+     * @param  IlluminateBuilder  $query
+     * @return string
+     */
+    public function compileExists(IlluminateBuilder $query)
+    {
+        $query->columns = [$query->from];
+
+        $select = $this->compileSelect($query);
+
+        return 'RETURN { exists: LENGTH((' . $select . ')) > 0 ? true : false }';
+    }
+
+
+    /**
+     * Compile AQL for max aggregate.
+     *
+     * @param array<mixed> $aggregate
+     * @return string
+     * @throws \Exception
+     */
+    protected function compileMax(Builder $query, array $aggregate)
+    {
+        $column = $this->normalizeColumn($query, $aggregate['columns'][0]);
+
+        return "COLLECT AGGREGATE aggregateResult = MAX($column)";
+    }
+
+    /**
+     * Compile AQL for min aggregate.
+     *
+     * @param Builder $query
+     * @param array<mixed> $aggregate
+     * @return string
+     * @throws \Exception
+     */
+    protected function compileMin(Builder $query, array $aggregate)
+    {
+        $column = $this->normalizeColumn($query, $aggregate['columns'][0]);
+
+        return "COLLECT AGGREGATE aggregateResult = MIN($column)";
     }
 
     /**
      * Compile AQL for sum aggregate.
      *
-     * @param  Builder  $builder
-     * @param  array<mixed>  $aggregate
-     * @return Builder
+     * @param Builder $query
+     * @param array<mixed> $aggregate
+     * @return string
+     * @throws \Exception
      */
-    protected function compileSum(Builder $builder, array $aggregate): Builder
+    protected function compileSum(Builder $query, array $aggregate)
     {
-        $column = $this->normalizeColumn($builder, $aggregate['columns'][0]);
+        $column = $this->normalizeColumn($query, $aggregate['columns'][0]);
 
-        $builder->aqb = $builder->aqb->collect()->aggregate('aggregateResult', $builder->aqb->sum($column));
-
-        return $builder;
+        return "COLLECT AGGREGATE aggregateResult = SUM($column)";
     }
 }

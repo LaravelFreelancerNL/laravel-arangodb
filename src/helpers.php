@@ -4,31 +4,31 @@ declare(strict_types=1);
 
 use Illuminate\Support\Arr;
 
-if (! function_exists('associativeFlatten')) {
+if (!function_exists('associativeFlatten')) {
     /**
      * Flatten a multi-dimensional associative array with dots.
-     * List arrays are left untouched
+     * List arrays are left untouched.
      *
-     * @param  iterable  $array
-     * @param  string  $prepend
-     * @return array
+     * @param array<mixed> $array
+     * @param string $prepend
+     * @return array<mixed>
      */
-    function associativeFlatten(iterable $array, string $prepend = ''): iterable
+    function associativeFlatten(array $array, string $prepend = ''): array
     {
         $results = [];
 
         if (Arr::isAssoc((array) $array)) {
             foreach ($array as $key => $value) {
-                if (is_iterable($value) && ! empty($value)) {
+                if (is_array($value) && !empty($value)) {
                     $dot = '';
                     if (Arr::isAssoc($value)) {
                         $dot = '.';
                     }
-                    $results = array_merge($results, associativeFlatten($value, $prepend.$key.$dot));
+                    $results = array_merge($results, associativeFlatten($value, $prepend . $key . $dot));
 
                     continue;
                 }
-                $results[$prepend.$key] = $value;
+                $results[$prepend . $key] = $value;
             }
 
             return $results;
@@ -39,18 +39,16 @@ if (! function_exists('associativeFlatten')) {
     }
 }
 
-if (! function_exists('isDotString')) {
+if (!function_exists('isDotString')) {
     function isDotString(string $string): bool
     {
         return (bool) strpos($string, '.');
     }
 }
 
-if (! function_exists('renameArrayKey')) {
+if (!function_exists('renameArrayKey')) {
     /**
      * @param  array<mixed>  $array
-     * @param  string|int  $oldKey
-     * @param  string|int  $newKey
      * @return array<mixed>
      */
     function renameArrayKey(array &$array, string|int $oldKey, string|int $newKey): array

@@ -1,0 +1,73 @@
+name: CI tests
+
+on: 
+  workflow_dispatch:
+  push:
+  pull_request:
+  schedule:
+  - cron: 0 6 * * 4
+
+env:
+  DB_ENDPOINT: 'http://localhost:8529'
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arangodb: ['3.10', '3.11']
+        php: ['8.1', '8.2', '8.3']
+        laravel: ['^10.0']
+#        exclude:
+#          - laravel: '^11.0'
+#            php: '8.1'
+        include:
+          - laravel: '^10.0'
+            testbench: '^8.0'
+    name:  QA L ${{ matrix.laravel }} / P ${{ matrix.php }} / A ${{ matrix.arangodb }} - ${{ matrix.dependency-version }}
+
+    services:
+      arangodb:
+        image: arangodb:${{ matrix.arangodb }}
+        ports:
+          - 8529:8529
+        env:
+          ARANGO_NO_AUTH: 1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.composer/cache/files
+          key: dependencies-composer-${{ hashFiles('composer.json') }}-laravel-${{ matrix.laravel }}-php-${{ matrix.php }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, intl
+          ini-values: post_max_size=256M, short_open_tag=On
+          coverage: xdebug
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: |
+          composer require laravel/framework:${{ matrix.laravel }} orchestra/testbench:${{ matrix.testbench }} --no-interaction --no-update
+          composer update --prefer-dist --no-interaction
+
+      - name: Prepare test database
+        run: |
+          chmod +x "${GITHUB_WORKSPACE}/bin/prepare-test-db.sh"
+          "${GITHUB_WORKSPACE}/bin/prepare-test-db.sh"
+
+      - name: Run all QA tests
+        run: |
+          ./vendor/bin/phpmd src/ text phpmd-ruleset.xml
+          ./vendor/bin/phpstan analyse -c phpstan.neon.dist
+          ./vendor/bin/testbench migrate:fresh --path=tests/Setup/Database/Migrations --realpath --seed
+          ./vendor/bin/testbench package:test --coverage --min=80 tests
+        env:
+          ARANGODB_VERSION: ${{ matrix.arangodb }}

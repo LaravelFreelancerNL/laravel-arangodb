@@ -1,10 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace LaravelFreelancerNL\Aranguent\Query;
 
 use Closure;
-use Illuminate\Database\ConnectionInterface;
+use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Database\Query\Processors\Processor;
+use LaravelFreelancerNL\Aranguent\Connection;
 
 class JoinClause extends Builder
 {
@@ -18,21 +22,21 @@ class JoinClause extends Builder
     /**
      * The table the join clause is joining to.
      *
-     * @var string
+     * @var Expression|string
      */
     public $table;
 
     /**
      * The connection of the parent query builder.
      *
-     * @var ConnectionInterface
+     * @var \Illuminate\Database\ConnectionInterface
      */
     protected $parentConnection;
 
     /**
      * The grammar of the parent query builder.
      *
-     * @var Grammar
+     * @var \Illuminate\Database\Query\Grammars\Grammar
      */
     protected $parentGrammar;
 
@@ -46,19 +50,18 @@ class JoinClause extends Builder
     /**
      * The class name of the parent query builder.
      *
-     * @var string
+     * @var class-string<IlluminateQueryBuilder>
      */
     protected $parentClass;
 
     /**
      * Create a new join clause instance.
      *
-     * @param  Builder  $parentQuery
      * @param  string  $type
-     * @param  string  $table
+     * @param  Expression|string  $table
      * @return void
      */
-    public function __construct(Builder $parentQuery, $type, $table)
+    public function __construct(IlluminateQueryBuilder $parentQuery, $type, $table)
     {
         $this->type = $type;
         $this->table = $table;
@@ -72,6 +75,9 @@ class JoinClause extends Builder
             $this->parentGrammar,
             $this->parentProcessor
         );
+
+        $this->registerTableAlias($table);
+        $this->importTableAliases($parentQuery);
     }
 
     /**
@@ -88,7 +94,7 @@ class JoinClause extends Builder
      *
      * @param  \Closure|string  $first
      * @param  string|null  $operator
-     * @param  \Illuminate\Database\Query\Expression|string|null  $second
+     * @param  Expression|string|null  $second
      * @param  string  $boolean
      * @return $this
      *
@@ -99,7 +105,6 @@ class JoinClause extends Builder
         if ($first instanceof Closure) {
             return $this->whereNested($first, $boolean);
         }
-
         return $this->whereColumn($first, $operator, $second, $boolean);
     }
 
@@ -129,7 +134,7 @@ class JoinClause extends Builder
     /**
      * Create a new query instance for sub-query.
      *
-     * @return Builder
+     * @return \Illuminate\Database\Query\Builder
      */
     protected function forSubQuery()
     {
@@ -145,6 +150,9 @@ class JoinClause extends Builder
     {
         $class = $this->parentClass;
 
-        return new $class($this->parentConnection, $this->parentGrammar, $this->parentProcessor);
+        $newParentQuery = new $class($this->parentConnection, $this->parentGrammar, $this->parentProcessor);
+        assert($newParentQuery instanceof Builder);
+
+        return $newParentQuery;
     }
 }

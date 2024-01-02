@@ -6,9 +6,6 @@ use ArangoClient\ArangoClient;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use LaravelFreelancerNL\Aranguent\QueryException;
-use Tests\TestCase;
-
-uses(TestCase::class);
 
 test('connection is made', function () {
     $connection = $this->connection;
@@ -19,7 +16,7 @@ test('connection is made', function () {
 test('change database name', function () {
     $initialName = $this->connection->getDatabaseName();
 
-    $newName = $initialName.'New';
+    $newName = $initialName . 'New';
     $this->connection->setDatabaseName($newName);
     $currentName = $this->connection->getDatabaseName();
 
@@ -37,7 +34,7 @@ test('explain query', function () {
 
     $explanation = $this->connection->explain($query);
 
-    $this->assertObjectHasAttribute('plan', $explanation);
+    $this->assertObjectHasProperty('plan', $explanation);
 });
 
 test('error handling collection not found', function () {

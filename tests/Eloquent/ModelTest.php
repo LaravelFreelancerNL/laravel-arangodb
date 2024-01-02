@@ -2,10 +2,8 @@
 
 use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\Setup\Models\Character;
-use Tests\TestCase;
 
 uses(
-    TestCase::class,
     DatabaseTransactions::class
 );
 
@@ -18,7 +16,7 @@ test('create aranguent model', function () {
         ]
     )->run();
 
-    $file = __DIR__.'/../../vendor/orchestra/testbench-core/laravel/app/Models/AranguentModelTest.php';
+    $file = __DIR__ . '/../../vendor/orchestra/testbench-core/laravel/app/Models/AranguentModelTest.php';
 
     //assert file exists
     expect($file)->toBeFile();

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace LaravelFreelancerNL\Aranguent\Providers;
 
 use Illuminate\Database\MigrationServiceProvider as IlluminateMigrationServiceProvider;
@@ -11,9 +13,9 @@ use LaravelFreelancerNL\Aranguent\Migrations\MigrationCreator;
 
 class CommandServiceProvider extends IlluminateMigrationServiceProvider
 {
-    protected $defer = true;
+    protected bool $defer = true;
 
-    public function boot()
+    public function boot(): void
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
@@ -62,7 +64,7 @@ class CommandServiceProvider extends IlluminateMigrationServiceProvider
     protected function registerCreator()
     {
         $this->app->singleton('migration.creator', function ($app) {
-            $customStubPath = __DIR__.'/../../stubs';
+            $customStubPath = __DIR__ . '/../../stubs';
 
             return new MigrationCreator($app['files'], $customStubPath);
         });
@@ -84,20 +86,23 @@ class CommandServiceProvider extends IlluminateMigrationServiceProvider
         });
     }
 
-    protected function registerModelMakeCommand()
+    protected function registerModelMakeCommand(): void
     {
         $this->app->singleton('command.model.aranguent', function ($app) {
             return new ModelMakeCommand($app['files']);
         });
     }
 
-    protected function registerAranguentConvertMigrationsCommand()
+    protected function registerAranguentConvertMigrationsCommand(): void
     {
         $this->app->singleton('command.aranguent.convert-migrations', function ($app) {
             return new AranguentConvertMigrationsCommand($app['migrator']);
         });
     }
 
+    /**
+     * @return string[]
+     */
     public function provides()
     {
         return [

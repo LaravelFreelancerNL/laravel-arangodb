@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 

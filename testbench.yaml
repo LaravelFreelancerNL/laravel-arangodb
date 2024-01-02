@@ -1,9 +1,20 @@
 env:
   - DB_CONNECTION="arangodb"
+  - DB_ENDPOINT="http://localhost:8529"
+  - DB_DATABASE="aranguent__test"
   - DB_USERNAME="root"
   - DB_PASSWORD=
+
+bootstrappers:
+  - Tests\BootstrapTestbench
 
 providers:
   - LaravelFreelancerNL\Aranguent\AranguentServiceProvider
   - LaravelFreelancerNL\Aranguent\Providers\CommandServiceProvider
   - Tests\Setup\AranguentTestServiceProvider
+
+migrations:
+  - tests/Setup/Database/Migrations
+
+seeders:
+  - Tests\Setup\Database\Seeds\DatabaseSeeder

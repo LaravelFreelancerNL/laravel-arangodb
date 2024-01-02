@@ -11,9 +11,9 @@ trait InteractsWithPivotTable
      *
      * @param  int  $key
      * @param  mixed  $value
-     * @param  array  $attributes
+     * @param  array<mixed>  $attributes
      * @param  bool  $hasTimestamps
-     * @return array
+     * @return array<mixed>
      */
     protected function formatAttachRecord($key, $value, $attributes, $hasTimestamps)
     {

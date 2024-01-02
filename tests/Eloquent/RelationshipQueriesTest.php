@@ -2,10 +2,8 @@
 
 use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Tests\Setup\Models\Character;
-use Tests\TestCase;
 
 uses(
-    TestCase::class,
     DatabaseTransactions::class
 );
 
@@ -14,26 +12,36 @@ test('has', function () {
     expect(count($characters))->toEqual(3);
 });
 
-test('has with minimum relation count', function () {
+test('has, with minimum relation count', function () {
     $characters = Character::has('leads', '>=', 3)->get();
     expect(count($characters))->toEqual(1);
 });
 
-test('has morph', function () {
+test('doesntHave', function () {
+    $characters = Character::doesntHave('leads')->get();
+    expect(count($characters))->toEqual(40);
+});
+
+test('has on morphed relation', function () {
     $characters = Character::has('tags')->get();
 
     expect(count($characters))->toEqual(2);
 });
 
-test('doesnt have', function () {
-    $characters = Character::doesntHave('leads')->get();
-    expect(count($characters))->toEqual(40);
-});
-
-test('with count', function () {
+test('withCount', function () {
     $characters = Character::withCount('leads')
         ->where('leads_count', '>', 0)
         ->get();
 
     expect(count($characters))->toEqual(3);
+});
+
+test('withExists', function () {
+    ray()->showQueries();
+
+    $characters = Character::withExists('leads')
+        ->get();
+
+    expect(count($characters))->toEqual(43);
+    expect($characters->where('leads_exists', true)->count())->toEqual(3);
 });

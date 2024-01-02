@@ -2,29 +2,66 @@
 
 namespace LaravelFreelancerNL\Aranguent\Query;
 
-use Closure;
+use Exception;
+use Illuminate\Database\ConnectionInterface as IlluminateConnectionInterface;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use Illuminate\Database\Query\Expression;
-use InvalidArgumentException;
+use Illuminate\Database\Query\Grammars\Grammar as IlluminateQueryGrammar;
+use Illuminate\Database\Query\Processors\Processor as IlluminateProcessor;
 use LaravelFreelancerNL\Aranguent\Connection;
-use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsJoinClauses;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsGroups;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsSearches;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsInserts;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsJoins;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsSelects;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsSubqueries;
-use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsWhereClauses;
-use LaravelFreelancerNL\FluentAQL\Exceptions\BindException;
-use LaravelFreelancerNL\FluentAQL\Expressions\ExpressionInterface as ExpressionInterface;
-use LaravelFreelancerNL\FluentAQL\Expressions\FunctionExpression;
-use LaravelFreelancerNL\FluentAQL\QueryBuilder;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsUpdates;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\BuildsWheres;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\ConvertsIdToKey;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\HandlesAliases;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\HandlesBindings;
+use LaravelFreelancerNL\Aranguent\Query\Enums\VariablePosition;
+use LaravelFreelancerNL\FluentAQL\QueryBuilder as AQB;
+use phpDocumentor\Reflection\Types\Boolean;
 
 class Builder extends IlluminateQueryBuilder
 {
-    use BuildsJoinClauses;
+    use BuildsGroups;
+    use BuildsInserts;
+    use BuildsJoins;
+    use BuildsSearches;
+    use BuildsSelects;
     use BuildsSubqueries;
-    use BuildsWhereClauses;
+    use BuildsUpdates;
+    use BuildsWheres;
+    use ConvertsIdToKey;
+    use HandlesAliases;
+    use HandlesBindings;
+    public AQB $aqb;
 
     /**
-     * @var QueryBuilder|FunctionExpression
+     * The current query value bindings.
+     *
+     * @var array<mixed>
      */
-    public QueryBuilder|FunctionExpression $aqb;
+    public $bindings = [
+        'preIterationVariables' => [],
+        'from' => [],
+        'search' => [],
+        'join' => [],
+        'postIterationVariables' => [],
+        'where' => [],
+        'groupBy' => [],
+        'having' => [],
+        'order' => [],
+        'union' => [],
+        'unionOrder' => [],
+        'select' => [],
+        'insert' => [],
+        'update' => [],
+        'upsert' => [],
+    ];
+
 
     /**
      * @var Connection
@@ -32,96 +69,89 @@ class Builder extends IlluminateQueryBuilder
     public $connection;
 
     /**
-     * @var Grammar
+     * @var IlluminateQueryGrammar
      */
     public $grammar;
 
     /**
      * The current query value bindings.
      *
-     * @var null|array{predicates: array<mixed>, options: array<string, string>}
+     * @var null|array{fields: mixed, searchText: mixed, analyzer: non-falsy-string}
      */
     public ?array $search = null;
 
     /**
-     * The query variables that should be set.
+     * The query variables that should be set before traversals (for/joins).
      *
      * @var array<mixed>
      */
-    public $variables = [];
+    public $preIterationVariables = [];
+
+    /**
+     * The query variables that should be set after traversals (for/joins).
+     *
+     * @var array<mixed>
+     */
+    public $postIterationVariables = [];
+
+    /**
+     * ID of the query
+     * Used as prefix for automatically generated bindings.
+     *
+     * @var int
+     */
+    protected $queryId = 1;
 
     /**
      * @override
      * Create a new query builder instance.
      */
     public function __construct(
-        Connection $connection,
-        Grammar $grammar = null,
-        Processor $processor = null,
-        QueryBuilder $aqb = null
+        IlluminateConnectionInterface $connection,
+        IlluminateQueryGrammar        $grammar = null,
+        IlluminateProcessor           $processor = null,
+        AQB                           $aqb = null
     ) {
-        $this->connection = $connection;
-        $this->grammar = $grammar ?: $connection->getQueryGrammar();
-        $this->processor = $processor ?: $connection->getPostProcessor();
-        if (! $aqb instanceof QueryBuilder) {
-            $aqb = new QueryBuilder();
+        assert($connection instanceof IlluminateConnectionInterface);
+        assert($processor instanceof IlluminateProcessor);
+
+        parent::__construct($connection, $grammar, $processor);
+
+        if (!$aqb instanceof AQB) {
+            $aqb = new AQB();
         }
         $this->aqb = $aqb;
+
+        $this->queryId = spl_object_id($this);
+    }
+
+    public function getQueryId(): int
+    {
+        return $this->queryId;
     }
 
     /**
-     * Delete a record from the database.
+     * Get the current query value bindings in a flattened array.
      *
-     * @param  mixed  $id
-     * @return int
+     * @return array<mixed>
      */
-    public function delete($id = null)
+    public function getBindings()
     {
-        $this->aqb = new QueryBuilder();
-        $this->grammar->compileDelete($this, $id)->setAql();
-
-        return $this->connection->delete($this->aqb);
-    }
-
-    /**
-     * Set the table which the query is targeting.
-     *
-     * @param  \Closure|IlluminateQueryBuilder|string  $table
-     * @param  string|null  $as
-     * @return IlluminateQueryBuilder
-     */
-    public function from($table, $as = null)
-    {
-        if ($this->isQueryable($table)) {
-            return $this->fromSub($table, $as);
+        $extractedBindings = [];
+        foreach ($this->bindings as $typeBinds) {
+            foreach ($typeBinds as $key => $value) {
+                $extractedBindings[$key] = $value;
+            }
         }
-        $this->grammar->registerTableAlias($table, $as);
 
-        $this->from = $table;
-
-        return $this;
-    }
-
-    /**
-     * Run the query as a "select" statement against the connection.
-     *
-     * @return array
-     */
-    protected function runSelect()
-    {
-        $this->aqb = new QueryBuilder();
-        $this->grammar->compileSelect($this)->setAql();
-        $results = $this->connection->select($this->aqb);
-        $this->aqb = new QueryBuilder();
-
-        return $results;
+        return $extractedBindings;
     }
 
     /**
      * Run a pagination count query.
      *
-     * @param  array  $columns
-     * @return array
+     * @param array<mixed> $columns
+     * @return array<mixed>
      */
     protected function runPaginationCountQuery($columns = ['*'])
     {
@@ -136,163 +166,63 @@ class Builder extends IlluminateQueryBuilder
     }
 
     /**
-     * Set the columns to be selected.
+     * Delete records from the database.
      *
-     * @param  array|mixed  $columns
-     * @return IlluminateQueryBuilder
-     */
-    public function select($columns = ['*'])
-    {
-        $this->columns = [];
-        $this->bindings['select'] = [];
-        $columns = is_array($columns) ? $columns : func_get_args();
-
-        $this->addColumns($columns);
-
-        return $this;
-    }
-
-    /**
-     * Add a new select column to the query.
-     *
-     * @param  array|mixed  $column
-     * @return $this
-     */
-    public function addSelect($column)
-    {
-        $columns = is_array($column) ? $column : func_get_args();
-
-        $this->addColumns($columns);
-
-        return $this;
-    }
-
-    /**
-     * @param  array<mixed>  $columns
-     */
-    protected function addColumns(array $columns): void
-    {
-        foreach ($columns as $as => $column) {
-            if (is_string($as) && $this->isQueryable($column)) {
-                if (is_null($this->columns)) {
-                    $this->select($this->from.'.*');
-                }
-
-                $this->selectSub($column, $as);
-
-                continue;
-            }
-
-            if (is_string($as)) {
-                $this->columns[$as] = $column;
-
-                continue;
-            }
-
-            $this->columns[] = $column;
-        }
-    }
-
-    /**
-     * Get the SQL representation of the query.
-     *
-     * @return string
-     */
-    public function toSql()
-    {
-        $this->grammar->compileSelect($this)->setAql();
-
-        return $this->aqb->query;
-    }
-
-    /**
-     * Insert a new record into the database.
-     *
-     * @param  array  $values
-     * @return bool
-     *
-     * @throws BindException
-     */
-    public function insert(array $values): bool
-    {
-        $this->grammar->compileInsert($this, $values)->setAql();
-        $results = $this->getConnection()->insert($this->aqb);
-        $this->aqb = new QueryBuilder();
-
-        return $results;
-    }
-
-    /**
-     * Insert a new record and get the value of the primary key.
-     *
-     * @param  array<mixed>  $values
-     */
-    public function insertGetId(array $values, $sequence = null)
-    {
-        $this->grammar->compileInsertGetId($this, $values, $sequence)->setAql();
-        $response = $this->getConnection()->execute($this->aqb);
-        $this->aqb = new QueryBuilder();
-
-        return (is_array($response)) ? end($response) : $response;
-    }
-
-    /**
-     * Insert a new record into the database.
-     *
-     * @param  array  $values
-     * @return bool
-     *
-     * @throws BindException
-     */
-    public function insertOrIgnore(array $values): bool
-    {
-        $this->grammar->compileInsertOrIgnore($this, $values)->setAql();
-        $results = $this->getConnection()->insert($this->aqb);
-        $this->aqb = new QueryBuilder();
-
-        return $results;
-    }
-
-    /**
-    /**
-     * Get the current query value bindings in a flattened array.
-     *
-     * @return array
-     */
-    public function getBindings()
-    {
-        return $this->aqb->binds;
-    }
-
-    protected function setAql()
-    {
-        $this->aqb = $this->aqb->get();
-
-        return $this;
-    }
-
-    /**
-     * Update a record in the database.
-     *
-     * @param  array  $values
+     * @param mixed $id
      * @return int
      */
-    public function update(array $values)
+    public function delete($id = null)
     {
-        $this->aqb = new QueryBuilder();
+        // If an ID is passed to the method, we will set the where clause to check the
+        // ID to let developers to simply and quickly remove a single row from this
+        // database without manually specifying the "where" clauses on the query.
+        if (!is_null($id)) {
+            $this->where($this->from . '._key', '=', $id);
+        }
 
-        $this->grammar->compileUpdate($this, $values)->setAql();
-        $results = $this->connection->update($this->aqb);
-        $this->aqb = new QueryBuilder();
+        $this->applyBeforeQueryCallbacks();
 
-        return $results;
+        return $this->connection->delete(
+            $this->grammar->compileDelete($this),
+            $this->cleanBindings(
+                $this->grammar->prepareBindingsForDelete($this->bindings)
+            )
+        );
     }
+
+    /**
+     * Determine if any rows exist for the current query.
+     *
+     * @return bool
+     */
+    public function exists()
+    {
+        $this->applyBeforeQueryCallbacks();
+
+        $results = $this->connection->select(
+            $this->grammar->compileExists($this),
+            $this->getBindings(),
+            !$this->useWritePdo
+        );
+
+        // If the results have rows, we will get the row and see if the exists column is a
+        // boolean true. If there are no results for this query we will return false as
+        // there are no rows for this query at all, and we can return that info here.
+        if (isset($results[0])) {
+            $results = (array) $results[0];
+
+            return (bool) $results['exists'];
+        }
+
+        return false;
+    }
+
 
     /**
      * Execute an aggregate function on the database.
      *
-     * @param  string  $function
-     * @param  array  $columns
+     * @param string $function
+     * @param array<mixed> $columns
      * @return mixed
      */
     public function aggregate($function, $columns = ['*'])
@@ -301,121 +231,88 @@ class Builder extends IlluminateQueryBuilder
             ->setAggregate($function, $columns)
             ->get($columns);
 
-        $this->aqb = new QueryBuilder();
-
-        if (! $results->isEmpty()) {
-            return array_change_key_case((array) $results[0])['aggregate'];
+        if (!$results->isEmpty()) {
+            return ($results->first())->aggregate;
         }
 
         return false;
     }
 
     /**
-     * Determine if the given operator is supported.
-     *
-     * @param  string  $operator
-     * @return bool
-     */
-    protected function invalidOperator($operator)
-    {
-        return ! in_array(strtolower($operator), $this->operators, true) &&
-            ! isset($this->grammar->getOperators()[strtoupper($operator)]);
-    }
-
-    /**
-     * Add an "order by" clause to the query.
-     *
-     * @param  Closure|IlluminateQueryBuilder|string  $column
-     * @param  string  $direction
-     * @return $this
-     *
-     * @throws InvalidArgumentException
-     */
-    public function orderBy($column, $direction = 'asc')
-    {
-        if ($this->isQueryable($column)) {
-            [$query, $bindings] = $this->createSub($column);
-
-            //fixme: Remove binding when implementing subqueries
-            $bindings = null;
-
-            $column = new Expression('('.$query.')');
-        }
-
-        $this->{$this->unions ? 'unionOrders' : 'orders'}[] = [
-            'column' => $column,
-            'direction' => $direction,
-        ];
-
-        return $this;
-    }
-
-    /**
-     * Add a raw "order by" clause to the query.
-     *
-     * @param  string|ExpressionInterface  $aql
-     * @param  array  $bindings
-     * @return $this
-     */
-    public function orderByRaw($aql, $bindings = [])
-    {
-        $bindings = [];
-
-        $type = 'Raw';
-        $column = $aql;
-        $this->{$this->unions ? 'unionOrders' : 'orders'}[] = compact('type', 'column');
-
-        return $this;
-    }
-
-    /**
-     * Put the query's results in random order.
-     *
-     * @param  string  $seed
-     * @return $this
-     */
-    public function inRandomOrder($seed = '')
-    {
-        // ArangoDB's random function doesn't accept a seed.
-        $seed = null;
-
-        return $this->orderByRaw($this->grammar->compileRandom($this));
-    }
-
-    /**
-     * Search an ArangoSearch view.
-     *
-     * @param  mixed  $predicates
-     * @param  array|null  $options
+     * Set a variable
+     * @param string $variable
+     * @param IlluminateQueryBuilder|Expression|array<mixed>|Int|Float|String|Boolean $value
+     * @param string|VariablePosition $variablePosition
      * @return Builder
      */
-    public function search(mixed $predicates, array $options = null): Builder
-    {
-        if ($predicates instanceof Closure) {
-            $predicates = $predicates($this->aqb);
+    public function set(
+        string $variable,
+        IlluminateQueryBuilder|Expression|array|Boolean|Int|Float|String $value,
+        VariablePosition|string $variablePosition = VariablePosition::preIterations
+    ): Builder {
+        if (is_string($variablePosition)) {
+            $variablePosition = VariablePosition::tryFrom($variablePosition) ?? VariablePosition::preIterations;
+        }
+        if ($value instanceof Expression) {
+            $this->{$variablePosition->value}[$variable] = $value->getValue($this->grammar);
+
+            return $this;
         }
 
-        if (! is_array($predicates)) {
-            $predicates = [$predicates];
-        }
+        if ($value instanceof Builder) {
 
-        $this->search = [
-            'predicates' => $predicates,
-            'options' => $options,
-        ];
+            [$subquery] = $this->createSub($value);
+
+            $this->{$variablePosition->value}[$variable] = $subquery;
+
+            return $this;
+        }
+        $this->{$variablePosition->value}[$variable] = $this->bindValue($value, $variablePosition->value);
 
         return $this;
     }
 
-    /**
-     * Create a new query instance for a sub-query.
-     *
-     * @return $this
-     */
-    protected function forSubQuery()
+    public function isVariable(string $value): bool
     {
-        return $this->newQuery();
+        if (
+            key_exists($value, $this->preIterationVariables)
+            ||  key_exists($value, $this->postIterationVariables)
+        ) {
+            return true;
+        }
+
+        return false;
     }
+
+    /**
+     * @param mixed $value
+     * @param array<mixed> $variables
+     * @return bool
+     */
+    public function isReference(mixed $value, array $variables = []): bool
+    {
+        if (!is_string($value) || empty($value)) {
+            return false;
+        }
+
+        if (empty($variables)) {
+            $variables = array_merge(
+                array_keys($this->preIterationVariables),
+                array_keys($this->postIterationVariables),
+                $this->tableAliases,
+            );
+        }
+
+        $variablesRegex = implode('|', $variables);
+
+        return (bool) preg_match(
+            '/^\`?('
+            . $variablesRegex
+            . '|CURRENT|NEW|OLD)\`?(\[\`.+\`\]|\[[\d\w\*]*\])*(\.(\`.+\`|@?[\d\w]*)(\[\`.+\`\]|\[[\d\w\*]*\])*)*$/',
+            $value
+        );
+    }
+
 
     /**
      * Get the database connection instance.
@@ -425,5 +322,34 @@ class Builder extends IlluminateQueryBuilder
     public function getConnection()
     {
         return $this->connection;
+    }
+
+    /**
+     * Prepend the database name if the given query is on another database.
+     *
+     * @param mixed $query
+     * @return mixed
+     * @throws Exception
+     */
+    protected function prependDatabaseNameIfCrossDatabaseQuery($query)
+    {
+        if ($query->getConnection()->getDatabaseName() !==
+            $this->getConnection()->getDatabaseName()) {
+            $databaseName = $query->getConnection()->getDatabaseName();
+
+            if (!str_starts_with($query->from, $databaseName) && !str_contains($query->from, '.')) {
+                throw new Exception(message: 'ArangoDB does not support cross database queries.');
+            }
+        }
+
+        return $query;
+    }
+
+    /**
+     * Get the AQL representation of the query.
+     */
+    public function toAql(): string
+    {
+        return $this->toSql();
     }
 }

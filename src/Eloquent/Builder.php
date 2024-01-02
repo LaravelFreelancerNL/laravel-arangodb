@@ -1,66 +1,31 @@
 <?php
 
+declare(strict_types=1);
+
 namespace LaravelFreelancerNL\Aranguent\Eloquent;
 
-use Illuminate\Database\Eloquent\Builder as IlluminateBuilder;
+use Illuminate\Database\Eloquent\Builder as IlluminateEloquentBuilder;
 use Illuminate\Support\Arr;
 use LaravelFreelancerNL\Aranguent\Eloquent\Concerns\QueriesAranguentRelationships;
+use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
 
-class Builder extends IlluminateBuilder
+class Builder extends IlluminateEloquentBuilder
 {
     use QueriesAranguentRelationships;
 
     /**
-     * The methods that should be returned from query builder.
+     * The base query builder instance.
      *
-     * @var array
+     * @var QueryBuilder
      */
-    protected $passthru = [
-        'insert', 'insertOrIgnore', 'insertGetId', 'insertUsing', 'getBindings', 'toSql', 'dump', 'dd',
-        'exists', 'doesntExist', 'count', 'min', 'max', 'avg', 'average', 'sum', 'getConnection',
-    ];
-
-    /**
-     * Get the first record matching the attributes or create it.
-     *
-     * @param  array  $attributes
-     * @param  array  $values
-     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder
-     */
-    public function firstOrCreate(array $attributes = [], array $values = [])
-    {
-        $instance = $this->where(associativeFlatten($attributes))->first();
-        if (! is_null($instance)) {
-            return $instance;
-        }
-
-        return tap($this->newModelInstance(array_merge($attributes, $values)), function ($instance) {
-            $instance->save();
-        });
-    }
-
-    /**
-     * Get the first record matching the attributes or instantiate it.
-     *
-     * @param  array  $attributes
-     * @param  array  $values
-     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder
-     */
-    public function firstOrNew(array $attributes = [], array $values = [])
-    {
-        $instance = $this->where(associativeFlatten($attributes))->first();
-        if (! is_null($instance)) {
-            return $instance;
-        }
-
-        return $this->newModelInstance(array_merge($attributes, $values));
-    }
+    protected $query;
 
     /**
      * Insert a record in the database.
      *
-     * @param  array  $values
-     * @return int
+     *
+     * @param array<mixed> $values
+     * @return bool
      */
     public function insert(array $values)
     {
@@ -74,7 +39,7 @@ class Builder extends IlluminateBuilder
         if (Arr::isAssoc($values)) {
             $values = [$values];
         }
-        if (! Arr::isAssoc($values)) {
+        if (!Arr::isAssoc($values)) {
             // Here, we will sort the insert keys for every record so that each insert is
             // in the same order for the record. We need to make sure this is the case
             // so there are not any errors or problems when inserting these records.
@@ -96,13 +61,13 @@ class Builder extends IlluminateBuilder
     /**
      * Add the "updated at" column to an array of values.
      *
-     * @param  array  $values
-     * @return array
+     * @param array<string, string> $values
+     * @return array<string, string>
      */
     protected function updateTimestamps(array $values)
     {
         if (
-            ! $this->model->usesTimestamps() ||
+            !$this->model->usesTimestamps() ||
             is_null($this->model->getUpdatedAtColumn()) ||
             is_null($this->model->getCreatedAtColumn())
         ) {
@@ -116,7 +81,7 @@ class Builder extends IlluminateBuilder
         $timestamps[$updatedAtColumn] = $timestamp;
 
         $createdAtColumn = $this->model->getCreatedAtColumn();
-        if (! isset($values[$createdAtColumn]) && ! isset($this->model->$createdAtColumn)) {
+        if (!isset($values[$createdAtColumn]) && !isset($this->model->$createdAtColumn)) {
             $timestamps[$createdAtColumn] = $timestamp;
         }
 
@@ -131,13 +96,13 @@ class Builder extends IlluminateBuilder
     /**
      * Add the "updated at" column to an array of values.
      *
-     * @param  array  $values
-     * @return array
+     * @param array<string> $values
+     * @return array<string>
      */
     protected function addUpdatedAtColumn(array $values): array
     {
         if (
-            ! $this->model->usesTimestamps() ||
+            !$this->model->usesTimestamps() ||
             is_null($this->model->getUpdatedAtColumn())
         ) {
             return $values;
@@ -151,5 +116,15 @@ class Builder extends IlluminateBuilder
         );
 
         return $values;
+    }
+
+    /**
+     * Get the underlying query builder instance.
+     *
+     * @return QueryBuilder
+     */
+    public function getQuery()
+    {
+        return $this->query;
     }
 }

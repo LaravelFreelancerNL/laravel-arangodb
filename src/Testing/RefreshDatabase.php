@@ -13,8 +13,10 @@ trait RefreshDatabase
 
     /**
      * Begin a database transaction on the testing database.
+     *
+     * @return void
      */
-    public function beginDatabaseTransaction(): void
+    public function beginDatabaseTransaction()
     {
         $this->initializeTestDatabaseTransactions();
     }

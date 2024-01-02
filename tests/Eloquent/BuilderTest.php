@@ -5,10 +5,8 @@ use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use LaravelFreelancerNL\Aranguent\Testing\DatabaseTransactions;
 use Mockery as M;
 use Tests\Setup\Models\Character;
-use Tests\TestCase;
 
 uses(
-    TestCase::class,
     DatabaseTransactions::class
 );
 beforeEach(function () {
@@ -35,9 +33,11 @@ test('insert handles array attributes', function ($character) {
 })->with('character');
 
 test('update sets correct updated at', function ($character) {
+
     Character::insert($character);
 
     $retrievedBeforeUpdate = Character::find($character['id']);
+
     $retrievedBeforeUpdate->update(['alive' => false]);
 
     $retrievedAfterUpdate = Character::find($character['id']);

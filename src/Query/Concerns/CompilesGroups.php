@@ -2,6 +2,8 @@
 
 namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
+use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
+use Illuminate\Database\Query\Expression;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 
 trait CompilesGroups
@@ -9,35 +11,80 @@ trait CompilesGroups
     /**
      * Compile the "group by" portions of the query.
      *
-     * @param  Builder  $builder
-     * @param  array<string>  $groups
-     * @return Builder
-     *
+     * @param IlluminateQueryBuilder $query
+     * @param array<mixed> $groups
+     * @return string
      * @throws \Exception
      */
-    protected function compileGroups(Builder $builder, array $groups = []): Builder
+    protected function compileGroups(IlluminateQueryBuilder $query, $groups): string
     {
-        $aqlGroups = [];
-        foreach ($groups as $key => $group) {
-            $aqlGroups[$key][0] = $group;
+        assert($query instanceof Builder);
 
-            $aqlGroups[$key][1] = $this->normalizeColumn($builder, $group);
+        $aql = "COLLECT ";
+
+        $aqlGroups = [];
+        foreach ($groups as $group) {
+            if ($group instanceof Expression) {
+                $groupVariable = $this->extractGroupVariable($group);
+                ;
+                $query->registerTableAlias($groupVariable, $groupVariable);
+
+                $aqlGroups[] = $group->getValue($this);
+                continue;
+            }
+
+            $aqlGroups[] = $group . " = " . $this->normalizeColumn($query, $group);
+
+            $query->registerTableAlias($group, $group);
+            $query->groupVariables[] = $group;
         }
 
-        $builder->aqb = $builder->aqb->collect($aqlGroups);
+        $aql .= implode(", ", $aqlGroups);
 
-        return $builder;
+        $variablesToKeep = $this->keepColumns($query, $groups);
+
+        if (!empty($variablesToKeep)) {
+            $query->registerTableAlias('groupsVariable', 'groupsVariable');
+            $query->groupVariables[] = 'groupsVariable';
+
+            $aql .= ' INTO groupsVariable = ' . $this->generateAqlObject($variablesToKeep);
+        }
+        return $aql;
     }
 
     /**
-     * Compile the "group by" portions of the query.
-     *
-     * @param  Builder  $builder
-     * @param  string[]  $havings
-     * @return Builder
+     * @param IlluminateQueryBuilder $query
+     * @param array<mixed> $groups
+     * @return array<string>
+     * @throws \Exception
      */
-    protected function compileHavings(Builder $builder, array $havings = [])
+    protected function keepColumns(IlluminateQueryBuilder $query, $groups)
     {
-        return $this->compileWheres($builder, $havings, 'havings');
+        $tempGroups = [];
+        foreach($groups as $group) {
+            if ($group instanceof Expression) {
+                $tempGroups[] = $this->extractGroupVariable($group);
+                continue;
+            }
+            $tempGroups[] = $group;
+        }
+
+        $diff = array_diff_assoc($query->columns, $tempGroups);
+
+        $results = [];
+        foreach ($diff as $key => $value) {
+            if (is_numeric($key)) {
+                $results[$value] = $this->normalizeColumn($query, $value);
+                continue;
+            }
+            $results[$key] = $this->normalizeColumn($query, $value);
+        }
+
+        return $results;
+    }
+
+    protected function extractGroupVariable(Expression $group): string
+    {
+        return explode(' = ', (string) $group->getValue($this))[0];
     }
 }

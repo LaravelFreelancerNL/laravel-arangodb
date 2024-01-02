@@ -1,109 +1,114 @@
 # Compatibility list
-This page shows a list of tried and tested compatible abilities and methods. Unmentioned methods & abilities 
-might work but your mileage may vary. 
+This page shows a list of tried and tested compatible features as well as incompatibilities. 
 
-**_Note_**: This list is limited to database interactions. It lists 'create' but not 'make' etc.
+Features annotated with a question mark are untested. Known incompatibilities are explicitly mentioned.
+Untested features might work but your mileage may vary. 
+
+**_Note_**: This list is limited to database interactions. For example, it lists 'create' but not 'make'.
 
 - [Query Builder](#query-builder)
 - [Eloquent](#eloquent)
+- [Testing](#testing)
 - [Database Connection](#database-connection)
 - [Known Incompatibilities](#known-incompatibilities)
 
+## <a name="query-builder"></a>Query Builder
 
-##<a name="query-builder"></a>Query Builder
-- dd
-- raw (use AQL)
-- toSql
-
-### Selections
-- addSelect
-- crossJoin
-- distinct
-- doesntExist
-- exists
-- find
-- get
-- groupBy
-- inRandomOrder
-- join
-- leftJoin
-- limit
-- offset
-- orderBy
-- orderByRaw (use AQL)
-- pluck
-- select
-- selectRaw (use AQL)
-- skip
-- table
-- take
-
-### filters
-- having
-- havingBetween
-- orWhere
-- orWhereColumn
-- orWhereIn
-- orWhereNotIn
-- orWhereNotNull
-- orWhereNull
-- where
-- whereBetween
-- whereColumn
-- whereDate
-- whereDay
-- whereExists
-- whereIn
-- whereJsonContains
-- whereJsonLength
-- whereMonth
-- whereNotBetween
-- whereNotIn
-- whereNotNull 
-- whereNull
-- whereRaw (use AQL)
-- whereTime
-- whereYear
-
-### Statements
-- delete
-- insert
-- insertGetId
-- insertOrIgnore
-- truncate
-- update
-- upsert
+### Data retrieval
+find / first / get / value / pluck / sole / 
+chunk / chunkById / orderedChunkById / lazy / lazyById / lazyByIdDesc / 
+paginate / simplePaginate / cursorPaginate
 
 ### Aggregates
-- average
-- avg
-- count
-- max
-- min
-- sum
+average / avg / count / doesntExist / exists / max / min / sum
 
+### Selections
+addSelect / distinct / select / selectRaw (use AQL) / selectSub?
 
-##<a name="eloquent"></a>Eloquent
-The methods listed below are specific to Eloquent.
-Note that a lot of Eloquent's featured are leveraging the query builder. Those methods are listed in the corresponding
-chapter below.
+### Raw Expressions
+**Note** that all raw expressions need to use AQL instead of SQL, so if a third-party
+package uses raw SQL you'll need to override it.
+
+selectRaw / raw / whereRaw / orWhereRaw / havingRaw / orHavingRaw
+
+#### Unsupported raw Expressions
+groupByRaw
+
+### Unions
+union / unionAll
+
+#### Unsupported union clauses
+Union orders / Union aggregates / Union groupBy
+
+### Expressions
+Expression / raw
+
+### Joins
+crossJoin / join / joinSub? / leftJoin / leftJoinSub?
+
+#### Unsupported join clauses
+rightJoin / rightJoinSub / joinWhere?
+
+### Where clauses
+where / orWhere / whereNot / orWhereNot / whereColumn / whereExists
+whereBetween / whereNotBetween / whereBetweenColumns / whereNotBetweenColumns /
+whereJsonContains / whereJsonLength /
+whereIn / whereNotIn / whereNull / whereNotNull /
+whereDate / whereMonth / whereDay / whereYear / whereTime /
+whereRaw (use AQL)
+
+nested wheres / subquery wheres on both operands 
+
+#### Incompatible where clauses
+whereFullText (use searchView instead)
+
+### Ordering
+orderBy / latest / oldest / inRandomOrder / reorder /
+orderByRaw (use AQL)
+
+### Grouping
+groupBy / groupByRaw /
+having / havingBetween / havingNull / havingNotNull / 
+havingRaw (use AQL) / Nested havings
+
+### Limit & offset
+limit / offset / take / skip
+
+### Conditional clauses
+when
+
+### Insert statements
+insert / insertOrIgnore / insertUsing / insertGetId
+
+### Update statements
+update / updateOrInsert / upsert /
+increment / incrementEach / decrement / decrementEach /
+update with join
+
+### Delete statements
+delete / truncate
+
+### Debugging
+dd  / dump / toSql / ddRawSql / dumpRawSql / toRawSql
+
+## <a name="eloquent"></a>Eloquent
+The methods listed below are **specific** to Eloquent.
+_Functions handed off to the **Query Builder** are specified 
+in the chapter above._
 
 ### Model CRUD
-- all
-- create
-- delete
-- destroy
-- find
-- first
-- firstOr
-- firstOrFail
-- firstOrCreate
-- firstOrNew
-- firstWhere
-- fresh
-- paginate
-- save
-- updateOrCreate
+all / first / firstWhere / firstOr / firstOrFail /
+firstOrCreate? / firstOrNew? / 
+find / findOr / fresh? / refresh? /  
+create / fill / save / update / updateOrCreate /
+upsert / replicate / delete / destroy / truncate / softDeletes / 
+trashed? / restore? / withTrashed? / forceDelete
+isDirty? / isClean / wasChanged / getOriginal /
+pruning / query scopes? / saveQuietly / deleteQuietly /
+forceDeleteQuietly / restoreQuietly
+
+#### Model comparison
+is / isNot
 
 ### Relationships
 - One To One
@@ -113,61 +118,68 @@ chapter below.
 - One To Many (Polymorphic)
 - Many To Many (Polymorphic)
 
-Methods:
-- belongsTo
-- belongsToMany
-- doesntHave
-- enforceMorphMap
-- has
-- hasMany
-- hasOne
-- morphedByMany
-- morphMany
-- morphOne
-- morphTo
-- with
-- withCount
+belongsTo / belongsToMany / 
+morphOne / morphTo / morphMany / morphMany / morphedByMany / 
+ofMany / latestOfMany / oldestOfMany
+hasOne / hasMany / hasX / hasOneThrough / hasManyThrough / 
+throughX /
+whereBelongsTo /
+as / 
+withTimestamps /
 
+#### Pivot functions
+withPivot / 
+wherePivot / wherePivotIn /wherePivotNotIn /
+wherePivotBetween / wherePivotNotBetween /
+wherePivotNull / wherePivotNotNull / orderByPivot /
+using
 
-##<a name="testing"></a>Testing
-- assertDatabaseCount
-- assertDeleted
-- assertDatabaseHas
-- assertDatabaseMissing
-- assertModelExists
-- assertModelMissing
-- assertNotSoftDeleted
-- assertSoftDeleted
-- castAsJson (dummy method)
+enforceMorphMap / getMorphClass / getMorphedModel / resolveRelationUsing
 
+#### Query relationships
+has / orHas / whereHas / whereRelation / doesntHave /
+whereDoesntHave / whereHasMorph / whereDoesntHaveMorph
 
-##<a name="known-incompatibilities"></a>Known incompatibilities
+#### Aggregating related models
+withCount / loadCount /
+withSum / loadSum / withExists / morphWithCount /loadMorphCount /
+
+loadMorphCount
+#### Eager loading
+with / without / withOnly / constrain /
+load / loadMissing / loadMorph / preventLazyLoading
+
+#### Inserting and updating related models
+save / saveMany / refresh / push / pushQuietly / 
+create / createMany / createQuietly / createManyQuietly /
+associate / dissociate / attach / detach / 
+sync / syncWithPivotValues / syncWithoutDetaching / toggle /
+updateExistingPivot / 
+
+## <a name="testing"></a> Testing
+
+### Traits
+DatabaseTransactions / RefreshDatabase?
+
+### Assertions
+assertDatabaseCount /
+assertDatabaseHas / assertDatabaseMissing /
+assertModelExists / assertModelMissing /
+assertDeleted  / assertSoftDeleted / assertNotSoftDeleted /
+castAsJson (dummy method)
+
+## <a name="database-connection"></a> Database connection
+escape
+
+## <a name="known-incompatibilities"></a> Known incompatibilities
 Not all features can be made compatible. Known issues are listed below:
 
-- unions
-- rightJoin
-
-## id vs _id
-All ArangoDB documents have a default indexed identifier called '_id' consisting of the collection (table) name and
-a unique string _key. This looks something like: users/12345.
-
-At the moment _id and id aren't transcribed back and forth. So relations and queries that rely on 'id' will fail if they 
-don't retrieve a models keyName. Relevant parts of packages must be overridden.
-
-**Note**: this is high on the list to solve generically. So this behaviour is likely to change in the future.
-
-### Transactions
-[At the beginning of a transaction you must declare collections that are used in (write) statements.](transactions.md)
-
-### Locking: sharedLock/lockForUpdate
-These methods don't work as ArangoDB requires you to declare the locking mechanics at the start of a transaction. 
-
-### Separate read and write connections
-Aranguent currently doesn't support the combination of a separate read and write connection  
+### Cross database queries
+ArangoDB does not support cross database queries.
 
 ### Foreign keys
-ArangoDB doesn't support foreign keys. So if a package depends on that for cascading updates or deletes you'll 
-have to extend those parts of the package. 
+ArangoDB doesn't support foreign keys. So if a package depends on that for cascading updates or deletes you'll
+have to extend those parts of the package.
 
 You can set up an event listener in the Model's boot method or use an
 observer besides that you want to override any delete action that is performed directly on the database.
@@ -176,5 +188,15 @@ Note that you'll want to delete child models before deleting the model itself. T
 all child models in case of mass deletion. As you'll be dealing with multiple delete queries it is a good idea to
 wrap it in a transaction.
 
+### Locking: sharedLock / lockForUpdate
+These methods don't work as ArangoDB requires you to declare the locking mechanics at the start of a transaction.
+**_They fail silently and just run the query. (???)_**
+
 ### Raw SQL
-Any raw SQL needs to be replaced by AQL.
+Any raw SQL needs to be replaced by raw AQL.
+
+### Separate read and write connections
+Aranguent currently doesn't support the combination of a separate read and write connection  
+
+### Transactions
+[At the beginning of a transaction you must declare collections that are used in (write) statements.](transactions.md)

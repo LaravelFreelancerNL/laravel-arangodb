@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace LaravelFreelancerNL\Aranguent\Eloquent\Concerns;
 
 use Closure;
+use Illuminate\Database\Eloquent\Builder as IlluminateEloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Eloquent\Builder;
@@ -18,14 +20,16 @@ trait IsAranguentModel
     /**
      * Insert the given attributes and set the ID on the model.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @param  array  $attributes
+     * @param  array<mixed>  $attributes
      * @return void
      */
-    protected function insertAndSetId(\Illuminate\Database\Eloquent\Builder $query, $attributes)
+    protected function insertAndSetId(IlluminateEloquentBuilder $query, $attributes)
     {
+        assert($query instanceof Builder);
+
         $keyName = $this->getKeyName();
-        $id = $query->insertGetId($attributes, $keyName);
+
+        $id = (string) $query->insertGetId($attributes, $keyName);
 
         $this->setAttribute($keyName, $id);
         if ($keyName === '_id') {
@@ -96,12 +100,9 @@ trait IsAranguentModel
         $this->updateIdWithKey($value);
     }
 
-    /**
-     * @param  string  $key
-     */
-    protected function updateIdWithKey(string $key)
+    protected function updateIdWithKey(string $key): void
     {
-        $this->attributes['_id'] = $this->getTable().'/'.$key;
+        $this->attributes['_id'] = $this->getTable() . '/' . $key;
     }
 
     /**
@@ -112,13 +113,13 @@ trait IsAranguentModel
      */
     public function qualifyColumn($column)
     {
-        $tableReferer = Str::singular($this->getTable()).'Doc';
+        $tableReferer = Str::singular($this->getTable()) . 'Doc';
 
-        if (Str::startsWith($column, $tableReferer.'.')) {
+        if (Str::startsWith($column, $tableReferer . '.')) {
             return $column;
         }
 
-        return $tableReferer.'.'.$column;
+        return $tableReferer . '.' . $column;
     }
 
     /**
@@ -131,23 +132,24 @@ trait IsAranguentModel
         $keyName = $this->getKeyName();
 
         if ($keyName[0] != '_') {
-            $keyName = '_'.$keyName;
+            $keyName = '_' . $keyName;
         }
 
-        return Str::snake(class_basename($this)).$keyName;
+        return Str::snake(class_basename($this)) . $keyName;
     }
 
-    protected function fromAqb(ArangoQueryBuilder|Closure $aqb): Collection
-    {
-        if ($aqb instanceof Closure) {
-            /** @phpstan-ignore-next-line */
-            $aqb = $aqb(DB::aqb());
-        }
-        $connection = $this->getConnection();
-        $results = $connection->execute($aqb->get());
-
-        return $this->hydrate($results);
-    }
+    // TODO: see if we can get this working.
+    //    public static function fromAqb(ArangoQueryBuilder|Closure $aqb): Collection
+    //    {
+    //        if ($aqb instanceof Closure) {
+    //            /** @phpstan-ignore-next-line */
+    //            $aqb = $aqb(new ArangoQueryBuilder());
+    //        }
+    //        $connection = static::resolveConnection(self::$connection);
+    //        $results = $connection->execute($aqb->get());
+    //
+    //        return self::hydrate($results);
+    //    }
 
     /**
      * Get the database connection for the model.
@@ -156,6 +158,10 @@ trait IsAranguentModel
      */
     public function getConnection()
     {
-        return static::resolveConnection($this->getConnectionName());
+        $connection = static::resolveConnection($this->getConnectionName());
+
+        assert($connection instanceof Connection);
+
+        return $connection;
     }
 }

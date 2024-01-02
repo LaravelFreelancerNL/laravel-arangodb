@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace LaravelFreelancerNL\Aranguent\Testing\Concerns;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Testing\Constraints\HasInDatabase;
 use Illuminate\Testing\Constraints\NotSoftDeletedInDatabase;
 use Illuminate\Testing\Constraints\SoftDeletedInDatabase;
@@ -15,9 +15,9 @@ trait InteractsWithDatabase
     /**
      * Assert that a given where condition exists in the database.
      *
-     * @param  Model|string  $table
-     * @param  array  $data
-     * @param  null  $connection
+     * @param  \Illuminate\Database\Eloquent\Model|string  $table
+     * @param  array<mixed>  $data
+     * @param  string|null  $connection
      * @return $this
      */
     protected function assertDatabaseHas($table, array $data, $connection = null)
@@ -33,9 +33,9 @@ trait InteractsWithDatabase
     /**
      * Assert that a given where condition does not exist in the database.
      *
-     * @param  Model|string  $table
-     * @param  array  $data
-     * @param  null  $connection
+     * @param  \Illuminate\Database\Eloquent\Model|string  $table
+     * @param  array<mixed>  $data
+     * @param  string|null  $connection
      * @return $this
      */
     protected function assertDatabaseMissing($table, array $data, $connection = null)
@@ -52,10 +52,10 @@ trait InteractsWithDatabase
     /**
      * Assert the given record has been "soft deleted".
      *
-     * @param  Model|string  $table
-     * @param  array  $data
-     * @param  null  $connection
-     * @param  string  $deletedAtColumn
+     * @param  \Illuminate\Database\Eloquent\Model|string  $table
+     * @param  array<mixed>  $data
+     * @param  string|null  $connection
+     * @param  string|null  $deletedAtColumn
      * @return $this
      */
     protected function assertSoftDeleted(
@@ -64,7 +64,7 @@ trait InteractsWithDatabase
         $connection = null,
         $deletedAtColumn = 'deleted_at'
     ) {
-        if ($this->isSoftDeletableModel($table)) {
+        if ($this->isSoftDeletableModel($table) && !is_string($table)) {
             return $this->assertSoftDeleted(
                 $table->getTable(),
                 [$table->getKeyName() => $table->getKey()],
@@ -78,7 +78,7 @@ trait InteractsWithDatabase
             new SoftDeletedInDatabase(
                 $this->getConnection($connection),
                 associativeFlatten($data),
-                $deletedAtColumn
+                (string) $deletedAtColumn
             )
         );
 
@@ -88,10 +88,10 @@ trait InteractsWithDatabase
     /**
      * Assert the given record has not been "soft deleted".
      *
-     * @param  Model|string  $table
+     * @param  \Illuminate\Database\Eloquent\Model|string  $table
      * @param  array<mixed>  $data
-     * @param  null  $connection
-     * @param  string  $deletedAtColumn
+     * @param  string|null  $connection
+     * @param  string|null  $deletedAtColumn
      * @return $this
      */
     protected function assertNotSoftDeleted(
@@ -100,7 +100,7 @@ trait InteractsWithDatabase
         $connection = null,
         $deletedAtColumn = 'deleted_at'
     ) {
-        if ($this->isSoftDeletableModel($table)) {
+        if ($this->isSoftDeletableModel($table) && !is_string($table)) {
             return $this->assertNotSoftDeleted(
                 $table->getTable(),
                 [$table->getKeyName() => $table->getKey()],
@@ -114,7 +114,7 @@ trait InteractsWithDatabase
             new NotSoftDeletedInDatabase(
                 $this->getConnection($connection),
                 associativeFlatten($data),
-                $deletedAtColumn
+                (string) $deletedAtColumn
             )
         );
 
@@ -126,11 +126,12 @@ trait InteractsWithDatabase
      * Supported for backwards compatibility in existing projects.
      * No cast is necessary as json is a first class citizen in ArangoDB.
      *
-     * @param  array|string  $value
-     * @return array|string
+     * @param  array<mixed>|object|string  $value
+     * @return \Illuminate\Contracts\Database\Query\Expression
      */
-    public function castAsJson($value): array|string
+    public function castAsJson($value)
     {
-        return $value;
+        return DB::raw($value);
     }
+
 }

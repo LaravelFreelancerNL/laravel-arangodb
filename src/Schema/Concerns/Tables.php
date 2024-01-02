@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace LaravelFreelancerNL\Aranguent\Schema\Concerns;
 
 use Illuminate\Support\Fluent;
@@ -37,7 +39,7 @@ trait Tables
     public function executeCreateCommand($command)
     {
         if ($this->connection->pretending()) {
-            $this->connection->logQuery('/* '.$command->explanation." */\n", []);
+            $this->connection->logQuery('/* ' . $command->explanation . " */\n", []);
 
             return;
         }
@@ -49,7 +51,7 @@ trait Tables
             $options['keyOptions']['autoincrement'] = true;
         }
 
-        if (! $this->schemaManager->hasCollection($this->table)) {
+        if (!$this->schemaManager->hasCollection($this->table)) {
             $this->schemaManager->createCollection($this->table, $options);
         }
     }
