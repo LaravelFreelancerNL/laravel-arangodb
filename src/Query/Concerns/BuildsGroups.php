@@ -56,7 +56,7 @@ trait BuildsGroups
 
     public function cleanGroupVariables(): void
     {
-        $this->tableAliases = array_diff($this->tableAliases, $this->groupVariables);
+        $this->tableAliases = array_diff($this->tableAliases, $this->groupVariables ?? []);
         $this->groupVariables = null;
     }
 

@@ -22,7 +22,7 @@ trait BuildsSelects
      */
     public function from($table, $as = null)
     {
-        if ($this->isQueryable($table)) {
+        if ($this->isQueryable($table) && $as !== null) {
             return $this->fromSub($table, $as);
         }
 

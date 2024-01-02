@@ -35,7 +35,11 @@ trait CompilesDataManipulations
     /**
      * Compile an insert and get ID statement into SQL.
      *
+     * @param IlluminateQueryBuilder $query
      * @param array<mixed> $values
+     * @param null|string $sequence
+     * @param string|null $bindVar
+     * @return string
      */
     public function compileInsertGetId(IlluminateQueryBuilder $query, $values, $sequence = '_key', string $bindVar = null)
     {

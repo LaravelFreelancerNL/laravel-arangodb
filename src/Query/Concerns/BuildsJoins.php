@@ -143,10 +143,12 @@ trait BuildsJoins
      */
     public function leftJoin($table, $first, $operator = null, $second = null): IlluminateQueryBuilder
     {
+
         return $this->join(
             $table,
             $first,
             $operator,
+            /** @phpstan-ignore-next-line  */
             $this->grammar->getValue($second),
             'left'
         );
@@ -163,6 +165,7 @@ trait BuildsJoins
      */
     public function leftJoinSub($query, $as, $first, $operator = null, $second = null): IlluminateQueryBuilder
     {
+        /** @phpstan-ignore-next-line  */
         return $this->joinSub($query, $as, $first, $operator, $this->grammar->getValue($second), 'left');
     }
 

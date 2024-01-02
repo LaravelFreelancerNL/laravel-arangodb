@@ -53,7 +53,7 @@ trait BuildsWheres
     {
         if ($useDefault) {
             return [$operator, '=='];
-        } elseif ($this->invalidOperatorAndValue($operator, $value)) {
+        } elseif (!is_null($operator) && $this->invalidOperatorAndValue($operator, $value)) {
             throw new InvalidArgumentException('Illegal operator and value combination.');
         }
 
@@ -319,14 +319,14 @@ trait BuildsWheres
         // If the column is an array, we will assume it is an array of key-value pairs
         // and can add them each as a where clause. We will maintain the boolean we
         // received when the method was called and pass it into the nested where.
-        if (is_array($first) && !array_is_list($first)) {
+        if (is_array($first) && !array_is_list($first) && $boolean !== null) {
             return $this->addArrayOfWheres($first, $boolean, 'whereColumn');
         }
 
         // If the given operator is not found in the list of valid operators we will
         // assume that the developer is just short-cutting the '=' operators and
         // we will set the operators to '=' and set the values appropriately.
-        if ($this->invalidOperator($operator)) {
+        if ($operator !== null && $this->invalidOperator($operator)) {
             [$second, $operator] = [$operator, '='];
         }
 

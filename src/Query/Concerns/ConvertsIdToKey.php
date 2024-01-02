@@ -34,7 +34,7 @@ trait ConvertsIdToKey
         ];
         //TODO: we probably only want to replace .id if the prefix is a table or table alias.
 
-        return preg_replace(
+        return (string) preg_replace(
             array_keys($replace),
             $replace,
             $data,

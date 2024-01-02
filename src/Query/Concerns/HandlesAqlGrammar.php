@@ -248,11 +248,11 @@ trait HandlesAqlGrammar
     /**
      * Substitute the given bindings into the given raw AQL query.
      *
-     * @param  string  $sql
+     * @param  string  $aql
      * @param  array<mixed>  $bindings
      * @return string
      */
-    public function substituteBindingsIntoRawSql($sql, $bindings)
+    public function substituteBindingsIntoRawSql($aql, $bindings)
     {
         $bindings = array_map(fn($value) => $this->escape($value), $bindings);
 
@@ -260,14 +260,14 @@ trait HandlesAqlGrammar
 
         foreach($bindings as $key => $value) {
             $pattern = '/(@' . $key . ')(?![^a-zA-Z_ ,\}\]])/';
-            $sql = preg_replace(
+            $aql = (string) preg_replace(
                 $pattern,
                 $value,
-                $sql
+                $aql
             );
         }
 
-        return $sql;
+        return $aql;
     }
 
     /**

@@ -413,16 +413,16 @@ class Grammar extends IlluminateQueryGrammar
     /**
      * Get the value of a raw expression.
      *
-     * @param Expression $expression
-     * @return float|int|string
+     * @param bool|float|Expression|int|string|null $expression
+     * @return bool|float|int|string|null
      */
     public function getValue($expression)
     {
-        if (!$expression instanceof Expression) {
-            return $expression;
+        if ($expression instanceof Expression) {
+            return $expression->getValue($this);
         }
 
-        return $expression->getValue($this);
+        return $expression;
     }
 
     /**

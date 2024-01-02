@@ -142,6 +142,7 @@ trait HandlesAliases
 
     public function prefixAlias(string $target, string $value): string
     {
+        /** @phpstan-ignore-next-line */
         $alias =  $this->grammar->getValue($this->getTableAlias($target));
 
         if (Str::startsWith($value, $alias . '.')) {
@@ -203,6 +204,7 @@ trait HandlesAliases
     {
         $referenceParts = explode('.', $reference);
         $first = array_shift($referenceParts);
+        /** @phpstan-ignore-next-line */
         $alias = $this->grammar->getValue($this->getTableAlias($first));
         if ($alias == null) {
             $alias = $first;

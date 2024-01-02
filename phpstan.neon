@@ -2,7 +2,7 @@ includes:
     - ./vendor/nunomaduro/larastan/extension.neon
 
 parameters:
-	level: 7
+	level: 8
 	checkGenericClassInNonGenericObjectType: false
 	universalObjectCratesClasses:
 	    - 'Illuminate\Support\Fluent'
