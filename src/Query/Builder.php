@@ -47,6 +47,7 @@ class Builder extends IlluminateQueryBuilder
     public $bindings = [
         'preIterationVariables' => [],
         'from' => [],
+        'fromOptions' => [],
         'search' => [],
         'join' => [],
         'postIterationVariables' => [],
@@ -72,6 +73,13 @@ class Builder extends IlluminateQueryBuilder
      * @var IlluminateQueryGrammar
      */
     public $grammar;
+
+    /**
+     * 'from' options.
+     *
+     * @var array<mixed>
+     */
+    public $fromOptions = [];
 
     /**
      * The current query value bindings.

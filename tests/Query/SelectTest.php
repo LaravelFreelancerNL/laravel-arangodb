@@ -158,4 +158,28 @@ test('select subquery', function () {
     expect($results->last()->location)->toBe('winterfell');
 });
 
-test('fromOptions')->todo();
+test('fromOptions', function () {
+    $query = \DB::table('houses')
+        ->fromOptions([
+            'indexHint' => 'InvIdx',
+            'forceIndexHint' => true
+        ])
+        ->where('en.description', 'LIKE', '%Westeros%');
+
+    $queryId =  $query->getQueryId();
+
+    expect($query->toSql())
+        ->toBe(
+            "FOR houseDoc IN houses "
+            . "OPTIONS {indexHint: @{$queryId}_fromOptions_1, forceIndexHint: @{$queryId}_fromOptions_2} "
+            . "FILTER `houseDoc`.`en`.`description` LIKE @{$queryId}_where_1 RETURN houseDoc"
+        );
+
+
+    $results = $query->get();
+
+    expect($results->count())->toBe(3);
+    expect($results[0]->name)->toBe('Lannister');
+    expect($results[1]->name)->toBe('Stark');
+    expect($results[2]->name)->toBe('Targaryen');
+});
