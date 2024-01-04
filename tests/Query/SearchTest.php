@@ -86,4 +86,3 @@ test('rawSearchView', function () {
     expect($results[1]->name)->toBe('Targaryen');
     expect($results[2]->name)->toBe('Lannister');
 });
-

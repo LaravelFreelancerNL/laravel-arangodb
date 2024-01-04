@@ -416,7 +416,7 @@ class Grammar extends IlluminateQueryGrammar
     public function compileSearch(IlluminateQueryBuilder $query, array $search)
     {
         if (isset($search['expression'])) {
-            return $this->getValue($search['expression']);
+            return (string) $this->getValue($search['expression']);
         }
 
         $predicates = [];
