@@ -219,8 +219,16 @@ trait HandlesAqlGrammar
     {
         foreach($data as $key => $value) {
             $prefix = $key . ': ';
+
             if (is_numeric($key)) {
                 $prefix = '';
+            }
+
+            if (is_bool($value)) {
+                $booleanString = ($value) ? 'true' : 'false';
+                $data[$key] = $prefix . $booleanString;
+
+                continue;
             }
 
             if (is_array($value)) {
