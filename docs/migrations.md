@@ -21,13 +21,14 @@ See the [ArangoDB Documentation for all options](https://docs.arangodb.com/3.3/H
 Within the collection blueprint you can create indexes.
 ArangoDB knows the following types:
 
-Type       | Purpose                 | Blueprint Method 
----------- | ----------------------- | ----------------
-Hash       | Exact matching          | `$collection->hashIndex($attributes, $indexOptions = [])`
-Persistent | Ranged matching         | `$collection->persistentIndex($attributes, $indexOptions = [])`
-Geo        | Location matching       | `$collection->geoIndex($attributes, $indexOptions = [])`
-TTL        | Auto-expiring documents | `$collection->ttlIndex($attributes, $indexOptions = [])`
-Fulltext * | (Partial) text matching | `$collection->fulltextIndex($attribute, $indexOptions = [])`
+Type       | Purpose                   | Blueprint Method 
+---------- |---------------------------| ----------------
+Hash       | Exact matching            | `$collection->hashIndex($attributes, $indexOptions = [])`
+Persistent | Ranged matching           | `$collection->persistentIndex($attributes, $indexOptions = [])`
+Geo        | Location matching         | `$collection->geoIndex($attributes, $indexOptions = [])`
+TTL        | Auto-expiring documents   | `$collection->ttlIndex($attributes, $indexOptions = [])`
+Fulltext * | (Partial) text matching   | `$collection->fulltextIndex($attribute, $indexOptions = [])`
+Inverted   | Fast full text searching  | `$collection->invertedIndex($attribute, $indexOptions = [])`
 
 * Instead of fulltext indices you'll probably want to use [ArangoSearch](https://www.arangodb.com/docs/stable/arangosearch.html) 
 ArangoDB's powerful search engine.  
@@ -55,6 +56,22 @@ You can create, edit or delete an ArangoDB view.
 ```php
 Schema::createView($viewName, $options);
 ``` 
+
+#### Example search-alias view creation
+```php 
+        Schema::createView(
+            'house_search_alias_view',
+            [
+                "indexes" => [
+                    [
+                        "collection" => "houses",
+                        "index" => "en-inv-index"
+                    ]
+                ],
+            ],
+            'search-alias'
+        );
+```
 
 ### Edit view
 ```php

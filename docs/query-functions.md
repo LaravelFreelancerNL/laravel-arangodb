@@ -1,64 +1,26 @@
 # Query functions
+Aranguent supports most query functions available in vanilla Laravel. 
+[You'll find  a full list of compatible functions here.](compatibility-list.md)
+In addition the following functions have been added:
 
-Aranguent supports the following functions of Laravel's query API.
+## searchView && rawSearchView
+These functions allow you to search ArangoViews.
+[They are explained here in more detail.](arangosearch.md)
 
-(unmentioned functions are untested, your mileage may vary)
+## fromOptions($options)
+fromOptions allows you to set options for the initial 'from' statement of the query builder.
+[In AQL these are the 'FOR' options as described here.](https://docs.arangodb.com/stable/aql/high-level-operations/for/#options)
 
-## Select clauses
-- select
-- selectSub
-- distinct
-- addSelect
-- get
+This enables you to indexHint [inverted indexes](https://docs.arangodb.com/stable/index-and-search/indexing/working-with-indexes/inverted-indexes/)
+which can then be used by filters such as where and having functions.
 
-## Aggregates
-- count
-- max
-- min
-- avg
-- sum
-
-## Return set clauses
-- orderBy
-- inRandomOrder
-- having
-- orHaving
-- havingBetween
-- limit
-- offset
-
-## Insert statements
-- insert
-- insertOrIgnore
-
-## Update statements
-- update
-- updateOrInsert
-- upsert
-
-## Delete statements
-- delete
-- truncate
-
-## Joins
-- join
-- leftJoin
-- crossJoin
-
-## Where clauses
-- where / orWhere
-- whereJsonContains / whereJsonLength / JSON where syntax
-- whereBetween / orWhereBetween / whereNotBetween / orWhereNotBetween
-- whereIn / whereNotIn / orWhereIn / orWhereNotIn
-- whereNull / whereNotNull / orWhereNull / orWhereNotNull
-- whereDate / whereMonth / whereDay / whereYear / whereTime
-- whereColumn / orWhereColumn / whereBetweenColumns
-- whereExists / whereNotExists
-
-## Debugging
-- dd
-- dump
-
-## Raw expressions (!)
-ArangoDB does not support SQL, so any raw expressions must be fed AQL instead.
-This means that any package with raw SQL code is incompatible, at least partially.
+### Example:
+```php
+\DB::table('houses')
+        ->fromOptions([
+            'indexHint' => 'InvIdx',
+            'forceIndexHint' => true
+        ])
+        ->where('en.description', 'LIKE', '%Westeros%')
+        ->get();
+```
