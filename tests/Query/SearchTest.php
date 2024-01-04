@@ -51,3 +51,38 @@ test('searchView and order by frequency', function () {
     expect($results[1]->name)->toBe('Stark');
     expect($results[2]->name)->toBe('Lannister');
 });
+
+test('searchView on alias-search with inverted index', function () {
+    // search with fromoptions
+    $query = DB::table('house_search_alias_view')
+        ->searchView(['en.description', 'en.words'], 'westeros dragon house fire north')
+        ->orderByBestMatching();
+
+    $results = $query->get();
+
+    expect($results->count())->toBe(3);
+    expect($results[0]->name)->toBe('Stark');
+    expect($results[1]->name)->toBe('Targaryen');
+    expect($results[2]->name)->toBe('Lannister');
+});
+
+test('rawSearchView', function () {
+    $query = DB::table('house_search_alias_view')
+        ->rawSearchView(
+            'SEARCH ANALYZER('
+            . '`houseSearchAliasViewDoc`.`en`.`description` IN TOKENS(@tokens, "text_en") '
+            . 'OR `houseSearchAliasViewDoc`.`en`.`words` IN TOKENS(@tokens, "text_en"), '
+            . '"text_en")',
+            [
+                'tokens' => "westeros dragon house fire north",
+            ]
+        )
+        ->orderByBestMatching();
+
+    $results = $query->get();
+
+    expect($results->count())->toBe(3);
+    expect($results[0]->name)->toBe('Stark');
+    expect($results[1]->name)->toBe('Targaryen');
+    expect($results[2]->name)->toBe('Lannister');
+});

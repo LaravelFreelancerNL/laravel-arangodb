@@ -1,35 +1,13 @@
 # Eloquent Relationships
 
-Aranguent supports the following Eloquent relationships and their inverses:
+Aranguent supports all Eloquent relationships and their functions. 
+- One To One
+- One To Many
+- Many To Many
+- One To One (Polymorphic)
+- One To Many (Polymorphic)
+- Many To Many (Polymorphic)
 
-1) One on one
-2) One to many
-3) Many to many
-4) Polymorphic one on one
-5) Polymorphic one to many
-6) Polymorphic many to many
+[You'll find  a full list of compatible functions here.](compatibility-list.md)
 
-## Relationship functions:
-Aranguent supports the following relationship functions:
-- hasOne
-- hasMany
-- belongsTo
-- morphOne
-- morphMany
-- morphTo
-- morphToMany
-- morphByMany
-- save (hasOne, hasMany)
-- create (hasOne, hasMany)
-- associate (belongsTo, morphTo)
-- dissociate (belongsTo, morphTo)
-- attach
-- detach
-- sync
-- with
 
-## Relationship query clauses
-- withCount
-- has
-- hasMorph 
-- doesntHave

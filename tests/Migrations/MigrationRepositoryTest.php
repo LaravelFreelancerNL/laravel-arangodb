@@ -10,7 +10,7 @@ beforeEach(function () {
 });
 
 afterEach(function () {
-    $migrations = $this->databaseMigrationRepository->getMigrations(10);
+    $migrations = $this->databaseMigrationRepository->getMigrations(11);
     foreach($migrations as $migration) {
         $this->databaseMigrationRepository->delete($migration);
     }
@@ -42,7 +42,7 @@ test('delete', function () {
     $this->databaseMigrationRepository->delete($migration);
 
     $results = $this->databaseMigrationRepository->getRan();
-
+    ray('delete getRan', $results);
     expect($results)->toBeEmpty();
 });
 

@@ -28,6 +28,22 @@ are reverted to their base character ('á' becomes 'a').
 ```
 This will return all indexed house documents with any of the words 'dragon' and 'lannister' in the english description.
 
+### rawSearchView()
+Analog to searchView you can easily customize your search statement by using `rawSearchView()` by adding
+the statement and its bindings:
+
+```php
+    $houses = \DB::table('house_search_alias_view')
+        ->searchView(
+            'SEARCH ANALYZER('
+            . '`houseSearchAliasViewDoc`.`en`.`description` IN TOKENS(@tokens, "text_en") '
+            . '"text_en")',
+            [
+                'tokens' => 'dragon lannister',
+            ])
+        ->get();
+```
+
 <a name="analyzer"></a>
 ## Analyzer
 The analyzer defaults to ArangoSearch text analyzer for the current locale; if that locale is supported.

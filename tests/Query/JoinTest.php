@@ -70,8 +70,6 @@ test('leftJoin', function () {
 });
 
 test('leftJoinSub', function () {
-    ray()->showQueries();
-
     $locations = DB::table('locations')
         ->where('name', '=', "King's Landing");
 

@@ -37,8 +37,6 @@ test('withCount', function () {
 });
 
 test('withExists', function () {
-    ray()->showQueries();
-
     $characters = Character::withExists('leads')
         ->get();
 

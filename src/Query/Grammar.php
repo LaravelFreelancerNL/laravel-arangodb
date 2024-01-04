@@ -248,11 +248,27 @@ class Grammar extends IlluminateQueryGrammar
         // FIXME: wrapping/quoting
         $table = $this->prefixTable($table);
 
-        //FIXME: register given alias (x AS y in SQL)
         $alias = $query->registerTableAlias($table);
 
+        $aql = "FOR $alias IN $table";
 
-        return "FOR $alias IN $table";
+        if (!empty($query->fromOptions)) {
+            $aql .= $this->compileFromOptions($query->fromOptions);
+        }
+
+        return $aql;
+    }
+
+    /**
+     * Compile AQL options for the "from" portion of the query.
+     *
+     * @param array<mixed> $options
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
+    protected function compileFromOptions($options): string
+    {
+        return ' OPTIONS ' . $this->generateAqlObject($options);
     }
 
     /**
@@ -399,6 +415,10 @@ class Grammar extends IlluminateQueryGrammar
      */
     public function compileSearch(IlluminateQueryBuilder $query, array $search)
     {
+        if (isset($search['expression'])) {
+            return (string) $this->getValue($search['expression']);
+        }
+
         $predicates = [];
         foreach($search['fields'] as $field) {
             $predicates[] = $this->normalizeColumn($query, $field)

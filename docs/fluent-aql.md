@@ -20,24 +20,3 @@ use LaravelFreelancerNL\FluentAQL\QueryBuilder;
 // 3: execute the query on the connection
     \DB::execute($aqb);
 ```
-
-## Model casting
-Alternatively; if you want to cast the results to a model you can replace step 3 with:
-```php
-// 3: execute the previously set query builder on the connection AND cast the results to the model
-    $results = YourModel::fromAqb($aqb);
-```
-The query will be executed and the results automatically cast to an Eloquent collection of YourModel instances.
-
-_**Important**: this means you have to return the proper data yourself!_
-
-You can also input a closure in which case a new builder is created and the closure added to it.
-```php
-        $results = Character::fromAqb(
-            function ($aqb) {
-                return $aqb->for('characterDoc', 'characters')
-                    ->return('characterDoc');
-            }
-        );
-```
-fromAqb() executes the given query and casts the results to the model it is used on. 

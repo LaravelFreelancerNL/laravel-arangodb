@@ -36,6 +36,26 @@ trait BuildsSelects
     }
 
     /**
+     * Set the table which the query is targeting.
+     *
+     * @param array<mixed> $options
+     *
+     * @return IlluminateQueryBuilder
+     */
+    public function fromOptions($options)
+    {
+
+        $boundOptions = [];
+        foreach ($options as $key => $option) {
+            $boundOptions[$key]  = $this->bindValue($option, 'fromOptions');
+        }
+
+        $this->fromOptions = $boundOptions;
+
+        return $this;
+    }
+
+    /**
      * Set the columns to be selected.
      *
      * @param array<mixed>|mixed $columns
