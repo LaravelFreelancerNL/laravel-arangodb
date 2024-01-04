@@ -14,15 +14,15 @@ trait BuildsSearches
 {
     /**
      * Search an ArangoSearch view.
-     * @param array<mixed>|Expression|string $fields
+     * @param array<mixed>|string $fields
      * @param string $searchText
      * @param string|null $analyzer
      * @return IlluminateQueryBuilder
      */
     public function searchView(
-        array|Expression|string $fields,
-        string $searchText,
-        string $analyzer = null
+        $fields,
+        $searchText,
+        $analyzer = null,
     ): IlluminateQueryBuilder {
         assert($this->grammar instanceof Grammar);
 
@@ -37,9 +37,12 @@ trait BuildsSearches
         $locale = App::getLocale();
         $analyzerLocales = ['de','en','es','fi','fr','it','nl','no','pt','ru','sv','zh'];
 
-        $analyzer = 'text_en';
-        if (in_array($locale, $analyzerLocales)) {
+
+        if (!$analyzer && in_array($locale, $analyzerLocales)) {
             $analyzer = 'text_' . $locale;
+        }
+        if (!$analyzer) {
+            $analyzer = 'text_en';
         }
 
         $this->search = [
@@ -47,6 +50,32 @@ trait BuildsSearches
             'searchText' => $searchText,
             'analyzer' => $analyzer
         ];
+
+        return $this;
+    }
+
+    /**
+     * Search an ArangoSearch view ith a raw search expression.
+     *
+     * @param Expression|string $rawSearch
+     * @param array<mixed> $bindings
+     * @return IlluminateQueryBuilder
+     */
+    public function rawSearchView(
+        $rawSearch,
+        $bindings = []
+    ): IlluminateQueryBuilder {
+        assert($this->grammar instanceof Grammar);
+
+        if (is_string($rawSearch)) {
+            $rawSearch = new Expression($rawSearch);
+        }
+
+        $this->search = [
+            'expression' => $rawSearch,
+        ];
+
+        $this->bindings['search'] = $bindings;
 
         return $this;
     }

@@ -84,7 +84,7 @@ class Builder extends IlluminateQueryBuilder
     /**
      * The current query value bindings.
      *
-     * @var null|array{fields: mixed, searchText: mixed, analyzer: non-falsy-string}
+     * @var null|array<mixed>
      */
     public ?array $search = null;
 
