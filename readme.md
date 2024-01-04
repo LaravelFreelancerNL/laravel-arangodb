@@ -23,9 +23,10 @@ You may use composer to install Aranguent:
 ``` composer require laravel-freelancer-nl/aranguent ```
 
 ### Version compatibility
-| Laravel | ArangoDB | PHP       | Aranguent |
-| :------ | :------- | :-------- | :-------- |
-| ^8.0 and ^9.0    | ^3.7     | ^8.0      | ^0.13     |
+| Laravel       | ArangoDB | PHP  | Aranguent |
+|:--------------| :------- |:-----|:----------|
+| ^8.0 and ^9.0 | ^3.7     | ^8.0 | ^0.13     |
+| ^10.0         | ^3.7     | ^8.1 | ^1.0.0    |
 
 ## Documentation
 1) [Connect to ArangoDB](docs/connect-to-arangodb.md): set up a connection
