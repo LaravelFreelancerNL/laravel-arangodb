@@ -4,6 +4,7 @@ use ArangoClient\ArangoClient;
 use ArangoClient\Exceptions\ArangoException;
 use ArangoClient\Schema\SchemaManager;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
 use LaravelFreelancerNL\Aranguent\Exceptions\QueryException;
@@ -12,6 +13,8 @@ use LaravelFreelancerNL\Aranguent\Schema\Builder;
 use LaravelFreelancerNL\Aranguent\Schema\Grammar;
 use Mockery as M;
 use Tests\Setup\ClassStubs\CustomBlueprint;
+use TiMacDonald\Log\LogEntry;
+use TiMacDonald\Log\LogFake;
 
 afterEach(function () {
     M::close();
@@ -299,4 +302,18 @@ test('dropAnalyzerIfExists false', function () {
     $schemaManager = $this->connection->getArangoClient()->schema();
 
     Schema::dropAnalyzerIfExists('none-existing-analyzer');
+});
+
+test('Silently fails unsupported functions', function () {
+    Schema::nonExistingFunction('none-existing-analyzer');
+})->throwsNoExceptions();
+
+test('Unsupported functions are logged', function () {
+    LogFake::bind();
+
+    Schema::nonExistingFunction('none-existing-analyzer');
+
+    Log::assertLogged(
+        fn(LogEntry $log) => $log->level === 'warning'
+    );
 });

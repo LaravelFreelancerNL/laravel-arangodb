@@ -124,6 +124,8 @@ trait QueriesAranguentRelationships
      * @param  string  $column
      * @param  string  $function
      * @return $this
+     *
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     public function withAggregate($relations, $column, $function = null)
     {
@@ -178,7 +180,7 @@ trait QueriesAranguentRelationships
             unset($query->orders);
             $query->setBindings([], 'order');
 
-            if (count($query->columns) > 1) {
+            if (is_array($query->columns) && count($query->columns) > 1) {
                 $query->columns = [$query->columns[0]];
                 $query->bindings['select'] = [];
             }

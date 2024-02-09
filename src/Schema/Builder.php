@@ -215,8 +215,8 @@ class Builder extends \Illuminate\Database\Schema\Builder
     /**
      * Silently catch the use of unsupported builder methods.
      */
-    public function __call(string $method, mixed $args): void
+    public function __call($method, $parameters)
     {
-        Log::warning("The Aranguent Schema Builder doesn't support method '$method'\n");
+        Log::warning("The ArangoDB driver's schema builder doesn't support method '$method'\n");
     }
 }
