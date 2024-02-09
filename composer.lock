@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a0c67e31c263613f9f63d4f307423d2d",
+    "content-hash": "66edb2cd84b0e4e231abfcc611b2a9f7",
     "packages": [
         {
             "name": "amphp/amp",
@@ -13036,6 +13036,68 @@
             "time": "2023-11-20T00:12:19+00:00"
         },
         {
+            "name": "timacdonald/log-fake",
+            "version": "2.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/timacdonald/log-fake.git",
+                "reference": "70aaade5643e12c69556df307c817f5b2bcca8bf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/timacdonald/log-fake/zipball/70aaade5643e12c69556df307c817f5b2bcca8bf",
+                "reference": "70aaade5643e12c69556df307c817f5b2bcca8bf",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/collections": "^9.0 || ^10.0",
+                "illuminate/contracts": "^9.0 || ^10.0",
+                "illuminate/log": "^9.0 || ^10.0",
+                "illuminate/support": "^9.0 || ^10.0",
+                "php": "^8.1",
+                "phpunit/phpunit": "^9.0 || ^10.0",
+                "psr/log": "^1.0 || ^2.0 || ^3.0",
+                "symfony/var-dumper": "^6.0"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.4",
+                "illuminate/config": "^9.0 || ^10.0",
+                "illuminate/container": "^9.0 || ^10.0",
+                "timacdonald/callable-fake": "^1.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "TiMacDonald\\Log\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Tim MacDonald",
+                    "email": "hello@timacdonald.me",
+                    "homepage": "https://timacdonald.me"
+                }
+            ],
+            "description": "A drop in fake logger for testing with the Laravel framework.",
+            "keywords": [
+                "fake",
+                "laravel",
+                "log",
+                "logger",
+                "testing"
+            ],
+            "support": {
+                "docs": "https://github.com/timacdonald/log-fake/blob/master/readme.md",
+                "issues": "https://github.com/timacdonald/log-fake/issues",
+                "source": "https://github.com/timacdonald/log-fake/releases/latest"
+            },
+            "time": "2023-02-17T00:42:43+00:00"
+        },
+        {
             "name": "zbateson/mail-mime-parser",
             "version": "2.4.0",
             "source": {
@@ -13253,5 +13315,5 @@
         "ext-json": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.3.0"
 }

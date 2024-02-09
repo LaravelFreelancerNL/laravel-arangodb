@@ -42,7 +42,8 @@
         "pestphp/pest-plugin-mock": "^2.0",
         "phpmd/phpmd": "2.13",
         "phpstan/phpstan": "^1.0",
-        "spatie/laravel-ray": "^1.32"
+        "spatie/laravel-ray": "^1.32",
+        "timacdonald/log-fake": "^2.1"
     },
     "repositories": [],
     "autoload": {

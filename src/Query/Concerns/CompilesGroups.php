@@ -60,6 +60,9 @@ trait CompilesGroups
      */
     protected function keepColumns(IlluminateQueryBuilder $query, $groups)
     {
+        if (is_null($query->columns)) {
+            return [];
+        }
         $tempGroups = [];
         foreach($groups as $group) {
             if ($group instanceof Expression) {
