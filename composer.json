@@ -23,7 +23,7 @@
     "require": {
         "php": "^8.1",
         "ext-json": "*",
-        "composer/composer": "^2.2.12",
+        "composer/composer": "^2.7.0",
         "laravel-freelancer-nl/arangodb-php-client": "^2.3.0",
         "laravel-freelancer-nl/fluentaql": "^2.0",
         "laravel/framework": "^10.0",
