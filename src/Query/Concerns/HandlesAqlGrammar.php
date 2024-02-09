@@ -79,9 +79,9 @@ trait HandlesAqlGrammar
      *
      * @return string
      */
-    public function getDateFormat(): string
+    public function getDateFormat()
     {
-        return 'Y-m-d\TH:i:s.vp';
+        return  config('arangodb.date_time_format');
     }
 
     public function isBind(mixed $value): bool

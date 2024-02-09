@@ -4,23 +4,28 @@ declare(strict_types=1);
 
 namespace LaravelFreelancerNL\Aranguent\Providers;
 
-use Illuminate\Database\MigrationServiceProvider as IlluminateMigrationServiceProvider;
-use LaravelFreelancerNL\Aranguent\Console\Migrations\AranguentConvertMigrationsCommand;
-use LaravelFreelancerNL\Aranguent\Console\Migrations\MigrateMakeCommand;
 use LaravelFreelancerNL\Aranguent\Console\ModelMakeCommand;
-use LaravelFreelancerNL\Aranguent\Migrations\DatabaseMigrationRepository;
-use LaravelFreelancerNL\Aranguent\Migrations\MigrationCreator;
+use Illuminate\Support\ServiceProvider;
 
-class CommandServiceProvider extends IlluminateMigrationServiceProvider
+class CommandServiceProvider extends ServiceProvider
 {
     protected bool $defer = true;
+
+    /**
+     * The commands to be registered.
+     *
+     * @var array
+     */
+    protected $commands = [
+        'ModelMake' => ModelMakeCommand::class,
+    ];
+
 
     public function boot(): void
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
-                MigrateMakeCommand::class,
-                ModelMakeCommand::class,
+                'ModelMake' => ModelMakeCommand::class,
             ]);
         }
     }
@@ -32,71 +37,28 @@ class CommandServiceProvider extends IlluminateMigrationServiceProvider
      */
     public function register()
     {
-        $this->registerRepository();
-
-        $this->registerMigrator();
-
-        $this->registerCreator();
-
-        $commands = array_merge(
-            $this->commands,
-            [
-                'AranguentConvertMigrations' => 'command.aranguent.convert-migrations',
-                'MigrateMake' => 'command.migrate.make',
-                'ModelMake' => 'command.model.aranguent',
-            ]
-        );
-        $this->registerCommands($commands);
+        $this->registerCommands($this->commands);
     }
 
     /**
-     * {@inheritdoc}
-     */
-    protected function registerRepository()
-    {
-        $this->app->singleton('migration.repository', function ($app) {
-            $collection = $app['config']['database.migrations'];
-
-            return new DatabaseMigrationRepository($app['db'], $collection);
-        });
-    }
-
-    protected function registerCreator()
-    {
-        $this->app->singleton('migration.creator', function ($app) {
-            $customStubPath = __DIR__ . '/../../stubs';
-
-            return new MigrationCreator($app['files'], $customStubPath);
-        });
-    }
-
-    /**
-     * Register the command.
+     * Register the given commands.
      *
+     * @param  array  $commands
      * @return void
      */
-    protected function registerMigrateMakeCommand()
+    protected function registerCommands(array $commands)
     {
-        $this->app->singleton('command.migrate.make', function ($app) {
-            $creator = $app['migration.creator'];
+        foreach (array_keys($commands) as $command) {
+            $this->{"register{$command}Command"}();
+        }
 
-            $composer = $app['composer'];
-
-            return new MigrateMakeCommand($creator, $composer);
-        });
+        $this->commands(array_values($commands));
     }
 
     protected function registerModelMakeCommand(): void
     {
-        $this->app->singleton('command.model.aranguent', function ($app) {
+        $this->app->extend(ModelMakeCommand::class, function ($app) {
             return new ModelMakeCommand($app['files']);
-        });
-    }
-
-    protected function registerAranguentConvertMigrationsCommand(): void
-    {
-        $this->app->singleton('command.aranguent.convert-migrations', function ($app) {
-            return new AranguentConvertMigrationsCommand($app['migrator']);
         });
     }
 
@@ -106,12 +68,7 @@ class CommandServiceProvider extends IlluminateMigrationServiceProvider
     public function provides()
     {
         return [
-            'migrator',
-            'migration.creator',
-            'migration.repository',
-            'command.aranguent.convert-migrations',
-            'command.migrate.make',
-            'command.model.aranguent',
+            ModelMakeCommand::class
         ];
     }
 }

@@ -1,0 +1,15 @@
+<?php
+
+namespace {{ namespace }};
+
+use LaravelFreelancerNL\Aranguent\Eloquent\Relations\Pivot;
+
+/**
+ * @property string $id
+ * @property string $_id
+ * @property string $_rev
+ */
+class {{ class }} extends Pivot
+{
+    //
+}

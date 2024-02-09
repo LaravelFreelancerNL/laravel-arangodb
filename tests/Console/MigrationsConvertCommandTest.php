@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migrator;
-use LaravelFreelancerNL\Aranguent\Console\Migrations\AranguentConvertMigrationsCommand;
+use LaravelFreelancerNL\Aranguent\Console\Migrations\MigrationsConvertCommand;
 use Mockery as M;
 use Tests\Setup\ClassStubs\ApplicationDatabaseMigrationStub;
 
@@ -22,7 +22,7 @@ afterEach(function () {
  * Illuminate usage is replaced by Aranguent in migration files.
  */
 test('illuminate usage is replaced by aranguent in migration files', function () {
-    $command = new AranguentConvertMigrationsCommand($migrator = M::mock(Migrator::class));
+    $command = new MigrationsConvertCommand($migrator = M::mock(Migrator::class));
     $app = new ApplicationDatabaseMigrationStub(['path.database' => __DIR__]);
     $app->useDatabasePath(__DIR__);
     $command->setLaravel($app);

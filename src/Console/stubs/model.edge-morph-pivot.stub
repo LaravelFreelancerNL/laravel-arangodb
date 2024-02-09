@@ -1,0 +1,17 @@
+<?php
+
+namespace {{ namespace }};
+
+use LaravelFreelancerNL\Aranguent\Eloquent\Relations\MorphPivot;
+
+/**
+ * @property string $id
+ * @property string $_id
+ * @property string $_rev
+ * @property string $_from
+ * @property string $_to
+ */
+class {{ class }} extends MorphPivot
+{
+    //
+}

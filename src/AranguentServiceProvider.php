@@ -35,6 +35,10 @@ class AranguentServiceProvider extends ServiceProvider
         if (isset($this->app['events'])) {
             Model::setEventDispatcher($this->app['events']);
         }
+
+        $this->publishes([
+            __DIR__.'/../config/arangodb.php' => config_path('arangodb.php'),
+        ]);
     }
 
     /**
@@ -44,6 +48,14 @@ class AranguentServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->mergeConfigFrom(
+            __DIR__.'/../config/arangodb.php', 'arangodb'
+        );
+
+        $this->app->singleton(\Illuminate\Database\Migrations\Migrator::class, function ($app) {
+            return $app['migrator'];
+        });
+
         /**
          * When the MigrationCreator complains about an unset $customStubPath
          * we resolve it here
@@ -51,12 +63,13 @@ class AranguentServiceProvider extends ServiceProvider
         $this->app->when(MigrationCreator::class)
             ->needs('$customStubPath')
             ->give(function () {
-                return __DIR__ . '/../stubs';
+                return __DIR__ . '/Migrations/stubs';
             });
+
         $this->app->when(IlluminateMigrationCreator::class)
             ->needs('$customStubPath')
             ->give(function () {
-                return __DIR__ . '/../stubs';
+                return __DIR__ . '/Migrations/stubs';
             });
 
         $this->app->resolving(
@@ -84,6 +97,7 @@ class AranguentServiceProvider extends ServiceProvider
             }
         );
 
+        $this->app->register('LaravelFreelancerNL\Aranguent\Providers\MigrationServiceProvider');
         $this->app->register('LaravelFreelancerNL\Aranguent\Providers\CommandServiceProvider');
     }
 }

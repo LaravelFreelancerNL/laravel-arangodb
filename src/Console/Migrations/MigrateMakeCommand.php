@@ -18,11 +18,12 @@ class MigrateMakeCommand extends IlluminateMigrateMakeCommand
      * @var string
      */
     protected $signature = 'make:migration {name : The name of the migration}
-        {--create= : The collection to be created}
-        {--collection= : The collection to migrate}
-        {--table= : (Alias for collection)}
+        {--create= : The table to be created}
+        {--edge= : The edge collection to be created}
+        {--table= : The table to alter}
         {--path= : The location where the migration file should be created}
-        {--realpath : Indicate any provided migration file paths are pre-resolved absolute paths}';
+        {--realpath : Indicate any provided migration file paths are pre-resolved absolute paths}
+        {--fullpath : Output the full path of the migration (Deprecated)}';
 
     /**
      * Create a new migration install command instance.
@@ -49,33 +50,38 @@ class MigrateMakeCommand extends IlluminateMigrateMakeCommand
         // to be freshly created so we can create the appropriate migrations.
         $name = Str::snake(trim((string) $this->input->getArgument('name')));
 
-        $collection = $this->input->getOption('collection');
-        if (!$collection) {
-            $collection = $this->input->getOption('table');
-        }
+        $table = $this->input->getOption('table');
 
         $create = $this->input->getOption('create') ?: false;
+
+        $edge = $this->input->getOption('edge') ?: false;
 
         // If no table was given as an option but a create option is given then we
         // will use the "create" option as the table name. This allows the devs
         // to pass a table name into this option as a short-cut for creating.
-        if (!$collection && is_string($create)) {
-            $collection = $create;
+        if (!$table && is_string($create)) {
+            $table = $create;
 
             $create = true;
+        }
+
+        if (!$table && is_string($edge)) {
+            $table = $create;
+
+            $edge = true;
         }
 
         // Next, we will attempt to guess the table name if this the migration has
         // "create" in the name. This will allow us to provide a convenient way
         // of creating migrations that create new tables for the application.
-        if (!$collection) {
-            [$collection, $create] = TableGuesser::guess($name);
+        if (!$table) {
+            [$table, $create] = TableGuesser::guess($name);
         }
 
         // Now we are ready to write the migration out to disk. Once we've written
         // the migration out, we will dump-autoload for the entire framework to
         // make sure that the migrations are registered by the class loaders.
-        $this->writeMigration($name, $collection, $create);
+        $this->writeMigration($name, $table, $create, $edge);
 
         $this->composer->dumpAutoloads();
     }
@@ -90,13 +96,14 @@ class MigrateMakeCommand extends IlluminateMigrateMakeCommand
      *
      * @throws \Exception
      */
-    protected function writeMigration($name, $collection, $create)
+    protected function writeMigration($name, $table, $create, $edge = false)
     {
         $file = pathinfo($this->creator->create(
             $name,
             $this->getMigrationPath(),
-            $collection,
-            $create
+            $table,
+            $create,
+            $edge
         ), PATHINFO_FILENAME);
 
         $this->line("<info>Created Migration:</info> {$file}");
