@@ -26,6 +26,16 @@ test('searchView with multiple fields', function () {
     expect($results[1]->name)->toBe('Targaryen');
 });
 
+test('searchView with different analyzer', function () {
+    $query = DB::table('house_view')
+        ->searchView('en.description', 'dragon lannister', 'text_nl');
+
+    expect($query->toSql())->toBe(
+        "FOR houseViewDoc IN house_view SEARCH ANALYZER(`houseViewDoc`.`en`.`description` IN TOKENS(@"
+        . $query->getQueryId() . "_search_1, 'text_nl'), 'text_nl') RETURN houseViewDoc"
+    );
+});
+
 test('searchView and order by best matching', function () {
     $query = DB::table('house_view')
         ->searchView(['en.description', 'en.words'], 'westeros dragon house fire north')
