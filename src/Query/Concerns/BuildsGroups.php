@@ -28,7 +28,7 @@ trait BuildsGroups
     {
         foreach ($groups as $group) {
             $this->groups = array_merge(
-                (array)$this->groups,
+                (array) $this->groups,
                 Arr::wrap($group)
             );
         }
