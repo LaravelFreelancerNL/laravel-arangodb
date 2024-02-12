@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace LaravelFreelancerNL\Aranguent\Console\Migrations;
 
+use Exception;
 use Illuminate\Database\Console\Migrations\MigrateMakeCommand as IlluminateMigrateMakeCommand;
 use Illuminate\Database\Console\Migrations\TableGuesser;
 use Illuminate\Support\Composer;
@@ -41,7 +42,7 @@ class MigrateMakeCommand extends IlluminateMigrateMakeCommand
      *
      * @return void
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function handle()
     {
@@ -90,21 +91,29 @@ class MigrateMakeCommand extends IlluminateMigrateMakeCommand
      * Write the migration file to disk.
      *
      * @param  string  $name
-     * @param  string  $collection
+     * @param  string  $table
      * @param  bool  $create
+     * @param  bool  $edge
      * @return void
      *
-     * @throws \Exception
+     * @throws Exception
+     *
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     protected function writeMigration($name, $table, $create, $edge = false)
     {
-        $file = pathinfo($this->creator->create(
-            $name,
-            $this->getMigrationPath(),
-            $table,
-            $create,
-            $edge
-        ), PATHINFO_FILENAME);
+        assert($this->creator instanceof MigrationCreator);
+
+        $file = pathinfo(
+            $this->creator->create(
+                $name,
+                $this->getMigrationPath(),
+                $table,
+                $create,
+                $edge
+            ),
+            PATHINFO_FILENAME
+        );
 
         $this->line("<info>Created Migration:</info> {$file}");
     }

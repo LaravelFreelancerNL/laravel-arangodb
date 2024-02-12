@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace LaravelFreelancerNL\Aranguent\Console;
 
-use Illuminate\Filesystem\Filesystem;
 use Illuminate\Foundation\Console\ModelMakeCommand as IlluminateModelMakeCommand;
 use Illuminate\Support\Str;
 use LaravelFreelancerNL\Aranguent\Console\Concerns\ArangoCommands;
-use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
 
 class ModelMakeCommand extends IlluminateModelMakeCommand
@@ -25,50 +23,29 @@ class ModelMakeCommand extends IlluminateModelMakeCommand
     /**
      * Execute the console command.
      *
-     * @return void
+     * @return void|false
      */
     public function handle()
     {
+        /** @phpstan-ignore-next-line  */
         if ($this->hasOption('arangodb') &&  $this->option('arangodb')) {
             $this->useArangoDB = true;
         }
 
         if ($this->useFallback()) {
+            /** @phpstan-ignore-next-line */
             return parent::handle();
         }
 
+        /** @phpstan-ignore-next-line */
         if (parent::handle() === false && ! $this->option('force')) {
             return false;
         }
 
-        if ($this->option('all')) {
-            $this->input->setOption('factory', true);
-            $this->input->setOption('seed', true);
-            $this->input->setOption('migration', true);
-            $this->input->setOption('controller', true);
-            $this->input->setOption('policy', true);
-            $this->input->setOption('resource', true);
-        }
+        $this->handleAllOption();
 
-        if ($this->option('factory')) {
-            $this->createFactory();
-        }
 
-        if ($this->option('migration')) {
-            $this->createMigration();
-        }
-
-        if ($this->option('seed')) {
-            $this->createSeeder();
-        }
-
-        if ($this->option('controller') || $this->option('resource') || $this->option('api')) {
-            $this->createController();
-        }
-
-        if ($this->option('policy')) {
-            $this->createPolicy();
-        }
+        $this->handleOptions();
     }
 
 
@@ -102,6 +79,50 @@ class ModelMakeCommand extends IlluminateModelMakeCommand
         ]);
     }
 
+    /**
+     * @return void
+     */
+    public function handleAllOption(): void
+    {
+        if ($this->option('all')) {
+            $this->input->setOption('factory', true);
+            $this->input->setOption('seed', true);
+            $this->input->setOption('migration', true);
+            $this->input->setOption('controller', true);
+            $this->input->setOption('policy', true);
+            $this->input->setOption('resource', true);
+        }
+    }
+
+    /**
+     * @return void
+     */
+    public function handleOptions(): void
+    {
+        if ($this->option('factory')) {
+            $this->createFactory();
+        }
+
+        if ($this->option('migration')) {
+            $this->createMigration();
+        }
+
+        if ($this->option('seed')) {
+            $this->createSeeder();
+        }
+
+        if ($this->option('controller') || $this->option('resource') || $this->option('api')) {
+            $this->createController();
+        }
+
+        if ($this->option('policy')) {
+            $this->createPolicy();
+        }
+    }
+
+    /**
+     * @return array<array-key, string|null|int>
+     */
     protected function getOptions()
     {
         $options = parent::getOptions();
@@ -113,13 +134,16 @@ class ModelMakeCommand extends IlluminateModelMakeCommand
         $options[] = [
             'edge-morph-pivot',
             null,
-            InputOption::VALUE_NONE, 'The generated model uses a custom polymorphic intermediate edge-collection model for ArangoDB'
+            InputOption::VALUE_NONE,
+            'The generated model uses a custom polymorphic intermediate edge-collection model for ArangoDB'
         ];
+
         if (!$this->arangodbIsDefaultConnection()) {
             $options[] = [
                 'arangodb',
                 null,
-                InputOption::VALUE_NONE, 'Use ArangoDB instead of the default connection.'
+                InputOption::VALUE_NONE,
+                'Use ArangoDB instead of the default connection.'
             ];
         }
 

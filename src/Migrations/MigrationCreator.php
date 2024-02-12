@@ -6,21 +6,9 @@ namespace LaravelFreelancerNL\Aranguent\Migrations;
 
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Database\Migrations\MigrationCreator as IlluminateMigrationCreator;
-use Illuminate\Filesystem\Filesystem;
 
 class MigrationCreator extends IlluminateMigrationCreator
 {
-    /**
-     * Create a new migration creator instance.
-     *
-     * @param  string  $customStubPath
-     */
-    public function __construct(Filesystem $files, $customStubPath)
-    {
-        $this->files = $files;
-        $this->customStubPath = $customStubPath;
-    }
-
     /**
      * Get the path to the stubs.
      *
@@ -38,7 +26,10 @@ class MigrationCreator extends IlluminateMigrationCreator
      * @param bool $create
      * @param bool $edge
      * @return string
+     *
      * @throws FileNotFoundException
+     *
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     protected function getStub($table, $create, $edge = false)
     {
@@ -46,19 +37,26 @@ class MigrationCreator extends IlluminateMigrationCreator
             $stub = $this->files->exists($customPath = $this->customStubPath . '/migration.stub')
                 ? $customPath
                 : $this->stubPath() . '/migration.stub';
+            return $this->files->get($stub);
         } elseif ($edge) {
             $stub = $this->files->exists($customPath = $this->customStubPath . '/migration.create-edge.stub')
                 ? $customPath
                 : $this->stubPath() . '/migration.create-edge.stub';
+
+
+            return $this->files->get($stub);
         } elseif ($create) {
             $stub = $this->files->exists($customPath = $this->customStubPath . '/migration.create.stub')
                 ? $customPath
                 : $this->stubPath() . '/migration.create.stub';
-        } else {
-            $stub = $this->files->exists($customPath = $this->customStubPath . '/migration.update.stub')
-                ? $customPath
-                : $this->stubPath() . '/migration.update.stub';
+
+            return $this->files->get($stub);
         }
+
+
+        $stub = $this->files->exists($customPath = $this->customStubPath . '/migration.update.stub')
+            ? $customPath
+            : $this->stubPath() . '/migration.update.stub';
 
         return $this->files->get($stub);
     }
@@ -70,10 +68,12 @@ class MigrationCreator extends IlluminateMigrationCreator
      * @param  string  $path
      * @param  string|null  $table
      * @param  bool  $create
+     * @param  bool  $edge
      * @return string
      *
      * @throws \Exception
      */
+    /**  @phpstan-ignore-next-line  @SuppressWarnings(PHPMD.BooleanArgumentFlag) */
     public function create($name, $path, $table = null, $create = false, $edge = false)
     {
         $this->ensureMigrationDoesntAlreadyExist($name, $path);

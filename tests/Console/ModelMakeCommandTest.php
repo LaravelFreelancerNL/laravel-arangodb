@@ -8,7 +8,7 @@ $testModelData = [
 $migrationPath = __DIR__ . '/../../vendor/orchestra/testbench-core/laravel/database/migrations';
 
 afterEach(function () use ($testModelData) {
-        unlink($testModelData['path']);
+    unlink($testModelData['path']);
 });
 
 test('make:model', function () use ($testModelData) {
@@ -100,6 +100,6 @@ test('create model with edge migration', function () use ($testModelData, $migra
         expect(str_contains($content, 'const EDGE_COLLECTION = 3;'))->toBeTrue();
         expect(str_contains($content, "type' => EDGE_COLLECTION,"))->toBeTrue();
 
-                unlink($migrationPath.'/'.$file);
+        unlink($migrationPath . '/' . $file);
     }
 });

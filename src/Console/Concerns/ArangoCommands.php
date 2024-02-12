@@ -18,6 +18,6 @@ trait ArangoCommands
 
     protected function useFallback(): bool
     {
-       return !$this->arangodbIsDefaultConnection() && !$this->useArangoDB;
+        return !$this->arangodbIsDefaultConnection() && !$this->useArangoDB;
     }
 }

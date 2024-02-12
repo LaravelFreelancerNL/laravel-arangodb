@@ -18,6 +18,9 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
 
     protected bool $defer = true;
 
+    /**
+     * @var string[]
+     */
     protected $aliases = [
         'Migrator' => 'migrator',
         'Creator' => 'migration.creator',

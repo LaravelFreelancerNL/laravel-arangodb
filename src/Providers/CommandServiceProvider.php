@@ -14,7 +14,7 @@ class CommandServiceProvider extends ServiceProvider
     /**
      * The commands to be registered.
      *
-     * @var array
+     * @var string[]
      */
     protected $commands = [
         'ModelMake' => ModelMakeCommand::class,
@@ -43,7 +43,7 @@ class CommandServiceProvider extends ServiceProvider
     /**
      * Register the given commands.
      *
-     * @param  array  $commands
+     * @param  string[]  $commands
      * @return void
      */
     protected function registerCommands(array $commands)

@@ -6,7 +6,6 @@ namespace LaravelFreelancerNL\Aranguent;
 
 use Illuminate\Database\Migrations\MigrationCreator as IlluminateMigrationCreator;
 use Illuminate\Support\ServiceProvider;
-use LaravelFreelancerNL\Aranguent\Console\ModelMakeCommand;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use LaravelFreelancerNL\Aranguent\Migrations\MigrationCreator;
 use LaravelFreelancerNL\Aranguent\Schema\Grammar as SchemaGrammar;
