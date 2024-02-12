@@ -43,21 +43,21 @@ class MigrationCreator extends IlluminateMigrationCreator
     protected function getStub($table, $create, $edge = false)
     {
         if (is_null($table)) {
-            $stub = $this->files->exists($customPath = $this->customStubPath.'/migration.stub')
+            $stub = $this->files->exists($customPath = $this->customStubPath . '/migration.stub')
                 ? $customPath
-                : $this->stubPath().'/migration.stub';
+                : $this->stubPath() . '/migration.stub';
         } elseif ($edge) {
-            $stub = $this->files->exists($customPath = $this->customStubPath.'/migration.create-edge.stub')
+            $stub = $this->files->exists($customPath = $this->customStubPath . '/migration.create-edge.stub')
                 ? $customPath
-                : $this->stubPath().'/migration.create-edge.stub';
+                : $this->stubPath() . '/migration.create-edge.stub';
         } elseif ($create) {
-            $stub = $this->files->exists($customPath = $this->customStubPath.'/migration.create.stub')
+            $stub = $this->files->exists($customPath = $this->customStubPath . '/migration.create.stub')
                 ? $customPath
-                : $this->stubPath().'/migration.create.stub';
+                : $this->stubPath() . '/migration.create.stub';
         } else {
-            $stub = $this->files->exists($customPath = $this->customStubPath.'/migration.update.stub')
+            $stub = $this->files->exists($customPath = $this->customStubPath . '/migration.update.stub')
                 ? $customPath
-                : $this->stubPath().'/migration.update.stub';
+                : $this->stubPath() . '/migration.update.stub';
         }
 
         return $this->files->get($stub);
@@ -88,7 +88,8 @@ class MigrationCreator extends IlluminateMigrationCreator
         $this->files->ensureDirectoryExists(dirname($path));
 
         $this->files->put(
-            $path, $this->populateStub($stub, $table)
+            $path,
+            $this->populateStub($stub, $table)
         );
 
         // Next, we will fire any hooks that are supposed to fire after a migration is

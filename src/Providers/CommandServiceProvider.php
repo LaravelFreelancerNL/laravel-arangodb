@@ -57,7 +57,7 @@ class CommandServiceProvider extends ServiceProvider
 
     protected function registerModelMakeCommand(): void
     {
-        $this->app->extend(ModelMakeCommand::class, function ($app) {
+        $this->app->singleton(ModelMakeCommand::class, function ($app) {
             return new ModelMakeCommand($app['files']);
         });
     }

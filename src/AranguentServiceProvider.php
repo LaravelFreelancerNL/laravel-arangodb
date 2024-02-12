@@ -6,6 +6,7 @@ namespace LaravelFreelancerNL\Aranguent;
 
 use Illuminate\Database\Migrations\MigrationCreator as IlluminateMigrationCreator;
 use Illuminate\Support\ServiceProvider;
+use LaravelFreelancerNL\Aranguent\Console\ModelMakeCommand;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 use LaravelFreelancerNL\Aranguent\Migrations\MigrationCreator;
 use LaravelFreelancerNL\Aranguent\Schema\Grammar as SchemaGrammar;
@@ -37,7 +38,7 @@ class AranguentServiceProvider extends ServiceProvider
         }
 
         $this->publishes([
-            __DIR__.'/../config/arangodb.php' => config_path('arangodb.php'),
+            __DIR__ . '/../config/arangodb.php' => config_path('arangodb.php'),
         ]);
     }
 
@@ -49,7 +50,8 @@ class AranguentServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(
-            __DIR__.'/../config/arangodb.php', 'arangodb'
+            __DIR__ . '/../config/arangodb.php',
+            'arangodb'
         );
 
         $this->app->singleton(\Illuminate\Database\Migrations\Migrator::class, function ($app) {
@@ -66,6 +68,7 @@ class AranguentServiceProvider extends ServiceProvider
                 return __DIR__ . '/Migrations/stubs';
             });
 
+        // FIXME: only for arangodb?
         $this->app->when(IlluminateMigrationCreator::class)
             ->needs('$customStubPath')
             ->give(function () {
@@ -99,5 +102,6 @@ class AranguentServiceProvider extends ServiceProvider
 
         $this->app->register('LaravelFreelancerNL\Aranguent\Providers\MigrationServiceProvider');
         $this->app->register('LaravelFreelancerNL\Aranguent\Providers\CommandServiceProvider');
+
     }
 }

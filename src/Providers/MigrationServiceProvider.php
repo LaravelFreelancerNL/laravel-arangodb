@@ -6,7 +6,7 @@ namespace LaravelFreelancerNL\Aranguent\Providers;
 
 use Illuminate\Database\Migrations\Migrator;
 use Illuminate\Database\MigrationServiceProvider as IlluminateMigrationServiceProvider;
-use LaravelFreelancerNL\Aranguent\Console\Concerns\CommandNameSpace;
+use LaravelFreelancerNL\Aranguent\Console\Concerns\ArangoCommands;
 use LaravelFreelancerNL\Aranguent\Console\Migrations\MigrationsConvertCommand;
 use LaravelFreelancerNL\Aranguent\Console\Migrations\MigrateMakeCommand;
 use LaravelFreelancerNL\Aranguent\Migrations\DatabaseMigrationRepository;
@@ -14,7 +14,7 @@ use LaravelFreelancerNL\Aranguent\Migrations\MigrationCreator;
 
 class MigrationServiceProvider extends IlluminateMigrationServiceProvider
 {
-    use CommandNameSpace;
+    use ArangoCommands;
 
     protected bool $defer = true;
 
@@ -43,7 +43,7 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
         parent::__construct($app);
 
         foreach($this->aliases as $key => $alias) {
-            $this->aliases[$key] = $this->postfixCommandNamespace($alias);
+            $this->aliases[$key] = $alias;
         }
     }
 
@@ -123,7 +123,7 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
     {
 
         $this->app->singleton($this->commands['MigrateMake'], function ($app) {
-            $creator = $app[$this->postfixCommandNamespace('migration.creator')];
+            $creator = $app['migration.creator'];
 
             $composer = $app['composer'];
 

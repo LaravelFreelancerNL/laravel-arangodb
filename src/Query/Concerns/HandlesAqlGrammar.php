@@ -81,7 +81,7 @@ trait HandlesAqlGrammar
      */
     public function getDateFormat()
     {
-        return  config('arangodb.date_time_format');
+        return  config('arangodb.datetime_format');
     }
 
     public function isBind(mixed $value): bool

@@ -8,7 +8,7 @@ $testModelData = [
 $migrationPath = __DIR__ . '/../../vendor/orchestra/testbench-core/laravel/database/migrations';
 
 afterEach(function () use ($testModelData) {
-//    unlink($testModelData['path']);
+        unlink($testModelData['path']);
 });
 
 test('make:model', function () use ($testModelData) {
@@ -17,7 +17,8 @@ test('make:model', function () use ($testModelData) {
         ->expectsQuestion('Would you like any of the following?', '')
         ->assertExitCode(0);
 
-    $content = file_get_contents($testModelData['path']);
+    $contents = file_get_contents($testModelData['path']);
+
     expect(str_contains($contents, 'use LaravelFreelancerNL\Aranguent\Eloquent\Model;'))->toBeTrue();
 });
 
@@ -26,9 +27,8 @@ test('create pivot model', function () use ($testModelData) {
         ->expectsQuestion('What should the model be named?', $testModelData['name'])
         ->assertExitCode(0);
 
-    $content = file_get_contents($testModelData['path']);
+    $contents = file_get_contents($testModelData['path']);
     expect(str_contains($contents, 'use LaravelFreelancerNL\Aranguent\Eloquent\Relations\Pivot;'))->toBeTrue();
-    expect($occurenceOfAranguent)->toEqual(1);
 });
 
 test('create morph-pivot model', function () use ($testModelData) {
@@ -36,9 +36,8 @@ test('create morph-pivot model', function () use ($testModelData) {
         ->expectsQuestion('What should the model be named?', $testModelData['name'])
         ->assertExitCode(0);
 
-    $content = file_get_contents($testModelData['path']);
-    $occurenceOfAranguent = substr_count($content, 'use LaravelFreelancerNL\Aranguent\Eloquent\Relations\MorphPivot;');
-    expect($occurenceOfAranguent)->toEqual(1);
+    $contents = file_get_contents($testModelData['path']);
+    expect(substr_count($contents, 'use LaravelFreelancerNL\Aranguent\Eloquent\Relations\MorphPivot;'))->toEqual(1);
 });
 
 test('create edge-pivot model', function () use ($testModelData) {
@@ -47,9 +46,9 @@ test('create edge-pivot model', function () use ($testModelData) {
         ->assertExitCode(0);
 
     $content = file_get_contents($testModelData['path']);
-    expect( str_contains($content, 'use LaravelFreelancerNL\Aranguent\Eloquent\Relations\Pivot;'))->toBeTrue();
-    expect( str_contains($content, ' * @property string $_from'))->toBeTrue();
-    expect( str_contains($content, ' * @property string $_to'))->toBeTrue();
+    expect(str_contains($content, 'use LaravelFreelancerNL\Aranguent\Eloquent\Relations\Pivot;'))->toBeTrue();
+    expect(str_contains($content, ' * @property string $_from'))->toBeTrue();
+    expect(str_contains($content, ' * @property string $_to'))->toBeTrue();
 });
 
 test('create edge-morph-pivot model', function () use ($testModelData) {
@@ -58,7 +57,7 @@ test('create edge-morph-pivot model', function () use ($testModelData) {
         ->assertExitCode(0);
 
     $content = file_get_contents($testModelData['path']);
-    expect(str_contains($content, 'use LaravelFreelancerNL\Aranguent\Eloquent\Relations\Pivot;'))->toBeTrue();
+    expect(str_contains($content, 'use LaravelFreelancerNL\Aranguent\Eloquent\Relations\MorphPivot;'))->toBeTrue();
     expect(str_contains($content, ' * @property string $_from'))->toBeTrue();
     expect(str_contains($content, ' * @property string $_to'))->toBeTrue();
 });
@@ -78,7 +77,7 @@ test('create model with migration', function () use ($testModelData, $migrationP
         }
         expect(str_contains($file, '_create_test_models_table.php'))->toBeTrue();
 
-        unlink($migrationPath.'/'.$file);
+        unlink($migrationPath . '/' . $file);
     }
 });
 
@@ -97,6 +96,10 @@ test('create model with edge migration', function () use ($testModelData, $migra
         }
         expect(str_contains($file, '_create_test_models_table.php'))->toBeTrue();
 
-//        unlink($migrationPath.'/'.$file);
+        $content = file_get_contents($migrationPath . '/' . $file);
+        expect(str_contains($content, 'const EDGE_COLLECTION = 3;'))->toBeTrue();
+        expect(str_contains($content, "type' => EDGE_COLLECTION,"))->toBeTrue();
+
+                unlink($migrationPath.'/'.$file);
     }
-})->todo();
+});

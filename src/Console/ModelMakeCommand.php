@@ -7,16 +7,13 @@ namespace LaravelFreelancerNL\Aranguent\Console;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Foundation\Console\ModelMakeCommand as IlluminateModelMakeCommand;
 use Illuminate\Support\Str;
-use LaravelFreelancerNL\Aranguent\Console\Concerns\CommandNameSpace;
-use Symfony\Component\Console\Attribute\AsCommand;
+use LaravelFreelancerNL\Aranguent\Console\Concerns\ArangoCommands;
+use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
 
-
-
-#[AsCommand(name: 'make:model')]
 class ModelMakeCommand extends IlluminateModelMakeCommand
 {
-    use CommandNameSpace;
+    use ArangoCommands;
 
     /**
      * The console command name.
@@ -26,26 +23,54 @@ class ModelMakeCommand extends IlluminateModelMakeCommand
     protected $name = 'make:model';
 
     /**
-     * Create a new controller creator command instance.
+     * Execute the console command.
      *
-     * @param  \Illuminate\Filesystem\Filesystem  $files
      * @return void
      */
-    public function __construct(Filesystem $files)
+    public function handle()
     {
-        ray('ModelMakeCommand construct');
-        parent::__construct($files);
-
-        $this->name = $this->prefixCommandNamespace($this->name);
-    }
-
-    protected function namespaceCommand(string $command): string
-    {
-        if (config('arangodb.console_command_namespace') === '') {
-            return $command;
+        if ($this->hasOption('arangodb') &&  $this->option('arangodb')) {
+            $this->useArangoDB = true;
         }
-        return $command.'.'.config('arangodb.console_command_namespace');
+
+        if ($this->useFallback()) {
+            return parent::handle();
+        }
+
+        if (parent::handle() === false && ! $this->option('force')) {
+            return false;
+        }
+
+        if ($this->option('all')) {
+            $this->input->setOption('factory', true);
+            $this->input->setOption('seed', true);
+            $this->input->setOption('migration', true);
+            $this->input->setOption('controller', true);
+            $this->input->setOption('policy', true);
+            $this->input->setOption('resource', true);
+        }
+
+        if ($this->option('factory')) {
+            $this->createFactory();
+        }
+
+        if ($this->option('migration')) {
+            $this->createMigration();
+        }
+
+        if ($this->option('seed')) {
+            $this->createSeeder();
+        }
+
+        if ($this->option('controller') || $this->option('resource') || $this->option('api')) {
+            $this->createController();
+        }
+
+        if ($this->option('policy')) {
+            $this->createPolicy();
+        }
     }
+
 
     /**
      * Create a migration file for the model.
@@ -54,6 +79,11 @@ class ModelMakeCommand extends IlluminateModelMakeCommand
      */
     protected function createMigration()
     {
+        if ($this->useFallback()) {
+            parent::createMigration();
+            return;
+        }
+
         $table = Str::snake(Str::pluralStudly(class_basename($this->argument('name'))));
 
         if ($this->option('pivot')) {
@@ -65,7 +95,7 @@ class ModelMakeCommand extends IlluminateModelMakeCommand
             $createCommand = '--edge';
         }
 
-        $this->call($this->prefixCommandNamespace('make:migration'), [
+        $this->call('make:migration', [
             'name' => "create_{$table}_table",
             $createCommand => $table,
             '--fullpath' => true,
@@ -78,13 +108,20 @@ class ModelMakeCommand extends IlluminateModelMakeCommand
         $options[] = [
             'edge-pivot',
             null,
-            InputOption::VALUE_NONE, 'Indicates if the generated model should be a custom intermediate edge-collection model'
+            InputOption::VALUE_NONE, 'The generated model uses a custom intermediate edge-collection model for ArangoDB'
         ];
         $options[] = [
             'edge-morph-pivot',
             null,
-            InputOption::VALUE_NONE, 'Indicates if the generated model should be a custom polymorphic intermediate edge-collection model'
+            InputOption::VALUE_NONE, 'The generated model uses a custom polymorphic intermediate edge-collection model for ArangoDB'
         ];
+        if (!$this->arangodbIsDefaultConnection()) {
+            $options[] = [
+                'arangodb',
+                null,
+                InputOption::VALUE_NONE, 'Use ArangoDB instead of the default connection.'
+            ];
+        }
 
         return $options;
     }
@@ -97,8 +134,10 @@ class ModelMakeCommand extends IlluminateModelMakeCommand
      */
     protected function getStub()
     {
+        if ($this->useFallback()) {
+            return parent::getStub();
+        }
         if ($this->option('pivot')) {
-            ray($this->resolveStubPath('/stubs/model.pivot.stub'));
             return $this->resolveStubPath('/stubs/model.pivot.stub');
         }
 
@@ -126,8 +165,12 @@ class ModelMakeCommand extends IlluminateModelMakeCommand
      */
     protected function resolveStubPath($stub)
     {
+        if ($this->useFallback()) {
+            return parent::resolveStubPath($stub);
+        }
+
         return file_exists($customPath = $this->laravel->basePath(trim($stub, '/')))
             ? $customPath
-            : __DIR__.$stub;
+            : __DIR__ . $stub;
     }
 }

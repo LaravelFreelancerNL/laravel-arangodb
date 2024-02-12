@@ -86,7 +86,7 @@ class TestCase extends AranguentTestCase implements \Orchestra\Testbench\Contrac
 
         //Convert orchestra migrations
         $this->artisan(
-            'migrations:convert',
+            'convert:migrations',
             ['--realpath' => true, '--path' => __DIR__ . '/../vendor/orchestra/testbench-core/laravel/migrations/']
         )->run();
 

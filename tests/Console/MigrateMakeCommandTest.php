@@ -7,7 +7,7 @@ test('make:migration', function () use ($migrationPath) {
         ->expectsQuestion('What should the migration be named?', 'create_tests_table')
         ->assertExitCode(0);
 
-    $migrationFiles = glob($migrationPath.'/*'.'_create_tests_table.php');
+    $migrationFiles = glob($migrationPath . '/*' . '_create_tests_table.php');
 
     $contents = file_get_contents($migrationFiles[0]);
 
@@ -23,7 +23,7 @@ test('make:migration --edge=edges', function () use ($migrationPath) {
         ->expectsQuestion('What should the migration be named?', 'create_edges_table')
         ->assertExitCode(0);
 
-    $migrationFiles = glob($migrationPath.'/*'.'create_edges_table.php');
+    $migrationFiles = glob($migrationPath . '/*' . 'create_edges_table.php');
 
     $contents = file_get_contents($migrationFiles[0]);
 
