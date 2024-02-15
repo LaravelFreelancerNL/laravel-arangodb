@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace LaravelFreelancerNL\Aranguent\Providers;
 
+use LaravelFreelancerNL\Aranguent\Console\DbCommand;
+use Illuminate\Database\Console\DbCommand as IlluminateDbCommand;
 use LaravelFreelancerNL\Aranguent\Console\ModelMakeCommand;
 use Illuminate\Support\ServiceProvider;
 
 class CommandServiceProvider extends ServiceProvider
 {
-    protected bool $defer = true;
+    protected bool $defer = false;
 
     /**
      * The commands to be registered.
@@ -18,15 +20,17 @@ class CommandServiceProvider extends ServiceProvider
      */
     protected $commands = [
         'ModelMake' => ModelMakeCommand::class,
+        'Db' => DbCommand::class,
     ];
 
 
     public function boot(): void
     {
         if ($this->app->runningInConsole()) {
-            $this->commands([
-                'ModelMake' => ModelMakeCommand::class,
-            ]);
+//            $this->commands([
+//                'ModelMake' => ModelMakeCommand::class,
+//                'Db' => DbCommand::class,
+//            ]);
         }
     }
 
@@ -62,13 +66,18 @@ class CommandServiceProvider extends ServiceProvider
         });
     }
 
+    protected function registerDbCommand(): void
+    {
+        $this->app->extend(IlluminateDbCommand::class, function ($app) {
+            return new DbCommand();
+        });
+    }
+
     /**
      * @return string[]
      */
     public function provides()
     {
-        return [
-            ModelMakeCommand::class
-        ];
+        return array_values($this->commands);
     }
 }
