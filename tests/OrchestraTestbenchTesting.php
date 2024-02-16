@@ -92,7 +92,7 @@ trait OrchestraTestbenchTesting
 
         Model::setEventDispatcher($this->app['events']);
 
-        $this->setUpApplicationRoutes();
+        $this->setUpApplicationRoutes($this->app);
 
         $this->setUpHasRun = true;
     }
