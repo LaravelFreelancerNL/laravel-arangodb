@@ -156,6 +156,16 @@ associate / dissociate / attach / detach /
 sync / syncWithPivotValues / syncWithoutDetaching / toggle /
 updateExistingPivot / 
 
+## <a name="artisan"></a> Artisan commands
+The following database-related artisan commands are supported:
+db / make:model / make:migration / migrate /  migrate:fresh /
+migrate:install / migrate:refresh / migrate:reset / migrate:rollback /
+migrate:status / convert:migrations
+
+The following database-related artisan commands are NOT support at this time:
+
+db:monitor / db:show / db:table / schema:dump
+
 ## <a name="testing"></a> Testing
 
 ### Traits
