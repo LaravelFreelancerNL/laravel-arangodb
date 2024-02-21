@@ -7,13 +7,14 @@ namespace LaravelFreelancerNL\Aranguent\Console;
 use Illuminate\Database\Console\DbCommand as IlluminateDbCommand;
 use Symfony\Component\Process\Process;
 
-
 class DbCommand extends IlluminateDbCommand
 {
     /**
      * Execute the console command.
      *
      * @return int
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function handle()
     {
@@ -41,7 +42,7 @@ class DbCommand extends IlluminateDbCommand
     /**
      * Get the database client command to run.
      *
-     * @param  array  $connection
+     * @param  array<mixed>  $connection
      * @return string
      */
     public function getCommand(array $connection)
@@ -56,19 +57,19 @@ class DbCommand extends IlluminateDbCommand
     }
 
     /**
-     * Get the arguments for the ArangoDB CLI.
+     * Get the arguments for the ArangoDB CLI (Arangosh).
      *
-     * @param  array  $connection
-     * @return array
+     * @param  array<mixed>  $connection
+     * @return array<mixed>
      */
     protected function getArangodbArguments(array $connection)
     {
         return array_merge([
-            '--server.endpoint='.$connection['endpoint'],
-            '--server.database='.$connection['database'],
-            '--server.username='.$connection['username'],
+            '--server.endpoint=' . $connection['endpoint'],
+            '--server.database=' . $connection['database'],
+            '--server.username=' . $connection['username'],
         ], $this->getOptionalArguments([
-            'password' => '--server.password='.$connection['password'],
+            'password' => '--server.password=' . $connection['password'],
         ], $connection));
     }
 
