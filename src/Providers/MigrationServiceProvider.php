@@ -7,7 +7,6 @@ namespace LaravelFreelancerNL\Aranguent\Providers;
 use Illuminate\Database\Migrations\Migrator;
 use Illuminate\Database\MigrationServiceProvider as IlluminateMigrationServiceProvider;
 use LaravelFreelancerNL\Aranguent\Console\Concerns\ArangoCommands;
-use LaravelFreelancerNL\Aranguent\Console\Migrations\MigrateFreshCommand;
 use LaravelFreelancerNL\Aranguent\Console\Migrations\MigrationsConvertCommand;
 use LaravelFreelancerNL\Aranguent\Console\Migrations\MigrateMakeCommand;
 use LaravelFreelancerNL\Aranguent\Console\Migrations\MigrateInstallCommand;
@@ -28,7 +27,6 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
         'Creator' => 'migration.creator',
         'Repository' => 'migration.repository',
         'MigrateMake' => 'migrate.make',
-        'MigrateFresh' => MigrateFreshCommand::class,
         'MigrateInstall' => MigrateInstallCommand::class,
     ];
 

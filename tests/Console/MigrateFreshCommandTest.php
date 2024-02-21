@@ -1,12 +1,9 @@
 <?php
 
-use LaravelFreelancerNL\Aranguent\Migrations\DatabaseMigrationRepository;
 use Illuminate\Database\QueryException as IlluminateQueryException;
 use Database\Seeders\DatabaseSeeder;
 
 beforeEach(function () {
-    $this->databaseMigrationRepository = new DatabaseMigrationRepository(app('db'), 'migrations');
-
     $this->schemaManager = $this->connection->getArangoClient()->schema();
 });
 
@@ -37,6 +34,7 @@ test('migrate:fresh --database=arangodb', function () {
     ];
 
     $this->artisan('migrate:fresh', [
+        '--database' => 'arangodb',
         '--path' => [
             database_path('migrations'),
             realpath(__DIR__ . '/../Setup/Database/Migrations'),
