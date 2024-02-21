@@ -27,7 +27,7 @@ test('migrate:status --database=arangodb', function () {
         '--realpath' => true,
         '--database' => 'arangodb',
     ])
-        ->expectsOutputToContain('2024_01_04_145621_create_house_search_alias_view ......................................................................................... [1] Ran')
+        ->expectsOutputToContain('create_house_search_alias_view ......................................................................................... [1] Ran')
         ->assertExitCode(0);
 });
 
