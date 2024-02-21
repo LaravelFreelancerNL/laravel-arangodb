@@ -8,6 +8,7 @@ Untested features might work but your mileage may vary.
 
 - [Query Builder](#query-builder)
 - [Eloquent](#eloquent)
+- [Artisan commands](#artisan)
 - [Testing](#testing)
 - [Database Connection](#database-connection)
 - [Known Incompatibilities](#known-incompatibilities)
@@ -158,9 +159,10 @@ updateExistingPivot /
 
 ## <a name="artisan"></a> Artisan commands
 The following database-related artisan commands are supported:
-db / make:model / make:migration / migrate /  migrate:fresh /
-migrate:install / migrate:refresh / migrate:reset / migrate:rollback /
-migrate:status / convert:migrations
+make:model / db / db:wipe / 
+make:migration / migrate:install / migrate /
+migrate:fresh / migrate:refresh / migrate:reset / migrate:rollback / 
+migrate:status / convert:migrations 
 
 The following database-related artisan commands are NOT support at this time:
 

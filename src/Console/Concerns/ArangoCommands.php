@@ -6,8 +6,21 @@ namespace LaravelFreelancerNL\Aranguent\Console\Concerns;
 
 trait ArangoCommands
 {
-    protected bool $useArangoDB = false;
+    public bool $useArangoDB = false;
 
+    protected function connectionHasArangodbDriver(?string $name): bool
+    {
+        if ($name == '' && ! $this->arangodbIsDefaultConnection()) {
+            return false;
+        }
+        if ($name == '' && $this->arangodbIsDefaultConnection()) {
+            return true;
+        }
+
+        $connections = config('database.connections');
+
+        return $connections[$name]['driver'] === 'arangodb';
+    }
 
     protected function arangodbIsDefaultConnection(): bool
     {
@@ -15,6 +28,7 @@ trait ArangoCommands
 
         return $connection->getDriverName() === 'arangodb';
     }
+
 
     protected function useFallback(): bool
     {

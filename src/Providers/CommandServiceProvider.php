@@ -24,16 +24,6 @@ class CommandServiceProvider extends ServiceProvider
     ];
 
 
-    public function boot(): void
-    {
-        if ($this->app->runningInConsole()) {
-//            $this->commands([
-//                'ModelMake' => ModelMakeCommand::class,
-//                'Db' => DbCommand::class,
-//            ]);
-        }
-    }
-
     /**
      * Register the service provider.
      *
@@ -68,7 +58,7 @@ class CommandServiceProvider extends ServiceProvider
 
     protected function registerDbCommand(): void
     {
-        $this->app->extend(IlluminateDbCommand::class, function ($app) {
+        $this->app->extend(IlluminateDbCommand::class, function () {
             return new DbCommand();
         });
     }

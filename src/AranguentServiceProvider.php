@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace LaravelFreelancerNL\Aranguent;
 
-use Illuminate\Database\Migrations\MigrationCreator as IlluminateMigrationCreator;
 use Illuminate\Support\ServiceProvider;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
-use LaravelFreelancerNL\Aranguent\Migrations\MigrationCreator;
 use LaravelFreelancerNL\Aranguent\Schema\Grammar as SchemaGrammar;
 
 class AranguentServiceProvider extends ServiceProvider
@@ -57,23 +55,6 @@ class AranguentServiceProvider extends ServiceProvider
             return $app['migrator'];
         });
 
-        /**
-         * When the MigrationCreator complains about an unset $customStubPath
-         * we resolve it here
-         */
-        $this->app->when(MigrationCreator::class)
-            ->needs('$customStubPath')
-            ->give(function () {
-                return __DIR__ . '/Migrations/stubs';
-            });
-
-        // FIXME: only for arangodb?
-        $this->app->when(IlluminateMigrationCreator::class)
-            ->needs('$customStubPath')
-            ->give(function () {
-                return __DIR__ . '/Migrations/stubs';
-            });
-
         $this->app->resolving(
             'db',
             function ($db) {
@@ -101,6 +82,5 @@ class AranguentServiceProvider extends ServiceProvider
 
         $this->app->register('LaravelFreelancerNL\Aranguent\Providers\MigrationServiceProvider');
         $this->app->register('LaravelFreelancerNL\Aranguent\Providers\CommandServiceProvider');
-
     }
 }

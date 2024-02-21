@@ -7,8 +7,10 @@ namespace LaravelFreelancerNL\Aranguent\Providers;
 use Illuminate\Database\Migrations\Migrator;
 use Illuminate\Database\MigrationServiceProvider as IlluminateMigrationServiceProvider;
 use LaravelFreelancerNL\Aranguent\Console\Concerns\ArangoCommands;
+use LaravelFreelancerNL\Aranguent\Console\Migrations\MigrateFreshCommand;
 use LaravelFreelancerNL\Aranguent\Console\Migrations\MigrationsConvertCommand;
 use LaravelFreelancerNL\Aranguent\Console\Migrations\MigrateMakeCommand;
+use LaravelFreelancerNL\Aranguent\Console\Migrations\MigrateInstallCommand;
 use LaravelFreelancerNL\Aranguent\Migrations\DatabaseMigrationRepository;
 use LaravelFreelancerNL\Aranguent\Migrations\MigrationCreator;
 
@@ -26,13 +28,8 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
         'Creator' => 'migration.creator',
         'Repository' => 'migration.repository',
         'MigrateMake' => 'migrate.make',
-//        'Migrate' => MigrateCommand::class,
-//        'MigrateFresh' => FreshCommand::class,
-//        'MigrateInstall' => InstallCommand::class,
-//        'MigrateRefresh' => RefreshCommand::class,
-//        'MigrateReset' => ResetCommand::class,
-//        'MigrateRollback' => RollbackCommand::class,
-//        'MigrateStatus' => StatusCommand::class,
+        'MigrateFresh' => MigrateFreshCommand::class,
+        'MigrateInstall' => MigrateInstallCommand::class,
     ];
 
     /**
@@ -90,7 +87,6 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
         });
     }
 
-
     /**
      * Register the migrator service.
      *
@@ -131,6 +127,21 @@ class MigrationServiceProvider extends IlluminateMigrationServiceProvider
             $composer = $app['composer'];
 
             return new MigrateMakeCommand($creator, $composer);
+        });
+    }
+
+    /**
+     * Register the command.
+     *
+     * @return void
+     */
+    protected function registerMigrateInstallCommand()
+    {
+
+        $this->app->singleton($this->commands['MigrateInstall'], function ($app) {
+            $repository = $app[$this->aliases['Repository']];
+
+            return new MigrateInstallCommand($repository);
         });
     }
 

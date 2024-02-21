@@ -9,10 +9,13 @@ use Illuminate\Database\Console\Migrations\MigrateMakeCommand as IlluminateMigra
 use Illuminate\Database\Console\Migrations\TableGuesser;
 use Illuminate\Support\Composer;
 use Illuminate\Support\Str;
+use LaravelFreelancerNL\Aranguent\Console\Concerns\ArangoCommands;
 use LaravelFreelancerNL\Aranguent\Migrations\MigrationCreator;
 
 class MigrateMakeCommand extends IlluminateMigrateMakeCommand
 {
+    use ArangoCommands;
+
     /**
      * The console command signature.
      *
@@ -20,7 +23,7 @@ class MigrateMakeCommand extends IlluminateMigrateMakeCommand
      */
     protected $signature = 'make:migration {name : The name of the migration}
         {--create= : The table to be created}
-        {--edge= : The edge collection to be created}
+        {--edge= : The edge table to be created}
         {--table= : The table to alter}
         {--path= : The location where the migration file should be created}
         {--realpath : Indicate any provided migration file paths are pre-resolved absolute paths}
@@ -46,6 +49,16 @@ class MigrateMakeCommand extends IlluminateMigrateMakeCommand
      */
     public function handle()
     {
+        assert($this->creator instanceof MigrationCreator);
+
+        if ($this->useFallback()) {
+            $this->creator->setIlluminateCustomStubPath();
+            parent::handle();
+            return;
+        }
+
+        $this->creator->setArangoCustomStubPath();
+
         // It's possible for the developer to specify the tables to modify in this
         // schema operation. The developer may also specify if this table needs
         // to be freshly created so we can create the appropriate migrations.
@@ -102,6 +115,11 @@ class MigrateMakeCommand extends IlluminateMigrateMakeCommand
      */
     protected function writeMigration($name, $table, $create, $edge = false)
     {
+        if ($this->useFallback()) {
+            parent::writeMigration($name, $table, $create);
+            return;
+        }
+
         assert($this->creator instanceof MigrationCreator);
 
         $file = pathinfo(

@@ -6,9 +6,35 @@ namespace LaravelFreelancerNL\Aranguent\Migrations;
 
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Database\Migrations\MigrationCreator as IlluminateMigrationCreator;
+use Illuminate\Filesystem\Filesystem;
+use LaravelFreelancerNL\Aranguent\Console\Concerns\ArangoCommands;
 
 class MigrationCreator extends IlluminateMigrationCreator
 {
+    use ArangoCommands;
+
+    /**
+     * The custom app stubs directory.
+     *
+     * @var string
+     */
+    protected $customStubPath;
+
+    protected string $arangoStubPath = __DIR__ . '/stubs';
+
+    /**
+     * Create a new migration creator instance.
+     *
+     * @param  \Illuminate\Filesystem\Filesystem  $files
+     * @param  string  $customStubPath
+     * @return void
+     */
+    public function __construct(Filesystem $files, $customStubPath = __DIR__ . '/stubs')
+    {
+        parent::__construct($files, $customStubPath);
+    }
+
+
     /**
      * Get the path to the stubs.
      *
@@ -16,6 +42,10 @@ class MigrationCreator extends IlluminateMigrationCreator
      */
     public function stubPath()
     {
+        if ($this->useFallback()) {
+            return parent::stubPath();
+        }
+
         return __DIR__ . '/stubs';
     }
 
@@ -33,6 +63,10 @@ class MigrationCreator extends IlluminateMigrationCreator
      */
     protected function getStub($table, $create, $edge = false)
     {
+        if ($this->useFallback()) {
+            return parent::getStub($table, $create);
+        }
+
         if (is_null($table)) {
             $stub = $this->files->exists($customPath = $this->customStubPath . '/migration.stub')
                 ? $customPath
@@ -76,6 +110,10 @@ class MigrationCreator extends IlluminateMigrationCreator
     /**  @phpstan-ignore-next-line  @SuppressWarnings(PHPMD.BooleanArgumentFlag) */
     public function create($name, $path, $table = null, $create = false, $edge = false)
     {
+        if ($this->useFallback()) {
+            return parent::create($name, $path, $table = null, $create = false);
+        }
+
         $this->ensureMigrationDoesntAlreadyExist($name, $path);
 
         // First we will get the stub file for the migration, which serves as a type
@@ -98,5 +136,24 @@ class MigrationCreator extends IlluminateMigrationCreator
         $this->firePostCreateHooks($table, $path);
 
         return $path;
+    }
+
+    public function getDefaultIlluminateCustomStubPath(): string
+    {
+        return base_path('vendor/laravel/framework/src/Illuminate/Database/Migrations/stubs');
+    }
+
+    public function setIlluminateCustomStubPath(): void
+    {
+        if ($this->customStubPath === $this->arangoStubPath) {
+            $this->customStubPath = $this->getDefaultIlluminateCustomStubPath();
+        }
+    }
+
+    public function setArangoCustomStubPath(): void
+    {
+        if ($this->customStubPath === $this->getDefaultIlluminateCustomStubPath()) {
+            $this->customStubPath = __DIR__ . '/stubs';
+        }
     }
 }
