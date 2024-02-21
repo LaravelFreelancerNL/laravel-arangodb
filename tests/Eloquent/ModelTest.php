@@ -7,25 +7,6 @@ uses(
     DatabaseTransactions::class
 );
 
-test('create aranguent model', function () {
-    $this->artisan(
-        'aranguent:model',
-        [
-            'name' => 'AranguentModelTest',
-            '--force' => '',
-        ]
-    )->run();
-
-    $file = __DIR__ . '/../../vendor/orchestra/testbench-core/laravel/app/Models/AranguentModelTest.php';
-
-    //assert file exists
-    expect($file)->toBeFile();
-
-    //assert file refers to Aranguent Base Model
-    $content = file_get_contents($file);
-    expect($content)->toContain('use LaravelFreelancerNL\Aranguent\Eloquent\Model;');
-});
-
 test('update model', function () {
     $character = Character::first();
     $initialAge = $character->age;

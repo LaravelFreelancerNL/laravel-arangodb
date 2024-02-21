@@ -10,11 +10,14 @@ use Illuminate\Database\ConnectionResolverInterface as IlluminateResolver;
 use Illuminate\Database\Migrations\DatabaseMigrationRepository as IlluminateDatabaseMigrationRepository;
 use Illuminate\Database\Query\Builder as IlluminateQueryBuilder;
 use LaravelFreelancerNL\Aranguent\Connection;
+use LaravelFreelancerNL\Aranguent\Console\Concerns\ArangoCommands;
 use LaravelFreelancerNL\Aranguent\Exceptions\AranguentException;
 use LaravelFreelancerNL\Aranguent\Query\Builder;
 
 class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
 {
+    use ArangoCommands;
+
     /**
      * The name of the migration collection.
      *
@@ -42,7 +45,6 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
         }
 
         return $arangoClient->schema();
-
     }
 
     /**
@@ -52,6 +54,11 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     public function createRepository()
     {
+        if ($this->useFallback()) {
+            parent::createRepository();
+            return;
+        }
+
         $schemaManager = $this->getSchemaManager();
 
         $schemaManager->createCollection($this->table);
@@ -65,6 +72,10 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     public function getMigrations($steps)
     {
+        if ($this->useFallback()) {
+            return parent::getMigrations($steps);
+        }
+
         //TODO: the only difference with the parent function is that type of the batch value:
         // 1 instead of '1'. This should probably be changed in the Laravel framework as it
         // seems unnecessary to use a numeric string here.
@@ -88,6 +99,10 @@ class DatabaseMigrationRepository extends IlluminateDatabaseMigrationRepository
      */
     public function repositoryExists()
     {
+        if ($this->useFallback()) {
+            return parent::repositoryExists();
+        }
+
         $schemaManager = $this->getSchemaManager();
 
         return $schemaManager->hasCollection($this->table);

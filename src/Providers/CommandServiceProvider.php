@@ -4,26 +4,25 @@ declare(strict_types=1);
 
 namespace LaravelFreelancerNL\Aranguent\Providers;
 
-use Illuminate\Database\MigrationServiceProvider as IlluminateMigrationServiceProvider;
-use LaravelFreelancerNL\Aranguent\Console\Migrations\AranguentConvertMigrationsCommand;
-use LaravelFreelancerNL\Aranguent\Console\Migrations\MigrateMakeCommand;
+use LaravelFreelancerNL\Aranguent\Console\DbCommand;
+use Illuminate\Database\Console\DbCommand as IlluminateDbCommand;
 use LaravelFreelancerNL\Aranguent\Console\ModelMakeCommand;
-use LaravelFreelancerNL\Aranguent\Migrations\DatabaseMigrationRepository;
-use LaravelFreelancerNL\Aranguent\Migrations\MigrationCreator;
+use Illuminate\Support\ServiceProvider;
 
-class CommandServiceProvider extends IlluminateMigrationServiceProvider
+class CommandServiceProvider extends ServiceProvider
 {
-    protected bool $defer = true;
+    protected bool $defer = false;
 
-    public function boot(): void
-    {
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-                MigrateMakeCommand::class,
-                ModelMakeCommand::class,
-            ]);
-        }
-    }
+    /**
+     * The commands to be registered.
+     *
+     * @var string[]
+     */
+    protected $commands = [
+        'ModelMake' => ModelMakeCommand::class,
+        'Db' => DbCommand::class,
+    ];
+
 
     /**
      * Register the service provider.
@@ -32,71 +31,35 @@ class CommandServiceProvider extends IlluminateMigrationServiceProvider
      */
     public function register()
     {
-        $this->registerRepository();
-
-        $this->registerMigrator();
-
-        $this->registerCreator();
-
-        $commands = array_merge(
-            $this->commands,
-            [
-                'AranguentConvertMigrations' => 'command.aranguent.convert-migrations',
-                'MigrateMake' => 'command.migrate.make',
-                'ModelMake' => 'command.model.aranguent',
-            ]
-        );
-        $this->registerCommands($commands);
+        $this->registerCommands($this->commands);
     }
 
     /**
-     * {@inheritdoc}
-     */
-    protected function registerRepository()
-    {
-        $this->app->singleton('migration.repository', function ($app) {
-            $collection = $app['config']['database.migrations'];
-
-            return new DatabaseMigrationRepository($app['db'], $collection);
-        });
-    }
-
-    protected function registerCreator()
-    {
-        $this->app->singleton('migration.creator', function ($app) {
-            $customStubPath = __DIR__ . '/../../stubs';
-
-            return new MigrationCreator($app['files'], $customStubPath);
-        });
-    }
-
-    /**
-     * Register the command.
+     * Register the given commands.
      *
+     * @param  string[]  $commands
      * @return void
      */
-    protected function registerMigrateMakeCommand()
+    protected function registerCommands(array $commands)
     {
-        $this->app->singleton('command.migrate.make', function ($app) {
-            $creator = $app['migration.creator'];
+        foreach (array_keys($commands) as $command) {
+            $this->{"register{$command}Command"}();
+        }
 
-            $composer = $app['composer'];
-
-            return new MigrateMakeCommand($creator, $composer);
-        });
+        $this->commands(array_values($commands));
     }
 
     protected function registerModelMakeCommand(): void
     {
-        $this->app->singleton('command.model.aranguent', function ($app) {
+        $this->app->singleton(ModelMakeCommand::class, function ($app) {
             return new ModelMakeCommand($app['files']);
         });
     }
 
-    protected function registerAranguentConvertMigrationsCommand(): void
+    protected function registerDbCommand(): void
     {
-        $this->app->singleton('command.aranguent.convert-migrations', function ($app) {
-            return new AranguentConvertMigrationsCommand($app['migrator']);
+        $this->app->extend(IlluminateDbCommand::class, function () {
+            return new DbCommand();
         });
     }
 
@@ -105,13 +68,6 @@ class CommandServiceProvider extends IlluminateMigrationServiceProvider
      */
     public function provides()
     {
-        return [
-            'migrator',
-            'migration.creator',
-            'migration.repository',
-            'command.aranguent.convert-migrations',
-            'command.migrate.make',
-            'command.model.aranguent',
-        ];
+        return array_values($this->commands);
     }
 }

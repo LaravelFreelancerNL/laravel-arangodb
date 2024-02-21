@@ -2,28 +2,25 @@
 
 declare(strict_types=1);
 
-use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
+use LaravelFreelancerNL\Aranguent\Facades\Schema;
 
-class DummyClass extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
         //
     }
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
         //
     }
-}
+};

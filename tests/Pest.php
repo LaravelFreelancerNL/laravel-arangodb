@@ -62,15 +62,15 @@ function getBuilder()
     return new Builder(m::mock(Connection::class), $grammar, $processor);
 }
 
+
 function refreshDatabase()
 {
-    // TODO: add path to testbench migrations
     //migrate & seed
-    Artisan::call('migrate:fresh', [
+    Artisan::call('migrate:refresh', [
         '--path' => [
             database_path('migrations'),
-            'tests/Setup/Database/Migrations',
-            __DIR__ . '/../vendor/orchestra/testbench-core/laravel/migrations/'
+            realpath('tests/Setup/Database/Migrations'),
+            realpath(__DIR__ . '/../vendor/orchestra/testbench-core/laravel/migrations/')
         ],
         '--realpath' => true,
         '--seed' => true,

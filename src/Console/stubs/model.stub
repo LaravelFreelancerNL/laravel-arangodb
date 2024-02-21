@@ -1,0 +1,16 @@
+<?php
+
+namespace {{ namespace }};
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use LaravelFreelancerNL\Aranguent\Eloquent\Model;
+
+/**
+ * @property string $id
+ * @property string $_id
+ * @property string $_rev
+ */
+ class {{ class }} extends Model
+{
+    use HasFactory;
+}

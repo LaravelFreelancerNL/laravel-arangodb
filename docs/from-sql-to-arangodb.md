@@ -17,7 +17,7 @@ Existing Illuminate based migration files can be quickly converted to use the Ar
 Artisan command: 
 
 ```php
- php artisan aranguent:convert-migrations; 
+ php artisan migrations:convert; 
  ```
 
 As ArangoDB is schemaless, column creation methods are ignored. However, index creation on a column is caught and handled: 

@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace LaravelFreelancerNL\Aranguent;
 
-use Illuminate\Database\Migrations\MigrationCreator as IlluminateMigrationCreator;
 use Illuminate\Support\ServiceProvider;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
-use LaravelFreelancerNL\Aranguent\Migrations\MigrationCreator;
 use LaravelFreelancerNL\Aranguent\Schema\Grammar as SchemaGrammar;
 
 class AranguentServiceProvider extends ServiceProvider
@@ -35,6 +33,10 @@ class AranguentServiceProvider extends ServiceProvider
         if (isset($this->app['events'])) {
             Model::setEventDispatcher($this->app['events']);
         }
+
+        $this->publishes([
+            __DIR__ . '/../config/arangodb.php' => config_path('arangodb.php'),
+        ]);
     }
 
     /**
@@ -44,20 +46,14 @@ class AranguentServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        /**
-         * When the MigrationCreator complains about an unset $customStubPath
-         * we resolve it here
-         */
-        $this->app->when(MigrationCreator::class)
-            ->needs('$customStubPath')
-            ->give(function () {
-                return __DIR__ . '/../stubs';
-            });
-        $this->app->when(IlluminateMigrationCreator::class)
-            ->needs('$customStubPath')
-            ->give(function () {
-                return __DIR__ . '/../stubs';
-            });
+        $this->mergeConfigFrom(
+            __DIR__ . '/../config/arangodb.php',
+            'arangodb'
+        );
+
+        $this->app->singleton(\Illuminate\Database\Migrations\Migrator::class, function ($app) {
+            return $app['migrator'];
+        });
 
         $this->app->resolving(
             'db',
@@ -84,6 +80,7 @@ class AranguentServiceProvider extends ServiceProvider
             }
         );
 
+        $this->app->register('LaravelFreelancerNL\Aranguent\Providers\MigrationServiceProvider');
         $this->app->register('LaravelFreelancerNL\Aranguent\Providers\CommandServiceProvider');
     }
 }

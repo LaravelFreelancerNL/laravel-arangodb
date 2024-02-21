@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use ArangoClient\Schema\SchemaManager;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Facades\DB;
 use LaravelFreelancerNL\Aranguent\AranguentServiceProvider;
@@ -22,6 +23,8 @@ class TestCase extends AranguentTestCase implements \Orchestra\Testbench\Contrac
      * @var string
      */
     protected $baseUrl = 'http://localhost';
+
+    protected SchemaManager $schemaManager;
 
     /**
      * Get package providers.
@@ -69,6 +72,7 @@ class TestCase extends AranguentTestCase implements \Orchestra\Testbench\Contrac
      */
     protected function setUp(): void
     {
+
         $this->setTransactionCollections([
             'write' => [
                 'characters',
@@ -86,7 +90,7 @@ class TestCase extends AranguentTestCase implements \Orchestra\Testbench\Contrac
 
         //Convert orchestra migrations
         $this->artisan(
-            'aranguent:convert-migrations',
+            'convert:migrations',
             ['--realpath' => true, '--path' => __DIR__ . '/../vendor/orchestra/testbench-core/laravel/migrations/']
         )->run();
 
@@ -112,12 +116,18 @@ class TestCase extends AranguentTestCase implements \Orchestra\Testbench\Contrac
     {
         TestConfig::set($app);
     }
-
-
     protected function skipTestOnArangoVersionsBefore(string $version)
     {
         if (version_compare(getenv('ARANGODB_VERSION'), $version, '<')) {
             $this->markTestSkipped('This test does not support ArangoDB versions before ' . $version);
+        }
+    }
+
+    public function clearDatabase()
+    {
+        $collections  = $this->schemaManager->getCollections(true);
+        foreach($collections as $collection) {
+            $this->schemaManager->deleteCollection($collection->name);
         }
     }
 }
