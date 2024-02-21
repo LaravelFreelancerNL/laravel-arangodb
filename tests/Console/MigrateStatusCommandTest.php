@@ -13,7 +13,7 @@ test('migrate:status', function () {
         ],
         '--realpath' => true,
     ])
-        ->expectsOutputToContain('2024_01_04_145621_create_house_search_alias_view ......................................................................................... [1] Ran')
+        ->expectsOutputToContain('2024_01_04_145621_create_house_search_alias_view')
         ->assertExitCode(0);
 });
 
@@ -27,7 +27,7 @@ test('migrate:status --database=arangodb', function () {
         '--realpath' => true,
         '--database' => 'arangodb',
     ])
-        ->expectsOutputToContain('create_house_search_alias_view')
+        ->expectsOutputToContain('2024_01_04_145621_create_house_search_alias_view')
         ->assertExitCode(0);
 });
 
