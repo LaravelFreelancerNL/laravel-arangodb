@@ -30,6 +30,8 @@ trait Indexes
             $columns = [$columns];
         }
 
+        $columns = $this->renameIdField($columns);
+
         $indexOptions['name'] = $name ?: $this->createIndexName($type, $columns, $indexOptions);
 
         return $this->addCommand('index', compact('type', 'columns', 'indexOptions'));
@@ -67,6 +69,8 @@ trait Indexes
      * @param  string  $name
      * @param  array  $indexOptions
      * @return Fluent
+     *
+     * @deprecated
      */
     public function fulltextIndex($column = null, $name = null, $indexOptions = [])
     {
@@ -127,6 +131,13 @@ trait Indexes
         return $this->indexCommand('persistent', $columns, $name, $indexOptions);
     }
 
+    public function primary(array $columns = null, string $name = null, array $indexOptions = []): Fluent
+    {
+        $indexOptions['unique'] = true;
+
+        return $this->indexCommand('persistent', $columns, $name, $indexOptions);
+    }
+
     /**
      * Create a TTL index for the table.
      *
@@ -167,6 +178,15 @@ trait Indexes
             return;
         }
 
+        // Skip persistent indexes set solely on id - ArangoDB already sets a unique index on _key.
+        if (
+            $command->type === 'persistent'
+            && count($command->columns) === 1
+            && $command->columns[0] === '_key'
+        ) {
+            return;
+        }
+
         $options = [
             'type' => $command->type,
             'fields' => $command->columns,
@@ -194,6 +214,15 @@ trait Indexes
 
         return $this->addCommand('dropIndex', $parameters);
     }
+
+    /**
+     * Indicate that the given index should be dropped.
+     */
+    public function dropPrimary(string $name): Fluent
+    {
+        return $this->dropIndex($name);
+    }
+
 
     /**
      * Drop the index by first getting all the indexes on the table; then selecting the matching one
