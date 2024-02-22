@@ -29,6 +29,7 @@ class Grammar extends IlluminateGrammar
     public function compileHasColumn($collection, Fluent $command)
     {
         $attributes = $command->getAttributes();
+
         if (!isset($attributes['columns'])) {
             return $command;
         }

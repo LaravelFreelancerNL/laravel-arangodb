@@ -23,6 +23,8 @@ ignored. Any index modifiers on a column are used to create the index.
 ### Indexes
 Fulltext indexes are deprecated per ArangoDB 3.10; you can use [ArangoSearch](arangosearch.md) instead.
 
+dropIndex / dropPrimary
+
 ## <a name="query-builder"></a>Query Builder
 
 ### Data retrieval
