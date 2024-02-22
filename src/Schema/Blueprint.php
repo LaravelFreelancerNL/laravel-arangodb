@@ -247,7 +247,7 @@ class Blueprint
      * @param  array<mixed>  $args
      * @return Blueprint
      */
-    public function __call(string $method, array $args = [])
+    public function __call($method, $args = [])
     {
         $columnMethods = [
             'bigIncrements', 'bigInteger', 'binary', 'boolean', 'char', 'date', 'dateTime', 'dateTimeTz', 'decimal',
@@ -278,5 +278,12 @@ class Blueprint
         $this->addCommand('ignore', $info);
 
         return $this;
+    }
+
+    public function renameIdField(mixed $fields)
+    {
+        return array_map(function ($value) {
+            return $value === 'id' ? '_key' : $value;
+        }, $fields);
     }
 }

@@ -20,13 +20,30 @@ test('create index', function () {
     expect($index->name)->toEqual($name);
 });
 
-test('drop index', function () {
-    Schema::table('characters', function (Blueprint $collection) {
-        $collection->index(['name']);
+
+test('create primary index', function () {
+    Schema::table('characters', function (Blueprint $table) {
+        $table->primary(['id', 'name']);
     });
 
-    Schema::table('characters', function (Blueprint $collection) {
-        $collection->dropIndex('characters_name_persistent');
+    $name = 'characters_key_name_persistent_unique';
+
+    $index = $this->schemaManager->getIndexByName('characters', $name);
+
+    expect($index->name)->toEqual($name);
+
+    Schema::table('characters', function (Blueprint $table) use ($name) {
+        $table->dropPrimary($name);
+    });
+});
+
+test('drop index', function () {
+    Schema::table('characters', function (Blueprint $table) {
+        $table->index(['name']);
+    });
+
+    Schema::table('characters', function (Blueprint $table) {
+        $table->dropIndex('characters_name_persistent');
     });
 
     $searchResult = $this->schemaManager->getIndexByName('characters', 'characters_name_persistent');

@@ -4,7 +4,8 @@ This page shows a list of tried and tested compatible features as well as incomp
 Features annotated with a question mark are untested. Known incompatibilities are explicitly mentioned.
 Untested features might work but your mileage may vary. 
 
-**_Note_**: This list is limited to database interactions. For example, it lists 'create' but not 'make'.
+**_Note_**: This list is limited to database interactions. For example, it lists 'create' but not 'make' 
+as the latter Eloquent function is in memory only.
 
 - [Query Builder](#query-builder)
 - [Eloquent](#eloquent)
@@ -12,6 +13,15 @@ Untested features might work but your mileage may vary.
 - [Testing](#testing)
 - [Database Connection](#database-connection)
 - [Known Incompatibilities](#known-incompatibilities)
+
+## <a name="migrations"></a>Migrations
+
+### Columns
+This driver doesn't support schema validation at this time. Column methods within a blueprint are silently
+ignored. Any index modifiers on a column are used to create the index.
+
+### Indexes
+Fulltext indexes are deprecated per ArangoDB 3.10; you can use [ArangoSearch](arangosearch.md) instead.
 
 ## <a name="query-builder"></a>Query Builder
 
@@ -212,3 +222,4 @@ Aranguent currently doesn't support the combination of a separate read and write
 
 ### Transactions
 [At the beginning of a transaction you must declare collections that are used in (write) statements.](transactions.md)
+
