@@ -4,11 +4,11 @@ You can use the regular migration Artisan commands.
 ## Blueprint execution
 Blueprint commands are executed sequentially and non-transactional(!)
 
-## Collections
+## tables
 You can add ArangoDB's collection config options to the create method.
 
 ```php
-Schema::create('posts', function (Blueprint $collection) {
+Schema::create('posts', function (Blueprint $table) {
     //
 }, [
         'type' => 3,            // 2 -> normal collection, 3 -> edge-collection</li>
@@ -19,24 +19,25 @@ See the [ArangoDB Documentation for all options](https://docs.arangodb.com/3.3/H
 
 ## Indexes
 Within the collection blueprint you can create indexes.
-ArangoDB knows the following types:
+This following indexes are supported:
 
-Type       | Purpose                   | Blueprint Method 
----------- |---------------------------| ----------------
-Hash       | Exact matching            | `$collection->hashIndex($attributes, $indexOptions = [])`
-Persistent | Ranged matching           | `$collection->persistentIndex($attributes, $indexOptions = [])`
-Geo        | Location matching         | `$collection->geoIndex($attributes, $indexOptions = [])`
-TTL        | Auto-expiring documents   | `$collection->ttlIndex($attributes, $indexOptions = [])`
-Fulltext * | (Partial) text matching   | `$collection->fulltextIndex($attribute, $indexOptions = [])`
-Inverted   | Fast full text searching  | `$collection->invertedIndex($attribute, $indexOptions = [])`
+Type       | Purpose                     | Blueprint Method 
+---------- |-----------------------------| ----------------
+Persistent | Ranged matching             | `$table->index($columns = null, $name = null, $algorithm = null, $indexOptions = [])`
+Primary *  | Unique ranged matching      | `$table->primary($columns = null, $name = null, $indexOptions = [])`
+Unique     | Unique ranged matching      | `$table->unique($attributes, $indexOptions = [])`
+Geo        | Location matching           | `$table->spatialIndex($columns, $name = null, $indexOptions = [])`
+TTL        | Auto-expiring documents     | `$table->ttlIndex($columns, $expireAfter, $name = null, $indexOptions = [])`
+Inverted   | Fast full text searching    | `$table->invertedIndex($columns = null, $name = null, $indexOptions = [])`
 
-* Instead of fulltext indices you'll probably want to use [ArangoSearch](https://www.arangodb.com/docs/stable/arangosearch.html) 
-ArangoDB's powerful search engine.  
+* the primary method is supported for composite keys. ArangoDB already sets a primary index on the _key property.
 
 See the [ArangoDB Documentation for more information](https://docs.arangodb.com/stable/HTTP/Indexes/)
 
 ### Dropping Indexes
-Use `$collection->dropIndex($attributes, $type)` to drop an index from within a Blueprint.
+Use `$table->dropIndex($attributes, $type)` to drop an index from within a Blueprint.
+Every index type has a related drop method. You can use any one of:
+dropPrimary / dropUnique / dropIndex / dropSpatialIndex / dropInvertedIndex / dropTtlIndex.
 
 ## Attributes
 ArangoDB is schemaless so you can't create attributes. However you can perform some operations on 

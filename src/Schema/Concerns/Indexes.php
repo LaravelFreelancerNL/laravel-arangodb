@@ -13,15 +13,11 @@ trait Indexes
      * @param  string|array<string>|null  $columns
      */
     protected function indexCommand(
-        string $type = '',
-        array|string $columns = null,
+        string $type,
+        array|null|string $columns = null,
         string $name = null,
         array $indexOptions = []
     ): Fluent {
-        if ($type == '') {
-            $type = $this->mapIndexAlgorithm('persistent');
-        }
-
         if ($columns === null) {
             $columns = end($this->columns);
         }
@@ -40,90 +36,56 @@ trait Indexes
     /**
      * Specify an index for the table.
      *
-     * @param  string|array  $columns
-     * @param  string  $name
-     * @param  string|null  $algorithm
+     * @param array|null|string $columns
+     * @param null|string $name
+     * @param null|string $algorithm
+     * @param array<mixed> $indexOptions
      * @return Fluent
      */
-    public function index($columns = null, $name = null, $algorithm = null)
+    public function index($columns = null, $name = null, $algorithm = null, $indexOptions = [])
     {
         $type = $this->mapIndexAlgorithm($algorithm);
 
-        return $this->indexCommand($type, $columns, $name);
-    }
-
-    /**
-     * Create a hash index for fast exact matching.
-     *
-     * @param  null  $columns
-     * @param  array  $indexOptions
-     * @return Fluent
-     */
-    public function hashIndex($columns = null, $indexOptions = [])
-    {
-        return $this->indexCommand('hash', $columns, $indexOptions);
-    }
-
-    /**
-     * @param  null|string  $column
-     * @param  string  $name
-     * @param  array  $indexOptions
-     * @return Fluent
-     *
-     * @deprecated
-     */
-    public function fulltextIndex($column = null, $name = null, $indexOptions = [])
-    {
-        return $this->indexCommand('fulltext', $column, $name, $indexOptions);
-    }
-
-    /**
-     *  Specify a spatial index for the table.
-     *
-     * @param  array<mixed>|null  $columns
-     * @param  null  $name
-     * @param  array  $indexOptions
-     * @return Fluent
-     */
-    public function geoIndex(array $columns = null, $name = null, $indexOptions = [])
-    {
-        return $this->indexCommand('geo', $columns, $name, $indexOptions);
-    }
-
-    /**
-     *  Specify a inverted index for the table.
-     *
-     * @param  array<mixed>|null  $columns
-     * @param  null  $name
-     * @param  array  $indexOptions
-     * @return Fluent
-     */
-    public function invertedIndex(array $columns = null, $name = null, $indexOptions = [])
-    {
-        return $this->indexCommand('inverted', $columns, $name, $indexOptions);
+        return $this->indexCommand($type, $columns, $name, $indexOptions);
     }
 
     /**
      * Specify a spatial index for the table.
      *
-     * @param  string|array  $columns
-     * @param  string  $name
+     * @param string|array $columns
+     * @param null|string $name
+     * @param array<mixed> $indexOptions
      * @return Fluent
      */
-    public function spatialIndex($columns, $name = null)
+    public function spatialIndex($columns, $name = null, $indexOptions = [])
     {
-        return $this->geoIndex($columns, $name);
+        return $this->indexCommand('geo', $columns, $name, $indexOptions);
     }
 
     /**
-     * @param array<mixed>|null$columns
-     * @param  string|null  $name
-     * @param  array  $indexOptions
+     *  Specify a spatial index for the table.
+     *
+     * @param  array<mixed>|null|string  $columns
+     * @param  null|string  $name
+     * @param  array<mixed>  $indexOptions
      * @return Fluent
      */
-    public function skiplistIndex(array $columns = null, $name = null, $indexOptions = [])
+    public function geoIndex($columns, $name = null, $indexOptions = [])
     {
-        return $this->indexCommand('skiplist', $columns, $name, $indexOptions);
+        return $this->spatialIndex($columns, $name, $indexOptions);
+    }
+
+    /**
+     *  Specify a inverted index for the table.
+     *
+     * @param  array<mixed>|null|string  $columns
+     * @param  null|string  $name
+     * @param  array<mixed>  $indexOptions
+     * @return Fluent
+     */
+    public function invertedIndex($columns = null, $name = null, $indexOptions = [])
+    {
+        return $this->indexCommand('inverted', $columns, $name, $indexOptions);
     }
 
     public function persistentIndex(array $columns = null, string $name = null, array $indexOptions = []): Fluent
@@ -131,7 +93,13 @@ trait Indexes
         return $this->indexCommand('persistent', $columns, $name, $indexOptions);
     }
 
-    public function primary(array $columns = null, string $name = null, array $indexOptions = []): Fluent
+    /**
+     * @param array<string>|null|string $columns
+     * @param string|null $name
+     * @param array<mixed> $indexOptions
+     * @return Fluent
+     */
+    public function primary($columns = null, $name = null, $indexOptions = []): Fluent
     {
         $indexOptions['unique'] = true;
 
@@ -141,12 +109,15 @@ trait Indexes
     /**
      * Create a TTL index for the table.
      *
-     * @param  array<string>|null  $columns
-     * @param  null  $name
-     * @param  array  $indexOptions
+     * @param string $columns
+     * @param int $expireAfter
+     * @param null $name
+     * @param array $indexOptions
+     * @return Fluent
      */
-    public function ttlIndex(array $columns = null, $name = null, $indexOptions = []): Fluent
+    public function ttlIndex($columns, $expireAfter, $name = null, $indexOptions = []): Fluent
     {
+        $indexOptions['expireAfter'] = $expireAfter;
         return $this->indexCommand('ttl', $columns, $name, $indexOptions);
     }
 
@@ -218,10 +189,43 @@ trait Indexes
     /**
      * Indicate that the given index should be dropped.
      */
+    public function dropPersistentIndex(string $name): Fluent
+    {
+        return $this->dropIndex($name);
+    }
+
+    /**
+     * Indicate that the given index should be dropped.
+     */
     public function dropPrimary(string $name): Fluent
     {
         return $this->dropIndex($name);
     }
+
+    /**
+     * Indicate that the given index should be dropped.
+     */
+    public function dropUnique(string $name): Fluent
+    {
+        return $this->dropIndex($name);
+    }
+
+    /**
+     * Indicate that the given index should be dropped.
+     */
+    public function dropSpatialIndex(string $name): Fluent
+    {
+        return $this->dropIndex($name);
+    }
+
+    /**
+     * Indicate that the given index should be dropped.
+     */
+    public function dropInvertedIndex(string $name): Fluent
+    {
+        return $this->dropIndex($name);
+    }
+
 
 
     /**
@@ -248,13 +252,14 @@ trait Indexes
      */
     protected function mapIndexAlgorithm($algorithm): mixed
     {
+        $algorithm = strtoupper($algorithm);
+
         $algorithmConversion = [
             'HASH' => 'hash',
             'BTREE' => 'persistent',
             'RTREE' => 'geo',
             'TTL' => 'ttl',
         ];
-        $algorithm = strtoupper($algorithm);
 
         return (isset($algorithmConversion[$algorithm])) ? $algorithmConversion[$algorithm] : 'persistent';
     }
