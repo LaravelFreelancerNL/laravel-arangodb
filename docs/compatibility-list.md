@@ -7,6 +7,7 @@ Untested features might work but your mileage may vary.
 **_Note_**: This list is limited to database interactions. For example, it lists 'create' but not 'make' 
 as the latter Eloquent function is in memory only.
 
+- [Migrations](#migrations)
 - [Query Builder](#query-builder)
 - [Eloquent](#eloquent)
 - [Artisan commands](#artisan)
@@ -21,9 +22,16 @@ This driver doesn't support schema validation at this time. Column methods withi
 ignored. Any index modifiers on a column are used to create the index.
 
 ### Indexes
-Fulltext indexes are deprecated per ArangoDB 3.10; you can use [ArangoSearch](arangosearch.md) instead.
+index / primary / unique / spatialIndex /
+invertedIndex / ttlIndex
+dropPrimary / dropUnique / dropIndex / dropSpatialIndex /
+dropInvertedIndex / dropTtlIndex /
+renameIndex
 
-dropIndex / dropPrimary
+#### Unsupported index methods
+fullText / dropFullText
+
+Fulltext indexes are deprecated per ArangoDB 3.10; you can use [ArangoSearch](arangosearch.md) instead.
 
 ## <a name="query-builder"></a>Query Builder
 

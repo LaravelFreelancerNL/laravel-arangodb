@@ -99,7 +99,7 @@ trait Indexes
      * @param array<mixed> $indexOptions
      * @return Fluent
      */
-    public function primary($columns = null, string $name = null, array $indexOptions = []): Fluent
+    public function primary($columns = null, $name = null, $indexOptions = []): Fluent
     {
         $indexOptions['unique'] = true;
 
