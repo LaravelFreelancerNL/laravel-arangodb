@@ -29,8 +29,6 @@ class Connection extends IlluminateConnection
 
     protected ?ArangoClient $arangoClient = null;
 
-    protected $database;
-
     /**
      * The ArangoDB driver name.
      */
@@ -47,8 +45,8 @@ class Connection extends IlluminateConnection
     {
         $this->config = $config;
 
-        $this->database = (isset($this->config['database'])) ? $this->config['database'] : null;
-        $this->tablePrefix = $this->config['tablePrefix'] ?? null;
+        $this->database = (isset($this->config['database'])) ? $this->config['database'] : '';
+        $this->tablePrefix = $this->config['tablePrefix'] ?? '';
 
         // activate and set the database client connection
         $this->arangoClient = new ArangoClient($this->config);
@@ -105,14 +103,6 @@ class Connection extends IlluminateConnection
     public function getSchemaGrammar()
     {
         return $this->schemaGrammar;
-    }
-
-    /**
-     * Get the collection prefix for the connection.
-     */
-    public function getTablePrefix(): string
-    {
-        return $this->tablePrefix;
     }
 
     /**
