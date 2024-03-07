@@ -72,38 +72,29 @@ class TestCase extends AranguentTestCase implements \Orchestra\Testbench\Contrac
      */
     protected function setUp(): void
     {
+        parent::setUp();
+
+        $this->connection = DB::connection();
 
         $this->setTransactionCollections([
             'write' => [
                 'characters',
                 'children',
+                'failed_jobs',
                 'houses',
                 'locations',
-                'tags',
+                'migrations',
+                'password_reset_tokens',
                 'taggables',
+                'tags',
                 'users'
             ]]);
-
-        parent::setUp();
-
-        $this->connection = DB::connection();
 
         //Convert orchestra migrations
         $this->artisan(
             'convert:migrations',
             ['--realpath' => true, '--path' => __DIR__ . '/../vendor/orchestra/testbench-core/laravel/migrations/']
         )->run();
-
-        $this->setTransactionCollections([
-            'write' => [
-                'characters',
-                'children',
-                'houses',
-                'locations',
-                'tags',
-                'taggables',
-            ]
-        ]);
     }
 
     /**
