@@ -6,10 +6,10 @@ use Illuminate\Database\Migrations\Migration;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
 
-const EDGE_COLLECTION = 3;
-
 return new class extends Migration
 {
+
+
     /**
      * Run the migrations.
      */
@@ -19,7 +19,7 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
         }, [
-            'type' => EDGE_COLLECTION,
+            'type' => Schema::EDGE_COLLECTION,
         ]);
     }
 
