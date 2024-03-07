@@ -23,10 +23,11 @@ class Grammar extends IlluminateGrammar
      * Compile AQL to check if an attribute is in use within a document in the collection.
      * If multiple attributes are set then all must be set in one document.
      *
-     * @param  string  $collection
+     * @param string $table
      * @return Fluent
+     * @throws BindException
      */
-    public function compileHasColumn($collection, Fluent $command)
+    public function compileHasColumn($table, Fluent $command)
     {
         $attributes = $command->getAttributes();
 
@@ -34,18 +35,24 @@ class Grammar extends IlluminateGrammar
             return $command;
         }
 
+        $aqb = new QueryBuilder();
+
         $filter = [];
         foreach ($attributes['columns'] as $column) {
-            $filter[] = ['doc.' . $column, '!=', null];
+            $filter[] = [$aqb->rawExpression('HAS(doc, \'' . $column . '\')')];
         }
 
-        $aqb = (new QueryBuilder())->for('doc', $collection)
-            ->filter($filter)
-            ->limit(1)
-            ->return('true')
-            ->get();
-
-        $command->aqb = $aqb;
+        $command->aqb =
+            $aqb->let(
+                'columnFound',
+                $aqb->first(
+                    (new QueryBuilder())->for('doc', $table)
+                        ->filter($filter)
+                        ->limit(1)
+                        ->return('true')
+                )
+            )->return($aqb->rawExpression('columnFound == true'))
+                ->get();
 
         return $command;
     }

@@ -25,9 +25,11 @@ test('create with custom blueprint', function () {
     $schema->blueprintResolver(function ($table, $callback) {
         return new CustomBlueprint($table, $callback);
     });
-    $schema->create('characters', function (Blueprint $collection) {
-        expect($collection)->toBeInstanceOf(CustomBlueprint::class);
+    $schema->create('characters', function (Blueprint $table) {
+        expect($table)->toBeInstanceOf(CustomBlueprint::class);
     });
+
+    refreshDatabase();
 });
 
 test('has table', function () {
@@ -53,6 +55,8 @@ test('rename', function () {
     expect(Schema::hasTable('people'))->toBeTrue();
 
     Schema::rename('people', 'characters');
+
+    refreshDatabase();
 });
 
 test('drop all tables', function () {
@@ -68,25 +72,14 @@ test('drop all tables', function () {
     refreshDatabase();
 });
 
-/**
- * FIXME: with default seed this can be tested against the db.
- */
-test('collection has columns', function () {
-    $mockConnection = M::mock(Connection::class);
-    $mockArangoClient = M::mock(ArangoClient::class);
-    $mockSchemaManager = M::mock(SchemaManager::class);
-    $grammar = new Grammar();
-    $mockConnection->shouldReceive('getSchemaGrammar')->andReturn($grammar);
-    $mockConnection->shouldReceive('getArangoClient')->andReturn($mockArangoClient);
-    $mockArangoClient->shouldReceive('schema')->andReturn($mockSchemaManager);
+test('hasColumn', function () {
+    expect(Schema::hasColumn('characters', 'xname'))->toBeFalse();
+    expect(Schema::hasColumn('characters', 'name'))->toBeTrue();
+});
 
-    $builder = new Builder($mockConnection);
-
-    $mockConnection->shouldReceive('statement')->once()->andReturn(true);
-    $mockConnection->shouldReceive('statement')->once()->andReturn(false);
-
-    expect($builder->hasColumn('users', 'firstname'))->toBeTrue();
-    expect($builder->hasColumn('users', 'not_an_attribute'))->toBeFalse();
+test('hasColumns', function () {
+    expect(Schema::hasColumn('characters', ['name', 'xname']))->toBeFalse();
+    expect(Schema::hasColumn('characters', ['name', 'alive']))->toBeTrue();
 });
 
 test('create view', function () {
@@ -208,6 +201,8 @@ test('create database', function () {
     expect($schemaManager->hasDatabase($databaseName))->toBeTrue();
 
     $schemaManager->deleteDatabase($databaseName);
+
+    refreshDatabase();
 });
 
 test('drop database if exists', function () {
@@ -220,6 +215,8 @@ test('drop database if exists', function () {
 
     expect($result)->toBeTrue();
     expect($schemaManager->hasDatabase($databaseName))->toBeFalse();
+
+    refreshDatabase();
 });
 
 test('drop database if exists none existing db', function () {
@@ -231,6 +228,8 @@ test('drop database if exists none existing db', function () {
     $result = Schema::dropDatabaseIfExists($databaseName);
 
     expect($result)->toBeTrue();
+
+    refreshDatabase();
 });
 
 test('get connection', function () {

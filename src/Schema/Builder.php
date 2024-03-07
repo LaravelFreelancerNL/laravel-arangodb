@@ -21,6 +21,8 @@ class Builder extends \Illuminate\Database\Schema\Builder
     use HandlesViews;
     use UsesBlueprints;
 
+    const EDGE_COLLECTION = 3;
+
     /**
      * The database connection instance.
      *
@@ -128,37 +130,37 @@ class Builder extends \Illuminate\Database\Schema\Builder
      * Determine if the given table has a given column.
      *
      * @param  string  $table
-     * @param  string  $column
+     * @param string|string[] $column
      * @return bool
      */
     public function hasColumn($table, $column)
     {
-        if (is_string($column)) {
-            $column = [$column];
-        }
-
         return $this->hasColumns($table, $column);
     }
 
     /**
      * Determine if the given table has given columns.
      *
-     * @param  string  $table
+     * @param string $table
+     * @param string|string[] $columns
      * @return bool
      */
-    public function hasColumns($table, array $columns)
+    public function hasColumns($table, $columns)
     {
+        if (is_string($columns)) {
+            $columns = [$columns];
+        }
+
         $parameters = [];
-        $parameters['name'] = 'hasAttribute';
+        $parameters['name'] = 'hasColumn';
         $parameters['handler'] = 'aql';
         $parameters['columns'] = $columns;
 
         $command = new Fluent($parameters);
+
         $compilation = $this->grammar->compileHasColumn($table, $command);
-
-        return $this->connection->statement($compilation['aql']);
+        return $this->connection->select($compilation['aqb'])[0];
     }
-
 
     /**
      * Create a database in the schema.
