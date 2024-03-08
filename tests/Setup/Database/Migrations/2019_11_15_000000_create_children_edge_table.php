@@ -6,8 +6,7 @@ use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
 
 class CreateChildrenEdgeTable extends Migration
 {
-
-    const EDGE_COLLECTION = 3;
+    public const EDGE_COLLECTION = 3;
 
     /**
      * Run the migrations.

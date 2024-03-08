@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Support\Fluent;
 use LaravelFreelancerNL\Aranguent\Schema\Grammar;
 use Mockery as M;
 

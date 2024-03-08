@@ -8,7 +8,6 @@ use Illuminate\Support\Fluent;
 
 trait Columns
 {
-
     /**
      * Indicate that the given attributes should be renamed.
      *
