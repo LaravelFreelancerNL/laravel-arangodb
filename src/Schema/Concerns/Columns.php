@@ -8,23 +8,6 @@ use Illuminate\Support\Fluent;
 
 trait Columns
 {
-    /**
-     * Check if any document within the table has the column.
-     *
-     * @param  string|array  $column
-     * @return Fluent
-     */
-    public function hasColumn($column)
-    {
-        $parameters = [];
-        $parameters['handler'] = 'aql';
-        $parameters['explanation'] = "Checking if any document within the table has the '"
-            . implode(', ', (array) $column)
-            . "' column(s).";
-        $parameters['column'] = $column;
-
-        return $this->addCommand('hasColumn', $parameters);
-    }
 
     /**
      * Indicate that the given attributes should be renamed.
