@@ -1,16 +1,12 @@
 <?php
 
-use ArangoClient\ArangoClient;
 use ArangoClient\Exceptions\ArangoException;
-use ArangoClient\Schema\SchemaManager;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Facades\Schema;
 use LaravelFreelancerNL\Aranguent\Exceptions\QueryException;
 use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
-use LaravelFreelancerNL\Aranguent\Schema\Builder;
-use LaravelFreelancerNL\Aranguent\Schema\Grammar;
 use Mockery as M;
 use Tests\Setup\ClassStubs\CustomBlueprint;
 use TiMacDonald\Log\LogEntry;
