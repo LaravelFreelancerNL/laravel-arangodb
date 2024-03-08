@@ -79,32 +79,32 @@ class Blueprint
      */
     protected $columns = [];
 
-    /**
-     * Whether to make the table temporary.
-     *
-     * @var bool
-     */
-    public $temporary = false;
 
     /**
-     * Detect if _id should autoincrement.
+     * the key generator to use for this table.
      *
      * @var bool
      */
-    protected $autoIncrement = false;
+    protected $keyGenerator = 'traditional';
+
+    protected int $incrementOffset = 0;
 
     /**
      * Create a new schema blueprint.
      *
      * Blueprint constructor.
      *
-     * @param  string  $table
-     * @param  SchemaManager  $schemaManager
-     * @param  string  $prefix
+     * @param string $table
+     * @param Grammar $grammar
+     * @param SchemaManager $schemaManager
+     * @param Closure|null $callback
+     * @param string $prefix
      */
-    public function __construct($table, $schemaManager, Closure $callback = null, $prefix = '')
+    public function __construct($table, $grammar, $schemaManager, Closure $callback = null, $prefix = '')
     {
         $this->table = $table;
+
+        $this->grammar = $grammar;
 
         $this->schemaManager = $schemaManager;
 
@@ -130,7 +130,7 @@ class Blueprint
         }
 
         foreach ($this->commands as $command) {
-            if ($command->handler == 'aql') {
+            if ($command->handler === 'aql') {
                 $command = $this->compileAqlCommand($command);
             }
 
@@ -157,11 +157,13 @@ class Blueprint
     public function executeCommand(Fluent $command): void
     {
         $executeNamedMethod = 'execute' . ucfirst($command->name) . 'Command';
+
         if (method_exists($this, $executeNamedMethod)) {
             $this->$executeNamedMethod($command);
 
             return;
         }
+
         $this->executeCommandByHandler($command);
     }
 
@@ -193,7 +195,7 @@ class Blueprint
         }
 
         if (method_exists($this->schemaManager, $command->method)) {
-            $this->schemaManager->{$command->method}($command->parameters);
+            $this->schemaManager->{$command->method}($command);
         }
     }
 
@@ -241,6 +243,16 @@ class Blueprint
         return $this->commands;
     }
 
+    public function from(int $startingValue)
+    {
+        $this->incrementOffset = $startingValue;
+
+        $info['method'] = 'from';
+        $info['explanation'] = "The autoincrement offset has been set to {$startingValue}.";
+
+        return $this->addCommand('ignore', $info);
+    }
+
     /**
      * Silently catch unsupported schema methods. Store columns for backwards compatible fluent index creation.
      *
@@ -269,15 +281,32 @@ class Blueprint
 
         $autoIncrementMethods = ['increments', 'autoIncrement'];
         if (in_array($method, $autoIncrementMethods)) {
-            $this->autoIncrement = true;
+            $this->setKeyGenerator('autoincrement');
         }
 
+        if ($method === 'uuid') {
+            $this->setKeyGenerator('uuid');
+        }
+
+        $this->ignoreMethod($method);
+
+        return $this;
+    }
+
+    protected function setKeyGenerator(string $generator = 'traditional'): void
+    {
+        $column = end($this->columns);
+        if ($column === '_key' || $column === 'id') {
+            $this->keyGenerator = $generator;
+        }
+    }
+
+    protected function ignoreMethod(string $method)
+    {
         $info = [];
         $info['method'] = $method;
         $info['explanation'] = "'$method' is ignored; Aranguent Schema Blueprint doesn't support it.";
         $this->addCommand('ignore', $info);
-
-        return $this;
     }
 
     public function renameIdField(mixed $fields)

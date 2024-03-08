@@ -31,10 +31,6 @@ class Grammar extends IlluminateGrammar
     {
         $attributes = $command->getAttributes();
 
-        if (!isset($attributes['columns'])) {
-            return $command;
-        }
-
         $aqb = new QueryBuilder();
 
         $filter = [];
@@ -60,10 +56,11 @@ class Grammar extends IlluminateGrammar
     /**
      * Compile AQL to rename an attribute, if the new name isn't already in use.
      *
-     * @param  string  $collection
+     * @param string $table
+     * @param Fluent $command
      * @return Fluent
      */
-    public function compileRenameAttribute($collection, Fluent $command)
+    public function compileRenameAttribute($table, Fluent $command)
     {
         $attributes = $command->getAttributes();
 
@@ -72,7 +69,7 @@ class Grammar extends IlluminateGrammar
             ['doc.' . $attributes['to'], '==', null],
         ];
 
-        $aqb = (new QueryBuilder())->for('doc', $collection)
+        $aqb = (new QueryBuilder())->for('doc', $table)
             ->filter($filter)
             ->update(
                 'doc',
@@ -80,9 +77,9 @@ class Grammar extends IlluminateGrammar
                     $attributes['from'] => null,
                     $attributes['to'] => 'doc.' . $command->from,
                 ],
-                $collection
+                $table
             )
-            ->options(['keepNull' => true])
+            ->options(['keepNull' => false])
             ->get();
 
         $command->aqb = $aqb;
@@ -93,10 +90,11 @@ class Grammar extends IlluminateGrammar
     /**
      * Compile AQL to drop one or more attributes.
      *
-     * @param  string  $collection
+     * @param string $table
+     * @param Fluent $command
      * @return Fluent
      */
-    public function compileDropAttribute($collection, Fluent $command)
+    public function compileDropColumn($table, Fluent $command)
     {
         $filter = [];
         $attributes = $command->getAttributes();
@@ -106,9 +104,9 @@ class Grammar extends IlluminateGrammar
             $filter[] = ['doc.' . $attribute, '!=', null, 'OR'];
             $data[$attribute] = null;
         }
-        $aqb = (new QueryBuilder())->for('doc', $collection)
+        $aqb = (new QueryBuilder())->for('doc', $table)
             ->filter($filter)
-            ->update('doc', $data, $collection)
+            ->update('doc', $data, $table)
             ->options(['keepNull' => false])
             ->get();
 

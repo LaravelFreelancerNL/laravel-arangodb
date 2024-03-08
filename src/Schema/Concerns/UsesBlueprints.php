@@ -15,16 +15,17 @@ trait UsesBlueprints
      * @param  string  $collection
      * @return Blueprint
      */
-    protected function createBlueprint($collection, Closure $callback = null)
+    protected function createBlueprint($table, Closure $callback = null)
     {
-        //Prefixes are unnamed in ArangoDB
-        $prefix = null;
+        $prefix = $this->connection->getConfig('prefix_indexes')
+            ? $this->connection->getConfig('prefix')
+            : '';
 
         if (isset($this->resolver)) {
-            return call_user_func($this->resolver, $collection, $this->schemaManager, $callback, $prefix);
+            return call_user_func($this->resolver, $table, $this->grammar, $this->schemaManager, $callback, $prefix);
         }
 
-        return new Blueprint($collection, $this->schemaManager, $callback, $prefix);
+        return new Blueprint($table, $this->grammar, $this->schemaManager, $callback, $prefix);
     }
 
     /**

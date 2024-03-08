@@ -41,6 +41,6 @@ trait Columns
         $parameters['attributes'] = $columns;
         $parameters['explanation'] = 'Drop the following column(s): ' . implode(',', $columns) . '.';
 
-        return $this->addCommand('dropAttribute', compact('parameters'));
+        return $this->addCommand('dropColumn', $parameters);
     }
 }
