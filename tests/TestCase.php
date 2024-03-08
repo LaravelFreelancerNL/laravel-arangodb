@@ -72,10 +72,6 @@ class TestCase extends AranguentTestCase implements \Orchestra\Testbench\Contrac
      */
     protected function setUp(): void
     {
-        parent::setUp();
-
-        $this->connection = DB::connection();
-
         $this->setTransactionCollections([
             'write' => [
                 'characters',
@@ -89,6 +85,10 @@ class TestCase extends AranguentTestCase implements \Orchestra\Testbench\Contrac
                 'tags',
                 'users'
             ]]);
+
+        parent::setUp();
+
+        $this->connection = DB::connection();
 
         //Convert orchestra migrations
         $this->artisan(
