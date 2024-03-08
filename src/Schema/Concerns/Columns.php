@@ -23,7 +23,7 @@ trait Columns
             . "' column(s).";
         $parameters['column'] = $column;
 
-        return $this->addCommand('hasAttribute', $parameters);
+        return $this->addCommand('hasColumn', $parameters);
     }
 
     /**

@@ -21,8 +21,6 @@ class Builder extends \Illuminate\Database\Schema\Builder
     use HandlesViews;
     use UsesBlueprints;
 
-    const EDGE_COLLECTION = 3;
-
     /**
      * The database connection instance.
      *

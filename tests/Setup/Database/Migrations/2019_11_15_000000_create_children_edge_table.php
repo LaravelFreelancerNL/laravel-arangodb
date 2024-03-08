@@ -6,6 +6,9 @@ use LaravelFreelancerNL\Aranguent\Schema\Blueprint;
 
 class CreateChildrenEdgeTable extends Migration
 {
+
+    const EDGE_COLLECTION = 3;
+
     /**
      * Run the migrations.
      *
@@ -18,7 +21,7 @@ class CreateChildrenEdgeTable extends Migration
             function (Blueprint $collection) {
                 $collection->unique(['_from', '_to']);
             },
-            ['type' => 3]
+            ['type' => self::EDGE_COLLECTION]
         );
     }
 

@@ -9,6 +9,7 @@ use LaravelFreelancerNL\Aranguent\Facades\Schema;
 return new class extends Migration
 {
 
+    const EDGE_COLLECTION = 3;
 
     /**
      * Run the migrations.
@@ -19,7 +20,7 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
         }, [
-            'type' => Schema::EDGE_COLLECTION,
+            'type' => self::EDGE_COLLECTION,
         ]);
     }
 

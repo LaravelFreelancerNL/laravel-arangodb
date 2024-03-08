@@ -97,8 +97,7 @@ test('create model with edge migration', function () use ($testModelData, $migra
         expect(str_contains($file, '_create_test_models_table.php'))->toBeTrue();
 
         $content = file_get_contents($migrationPath . '/' . $file);
-        expect(str_contains($content, 'const EDGE_COLLECTION = 3;'))->toBeTrue();
-        expect(str_contains($content, "type' => EDGE_COLLECTION,"))->toBeTrue();
+        expect(str_contains($content, "type' => self::EDGE_COLLECTION,"))->toBeTrue();
 
         unlink($migrationPath . '/' . $file);
     }
