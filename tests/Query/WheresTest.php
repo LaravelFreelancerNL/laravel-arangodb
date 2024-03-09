@@ -330,29 +330,6 @@ test('where time', function () {
     );
 });
 
-test('where nested', function () {
-    $builder = getBuilder();
-
-    $query = $builder->select('*')
-        ->from('characters')
-        ->where('surname', '==', 'Lannister')
-        ->where(function ($query) {
-            $query->where('age', '>', 20)
-                ->orWhere('alive', '=', true);
-        });
-
-    $binds = $query->getBindings();
-    $bindKeys = array_keys($binds);
-
-    $this->assertSame(
-        'FOR characterDoc IN characters FILTER `characterDoc`.`surname` == @' . $bindKeys[0]
-        . ' and ( `characterDoc`.`age` > @' . $bindKeys[1]
-        . ' or `characterDoc`.`alive` == @' . $bindKeys[2]
-        . ') RETURN characterDoc',
-        $query->toSql()
-    );
-});
-
 test('subquery where', function () {
     $subquery = DB::table('locations')
         ->select('name')
@@ -423,4 +400,109 @@ test('where not exists with limit', function () {
 
     $characters = $query->get();
     expect(count($characters))->toEqual(40);
+});
+
+test('where nested', function () {
+    $builder = getBuilder();
+
+    $query = $builder->select('*')
+        ->from('characters')
+        ->where('surname', '==', 'Lannister')
+        ->where(function ($query) {
+            $query->where('age', '>', 20)
+                ->orWhere('alive', '=', true);
+        });
+
+    $binds = $query->getBindings();
+    $bindKeys = array_keys($binds);
+
+    $this->assertSame(
+        'FOR characterDoc IN characters FILTER `characterDoc`.`surname` == @' . $bindKeys[0]
+        . ' and ( `characterDoc`.`age` > @' . $bindKeys[1]
+        . ' or `characterDoc`.`alive` == @' . $bindKeys[2]
+        . ') RETURN characterDoc',
+        $query->toSql()
+    );
+});
+
+test('whereAll', function () {
+    $query = \DB::table('houses')
+        ->whereAll(['en.coat-of-arms', 'en.description'], 'LIKE', '%on%');
+
+    $binds = $query->getBindings();
+    $bindKeys = array_keys($binds);
+
+    $this->assertSame(
+        'FOR houseDoc IN houses FILTER ( `houseDoc`.`en`.`coat-of-arms` LIKE @' . $bindKeys[0]
+        . ' and `houseDoc`.`en`.`description` LIKE @' . $bindKeys[1]
+        . ') RETURN houseDoc',
+        $query->toSql()
+    );
+
+    $results = $query->get();
+    expect($results->count())->toBe(1);
+    expect(($results->first())->name)->toBe('Targaryen');
+});
+
+test('whereAny', function () {
+    $query = \DB::table('houses')
+        ->whereAny(['en.coat-of-arms', 'en.description'], 'LIKE', '%on%');
+
+    $binds = $query->getBindings();
+    $bindKeys = array_keys($binds);
+
+    $this->assertSame(
+        'FOR houseDoc IN houses FILTER ( `houseDoc`.`en`.`coat-of-arms` LIKE @' . $bindKeys[0]
+        . ' or `houseDoc`.`en`.`description` LIKE @' . $bindKeys[1]
+        . ') RETURN houseDoc',
+        $query->toSql()
+    );
+
+    $results = $query->get();
+    expect($results->count())->toBe(3);
+    expect(($results->first())->name)->toBe('Lannister');
+});
+
+test('orWhereAll', function () {
+    $query = \DB::table('houses')
+        ->whereAll(['en.coat-of-arms', 'en.description'], 'LIKE', '%on%')
+        ->orWhereAll(['name', 'en.description'], 'LIKE', '%Stark%');
+
+    $binds = $query->getBindings();
+    $bindKeys = array_keys($binds);
+
+    $this->assertSame(
+        'FOR houseDoc IN houses FILTER ( `houseDoc`.`en`.`coat-of-arms` LIKE @' . $bindKeys[0]
+        . ' and `houseDoc`.`en`.`description` LIKE @' . $bindKeys[1]
+        . ') or ( `houseDoc`.`name` LIKE @' . $bindKeys[2]
+        . ' and `houseDoc`.`en`.`description` LIKE @' . $bindKeys[3]
+        . ') RETURN houseDoc',
+        $query->toSql()
+    );
+
+    $results = $query->get();
+    expect($results->count())->toBe(2);
+    expect(($results->first())->name)->toBe('Stark');
+});
+
+test('orWhereAny', function () {
+    $query = \DB::table('houses')
+        ->whereAny(['en.coat-of-arms', 'en.description'], 'LIKE', '%Stark%')
+        ->orWhereAny(['name', 'en.description'], 'LIKE', '%Dragon%');
+
+    $binds = $query->getBindings();
+    $bindKeys = array_keys($binds);
+
+    $this->assertSame(
+        'FOR houseDoc IN houses FILTER ( `houseDoc`.`en`.`coat-of-arms` LIKE @' . $bindKeys[0]
+        . ' or `houseDoc`.`en`.`description` LIKE @' . $bindKeys[1]
+        . ') or ( `houseDoc`.`name` LIKE @' . $bindKeys[2]
+        . ' or `houseDoc`.`en`.`description` LIKE @' . $bindKeys[3]
+        . ') RETURN houseDoc',
+        $query->toSql()
+    );
+
+    $results = $query->get();
+    expect($results->count())->toBe(2);
+    expect(($results->first())->name)->toBe('Stark');
 });

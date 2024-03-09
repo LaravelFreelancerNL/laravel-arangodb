@@ -76,7 +76,8 @@ whereBetween / whereNotBetween / whereBetweenColumns / whereNotBetweenColumns /
 whereJsonContains / whereJsonLength /
 whereIn / whereNotIn / whereNull / whereNotNull /
 whereDate / whereMonth / whereDay / whereYear / whereTime /
-whereRaw (use AQL)
+whereRaw (use AQL) /
+whereAll / orWhereAll / whereAny / orWhereAny
 
 nested wheres / subquery wheres on both operands 
 
