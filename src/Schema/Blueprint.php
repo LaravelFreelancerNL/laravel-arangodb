@@ -247,6 +247,7 @@ class Blueprint
     {
         $this->incrementOffset = $startingValue;
 
+        $info = [];
         $info['method'] = 'from';
         $info['explanation'] = "The autoincrement offset has been set to {$startingValue}.";
 
