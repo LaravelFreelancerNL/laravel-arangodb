@@ -43,9 +43,14 @@
         "phpmd/phpmd": "2.13",
         "phpstan/phpstan": "^1.0",
         "spatie/laravel-ray": "^1.32",
-        "timacdonald/log-fake": "^2.1"
+        "timacdonald/log-fake": "dev-l11-compatibility"
     },
-    "repositories": [],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/laravel-shift/log-fake.git"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "LaravelFreelancerNL\\Aranguent\\": "src/",
