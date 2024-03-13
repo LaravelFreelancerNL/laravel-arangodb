@@ -33,7 +33,7 @@
     "require-dev": {
         "laravel/pint": "^1.10",
         "mockery/mockery": "^1.5.0",
-        "nunomaduro/collision": "^7.8",
+        "nunomaduro/collision": "^7.8|8.0",
         "nunomaduro/larastan": "^2.0",
         "orchestra/testbench": "^8.5.5",
         "pestphp/pest": "^2.6.1",
