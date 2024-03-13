@@ -59,7 +59,7 @@ jobs:
       - name: Install dependencies
         run: |
           composer require laravel/framework:${{ matrix.laravel }} orchestra/testbench:${{ matrix.testbench }} --no-interaction --no-update
-          composer update --prefer-dist --no-interaction --with-all-dependencies
+          composer update --prefer-dist --no-interaction
 
       - name: Prepare test database
         run: |
