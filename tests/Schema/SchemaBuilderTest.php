@@ -13,8 +13,9 @@ use LaravelFreelancerNL\Aranguent\Schema\Builder;
 use LaravelFreelancerNL\Aranguent\Schema\Grammar;
 use Mockery as M;
 use Tests\Setup\ClassStubs\CustomBlueprint;
-use TiMacDonald\Log\LogEntry;
-use TiMacDonald\Log\LogFake;
+
+//use TiMacDonald\Log\LogEntry;
+//use TiMacDonald\Log\LogFake;
 
 afterEach(function () {
     M::close();
@@ -308,14 +309,15 @@ test('Silently fails unsupported functions', function () {
     Schema::nonExistingFunction('none-existing-analyzer');
 })->throwsNoExceptions();
 
-test('Unsupported functions are logged', function () {
-    $this->skipTestOn('laravel', '>', '3.10');
-
-    LogFake::bind();
-
-    Schema::nonExistingFunction('none-existing-analyzer');
-
-    Log::assertLogged(
-        fn(LogEntry $log) => $log->level === 'warning'
-    );
-});
+// Removed the log fake dependency for now as it usually lags behind new Laravel releases
+//test('Unsupported functions are logged', function () {
+//    $this->skipTestOn('laravel', '>', '3.10');
+//
+//    LogFake::bind();
+//
+//    Schema::nonExistingFunction('none-existing-analyzer');
+//
+//    Log::assertLogged(
+//        fn(LogEntry $log) => $log->level === 'warning'
+//    );
+//});

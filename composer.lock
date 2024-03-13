@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "be13bc64646eae829cfa5dd27bcccbb6",
+    "content-hash": "e609d9fcda9c4c5ef99e3f3833c0d3ee",
     "packages": [
         {
             "name": "amphp/amp",
@@ -5791,16 +5791,16 @@
         },
         {
             "name": "spatie/php-structure-discoverer",
-            "version": "2.1.0",
+            "version": "2.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/php-structure-discoverer.git",
-                "reference": "f5b3c935dda89d6c382b27e3caf348fa80bcfa88"
+                "reference": "24f5221641560ec0f7dce23dd814e7d555b0098b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/php-structure-discoverer/zipball/f5b3c935dda89d6c382b27e3caf348fa80bcfa88",
-                "reference": "f5b3c935dda89d6c382b27e3caf348fa80bcfa88",
+                "url": "https://api.github.com/repos/spatie/php-structure-discoverer/zipball/24f5221641560ec0f7dce23dd814e7d555b0098b",
+                "reference": "24f5221641560ec0f7dce23dd814e7d555b0098b",
                 "shasum": ""
             },
             "require": {
@@ -5859,7 +5859,7 @@
             ],
             "support": {
                 "issues": "https://github.com/spatie/php-structure-discoverer/issues",
-                "source": "https://github.com/spatie/php-structure-discoverer/tree/2.1.0"
+                "source": "https://github.com/spatie/php-structure-discoverer/tree/2.1.1"
             },
             "funding": [
                 {
@@ -5867,7 +5867,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-02-16T12:42:24+00:00"
+            "time": "2024-03-13T16:08:30+00:00"
         },
         {
             "name": "spatie/ray",
@@ -13052,97 +13052,6 @@
             "time": "2024-03-03T12:36:25+00:00"
         },
         {
-            "name": "timacdonald/log-fake",
-            "version": "dev-l11-compatibility",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/laravel-shift/log-fake.git",
-                "reference": "e32cdcb21edee0f6dff28503886564889f6965df"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/laravel-shift/log-fake/zipball/e32cdcb21edee0f6dff28503886564889f6965df",
-                "reference": "e32cdcb21edee0f6dff28503886564889f6965df",
-                "shasum": ""
-            },
-            "require": {
-                "illuminate/collections": "^9.0 || ^10.0",
-                "illuminate/contracts": "^9.0 || ^10.0 || ^11.0",
-                "illuminate/log": "^9.0 || ^10.0 || ^11.0",
-                "illuminate/support": "^9.0 || ^10.0 || ^11.0",
-                "php": "^8.1",
-                "phpunit/phpunit": "^9.0 || ^10.0",
-                "psr/log": "^1.0 || ^2.0 || ^3.0",
-                "symfony/var-dumper": "^6.0 || ^7.0"
-            },
-            "require-dev": {
-                "bamarni/composer-bin-plugin": "^1.4",
-                "illuminate/config": "^9.0 || ^10.0 || ^11.0",
-                "illuminate/container": "^9.0 || ^10.0 || ^11.0",
-                "timacdonald/callable-fake": "^1.5"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "TiMacDonald\\Log\\": "src"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Tests\\": "tests/"
-                }
-            },
-            "scripts": {
-                "bin": [
-                    "echo 'bin not installed'"
-                ],
-                "post-install-cmd": [
-                    "@composer bin all install --ansi"
-                ],
-                "post-update-cmd": [
-                    "@composer bin all update --ansi"
-                ],
-                "fix": [
-                    "clear",
-                    "./vendor/bin/php-cs-fixer fix"
-                ],
-                "lint": [
-                    "clear",
-                    "./vendor/bin/php-cs-fixer fix --dry-run",
-                    "./vendor/bin/phpstan analyse"
-                ],
-                "test": [
-                    "clear",
-                    "./vendor/bin/phpunit",
-                    "./vendor/bin/infection --threads=8"
-                ]
-            },
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Tim MacDonald",
-                    "email": "hello@timacdonald.me",
-                    "homepage": "https://timacdonald.me"
-                }
-            ],
-            "description": "A drop in fake logger for testing with the Laravel framework.",
-            "keywords": [
-                "fake",
-                "laravel",
-                "log",
-                "logger",
-                "testing"
-            ],
-            "support": {
-                "issues": "https://github.com/timacdonald/log-fake/issues",
-                "source": "https://github.com/timacdonald/log-fake/releases/latest",
-                "docs": "https://github.com/timacdonald/log-fake/blob/master/readme.md"
-            },
-            "time": "2024-03-02T02:34:46+00:00"
-        },
-        {
             "name": "zbateson/mail-mime-parser",
             "version": "2.4.0",
             "source": {
@@ -13352,9 +13261,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "timacdonald/log-fake": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
@@ -13362,5 +13269,5 @@
         "ext-json": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.3.0"
 }
