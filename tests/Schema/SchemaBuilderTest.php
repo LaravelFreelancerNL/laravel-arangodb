@@ -309,6 +309,8 @@ test('Silently fails unsupported functions', function () {
 })->throwsNoExceptions();
 
 test('Unsupported functions are logged', function () {
+    $this->skipTestOn('laravel', '>', '3.10');
+
     LogFake::bind();
 
     Schema::nonExistingFunction('none-existing-analyzer');

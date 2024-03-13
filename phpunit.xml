@@ -29,7 +29,8 @@
   </coverage>
   <php>
     <env name="APP_KEY" value="AckfSECXIvnK5r28GVIWUAxmbBSjTsmF"/>
-    <env name="ARANGODB_VERSION" value="3.10"/>
+    <env name="ARANGODB_VERSION" value="3.11"/>
+    <env name="LARAVEL_VERSION" value="11"/>
     <env name="RAY_ENABLED" value="(true)"/>
     <env name="SEND_CACHE_TO_RAY" value="(false)"/>
     <env name="SEND_DUMPS_TO_RAY" value="(true)"/>

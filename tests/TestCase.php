@@ -130,4 +130,16 @@ class TestCase extends AranguentTestCase implements \Orchestra\Testbench\Contrac
             $this->schemaManager->deleteCollection($collection->name);
         }
     }
+
+    protected function skipTestOn(string $software, string $operator = '<', string $version)
+    {
+        $currentVersion = getenv('matrix.' . $software);
+        if (! $currentVersion) {
+            $currentVersion = getenv(strtoupper($software . '_VERSION'));
+        }
+
+        if (version_compare($currentVersion, $version, $operator)) {
+            $this->markTestSkipped('This test does not support ' . ucfirst($software) . ' versions ' . $operator . ' ' . $version);
+        }
+    }
 }
