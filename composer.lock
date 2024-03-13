@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1d43bb4e2b488b7c0a5591853737783a",
+    "content-hash": "be13bc64646eae829cfa5dd27bcccbb6",
     "packages": [
         {
             "name": "amphp/amp",
@@ -13053,32 +13053,32 @@
         },
         {
             "name": "timacdonald/log-fake",
-            "version": "2.1.0",
+            "version": "dev-l11-compatibility",
             "source": {
                 "type": "git",
-                "url": "https://github.com/timacdonald/log-fake.git",
-                "reference": "70aaade5643e12c69556df307c817f5b2bcca8bf"
+                "url": "https://github.com/laravel-shift/log-fake.git",
+                "reference": "e32cdcb21edee0f6dff28503886564889f6965df"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/timacdonald/log-fake/zipball/70aaade5643e12c69556df307c817f5b2bcca8bf",
-                "reference": "70aaade5643e12c69556df307c817f5b2bcca8bf",
+                "url": "https://api.github.com/repos/laravel-shift/log-fake/zipball/e32cdcb21edee0f6dff28503886564889f6965df",
+                "reference": "e32cdcb21edee0f6dff28503886564889f6965df",
                 "shasum": ""
             },
             "require": {
                 "illuminate/collections": "^9.0 || ^10.0",
-                "illuminate/contracts": "^9.0 || ^10.0",
-                "illuminate/log": "^9.0 || ^10.0",
-                "illuminate/support": "^9.0 || ^10.0",
+                "illuminate/contracts": "^9.0 || ^10.0 || ^11.0",
+                "illuminate/log": "^9.0 || ^10.0 || ^11.0",
+                "illuminate/support": "^9.0 || ^10.0 || ^11.0",
                 "php": "^8.1",
                 "phpunit/phpunit": "^9.0 || ^10.0",
                 "psr/log": "^1.0 || ^2.0 || ^3.0",
-                "symfony/var-dumper": "^6.0"
+                "symfony/var-dumper": "^6.0 || ^7.0"
             },
             "require-dev": {
                 "bamarni/composer-bin-plugin": "^1.4",
-                "illuminate/config": "^9.0 || ^10.0",
-                "illuminate/container": "^9.0 || ^10.0",
+                "illuminate/config": "^9.0 || ^10.0 || ^11.0",
+                "illuminate/container": "^9.0 || ^10.0 || ^11.0",
                 "timacdonald/callable-fake": "^1.5"
             },
             "type": "library",
@@ -13087,7 +13087,36 @@
                     "TiMacDonald\\Log\\": "src"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "autoload-dev": {
+                "psr-4": {
+                    "Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "bin": [
+                    "echo 'bin not installed'"
+                ],
+                "post-install-cmd": [
+                    "@composer bin all install --ansi"
+                ],
+                "post-update-cmd": [
+                    "@composer bin all update --ansi"
+                ],
+                "fix": [
+                    "clear",
+                    "./vendor/bin/php-cs-fixer fix"
+                ],
+                "lint": [
+                    "clear",
+                    "./vendor/bin/php-cs-fixer fix --dry-run",
+                    "./vendor/bin/phpstan analyse"
+                ],
+                "test": [
+                    "clear",
+                    "./vendor/bin/phpunit",
+                    "./vendor/bin/infection --threads=8"
+                ]
+            },
             "license": [
                 "MIT"
             ],
@@ -13107,11 +13136,11 @@
                 "testing"
             ],
             "support": {
-                "docs": "https://github.com/timacdonald/log-fake/blob/master/readme.md",
                 "issues": "https://github.com/timacdonald/log-fake/issues",
-                "source": "https://github.com/timacdonald/log-fake/releases/latest"
+                "source": "https://github.com/timacdonald/log-fake/releases/latest",
+                "docs": "https://github.com/timacdonald/log-fake/blob/master/readme.md"
             },
-            "time": "2023-02-17T00:42:43+00:00"
+            "time": "2024-03-02T02:34:46+00:00"
         },
         {
             "name": "zbateson/mail-mime-parser",
@@ -13323,7 +13352,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "timacdonald/log-fake": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
