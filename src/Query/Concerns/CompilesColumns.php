@@ -297,11 +297,13 @@ trait CompilesColumns
      */
     protected function mergeReturnDocs($returnDocs)
     {
+        $returnDocs = array_filter($returnDocs);
+
         if (sizeOf($returnDocs) > 1) {
             return 'MERGE(' . implode(', ', $returnDocs) . ')';
         }
 
-        return $returnDocs[0];
+        return reset($returnDocs) ?? '';
     }
 
     /**
