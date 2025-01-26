@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\DB;
 use TestSetup\Models\Character;
 
-test('basic wheres', function () {
+test('where', function () {
     $builder = getBuilder($this->connection);
     $builder = $builder->select('*')
         ->from('users')
@@ -17,7 +17,7 @@ test('basic wheres', function () {
     );
 });
 
-test('basic wheres with multiple predicates', function () {
+test('where with multiple predicates', function () {
     $builder = getBuilder($this->connection);
     $builder->select('*')
         ->from('users')
@@ -34,7 +34,7 @@ test('basic wheres with multiple predicates', function () {
     );
 });
 
-test('basic or wheres', function () {
+test('orWhere', function () {
     $builder = getBuilder($this->connection);
     $builder->select('*')
         ->from('users')
@@ -100,7 +100,7 @@ test('where json arrow conversion', function () {
     );
 });
 
-test('where json contains', function () {
+test('whereJsonContains', function () {
     $builder = getBuilder($this->connection);
     $builder->select('*')
         ->from('users')
@@ -115,7 +115,7 @@ test('where json contains', function () {
     );
 });
 
-test('where json length', function () {
+test('whereJsonLength', function () {
     $builder = getBuilder($this->connection);
     $builder->select('*')
         ->from('users')
@@ -130,7 +130,7 @@ test('where json length', function () {
     );
 });
 
-test('where between', function () {
+test('whereBetween', function () {
     $builder = getBuilder($this->connection);
     $builder->select('*')->from('users')->whereBetween('votes', [1, 100]);
 
@@ -144,7 +144,7 @@ test('where between', function () {
     );
 });
 
-test('where not between', function () {
+test('whereNotBetween', function () {
     $builder = getBuilder($this->connection);
     $builder->select('*')->from('users')->whereNotBetween('votes', [1, 100]);
 
@@ -158,7 +158,7 @@ test('where not between', function () {
     );
 });
 
-test('where between columns', function () {
+test('whereBetweenColumns', function () {
     $builder = getBuilder($this->connection);
     $builder->select('*')->from('users')->whereBetweenColumns('votes', ['min_vote', 'max_vote']);
 
@@ -169,7 +169,7 @@ test('where between columns', function () {
     );
 });
 
-test('where column', function () {
+test('whereColumn', function () {
     $builder = getBuilder($this->connection);
     $builder->select('*')->from('users')->whereColumn('first_name', '=', 'last_name');
 
@@ -179,7 +179,7 @@ test('where column', function () {
     );
 });
 
-test('where column without operator', function () {
+test('whereColumn without operator', function () {
     $builder = getBuilder($this->connection);
     $builder->select('*')->from('users')->whereColumn('first_name', 'last_name');
 
@@ -189,7 +189,7 @@ test('where column without operator', function () {
     );
 });
 
-test('where nulls', function () {
+test('whereNull / orWhereNull', function () {
     $builder = getBuilder($this->connection);
     $builder->select('*')->from('users')->whereNull('_key');
     expect($builder->toSql())->toBe('FOR userDoc IN users FILTER `userDoc`.`_key` == null RETURN userDoc');
@@ -209,7 +209,7 @@ test('where nulls', function () {
     );
 });
 
-test('where not nulls', function () {
+test('whereNotNull / orWhereNotNull', function () {
     $builder = getBuilder($this->connection);
     $builder->select('*')->from('users')->whereNotNull('id');
     expect($builder->toSql())->toBe('FOR userDoc IN users FILTER `userDoc`.`_key` != null RETURN userDoc');
@@ -253,7 +253,7 @@ test('whereIn', function () {
 
 
 
-test('where integer in raw', function () {
+test('whereIntegerInRaw', function () {
     $builder = getBuilder($this->connection);
 
     $builder->select()
@@ -266,7 +266,7 @@ test('where integer in raw', function () {
     );
 });
 
-test('where not in', function () {
+test('whereNotIn', function () {
     $builder = getBuilder($this->connection);
 
     $builder->select()
@@ -281,7 +281,7 @@ test('where not in', function () {
     );
 });
 
-test('where integer not in raw', function () {
+test('whereIntegerNotInRaw', function () {
     $builder = getBuilder($this->connection);
 
     $builder->select()
@@ -294,7 +294,7 @@ test('where integer not in raw', function () {
     );
 });
 
-test('where date', function () {
+test('whereDate', function () {
     $builder = getBuilder($this->connection);
     $builder->select('*')->from('users')->whereDate('created_at', '2016-12-31');
 
@@ -306,7 +306,7 @@ test('where date', function () {
     );
 });
 
-test('where year', function () {
+test('whereYear', function () {
     $builder = getBuilder($this->connection);
     $builder->select('*')->from('users')->whereYear('created_at', '2016');
 
@@ -318,7 +318,7 @@ test('where year', function () {
     );
 });
 
-test('where month', function () {
+test('whereMonth', function () {
     $builder = getBuilder($this->connection);
     $builder->select('*')->from('users')->whereMonth('created_at', '12');
 
@@ -330,7 +330,7 @@ test('where month', function () {
     );
 });
 
-test('where day', function () {
+test('whereDay', function () {
     $builder = getBuilder($this->connection);
     $builder->select('*')->from('users')->whereDay('created_at', '31');
 
@@ -342,7 +342,7 @@ test('where day', function () {
     );
 });
 
-test('where time', function () {
+test('whereTime', function () {
     $builder = getBuilder($this->connection);
     $builder->select('*')->from('users')->whereTime('created_at', '11:20:45');
 
@@ -414,7 +414,7 @@ test('where not exists with multiple results', function () {
     expect(count($characters))->toEqual(40);
 });
 
-test('where not exists with limit', function () {
+test('whereNotExists with limit', function () {
     $query = Character::whereNotExists(function ($query) {
         $query->select('name')
             ->from('locations')
@@ -572,9 +572,7 @@ test('orWhereNone', function () {
     expect(($results->first())->name)->toBe('Stark');
 });
 
-
-
-test('basic whereNot', function () {
+test('whereNot', function () {
     $builder = getBuilder($this->connection);
     $builder->select('*')->from('characters')->where('surname', 'Lannister')->whereNot('alive', true);
 
@@ -623,7 +621,7 @@ test('whereNot query results', function () {
     expect($results->count())->toBe(3);
 });
 
-test('basic orWhereNot', function () {
+test('orWhereNot', function () {
     $builder = getBuilder($this->connection);
     $builder->select('*')->from('characters')->where('alive', true)->orWhereNot('surname', 'Lannister');
 
@@ -732,6 +730,62 @@ test('orWhereNotLike', function () {
     );
 
     $results = $query->get();
+    expect($results->count())->toBe(2);
+    expect(($results->first())->name)->toBe('Lannister');
+});
+
+test('whereRaw', function () {
+    $query = \DB::table('houses')
+        ->whereRaw('`houseDoc`.`name` == "Stark"');
+
+    $binds = $query->getBindings();
+    $bindKeys = array_keys($binds);
+
+    $this->assertSame(
+        'FOR houseDoc IN houses FILTER `houseDoc`.`name` == "Stark" RETURN houseDoc',
+        $query->toSql(),
+    );
+
+    $results = $query->get();
+
+    expect($results->count())->toBe(1);
+    expect(($results->first())->name)->toBe('Stark');
+});
+
+test('orWhereRaw', function () {
+    $query = \DB::table('houses')
+        ->whereRaw('`houseDoc`.`name` == "Stark"')
+        ->orWhereRaw('`houseDoc`.`name` == "Lannister"');
+
+    $binds = $query->getBindings();
+    $bindKeys = array_keys($binds);
+
+    $this->assertSame(
+        'FOR houseDoc IN houses FILTER `houseDoc`.`name` == "Stark" or `houseDoc`.`name` == "Lannister" RETURN houseDoc',
+        $query->toSql(),
+    );
+
+    $results = $query->get();
+
+    expect($results->count())->toBe(2);
+    expect(($results->first())->name)->toBe('Lannister');
+});
+
+test('whereRaw with bindings', function () {
+    $query = \DB::table('houses')
+        ->whereRaw('`houseDoc`.`name` == @house1', ['house1' => "Stark"])
+        ->orWhereRaw('`houseDoc`.`name` == @house2', ['house2' => "Lannister"]);
+
+    $binds = $query->getBindings();
+    $bindKeys = array_keys($binds);
+
+    $this->assertSame(
+        'FOR houseDoc IN houses FILTER `houseDoc`.`name` == @house1 or `houseDoc`.`name` == @house2 RETURN houseDoc',
+        $query->toSql(),
+    );
+
+    $results = $query->get();
+
     expect($results->count())->toBe(2);
     expect(($results->first())->name)->toBe('Lannister');
 });

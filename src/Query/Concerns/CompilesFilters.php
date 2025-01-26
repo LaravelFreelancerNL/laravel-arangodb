@@ -31,7 +31,8 @@ trait CompilesFilters
     protected function compileWheresToArray($query)
     {
         return collect($query->wheres)->map(function ($where) use ($query) {
-            return $where['boolean'] . ' ' . $this->{"filter{$where['type']}"}($query, $where);
+            $type = ucfirst($where['type']);
+            return $where['boolean'] . ' ' . $this->{"filter{$type}"}($query, $where);
         })->all();
     }
 
@@ -73,6 +74,7 @@ trait CompilesFilters
      */
     protected function filter(IlluminateQueryBuilder $query, array $filter)
     {
+        ray($filter);
         // If the having clause is "raw", we can just return the clause straight away
         // without doing any more processing on it. Otherwise, we will compile the
         // clause into SQL based on the components that make it up from builder.
@@ -249,6 +251,22 @@ trait CompilesFilters
 
         return implode(" ", $predicate);
     }
+
+    /**
+     * Compile a "filter in raw" clause.
+     *
+     * For safety, filterIntegerInRaw ensures this method is only used with integer values.
+     *
+     * @param IlluminateQueryBuilder $query
+     * @param array<mixed> $filter
+     * @return string
+     * @throws \Exception
+     */
+    protected function filterRaw(IlluminateQueryBuilder $query, array $filter): string
+    {
+        return $filter['sql'] instanceof \Illuminate\Contracts\Database\Query\Expression ? $filter['sql']->getValue($this) : $filter['sql'];
+    }
+
 
     /**
      * Compile a "filter in raw" clause.

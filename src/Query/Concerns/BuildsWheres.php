@@ -516,4 +516,21 @@ trait BuildsWheres
 
         return $this;
     }
+
+    /**
+     * Add a raw where clause to the query.
+     *
+     * @param  string  $sql
+     * @param  mixed  $bindings
+     * @param  string  $boolean
+     * @return $this
+     */
+    public function whereRaw($sql, $bindings = [], $boolean = 'and')
+    {
+        $this->wheres[] = ['type' => 'raw', 'sql' => $sql, 'boolean' => $boolean];
+
+        $this->bindings['where'] = array_merge($this->bindings['where'], (array) $bindings);
+
+        return $this;
+    }
 }
