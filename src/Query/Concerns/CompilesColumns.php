@@ -303,7 +303,11 @@ trait CompilesColumns
             return 'MERGE(' . implode(', ', $returnDocs) . ')';
         }
 
-        return reset($returnDocs) ?? '';
+        if (empty($returnDocs)) {
+            return '';
+        }
+
+        return reset($returnDocs);
     }
 
     /**
