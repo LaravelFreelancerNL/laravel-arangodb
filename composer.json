@@ -27,7 +27,7 @@
         "composer/composer": "^2.8.0",
         "laravel-freelancer-nl/arangodb-php-client": "^2.8.0",
         "laravel-freelancer-nl/fluentaql": "^2.0",
-        "laravel/framework": "^11.0",
+        "laravel/framework": "^11",
         "spatie/laravel-data": "^4.4.0",
         "stevebauman/unfinalize": "^2.1",
         "vlucas/phpdotenv": "^5.4"
