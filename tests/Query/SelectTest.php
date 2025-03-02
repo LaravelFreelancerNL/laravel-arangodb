@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\DB;
 
-test('basic select', function () {
+test('select', function () {
     $results = DB::table('characters')->select()->get();
 
     expect($results)->toHaveCount(43);
@@ -10,13 +10,13 @@ test('basic select', function () {
     expect(count((array) $results[0]))->toBe(10);
 });
 
-test('basic select with specific column', function () {
+test('select with specific column', function () {
     $results = DB::table('characters')->select('name')->first();
 
     expect($results->name)->toBe('Ned');
 });
 
-test('basic select with specific columns', function () {
+test('select with specific columns', function () {
     $results = DB::table('characters')->select(['name', 'surname', 'age'])->limit(1)->get();
 
     expect($results[0])->toHaveProperties(['name', 'surname', 'age']);
@@ -182,4 +182,24 @@ test('fromOptions', function () {
     expect($results[0]->name)->toBe('Lannister');
     expect($results[1]->name)->toBe('Stark');
     expect($results[2]->name)->toBe('Targaryen');
+});
+
+test('select boolean', function () {
+    $results = DB::table('characters')->select(true)->get();
+
+    $uniqueResults = array_unique($results->toArray());
+
+    expect($results)->toHaveCount(43);
+    expect($uniqueResults)->toHaveCount(1);
+    expect($uniqueResults[0])->toBeTrue();
+});
+
+test('select integer', function () {
+    $results = DB::table('characters')->select(1)->get();
+
+    $uniqueResults = array_unique($results->toArray());
+
+    expect($results)->toHaveCount(43);
+    expect($uniqueResults)->toHaveCount(1);
+    expect($uniqueResults[0])->toBe(1);
 });

@@ -56,6 +56,14 @@ trait CompilesColumns
     {
         assert($query instanceof Builder);
 
+        if (sizeOf($columns) === 1  && !is_string($columns[0]) && is_scalar($columns[0])) {
+            if (is_bool($columns[0])) {
+                $value = ($columns[0]) ? 'true' : 'false';
+                return 'RETURN '.$value;
+            }
+            return 'RETURN '.$columns[0];
+        }
+
         $columns = $this->convertJsonFields($columns);
 
         [$returnAttributes, $returnDocs] = $this->prepareColumns($query, $columns);
