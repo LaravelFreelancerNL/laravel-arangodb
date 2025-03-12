@@ -33,7 +33,7 @@ trait RunsQueries
      * @param  array<mixed>  $bindings
      * @param  bool  $useReadPdo
      * @return \Generator
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      */
     public function cursor($query, $bindings = [], $useReadPdo = true)
     {
@@ -195,7 +195,7 @@ trait RunsQueries
     /**
      * Run a select statement against the database.
      *
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      *
      * @param  string|FluentAqlBuilder  $query
      * @param  array<mixed>  $bindings
@@ -210,7 +210,7 @@ trait RunsQueries
     /**
      * Run an AQL query against the database and return the results.
      *
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      *
      * @param  string|FluentAqlBuilder  $query
      * @param  array<mixed>  $bindings

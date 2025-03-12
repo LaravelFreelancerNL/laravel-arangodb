@@ -24,7 +24,7 @@ trait HasAttributes
      * @param  bool  $asObject
      * @return mixed
      *
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      */
     public function fromJson($value, $asObject = false)
     {

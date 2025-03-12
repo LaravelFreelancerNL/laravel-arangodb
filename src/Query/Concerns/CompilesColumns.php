@@ -76,7 +76,7 @@ trait CompilesColumns
      * @return array<mixed>
      * @throws Exception
      *
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      */
     protected function prepareColumns(IlluminateQueryBuilder $query, array $columns)
     {

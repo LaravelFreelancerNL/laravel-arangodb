@@ -12,7 +12,7 @@ class Processor extends IlluminateProcessor
     /**
      * Process the results of a "select" query.
      *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      *
      * @param  array<mixed>|null  $results
      * @return array<mixed>

@@ -116,7 +116,7 @@ trait HandlesAqlGrammar
      * @param  Array<mixed>|Expression|string  $value
      * @return array<mixed>|float|int|string
      *
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      */
     public function wrap($value)
     {

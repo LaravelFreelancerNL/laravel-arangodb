@@ -195,7 +195,7 @@ trait BuildsGroups
      * @param  bool  $not
      * @return $this
      *
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      */
     public function havingBetween($column, iterable $values, $boolean = 'and', $not = false)
     {

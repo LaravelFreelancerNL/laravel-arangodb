@@ -125,7 +125,7 @@ trait QueriesAranguentRelationships
      * @param  string  $function
      * @return $this
      *
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      */
     public function withAggregate($relations, $column, $function = null)
     {

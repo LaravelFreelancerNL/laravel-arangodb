@@ -42,7 +42,7 @@ trait CompilesFilters
      * @param  array<mixed>  $aql
      * @return string
      *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
     protected function concatenateWhereClauses($query, $aql)
     {
@@ -357,7 +357,7 @@ trait CompilesFilters
      * @param array<mixed> $filter
      * @return mixed
      *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
     protected function filterExpression(IlluminateQueryBuilder $query, $filter)
     {
@@ -526,7 +526,7 @@ trait CompilesFilters
      * @param  array<mixed>  $filter
      * @return string
      *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
     protected function filterExists(IlluminateQueryBuilder $query, $filter)
     {
@@ -540,7 +540,7 @@ trait CompilesFilters
      * @param  array<mixed>  $filter
      * @return string
      *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
     protected function filterNotExists(IlluminateQueryBuilder $query, $filter)
     {
@@ -554,7 +554,7 @@ trait CompilesFilters
      * @param  array<mixed>  $filter
      * @return string
      *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
     protected function filterNested(IlluminateQueryBuilder $query, $filter)
     {

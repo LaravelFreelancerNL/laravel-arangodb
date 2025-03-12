@@ -17,7 +17,7 @@ trait InteractsWithDatabase
      * @param string|null $connection
      * @return \Illuminate\Contracts\Database\Query\Expression
      *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
     public function castAsJson($value, $connection = null)
     {

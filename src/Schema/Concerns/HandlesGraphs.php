@@ -12,7 +12,7 @@ trait HandlesGraphs
      * @param  array<mixed>  $properties
      * @throws ArangoException
      *
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      */
     public function createGraph(string $name, array $properties = [], bool $waitForSync = false)
     {

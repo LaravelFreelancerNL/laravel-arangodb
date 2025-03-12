@@ -229,7 +229,7 @@ trait BuildsSelects
      * @param  bool  $all
      * @return $this
      *
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      */
     public function union($query, $all = false)
     {

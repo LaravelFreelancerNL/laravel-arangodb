@@ -201,7 +201,7 @@ class Connection extends IlluminateConnection
      * @param  bool  $binary
      * @return string
      *
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      */
     public function escape($value, $binary = false)
     {
@@ -221,7 +221,7 @@ class Connection extends IlluminateConnection
      * @param  string  $value
      * @return string
      *
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      */
     protected function escapeString($value, bool $binary = false)
     {

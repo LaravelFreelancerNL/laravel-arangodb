@@ -175,7 +175,7 @@ trait HandlesAliases
     }
 
     /**
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      */
     public function registerTableAlias(string|Expression $table, ?string $alias = null): string
     {
