@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        laravel: ['^11.0']
+        laravel: ['^12.0']
         include:
-          - laravel: '^11.0'
-            testbench: '^9.0'
+          - laravel: '^12.0'
+            testbench: '^10.0'
 
     name:  Test coverage (Scrutinizer)
 
