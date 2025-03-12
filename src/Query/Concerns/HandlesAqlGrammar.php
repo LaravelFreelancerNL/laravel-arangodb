@@ -148,10 +148,10 @@ trait HandlesAqlGrammar
      * @param Expression|string  $table
      * @return float|int|string
      */
-    public function wrapTable($table)
+    public function wrapTable($table, $prefix = null)
     {
         if (!$table instanceof Expression) {
-            $wrappedTable = $this->wrap($this->tablePrefix . $table);
+            $wrappedTable = $this->wrap(($prefix ?? $this->tablePrefix) . $table);
 
             assert(!is_array($wrappedTable));
 

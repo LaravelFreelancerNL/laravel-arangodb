@@ -72,7 +72,7 @@ class AranguentServiceProvider extends ServiceProvider
                     function ($config, $name) {
                         $config['name'] = $name;
                         $connection = new Connection($config);
-                        $connection->setSchemaGrammar(new SchemaGrammar());
+                        $connection->setSchemaGrammar(new SchemaGrammar($connection));
 
                         return $connection;
                     },

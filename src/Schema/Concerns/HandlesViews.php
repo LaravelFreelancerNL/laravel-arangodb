@@ -40,11 +40,14 @@ trait HandlesViews
     }
 
     /**
+     * @param string|string[]|null $schema
      * @return mixed[]
      * @throws ArangoException
      */
-    public function getViews(): array
+    public function getViews($schema = null): array
     {
+        unset($schema);
+
         return $this->mapResultsToArray(
             $this->schemaManager->getViews(),
         );

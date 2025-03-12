@@ -93,7 +93,7 @@ class Connection extends IlluminateConnection
      */
     protected function getDefaultQueryGrammar()
     {
-        ($grammar = new QueryGrammar())->setConnection($this);
+        $grammar = new QueryGrammar($this);
 
         return $grammar;
     }

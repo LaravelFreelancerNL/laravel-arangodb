@@ -129,11 +129,14 @@ class Builder extends \Illuminate\Database\Schema\Builder
     /**
      * Get the tables that belong to the database.
      *
+     * @param string|string[]|null $schema
      * @return array<mixed>
      * @throws ArangoException
      */
-    public function getTables()
+    public function getTables($schema = null)
     {
+        unset($schema);
+
         return $this->mapResultsToArray(
             $this->schemaManager->getCollections(true),
         );
@@ -197,14 +200,7 @@ class Builder extends \Illuminate\Database\Schema\Builder
      */
     public function getColumns($table)
     {
-        $parameters = [];
-        $parameters['name'] = 'columns';
-        $parameters['handler'] = 'aql';
-        $parameters['table'] = $table;
-
-        $command = new Fluent($parameters);
-
-        $compilation = $this->grammar->compileColumns($table, $command);
+        $compilation = $this->grammar->compileColumns(null, $table);
 
         $rawColumns = $this->connection->select($compilation['aqb'], $compilation['bindings']);
 
