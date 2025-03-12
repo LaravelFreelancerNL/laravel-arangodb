@@ -6,6 +6,7 @@ namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
 use Carbon\CarbonPeriod;
 use Closure;
+use DateTimeInterface;
 use Illuminate\Contracts\Database\Query\ConditionExpression;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Builder as IlluminateEloquentBuilder;
@@ -40,7 +41,7 @@ trait BuildsWheres
     /**
      * Prepare the value and operator for a where clause.
      *
-     * @param  float|int|string|null  $value
+     * @param  DateTimeInterface|float|int|string|null  $value
      * @param  string|null  $operator
      * @param  bool  $useDefault
      * @return array<mixed>
