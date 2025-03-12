@@ -27,7 +27,7 @@ test('getAnalyzers', function () {
 
     $endAnalyzers = $schemaManager->getAnalyzers();
     expect(count($initialAnalyzers))->toBe(count($endAnalyzers));
-})->only();
+});
 
 test('replaceAnalyzer', function () {
     $schemaManager = $this->connection->getArangoClient()->schema();
