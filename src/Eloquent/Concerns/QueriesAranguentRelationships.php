@@ -179,7 +179,8 @@ trait QueriesAranguentRelationships
             // If the query contains certain elements like orderings / more than one column selected
             // then we will remove those elements from the query so that it will execute properly
             // when given to the database. Otherwise, we may receive SQL errors or poor syntax.
-            unset($query->orders);
+            $query->orders = null;
+
             $query->setBindings([], 'order');
 
             if (is_array($query->columns) && count($query->columns) > 1) {

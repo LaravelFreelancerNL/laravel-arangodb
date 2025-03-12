@@ -56,6 +56,8 @@ trait BuildsGroups
 
     public function cleanGroupVariables(): void
     {
+        // FIXME: check for possible expressions instead of strings.
+        /* @phpstan-ignore-next-line */
         $this->tableAliases = array_diff($this->tableAliases, $this->groupVariables ?? []);
         $this->groupVariables = null;
     }
