@@ -24,7 +24,7 @@ test('output conversion without key', function () {
 });
 
 test('get id conversion single attribute', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder = $builder->select('id')->from('users');
 
     $this->assertSame(

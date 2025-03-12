@@ -1,7 +1,7 @@
 <?php
 
 test('wrap multiple columns', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder = $builder->select(['id', '_id', 'email'])
         ->from('users');
 
@@ -12,7 +12,7 @@ test('wrap multiple columns', function () {
 });
 
 test('wrap bypass', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder = $builder->select('*')
         ->from('users')
         ->where('i`d', '=', "a123");

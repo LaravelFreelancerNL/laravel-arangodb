@@ -54,9 +54,9 @@ uses(
 
 /** @link https://pestphp.com/docs/helpers */
 
-function getBuilder()
+function getBuilder($connection)
 {
-    $grammar = new Grammar();
+    $grammar = new Grammar($connection);
     $processor = m::mock(Processor::class);
 
     return new Builder(m::mock(Connection::class), $grammar, $processor);

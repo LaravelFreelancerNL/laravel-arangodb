@@ -25,7 +25,7 @@ test('insert', function () {
 
 
 test('insert get id', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
 
     $builder->getConnection()->shouldReceive('execute')->once()->andReturn(1);
     $result = $builder->from('users')->insertGetId(['email' => 'foo']);

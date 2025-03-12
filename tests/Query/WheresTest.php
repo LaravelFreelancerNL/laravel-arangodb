@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\DB;
 use TestSetup\Models\Character;
 
 test('basic wheres', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder = $builder->select('*')
         ->from('users')
         ->where('id', '=', "a123");
@@ -18,7 +18,7 @@ test('basic wheres', function () {
 });
 
 test('basic wheres with multiple predicates', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder->select('*')
         ->from('users')
         ->where('id', '=', 1)
@@ -35,7 +35,7 @@ test('basic wheres with multiple predicates', function () {
 });
 
 test('basic or wheres', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder->select('*')
         ->from('users')
         ->where('id', '==', 1)
@@ -50,7 +50,7 @@ test('basic or wheres', function () {
 });
 
 test('where operator conversion', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder->select('*')
         ->from('users')
         ->where('email', '=', 'email@example.com')
@@ -68,7 +68,7 @@ test('where operator conversion', function () {
 });
 
 test('where =~ operator', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder->select('*')
         ->from('users')
         ->where('email', '=~', 'email@example.com');
@@ -83,7 +83,7 @@ test('where =~ operator', function () {
 });
 
 test('where json arrow conversion', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder->select('*')
         ->from('users')
         ->where('email->address', '=', 'email@example.com')
@@ -101,7 +101,7 @@ test('where json arrow conversion', function () {
 });
 
 test('where json contains', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder->select('*')
         ->from('users')
         ->whereJsonContains('options->languages', 'en');
@@ -116,7 +116,7 @@ test('where json contains', function () {
 });
 
 test('where json length', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder->select('*')
         ->from('users')
         ->whereJsonLength('options->languages', '>', 'en');
@@ -131,7 +131,7 @@ test('where json length', function () {
 });
 
 test('where between', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder->select('*')->from('users')->whereBetween('votes', [1, 100]);
 
     $this->assertSame(
@@ -145,7 +145,7 @@ test('where between', function () {
 });
 
 test('where not between', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder->select('*')->from('users')->whereNotBetween('votes', [1, 100]);
 
     $this->assertSame(
@@ -159,7 +159,7 @@ test('where not between', function () {
 });
 
 test('where between columns', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder->select('*')->from('users')->whereBetweenColumns('votes', ['min_vote', 'max_vote']);
 
     $this->assertSame(
@@ -170,7 +170,7 @@ test('where between columns', function () {
 });
 
 test('where column', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder->select('*')->from('users')->whereColumn('first_name', '=', 'last_name');
 
     $this->assertSame(
@@ -180,7 +180,7 @@ test('where column', function () {
 });
 
 test('where column without operator', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder->select('*')->from('users')->whereColumn('first_name', 'last_name');
 
     $this->assertSame(
@@ -190,12 +190,12 @@ test('where column without operator', function () {
 });
 
 test('where nulls', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder->select('*')->from('users')->whereNull('_key');
     expect($builder->toSql())->toBe('FOR userDoc IN users FILTER `userDoc`.`_key` == null RETURN userDoc');
     expect($builder->getBindings())->toEqual([]);
 
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder->select('*')
         ->from('users')
         ->where('id', '=', 1)
@@ -210,12 +210,12 @@ test('where nulls', function () {
 });
 
 test('where not nulls', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder->select('*')->from('users')->whereNotNull('id');
     expect($builder->toSql())->toBe('FOR userDoc IN users FILTER `userDoc`.`_key` != null RETURN userDoc');
     expect($builder->getBindings())->toEqual([]);
 
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder->select('*')
         ->from('users')
         ->where('id', '>', 1)
@@ -254,7 +254,7 @@ test('whereIn', function () {
 
 
 test('where integer in raw', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
 
     $builder->select()
         ->from('users')
@@ -267,7 +267,7 @@ test('where integer in raw', function () {
 });
 
 test('where not in', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
 
     $builder->select()
         ->from('users')
@@ -282,7 +282,7 @@ test('where not in', function () {
 });
 
 test('where integer not in raw', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
 
     $builder->select()
         ->from('users')
@@ -295,7 +295,7 @@ test('where integer not in raw', function () {
 });
 
 test('where date', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder->select('*')->from('users')->whereDate('created_at', '2016-12-31');
 
     $this->assertSame(
@@ -307,7 +307,7 @@ test('where date', function () {
 });
 
 test('where year', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder->select('*')->from('users')->whereYear('created_at', '2016');
 
     $this->assertSame(
@@ -319,7 +319,7 @@ test('where year', function () {
 });
 
 test('where month', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder->select('*')->from('users')->whereMonth('created_at', '12');
 
     $this->assertSame(
@@ -331,7 +331,7 @@ test('where month', function () {
 });
 
 test('where day', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder->select('*')->from('users')->whereDay('created_at', '31');
 
     $this->assertSame(
@@ -343,7 +343,7 @@ test('where day', function () {
 });
 
 test('where time', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder->select('*')->from('users')->whereTime('created_at', '11:20:45');
 
     $this->assertSame(
@@ -427,7 +427,7 @@ test('where not exists with limit', function () {
 });
 
 test('where nested', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
 
     $query = $builder->select('*')
         ->from('characters')
@@ -575,7 +575,7 @@ test('orWhereNone', function () {
 
 
 test('basic whereNot', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder->select('*')->from('characters')->where('surname', 'Lannister')->whereNot('alive', true);
 
     $this->assertSame(
@@ -589,7 +589,7 @@ test('basic whereNot', function () {
 });
 
 test('whereNot nested', function () {
-    $query = getBuilder();
+    $query = getBuilder($this->connection);
     $query = $query
         ->select('*')
         ->from('characters')
@@ -624,7 +624,7 @@ test('whereNot query results', function () {
 });
 
 test('basic orWhereNot', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder->select('*')->from('characters')->where('alive', true)->orWhereNot('surname', 'Lannister');
 
     $this->assertSame(
