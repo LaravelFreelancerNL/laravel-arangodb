@@ -66,10 +66,17 @@ class TableCommand extends IlluminateTableCommand
             return 1;
         }
 
-        $tableName = $this->withoutTablePrefix($connection, $table['name']);
+        [$columns, $indexes] = $connection->withoutTablePrefix(function ($connection) use ($table) {
+            $schema = $connection->getSchemaBuilder();
+            $tableName = $table['name'];
 
-        $columns = $this->columns($schema, $tableName);
-        $indexes = $this->indexes($schema, $tableName);
+            return [
+                $this->columns($schema, $tableName),
+                $this->indexes($schema, $tableName)
+            ];
+        });
+
+
 
         $data = [
             'table' => $table,
