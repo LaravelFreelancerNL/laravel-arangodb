@@ -264,7 +264,7 @@ class Grammar extends IlluminateQueryGrammar
      *
      * @param array<mixed> $options
      *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
     protected function compileFromOptions($options): string
     {
@@ -297,7 +297,7 @@ class Grammar extends IlluminateQueryGrammar
      * @param array<string, mixed> $variables
      * @return string
      *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
     protected function compileVariables(IlluminateQueryBuilder $query, array $variables): string
     {
@@ -367,7 +367,7 @@ class Grammar extends IlluminateQueryGrammar
      * @param  int  $offset
      * @return string
      *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
     protected function compileOffset(IlluminateQueryBuilder $query, $offset)
     {
@@ -383,7 +383,7 @@ class Grammar extends IlluminateQueryGrammar
      * @param  int  $limit
      * @return string
      *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
     protected function compileLimit(IlluminateQueryBuilder $query, $limit)
     {

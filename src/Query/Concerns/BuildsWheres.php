@@ -6,6 +6,7 @@ namespace LaravelFreelancerNL\Aranguent\Query\Concerns;
 
 use Carbon\CarbonPeriod;
 use Closure;
+use DateTimeInterface;
 use Illuminate\Contracts\Database\Query\ConditionExpression;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Builder as IlluminateEloquentBuilder;
@@ -27,7 +28,7 @@ trait BuildsWheres
      * @param string $boolean
      * @return $this
      *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
     public function whereFullText($columns, $value, array $options = [], $boolean = 'and')
     {
@@ -40,14 +41,14 @@ trait BuildsWheres
     /**
      * Prepare the value and operator for a where clause.
      *
-     * @param  float|int|string|null  $value
+     * @param  DateTimeInterface|float|int|string|null  $value
      * @param  string|null  $operator
      * @param  bool  $useDefault
      * @return array<mixed>
      *
      * @throws \InvalidArgumentException
      *
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      */
     public function prepareValueAndOperator($value, $operator, $useDefault = false)
     {
@@ -157,7 +158,7 @@ trait BuildsWheres
      * @param  bool  $not
      * @return $this
      *
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      */
     public function addWhereExistsQuery(IlluminateQueryBuilder $query, $boolean = 'and', $not = false)
     {
@@ -195,8 +196,8 @@ trait BuildsWheres
      * @param  string  $boolean
      * @return IlluminateQueryBuilder
      *
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     * @SuppressWarnings("PHPMD.NPathComplexity")
      */
     public function where($column, $operator = null, $value = null, $boolean = 'and')
     {
@@ -286,7 +287,7 @@ trait BuildsWheres
      * @param bool $not
      * @return IlluminateQueryBuilder
      *
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      */
     public function whereBetween($column, iterable $values, $boolean = 'and', $not = false)
     {
@@ -356,7 +357,7 @@ trait BuildsWheres
      * @param  bool  $not
      * @return IlluminateQueryBuilder
      *
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      */
     public function whereIn($column, $values, $boolean = 'and', $not = false)
     {
@@ -390,7 +391,7 @@ trait BuildsWheres
     /**
      * Add a "where JSON contains" clause to the query.
      *
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      *
      * @param  string  $column
      * @param  mixed  $value
@@ -445,7 +446,7 @@ trait BuildsWheres
      * @param  bool  $not
      * @return $this
      *
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      */
     public function whereLike($column, $value, $caseSensitive = false, $boolean = 'and', $not = false)
     {
@@ -466,7 +467,7 @@ trait BuildsWheres
      * @param  bool  $not
      * @return $this
      *
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      */
     public function whereNull($columns, $boolean = 'and', $not = false)
     {

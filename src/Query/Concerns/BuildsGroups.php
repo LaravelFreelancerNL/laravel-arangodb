@@ -56,6 +56,8 @@ trait BuildsGroups
 
     public function cleanGroupVariables(): void
     {
+        // FIXME: check for possible expressions instead of strings.
+        /* @phpstan-ignore-next-line */
         $this->tableAliases = array_diff($this->tableAliases, $this->groupVariables ?? []);
         $this->groupVariables = null;
     }
@@ -195,7 +197,7 @@ trait BuildsGroups
      * @param  bool  $not
      * @return $this
      *
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      */
     public function havingBetween($column, iterable $values, $boolean = 'and', $not = false)
     {

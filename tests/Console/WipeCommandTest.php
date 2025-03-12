@@ -59,6 +59,8 @@ test('db:wipe --drop-views', function () {
 });
 
 test('db:wipe --drop-analyzers', function () {
+    $initialAnalyzers = $this->schemaManager->getAnalyzers();
+
     $schemaManager = $this->connection->getArangoClient()->schema();
     if (!$schemaManager->hasAnalyzer('dropMyAnalyzer')) {
         Schema::createAnalyzer(
@@ -71,8 +73,8 @@ test('db:wipe --drop-analyzers', function () {
         '--drop-analyzers' => true,
     ])->assertExitCode(0);
 
-    $analyzers = $this->schemaManager->getAnalyzers();
-    expect(count($analyzers))->toBe(13);
+    $endAnalyzers = $this->schemaManager->getAnalyzers();
+    expect(count($initialAnalyzers))->toBe(count($endAnalyzers));
 });
 
 test('db:wipe --drop-graphs', function () {
@@ -103,6 +105,10 @@ test('db:wipe --drop-graphs', function () {
 });
 
 test('db:wipe --drop-all', function () {
+    $initialAnalyzers = $this->schemaManager->getAnalyzers();
+    $initialViews = $this->schemaManager->getViews();
+    $initialGraphs = $this->schemaManager->getGraphs();
+
     $schemaManager = $this->connection->getArangoClient()->schema();
     if (!$schemaManager->hasAnalyzer('dropMyAnalyzer')) {
         Schema::createAnalyzer(
@@ -135,14 +141,14 @@ test('db:wipe --drop-all', function () {
         '--drop-all' => true,
     ])->assertExitCode(0);
 
-    $analyzers = $this->schemaManager->getAnalyzers();
-    expect(count($analyzers))->toBe(13);
+    $endAnalyzers = $this->schemaManager->getAnalyzers();
+    $endGraphs = $this->schemaManager->getGraphs();
+    $endViews = $this->schemaManager->getViews();
 
-    $graphs = $this->schemaManager->getGraphs();
-    expect(count($graphs))->toBe(0);
-
-    $views = $this->schemaManager->getViews();
-    expect(count($views))->toBe(0);
+    expect(count($initialAnalyzers))->toBe(count($endAnalyzers));
+    expect(count($initialGraphs))->toBe(count($endGraphs));
+    expect(count($initialViews))->toBe(2);
+    expect(count($endViews))->toBe(0);
 });
 
 test('db:wipe --drop-types', function () {

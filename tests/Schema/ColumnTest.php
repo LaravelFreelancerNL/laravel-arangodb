@@ -4,7 +4,7 @@ use LaravelFreelancerNL\Aranguent\Schema\Grammar;
 use Mockery as M;
 
 beforeEach(function () {
-    $this->grammar = new Grammar();
+    $this->grammar = new Grammar($this->connection);
 });
 
 afterEach(function () {

@@ -10,8 +10,8 @@ use Illuminate\Support\Collection;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 
 /**
- * @SuppressWarnings(PHPMD.UndefinedVariable)
- * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+ * @SuppressWarnings("PHPMD.UndefinedVariable")
+ * @SuppressWarnings("PHPMD.UnusedFormalParameter")
  */
 class AsEnumArrayObject extends IlluminateAsEnumArrayObjectAlias
 {
@@ -23,7 +23,7 @@ class AsEnumArrayObject extends IlluminateAsEnumArrayObjectAlias
      * @param  array{class-string<TEnum>}  $arguments
      * @return \Illuminate\Contracts\Database\Eloquent\CastsAttributes<\Illuminate\Database\Eloquent\Casts\ArrayObject<array-key, TEnum>, iterable<TEnum>>
      *
-     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+     * @SuppressWarnings("PHPMD.ExcessiveMethodLength")
      */
     public static function castUsing(array $arguments)
     {
@@ -36,7 +36,7 @@ class AsEnumArrayObject extends IlluminateAsEnumArrayObjectAlias
             /**
              * @param array<class-string<TEnum>> $arguments
              *
-             * @SuppressWarnings(PHPMD.UndefinedVariable)
+             * @SuppressWarnings("PHPMD.UndefinedVariable")
              */
             public function __construct(array $arguments)
             {
@@ -50,7 +50,7 @@ class AsEnumArrayObject extends IlluminateAsEnumArrayObjectAlias
              * @param $attributes
              * @return ArrayObject|void
              *
-             * @SuppressWarnings(PHPMD.UndefinedVariable)
+             * @SuppressWarnings("PHPMD.UndefinedVariable")
              */
             public function get($model, $key, $value, $attributes)
             {
@@ -83,8 +83,8 @@ class AsEnumArrayObject extends IlluminateAsEnumArrayObjectAlias
              * @param mixed[] $attributes
              * @return mixed[]
              *
-             * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-             * @SuppressWarnings(PHPMD.UndefinedVariable)
+             * @SuppressWarnings("PHPMD.UnusedFormalParameter")
+             * @SuppressWarnings("PHPMD.UndefinedVariable")
              */
             public function set($model, $key, $value, $attributes)
             {
@@ -136,7 +136,7 @@ class AsEnumArrayObject extends IlluminateAsEnumArrayObjectAlias
      * @param  class-string  $class
      * @return string
      *
-     * @SuppressWarnings(PHPMD.ShortMethodName)
+     * @SuppressWarnings("PHPMD.ShortMethodName")
      */
     public static function of($class)
     {

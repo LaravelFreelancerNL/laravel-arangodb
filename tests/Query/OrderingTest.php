@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\DB;
 
 test('orderBy', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder->select('*')->from('users')->orderBy('email')->orderBy('age', 'desc');
     $this->assertSame(
         'FOR userDoc IN users SORT `userDoc`.`email` ASC, `userDoc`.`age` DESC RETURN userDoc',
@@ -46,7 +46,7 @@ test('inRandomOrder', function () {
 });
 
 test('orderByRaw', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder->select('*')->from('users')->orderByRaw('userDoc.age @direction', ['@direction' => 'ASC']);
     $this->assertSame(
         'FOR userDoc IN users SORT userDoc.age @direction RETURN userDoc',
@@ -56,7 +56,7 @@ test('orderByRaw', function () {
 
 
 test('reorder', function () {
-    $builder = getBuilder();
+    $builder = getBuilder($this->connection);
     $builder->select('*')
         ->from('users')
         ->orderByRaw('userDoc.age @direction', ['@direction' => 'ASC'])

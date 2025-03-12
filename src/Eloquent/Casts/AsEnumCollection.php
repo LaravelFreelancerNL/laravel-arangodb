@@ -11,9 +11,9 @@ use Illuminate\Support\Collection;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 
 /**
- * @SuppressWarnings(PHPMD.UndefinedVariable)
- * @SuppressWarnings(PHPMD.UnusedFormalParameter)
- * @SuppressWarnings(PHPMD.ShortMethodName)
+ * @SuppressWarnings("PHPMD.UndefinedVariable")
+ * @SuppressWarnings("PHPMD.UnusedFormalParameter")
+ * @SuppressWarnings("PHPMD.ShortMethodName")
  */
 class AsEnumCollection extends IlluminateAsEnumCollection
 {

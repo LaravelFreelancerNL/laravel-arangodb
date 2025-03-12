@@ -40,7 +40,7 @@ trait CompilesAggregates
     /**
      * Compile AQL for count aggregate.
      *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      * @param Builder $query
      * @return string
      */

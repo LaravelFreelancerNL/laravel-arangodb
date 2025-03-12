@@ -23,7 +23,7 @@ trait BuildsJoins
      * @param  \Illuminate\Contracts\Database\Query\Expression|string|null  $second
      * @return $this
      *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
     public function rightJoin($table, $first, $operator = null, $second = null)
     {
@@ -40,7 +40,7 @@ trait BuildsJoins
      * @param  \Illuminate\Contracts\Database\Query\Expression|string|null  $second
      * @return $this
      *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
     public function rightJoinSub($query, $as, $first, $operator = null, $second = null)
     {
@@ -56,7 +56,7 @@ trait BuildsJoins
      * @param  \Illuminate\Contracts\Database\Query\Expression|string  $second
      * @return $this
      *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
     public function rightJoinWhere($table, $first, $operator, $second)
     {
@@ -69,7 +69,7 @@ trait BuildsJoins
      *
      * The boolean argument flag is part of this method's API in Laravel.
      *
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      *
      * @param  mixed  $table
      * @param Closure|string  $first
@@ -117,7 +117,7 @@ trait BuildsJoins
      *
      * @throws \InvalidArgumentException
      *
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      */
     public function joinSub($query, $as, $first, $operator = null, $second = null, $type = 'inner', $where = false): IlluminateQueryBuilder
     {

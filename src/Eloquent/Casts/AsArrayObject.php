@@ -17,7 +17,7 @@ class AsArrayObject extends IlluminateAsArrayObject
      * @param  array<array-key, mixed>  $arguments
      * @return \Illuminate\Contracts\Database\Eloquent\CastsAttributes<\Illuminate\Database\Eloquent\Casts\ArrayObject<array-key, mixed>, iterable<array-key, mixed>>
      *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
     public static function castUsing(array $arguments)
     {
@@ -44,7 +44,7 @@ class AsArrayObject extends IlluminateAsArrayObject
              * @param mixed[] $attributes
              * @return mixed[]
              *
-             * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+             * @SuppressWarnings("PHPMD.UnusedFormalParameter")
              */
             public function set($model, $key, $value, $attributes)
             {

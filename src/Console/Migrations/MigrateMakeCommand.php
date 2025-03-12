@@ -111,7 +111,7 @@ class MigrateMakeCommand extends IlluminateMigrateMakeCommand
      *
      * @throws Exception
      *
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      */
     protected function writeMigration($name, $table, $create, $edge = false)
     {

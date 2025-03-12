@@ -14,7 +14,7 @@ class DbCommand extends IlluminateDbCommand
      *
      * @return int
      *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
     public function handle()
     {

@@ -48,7 +48,7 @@ class CommandServiceProvider extends ServiceProvider
      * @param  string[]  $commands
      * @return void
      *
-     * @SuppressWarnings(PHPMD.ElseExpression)
+     * @SuppressWarnings("PHPMD.ElseExpression")
      */
     protected function registerCommands(array $commands)
     {

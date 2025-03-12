@@ -163,8 +163,8 @@ trait HasAranguentRelationships
      *
      *  Laravel API PHPMD exclusions
      *
-     *  @SuppressWarnings(PHPMD.BooleanArgumentFlag)
-     *  @SuppressWarnings(PHPMD.ExcessiveParameterList)
+     *  @SuppressWarnings("PHPMD.BooleanArgumentFlag")
+     *  @SuppressWarnings("PHPMD.ExcessiveParameterList")
      *
      * @param  string  $name
      * @param  string  $table

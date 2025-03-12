@@ -115,12 +115,11 @@ class Builder extends IlluminateQueryBuilder
      * Create a new query builder instance.
      */
     public function __construct(
-        IlluminateConnectionInterface $connection,
+        IlluminateConnectionInterface  $connection,
         ?IlluminateQueryGrammar        $grammar = null,
         ?IlluminateProcessor           $processor = null,
         ?AQB                           $aqb = null,
     ) {
-        assert($connection instanceof IlluminateConnectionInterface);
         assert($processor instanceof IlluminateProcessor);
 
         parent::__construct($connection, $grammar, $processor);

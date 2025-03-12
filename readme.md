@@ -34,10 +34,11 @@ You may then use composer to install Aranguent:
 
 
 ### Version compatibility
-| Laravel       | ArangoDB | PHP  | Aranguent |
-|:--------------|:---------|:-----|:----------|
-| ^8.0 and ^9.0 | ^3.7     | ^8.0 | ^0.13     |
-| ^11.0         | ^3.11    | ^8.2 | ^1.0.0    |
+| Laravel       | ArangoDB | PHP  | Aranguent                |
+|:--------------|:---------|:-----|:-------------------------|
+| ^8.0 and ^9.0 | ^3.7     | ^8.0 | ^0.13                    |
+| ^11.0         | ^3.11    | ^8.2 | ^1.0.0 - 1.0.0-beta.11   |
+| ^12.0         | ^3.11    | ^8.2 | ^v1.0.0-beta.12          |
 
 ## Documentation
 1) [Connect to ArangoDB](docs/connect-to-arangodb.md): set up a connection

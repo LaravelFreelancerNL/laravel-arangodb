@@ -228,10 +228,11 @@ test('createAnalyzer', function () {
 
 test('getAnalyzers', function () {
     $schemaManager = $this->connection->getArangoClient()->schema();
+    $initialAnalyzers = $schemaManager->getAnalyzers();
 
     $analyzers = Schema::getAnalyzers();
 
-    expect($analyzers)->toHaveCount(13);
+    expect(count($initialAnalyzers))->toBe(count($analyzers));
 });
 
 test('replaceAnalyzer', function () {

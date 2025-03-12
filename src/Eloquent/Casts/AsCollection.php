@@ -11,8 +11,8 @@ use InvalidArgumentException;
 use LaravelFreelancerNL\Aranguent\Eloquent\Model;
 
 /**
- * @SuppressWarnings(PHPMD.UndefinedVariable)
- * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+ * @SuppressWarnings("PHPMD.UndefinedVariable")
+ * @SuppressWarnings("PHPMD.UnusedFormalParameter")
  */
 class AsCollection extends IlluminateAsCollection
 {
@@ -37,7 +37,7 @@ class AsCollection extends IlluminateAsCollection
              * @param $attributes
              * @return Collection|mixed|void|null
              *
-             * @SuppressWarnings(PHPMD.UndefinedVariable)
+             * @SuppressWarnings("PHPMD.UndefinedVariable")
              */
             public function get($model, $key, $value, $attributes)
             {
@@ -68,7 +68,7 @@ class AsCollection extends IlluminateAsCollection
              * @param mixed[] $attributes
              * @return mixed[]
              *
-             * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+             * @SuppressWarnings("PHPMD.UnusedFormalParameter")
              */
             public function set($model, $key, $value, $attributes)
             {

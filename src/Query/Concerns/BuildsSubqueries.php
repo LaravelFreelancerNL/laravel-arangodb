@@ -28,7 +28,7 @@ trait BuildsSubqueries
      * @param  \Closure|IlluminateQueryBuilder|IlluminateEloquentBuilder|string $query
      * @return array<mixed>
      *
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      */
     public function createSub($query, bool $returnSingleValue = false)
     {

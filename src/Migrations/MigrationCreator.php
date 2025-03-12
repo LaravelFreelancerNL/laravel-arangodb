@@ -59,7 +59,7 @@ class MigrationCreator extends IlluminateMigrationCreator
      *
      * @throws FileNotFoundException
      *
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      */
     protected function getStub($table, $create, $edge = false)
     {
@@ -107,7 +107,7 @@ class MigrationCreator extends IlluminateMigrationCreator
      *
      * @throws \Exception
      */
-    /**  @phpstan-ignore-next-line  @SuppressWarnings(PHPMD.BooleanArgumentFlag) */
+    /**  @phpstan-ignore-next-line  @SuppressWarnings("PHPMD.BooleanArgumentFlag") */
     public function create($name, $path, $table = null, $create = false, $edge = false)
     {
         if ($this->useFallback()) {

@@ -24,12 +24,24 @@ class Grammar extends IlluminateGrammar
      * Compile AQL to check if an attribute is in use within a document in the collection.
      * If multiple attributes are set then all must be set in one document.
      *
+     * @param string|null $schema
      * @param string $table
      * @return Fluent
      * @throws BindException
      */
-    public function compileColumns($table, Fluent $command)
+    public function compileColumns($schema, $table)
     {
+        // At this time we don't use the schema; even if it has been set on the table.
+        unset($schema);
+
+        $parameters = [];
+        $parameters['name'] = 'columns';
+        $parameters['handler'] = 'aql';
+        $parameters['table'] = $table;
+
+        $command = new Fluent($parameters);
+
+
         $command->bindings = [
             '@collection' => $table,
         ];
