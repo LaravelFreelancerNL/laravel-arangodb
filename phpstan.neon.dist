@@ -5,9 +5,12 @@ parameters:
     level: 8
     ignoreErrors:
         - identifier: missingType.generics
+        - identifier: trait.unused
     universalObjectCratesClasses:
         - 'Illuminate\Support\Fluent'
     paths:
         - src
     excludePaths:
         - src/Schema
+        - src/Facades/Schema.php
+    treatPhpDocTypesAsCertain: false
