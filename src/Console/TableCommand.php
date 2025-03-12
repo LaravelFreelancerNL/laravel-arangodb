@@ -72,7 +72,7 @@ class TableCommand extends IlluminateTableCommand
 
             return [
                 $this->columns($schema, $tableName),
-                $this->indexes($schema, $tableName)
+                $this->indexes($schema, $tableName),
             ];
         });
 
