@@ -251,8 +251,6 @@ test('whereIn', function () {
     expect($results->first()->residence_id)->toBe('winterfell');
 });
 
-
-
 test('whereIntegerInRaw', function () {
     $builder = getBuilder($this->connection);
 

@@ -56,12 +56,8 @@ trait CompilesColumns
     {
         assert($query instanceof Builder);
 
-        if (sizeOf($columns) === 1  && !is_string($columns[0]) && is_scalar($columns[0])) {
-            if (is_bool($columns[0])) {
-                $value = ($columns[0]) ? 'true' : 'false';
-                return 'RETURN '.$value;
-            }
-            return 'RETURN '.$columns[0];
+        if (count($columns) === 1  && !is_string($columns[0]) && is_scalar($columns[0])) {
+            return 'RETURN '.var_export($columns[0], true);
         }
 
         $columns = $this->convertJsonFields($columns);
@@ -161,8 +157,8 @@ trait CompilesColumns
             return $this->wrap($column);
         }
 
-
         $column = $this->convertJsonFields($column);
+
         $column = $query->convertIdToKey($column);
 
         //We check for an existing alias to determine of the first reference is a table.
@@ -203,6 +199,7 @@ trait CompilesColumns
     {
         assert($query instanceof Builder);
 
+        // if the given column is a table alias or variable return it.
         if ($query->isReference($column)) {
             return $column;
         }
@@ -213,22 +210,20 @@ trait CompilesColumns
 
         $references = explode('.', $column);
 
+        // If an alias exists for the first element, replace it by the alias.
         $tableAlias = $query->getTableAlias($references[0]);
 
         if (isset($tableAlias)) {
             $references[0] = $tableAlias;
         }
 
-        if (array_key_exists('groupsVariable', $query->tableAliases)) {
-            $tableAlias = 'groupsVariable';
+        // If set, handle the group variable.
+        if ($this->isTableAlias('laravel_group')) {
+            $tableAlias = 'laravel_group';
             array_unshift($references, $tableAlias);
         }
 
-        // geen tableAlias, table is parent...waarom geen tableAlias?
-        if ($tableAlias === null  && array_key_exists($table, $query->tableAliases)) {
-            array_unshift($references, $query->tableAliases[$table]);
-        }
-
+        // If the reference isn't an alias generate it.
         if ($tableAlias === null && !$query->isReference($references[0])) {
             $tableAlias = $query->generateTableAlias($table);
             array_unshift($references, $tableAlias);
@@ -238,6 +233,13 @@ trait CompilesColumns
         return implode('.', $references);
     }
 
+    /**
+     * Remove any table, tableAlias or variable prefixes from the alias.
+     *
+     * @param IlluminateQueryBuilder $query
+     * @param int|string|null $alias
+     * @return int|string|null
+     */
     protected function cleanAlias(IlluminateQueryBuilder $query, int|null|string $alias): int|string|null
     {
         assert($query instanceof Builder);
@@ -254,7 +256,7 @@ trait CompilesColumns
 
         if (
             !$query->isTable($elements[0])
-            && !$query->isVariable($elements[0])
+            && !$query->isReference($elements[0])
         ) {
             return $alias;
         }

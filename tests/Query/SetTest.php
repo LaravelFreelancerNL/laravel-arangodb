@@ -11,7 +11,7 @@ test('set variable', function () {
         ->set('y', [1,2,3,4,5]);
 
     $this->assertSame(
-        'LET y = @' . $query->getQueryId() . '_preIterationVariables_1 FOR yDoc IN y RETURN yDoc',
+        'LET y = @' . $query->getQueryId() . '_preIterationVariables_1 FOR `yDoc` IN `y` RETURN yDoc',
         $query->toSql(),
     );
 
@@ -25,7 +25,7 @@ test('set expression', function () {
         ->set('y', new Expression('1..10'));
 
     $this->assertSame(
-        'LET y = 1..10 FOR yDoc IN y RETURN yDoc',
+        'LET y = 1..10 FOR `yDoc` IN `y` RETURN yDoc',
         $query->toSql(),
     );
 
@@ -42,7 +42,7 @@ test('set subquery', function () {
         ->set('x', $subquery);
 
     $this->assertSame(
-        'LET x = (LET y = 1..10 FOR yDoc IN y RETURN yDoc) FOR xDoc IN x RETURN xDoc',
+        'LET x = (LET y = 1..10 FOR `yDoc` IN `y` RETURN yDoc) FOR `xDoc` IN `x` RETURN xDoc',
         $query->toSql(),
     );
 
@@ -58,7 +58,7 @@ test('set post traversal variable ', function () {
         ->set('y', [1,2,3,4,5], VariablePosition::postIterations);
 
     $this->assertSame(
-        'FOR characterDoc IN characters LET y = @' . $query->getQueryId() . '_postIterationVariables_1 RETURN MERGE(characterDoc, {`yColumn`: `y`})',
+        'FOR `characterDoc` IN `characters` LET y = @' . $query->getQueryId() . '_postIterationVariables_1 RETURN MERGE(characterDoc, {`yColumn`: `y`})',
         $query->toSql(),
     );
 

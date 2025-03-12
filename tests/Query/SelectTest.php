@@ -170,7 +170,7 @@ test('fromOptions', function () {
 
     expect($query->toSql())
         ->toBe(
-            "FOR houseDoc IN houses "
+            "FOR `houseDoc` IN `houses` "
             . "OPTIONS {`indexHint`: @{$queryId}_fromOptions_1, `forceIndexHint`: @{$queryId}_fromOptions_2} "
             . "FILTER `houseDoc`.`en`.`description` LIKE @{$queryId}_where_1 RETURN houseDoc",
         );

@@ -26,7 +26,7 @@ trait CompilesGroups
         foreach ($groups as $group) {
             if ($group instanceof Expression) {
                 $groupVariable = $this->extractGroupVariable($group);
-                ;
+
                 $query->registerTableAlias($groupVariable, $groupVariable);
 
                 $aqlGroups[] = $group->getValue($this);
@@ -36,7 +36,7 @@ trait CompilesGroups
             $aqlGroups[] = $group . " = " . $this->normalizeColumn($query, $group);
 
             $query->registerTableAlias($group, $group);
-            $query->groupVariables[] = $group;
+            $query->groupVariables[$group] = $group;
         }
 
         $aql .= implode(", ", $aqlGroups);
@@ -44,10 +44,10 @@ trait CompilesGroups
         $variablesToKeep = $this->keepColumns($query, $groups);
 
         if (!empty($variablesToKeep)) {
-            $query->registerTableAlias('groupsVariable', 'groupsVariable');
-            $query->groupVariables[] = 'groupsVariable';
+            $query->registerTableAlias('laravel_group', 'laravel_group');
+            $query->groupVariables['laravel_group'] = 'laravel_group';
 
-            $aql .= ' INTO groupsVariable = ' . $this->generateAqlObject($variablesToKeep);
+            $aql .= ' INTO laravel_group = ' . $this->generateAqlObject($variablesToKeep);
         }
         return $aql;
     }

@@ -186,7 +186,7 @@ class Builder extends IlluminateQueryBuilder
         // ID to let developers to simply and quickly remove a single row from this
         // database without manually specifying the "where" clauses on the query.
         if (!is_null($id)) {
-            $this->where($table . '._key', '=', $id);
+            $this->where('id', $id);
         }
 
         $this->applyBeforeQueryCallbacks();
@@ -308,7 +308,7 @@ class Builder extends IlluminateQueryBuilder
             $variables = array_merge(
                 array_keys($this->preIterationVariables),
                 array_keys($this->postIterationVariables),
-                $this->tableAliases,
+                array_keys($this->tableAliases),
             );
         }
 

@@ -278,7 +278,9 @@ trait CompilesDataManipulations
     {
         assert($query instanceof Builder);
 
-        $alias = $this->normalizeColumn($query, $query->registerTableAlias($table));
+        [$table, $alias] = $query->registerTableAlias($table);
+
+        $alias = $this->normalizeColumn($query, $alias);
 
         $table = $this->wrapTable($this->prefixTable($table));
 

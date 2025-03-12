@@ -85,3 +85,10 @@ test('morph with MorphType', function () {
     expect($tag->pivot)->toBeInstanceOf(Taggable::class);
     expect($tag->pivot->tag_id)->toBeString();
 });
+
+test('has', function () {
+    $characters = Character::has('tags')->get();
+
+    expect(count($characters))->toEqual(2);
+});
+

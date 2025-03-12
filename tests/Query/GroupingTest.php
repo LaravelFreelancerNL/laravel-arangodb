@@ -60,7 +60,7 @@ test('having raw', function () {
     $surnames = $query->pluck('surname');
 
     $this->assertSame(
-        'FOR characterDoc IN characters COLLECT surname = `characterDoc`.`surname`'
+        'FOR `characterDoc` IN `characters` COLLECT surname = `characterDoc`.`surname`'
         . ' FILTER `surname` LIKE "Lannister"'
         . ' RETURN {`surname`: `surname`}',
         $query->toSql(),

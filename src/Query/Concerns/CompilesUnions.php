@@ -22,8 +22,8 @@ trait CompilesUnions
             return '';
         }
 
-        $unionResultsId = 'union' . $query->getQueryId() . 'Results';
-        $unionDocId = 'union' . $query->getQueryId() . 'Result';
+        $unionResultsId = 'laravel_union_' . $query->getQueryId() . '_results';
+        $unionDocId = 'laravel_union_' . $query->getQueryId() . '_result';
 
         $query->registerTableAlias($unionResultsId, $unionDocId);
 

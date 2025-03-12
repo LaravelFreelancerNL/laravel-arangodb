@@ -170,7 +170,7 @@ trait HandlesAqlGrammar
     protected function wrapValue($value)
     {
         $postfix = '';
-        if ($value === 'groupsVariable') {
+        if ($value === 'laravel_group') {
             $postfix = '[*]';
         }
 

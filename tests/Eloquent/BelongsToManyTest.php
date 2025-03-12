@@ -33,8 +33,6 @@ test('retrieve relation', function () {
     expect(count($children))->toEqual(5);
     expect($children[0])->toBeInstanceOf(Character::class);
     expect($children[0]->pivot->_from)->toEqual('characters/NedStark');
-
-    expect(true)->toBeTrue();
 });
 
 test('inverse relation', function () {
@@ -44,8 +42,6 @@ test('inverse relation', function () {
     expect($parents)->toHaveCount(1);
     expect($parents[0])->toBeInstanceOf(Character::class);
     expect($parents[0]->_id)->toEqual('characters/NedStark');
-
-    expect(true)->toBeTrue();
 });
 
 test('attach', function () {
@@ -183,3 +179,18 @@ test('load', function () {
     expect($parent->children)->toHaveCount(5);
     expect($parent->children->first()->id)->toEqual('RobbStark');
 });
+
+test('has self join', function () {
+
+    $parent = Character::find('NedStark');
+    $builder = $parent->has('children');
+
+    $query = $builder->toSql();
+//    $results = $builder->get();
+
+    ray($query);
+
+    //    expect(count($children))->toEqual(5);
+    //    expect($children[0])->toBeInstanceOf(Character::class);
+    //    expect($children[0]->pivot->_from)->toEqual('characters/NedStark');
+})->only();

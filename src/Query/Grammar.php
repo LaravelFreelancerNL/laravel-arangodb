@@ -17,6 +17,7 @@ use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesDataManipulations;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesJoins;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\CompilesUnions;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\ConvertsIdToKey;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\HandlesAliases;
 use LaravelFreelancerNL\Aranguent\Query\Concerns\HandlesAqlGrammar;
 
 class Grammar extends IlluminateQueryGrammar
@@ -29,6 +30,7 @@ class Grammar extends IlluminateQueryGrammar
     use CompilesGroups;
     use CompilesUnions;
     use ConvertsIdToKey;
+    use HandlesAliases;
     use HandlesAqlGrammar;
     use Macroable;
 
@@ -245,12 +247,11 @@ class Grammar extends IlluminateQueryGrammar
     {
         assert($query instanceof Builder);
 
-        // FIXME: wrapping/quoting
         $table = $this->prefixTable($this->getValue($table));
 
-        $alias = $query->registerTableAlias($table);
+        [$table, $alias] = $query->registerTableAlias($table);
 
-        $aql = "FOR $alias IN $table";
+        $aql = "FOR `$alias` IN `$table`";
 
         if (!empty($query->fromOptions)) {
             $aql .= $this->compileFromOptions($query->fromOptions);

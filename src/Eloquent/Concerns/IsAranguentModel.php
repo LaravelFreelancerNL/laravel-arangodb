@@ -9,9 +9,11 @@ use Illuminate\Support\Str;
 use LaravelFreelancerNL\Aranguent\Connection;
 use LaravelFreelancerNL\Aranguent\Eloquent\Builder;
 use LaravelFreelancerNL\Aranguent\Query\Builder as QueryBuilder;
+use LaravelFreelancerNL\Aranguent\Query\Concerns\GeneratesTableAlias;
 
 trait IsAranguentModel
 {
+    use GeneratesTableAlias;
     use HasAttributes;
     use HasAranguentRelationships;
 
@@ -113,7 +115,7 @@ trait IsAranguentModel
      */
     public function qualifyColumn($column)
     {
-        $tableReferer = Str::singular($this->getTable()) . 'Doc';
+        $tableReferer =  $this->generateTableAlias($this->getTable());
 
         if (Str::startsWith($column, $tableReferer . '.')) {
             return $column;

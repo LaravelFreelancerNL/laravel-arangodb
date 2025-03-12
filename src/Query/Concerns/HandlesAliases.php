@@ -14,6 +14,8 @@ use LaravelFreelancerNL\Aranguent\Query\Builder;
 
 trait HandlesAliases
 {
+    use GeneratesTableAlias;
+
     /**
      * @var array<string, Expression|string>
      */
@@ -23,20 +25,6 @@ trait HandlesAliases
      * @var array<string, Expression|string>
      */
     public array $columnAliases = [];
-
-    /**
-     * @param  array<mixed>|string  $column
-     * @return array<mixed>|string
-     */
-    public function convertColumnId(array|string|Expression $column): array|string|Expression
-    {
-
-        if ($column instanceof Expression) {
-            return $column;
-        }
-
-        return $this->convertIdToKey($column);
-    }
 
     /**
      * Extract table and alias from sql alias notation (entity AS `alias`)
@@ -65,30 +53,23 @@ trait HandlesAliases
 
         return $results;
     }
-
-    public function generateTableAlias(string|Expression $table, string $postfix = 'Doc'): string
+    public function getTableAlias(string|Expression $table): string|null
     {
         if ($table instanceof Expression) {
-            return 'Expression' . spl_object_id($table);
-        }
-        return Str::camel(Str::singular($table)) . $postfix;
-    }
-
-    public function getTableAlias(string|Expression $table): float|int|null|string
-    {
-        if ($table instanceof Expression) {
-            $table = 'Expression' . spl_object_id($table);
+            $table = 'laravel_expression_' . spl_object_id($table);
         }
 
         if ($this->isTableAlias($table)) {
             return $table;
         }
 
-        if (!isset($this->tableAliases[$table])) {
-            return null;
+        $alias = array_search($table, $this->tableAliases, true);
+
+        if (is_string($alias)) {
+            return $alias;
         }
 
-        return $this->grammar->getValue($this->tableAliases[$table]);
+        return null;
     }
 
     public function getColumnAlias(string $column): Expression|null|string
@@ -136,18 +117,18 @@ trait HandlesAliases
 
     public function isTableAlias(string $value): bool
     {
-        return in_array($value, $this->tableAliases);
+        return array_key_exists($value, $this->tableAliases);
     }
 
     public function isTable(string $value): bool
     {
-        return array_key_exists($value, $this->tableAliases);
+        return !! array_search($value, $this->tableAliases);
     }
 
     public function prefixAlias(string $target, string $value): string
     {
         /** @phpstan-ignore-next-line */
-        $alias =  $this->grammar->getValue($this->getTableAlias($target));
+        $alias = $this->grammar->getValue($this->getTableAlias($target));
 
         if (Str::startsWith($value, $alias . '.')) {
             return $value;
@@ -157,34 +138,19 @@ trait HandlesAliases
     }
 
     /**
-     * @throws Exception
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @param string|Expression $table
+     * @param string|null $alias
+     * @return array<string|Expression>
      */
-    public function registerColumnAlias(string $column, ?string $alias = null): bool
-    {
-        if (preg_match("/\sas\s/i", $column)) {
-            [$column, $alias] = $this->extractAlias($column);
-        }
-
-        if (isset($alias) && !$column instanceof Expression) {
-            $this->columnAliases[$column] = $alias;
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
-     */
-    public function registerTableAlias(string|Expression $table, ?string $alias = null): string
+    public function registerTableAlias(string|Expression $table, ?string $alias = null): array
     {
         if ($table instanceof Expression  && $alias !== null) {
-            $table = 'Expression' . spl_object_id($table);
+            $table = 'laravel_expression_' . spl_object_id($table);
         }
 
         if ($table instanceof Expression && $alias === null) {
-            $table = 'Expression' . spl_object_id($table);
+            $table = 'laravel_expression_' . spl_object_id($table);
             $alias = $table;
         }
 
@@ -203,9 +169,9 @@ trait HandlesAliases
         }
 
         /** @phpstan-ignore-next-line  */
-        $this->tableAliases[$table] = $alias;
+        $this->tableAliases[$alias] = $table;
 
-        return $alias;
+        return [$table, $alias];
     }
 
     public function replaceTableForAlias(string $reference): string
@@ -220,5 +186,37 @@ trait HandlesAliases
         array_unshift($referenceParts, $alias);
 
         return implode('.', $referenceParts);
+    }
+
+    /**
+     * @param  array<mixed>|string  $column
+     * @return array<mixed>|string
+     */
+    public function convertColumnId(array|string|Expression $column): array|string|Expression
+    {
+
+        if ($column instanceof Expression) {
+            return $column;
+        }
+
+        return $this->convertIdToKey($column);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function registerColumnAlias(string $column, ?string $alias = null): bool
+    {
+        if (preg_match("/\sas\s/i", $column)) {
+            [$column, $alias] = $this->extractAlias($column);
+        }
+
+        if (isset($alias) && !$column instanceof Expression) {
+            $this->columnAliases[$column] = $alias;
+
+            return true;
+        }
+
+        return false;
     }
 }

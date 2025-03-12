@@ -133,48 +133,34 @@ forceDeleteQuietly? / restoreQuietly?
 is? / isNot?
 
 ### Relationships
-- One To One
-- One To Many
-- Many To Many
-- One To One (Polymorphic)
-- One To Many (Polymorphic)
-- Many To Many (Polymorphic)
+#### hasOne (One To One)
+hasOne / create / save /
+doesntHave / orDoestntHave / has / orHas  /
+whereDoesntHave / whereRelation / 
+with / WithCount / withExists
 
-belongsTo / belongsToMany / 
-morphOne / morphTo / morphMany / morphMany / morphedByMany / 
-ofMany? / latestOfMany? / oldestOfMany? /
-has / hasOne / hasMany / hasOneThrough? / hasManyThrough? / 
-through? / whereBelongsTo? / 
+#### BelongsTo (One To One / One To Many)
+belongsTo / associate 
+dissociate / load
+orWhereDoesntHave / whereRelation / orWhereRelation
+whereDoesntHaveRelation / orWhereDoesntHaveRelation
+whereHas / orWhereHas
 
-#### Pivot functions
-as? / withPivot? / 
-wherePivot? / wherePivotIn? /wherePivotNotIn? /
-wherePivotBetween? / wherePivotNotBetween? /
-wherePivotNull? / wherePivotNotNull? / orderByPivot? /
-using? / withTimestamps? 
+#### One To Many
+#### Many To Many
+#### One To One (Polymorphic)
+#### One To Many (Polymorphic)
+#### Many To Many (Polymorphic)
+
 
 enforceMorphMap? / getMorphClass? / getMorphedModel? / resolveRelationUsing?
 
-#### Querying Relationship Existence
-has / orHas / whereHas / orWhereHas / whereRelation / orWhereRelation / 
-whereMorphRelation / orWhereMorphRelation
 
 #### Querying Relationship Absence
-doesntHave / orDoesntHave /
-whereDoesntHave / orWhereDoesntHave / whereDoesntHaveRelation / orWhereDoesntHaveRelation /
 whereMorphDoesntHaveRelation / orWhereMorphDoesntHaveRelation
 
 #### Querying Morph To Relationships
 whereHasMorph / orWhereHasMorph / whereDoesntHaveMorph / orWhereDoesntHaveMorph / whereMorphedTo? / whereNotMorphedTo?
-
-#### Aggregating related models
-withCount / loadCount? /
-withSum? / loadSum? / withExists / morphWithCount? /loadMorphCount? /
-loadMorphCount?
-
-#### Eager loading
-with / without / withOnly / constrain /
-load / loadMissing / loadMorph / preventLazyLoading
 
 #### Inserting and updating related models
 save / saveMany / refresh / push / pushQuietly / 

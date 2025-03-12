@@ -28,7 +28,7 @@ test('get id conversion single attribute', function () {
     $builder = $builder->select('id')->from('users');
 
     $this->assertSame(
-        'FOR userDoc IN users RETURN {`id`: `userDoc`.`_key`}',
+        'FOR `userDoc` IN `users` RETURN {`id`: `userDoc`.`_key`}',
         $builder->toSql(),
     );
 });
@@ -39,7 +39,7 @@ test('get id conversion multiple attributes', function () {
     $result = $query->first();
 
     $this->assertSame(
-        'FOR characterDoc IN characters LIMIT 1 RETURN {`id`: `characterDoc`.`_key`, `name`: `characterDoc`.`name`}',
+        'FOR `characterDoc` IN `characters` LIMIT 1 RETURN {`id`: `characterDoc`.`_key`, `name`: `characterDoc`.`name`}',
         $query->toSql(),
     );
 
@@ -54,7 +54,7 @@ test('get id conversion with alias', function () {
     $result = $query->first();
 
     $this->assertSame(
-        'FOR characterDoc IN characters LIMIT 1 RETURN {`i`: `characterDoc`.`_key`, `name`: `characterDoc`.`name`}',
+        'FOR `characterDoc` IN `characters` LIMIT 1 RETURN {`i`: `characterDoc`.`_key`, `name`: `characterDoc`.`name`}',
         $query->toSql(),
     );
 
@@ -69,7 +69,7 @@ test('get id conversion with multiple ids', function () {
     $result = $query->first();
 
     $this->assertSame(
-        'FOR characterDoc IN characters LIMIT 1 RETURN {`id`: `characterDoc`.`_key`, `i`: `characterDoc`.`_key`, `name`: `characterDoc`.`name`}',
+        'FOR `characterDoc` IN `characters` LIMIT 1 RETURN {`id`: `characterDoc`.`_key`, `i`: `characterDoc`.`_key`, `name`: `characterDoc`.`name`}',
         $query->toSql(),
     );
 
@@ -84,7 +84,7 @@ test('get id conversion with multiple aliases', function () {
     $result = $query->first();
 
     $this->assertSame(
-        'FOR characterDoc IN characters LIMIT 1 RETURN {`i`: `characterDoc`.`_key`, `i2`: `characterDoc`.`_key`, `name`: `characterDoc`.`name`}',
+        'FOR `characterDoc` IN `characters` LIMIT 1 RETURN {`i`: `characterDoc`.`_key`, `i2`: `characterDoc`.`_key`, `name`: `characterDoc`.`name`}',
         $query->toSql(),
     );
 
@@ -100,7 +100,7 @@ test('get id conversion with wheres', function () {
     $result = $query->first();
 
     $this->assertSame(
-        'FOR characterDoc IN characters FILTER `characterDoc`.`_key` == @' . $query->getQueryId() . '_where_1'
+        'FOR `characterDoc` IN `characters` FILTER `characterDoc`.`_key` == @' . $query->getQueryId() . '_where_1'
         . ' LIMIT 1 RETURN characterDoc',
         $query->toSql(),
     );

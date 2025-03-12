@@ -6,7 +6,7 @@ test('wrap multiple columns', function () {
         ->from('users');
 
     $this->assertSame(
-        'FOR userDoc IN users RETURN {`id`: `userDoc`.`_key`, `_id`: `userDoc`.`_id`, `email`: `userDoc`.`email`}',
+        'FOR `userDoc` IN `users` RETURN {`id`: `userDoc`.`_key`, `_id`: `userDoc`.`_id`, `email`: `userDoc`.`email`}',
         $builder->toSql(),
     );
 });
@@ -18,7 +18,7 @@ test('wrap bypass', function () {
         ->where('i`d', '=', "a123");
 
     $this->assertSame(
-        'FOR userDoc IN users FILTER `userDoc`.`i``d` == @'
+        'FOR `userDoc` IN `users` FILTER `userDoc`.`i``d` == @'
         . $builder->getQueryId()
         . '_where_1 RETURN userDoc',
         $builder->toSql(),

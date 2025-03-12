@@ -15,7 +15,7 @@ test('when false', function () {
     $results = $query->get();
 
     expect($aql)->toBe(
-        'FOR characterDoc IN characters RETURN characterDoc',
+        'FOR `characterDoc` IN `characters` RETURN characterDoc',
     )
         ->and($results->count())->toBe(43);
 });
@@ -32,8 +32,22 @@ test('when true', function () {
     $results = $query->get();
 
     expect($aql)->toBe(
-        'FOR characterDoc IN characters FILTER `characterDoc`.`_key` == @'
+        'FOR `characterDoc` IN `characters` FILTER `characterDoc`.`_key` == @'
         . $query->getQueryId() . '_where_1 RETURN characterDoc',
     )
         ->and($results->count())->toBe(1);
 });
+
+
+
+test('from alias', function () {
+    $builder = \DB::table('users', 'usersAlias')->select(['id', '_id', 'email']);
+
+    $query = $builder->toSql();
+//    $results = $builder->get();
+//
+//    expect($query)->toBe('FOR usersAlias IN users RETURN {`id`: `usersAlias`.`_key`, `_id`: `usersAlias`.`_id`, `email`: `usersAlias`.`email`}');
+//    expect($results->count())->toBe(1);
+//    expect((array) $results->first())->toBe(['id' => 'LyannaStark', '_id' => 'users/LyannaStark', 'email' => 'l.stark@windsofwinter.com']);
+
+})->todo();

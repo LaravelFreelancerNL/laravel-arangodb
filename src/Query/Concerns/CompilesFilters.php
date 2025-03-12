@@ -74,7 +74,6 @@ trait CompilesFilters
      */
     protected function filter(IlluminateQueryBuilder $query, array $filter)
     {
-        ray($filter);
         // If the having clause is "raw", we can just return the clause straight away
         // without doing any more processing on it. Otherwise, we will compile the
         // clause into SQL based on the components that make it up from builder.

@@ -103,6 +103,7 @@ test('leftJoinSub with selection of attributes', function () {
             $join->on('characters.id', '=', 'leads_locations.led_by');
         });
 
+
     $characters = $query->get();
 
     expect($characters)->toHaveCount(4);

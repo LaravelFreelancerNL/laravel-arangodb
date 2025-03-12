@@ -59,9 +59,11 @@ trait CompilesAggregates
     {
         $query->columns = [$query->from];
 
+        $query->select(1);
+
         $select = $this->compileSelect($query);
 
-        return 'RETURN { exists: LENGTH((' . $select . ')) > 0 ? true : false }';
+        return 'RETURN { exists: (LENGTH((' . $select . ')) > 0) ? true : false }';
     }
 
 

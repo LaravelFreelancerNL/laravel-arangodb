@@ -31,7 +31,7 @@ test('searchView with different analyzer', function () {
         ->searchView('en.description', 'dragon lannister', 'text_nl');
 
     expect($query->toSql())->toBe(
-        "FOR houseViewDoc IN house_view SEARCH ANALYZER(`houseViewDoc`.`en`.`description` IN TOKENS(@"
+        "FOR `houseViewDoc` IN `house_view` SEARCH ANALYZER(`houseViewDoc`.`en`.`description` IN TOKENS(@"
         . $query->getQueryId() . "_search_1, 'text_nl'), 'text_nl') RETURN houseViewDoc",
     );
 });
