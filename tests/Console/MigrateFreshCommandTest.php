@@ -84,6 +84,8 @@ test('migrate:fresh --drop-views', function () {
 });
 
 test('migrate:fresh --drop-analyzers', function () {
+    $initialAnalyzers = $this->schemaManager->getAnalyzers();
+
     $path = [
         realpath(__DIR__ . '/../../TestSetup/Database/Migrations'),
     ];
@@ -94,6 +96,9 @@ test('migrate:fresh --drop-analyzers', function () {
             'identity',
         );
     }
+
+
+    $analyzersAfterCreation = $this->schemaManager->getAnalyzers();
 
     $this->artisan('migrate:fresh', [
         '--path' => [
@@ -108,8 +113,10 @@ test('migrate:fresh --drop-analyzers', function () {
 
     ])->assertExitCode(0);
 
-    $analyzers = $this->schemaManager->getAnalyzers();
-    expect(count($analyzers))->toBe(13);
+    $endAnalyzers = $this->schemaManager->getAnalyzers();
+
+    expect(count($analyzersAfterCreation))->toBe(1 + count($initialAnalyzers));
+    expect(count($initialAnalyzers))->toBe(count($endAnalyzers));
 });
 
 test('migrate:fresh --drop-graphs', function () {
@@ -151,6 +158,10 @@ test('migrate:fresh --drop-graphs', function () {
 });
 
 test('migrate:fresh --drop-all', function () {
+    $initialViews = $this->schemaManager->getViews();
+    $initialAnalyzers = $this->schemaManager->getAnalyzers();
+    $initialGraphs = $this->schemaManager->getGraphs();
+
     $path = [
         realpath(__DIR__ . '/../../TestSetup/Database/Migrations'),
     ];
@@ -194,15 +205,14 @@ test('migrate:fresh --drop-all', function () {
 
     ])->assertExitCode(0);
 
+    $endAnalyzers = $this->schemaManager->getAnalyzers();
+    $endGraphs = $this->schemaManager->getGraphs();
+    $endViews = $this->schemaManager->getViews();
 
-    $analyzers = $this->schemaManager->getAnalyzers();
-    expect(count($analyzers))->toBe(13);
+    expect(count($initialAnalyzers))->toBe(count($endAnalyzers));
+    expect(count($initialGraphs))->toBe(count($endGraphs));
+    expect(count($initialViews))->toBe(count($endViews));
 
-    $graphs = $this->schemaManager->getGraphs();
-    expect(count($graphs))->toBe(0);
-
-    $views = $this->schemaManager->getViews();
-    expect(count($views))->toBe(2);
 });
 
 test('migrate:fresh --drop-types', function () {
