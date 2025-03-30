@@ -26,9 +26,9 @@ class BelongsToMany extends IlluminateBelongsToMany
     {
         $query->select($columns);
 
-        $query->from($this->related->getTable().' as '.$hash = $this->getRelationCountHash());
+        $query->from($this->related->getTable() . ' as ' . $hash = $this->getRelationCountHash());
 
-//        $this->related->setTable($hash);
+        //        $this->related->setTable($hash);
 
         $this->performJoin($query);
 

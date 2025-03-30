@@ -91,4 +91,3 @@ test('has', function () {
 
     expect(count($characters))->toEqual(2);
 });
-

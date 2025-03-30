@@ -186,7 +186,7 @@ test('has self join', function () {
     $builder = $parent->has('children');
 
     $query = $builder->toSql();
-//    $results = $builder->get();
+    //    $results = $builder->get();
 
     ray($query);
 

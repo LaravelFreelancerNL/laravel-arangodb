@@ -57,7 +57,7 @@ trait CompilesColumns
         assert($query instanceof Builder);
 
         if (count($columns) === 1  && !is_string($columns[0]) && is_scalar($columns[0])) {
-            return 'RETURN '.var_export($columns[0], true);
+            return 'RETURN ' . var_export($columns[0], true);
         }
 
         $columns = $this->convertJsonFields($columns);
