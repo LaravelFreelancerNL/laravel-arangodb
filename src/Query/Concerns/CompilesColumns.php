@@ -80,7 +80,7 @@ trait CompilesColumns
      * @return array<mixed>
      * @throws Exception
      *
-     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     protected function prepareColumns(IlluminateQueryBuilder $query, array $columns)
     {
@@ -157,6 +157,7 @@ trait CompilesColumns
             return $this->wrap($column);
         }
 
+
         $column = $this->convertJsonFields($column);
 
         $column = $query->convertIdToKey($column);
@@ -217,13 +218,16 @@ trait CompilesColumns
             $references[0] = $tableAlias;
         }
 
-        // If set, handle the group variable.
-        if ($this->isTableAlias('laravel_group')) {
-            $tableAlias = 'laravel_group';
+        if (array_key_exists('groupsVariable', $query->tableAliases)) {
+            $tableAlias = 'groupsVariable';
             array_unshift($references, $tableAlias);
         }
 
-        // If the reference isn't an alias generate it.
+        // geen tableAlias, table is parent...waarom geen tableAlias?
+        if ($tableAlias === null  && array_key_exists($table, $query->tableAliases)) {
+            array_unshift($references, $query->tableAliases[$table]);
+        }
+
         if ($tableAlias === null && !$query->isReference($references[0])) {
             $tableAlias = $query->generateTableAlias($table);
             array_unshift($references, $tableAlias);
