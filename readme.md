@@ -9,6 +9,19 @@ Aranguent
 <a href="https://packagist.org/packages/laravel-freelancer-nl/aranguent"><img src="https://poser.pugx.org/laravel-freelancer-nl/aranguent/downloads" alt="Total Downloads"></a>
 <a href="https://packagist.org/packages/laravel-freelancer-nl/aranguent"><img src="https://poser.pugx.org/laravel-freelancer-nl/aranguent/license" alt="License"></a>
 
+
+---------
+# I’m archiving my ArangoDB PHP/Laravel packages
+Sorry folks, due to last year’s license changes ArangoDB made for their database it doesn’t make sense anymore for me to use the product, let alone develop, maintain and improve these packages.
+In the current day and age that is easier and cheaper than ever, but the new license is a massive roadblock to my own admittedly small side-projects. 
+I love working with ArangoDB, it’s a great project. But in the new situation someone will have to pick up the tab. I can’t justify investing my time in it. It’s my scarcest resource, so it has to pay off when I do. So, feel free to hire me to continue working on these drivers. Or fork them and make your own. Both options are completely fine 😊
+
+
+So long, and thanks for all the fish.
+Bas - Laravel Freelancer NL
+---------
+
+
 [ArangoDB](https://www.arangodb.com) driver for [Laravel](https://laravel.com)  
 <sub>The unguent between the ArangoDB and Laravel</sub>
 </p>
