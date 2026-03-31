@@ -1,30 +1,35 @@
 Aranguent
----------
-<p align="center">
-
-![Github CI tests](https://github.com/LaravelFreelancerNL/laravel-arangodb/workflows/CI%20tests/badge.svg?branch=next)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/LaravelFreelancerNL/laravel-arangodb/badges/quality-score.png?b=next)](https://scrutinizer-ci.com/g/LaravelFreelancerNL/laravel-arangodb/?branch=next)
-[![Code Coverage](https://scrutinizer-ci.com/g/LaravelFreelancerNL/laravel-arangodb/badges/coverage.png?b=next)](https://scrutinizer-ci.com/g/LaravelFreelancerNL/laravel-arangodb/?b=next)
-<a href="https://packagist.org/packages/laravel-freelancer-nl/aranguent"><img src="https://poser.pugx.org/laravel-freelancer-nl/aranguent/v/unstable" alt="Latest Version"></a>
-<a href="https://packagist.org/packages/laravel-freelancer-nl/aranguent"><img src="https://poser.pugx.org/laravel-freelancer-nl/aranguent/downloads" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel-freelancer-nl/aranguent"><img src="https://poser.pugx.org/laravel-freelancer-nl/aranguent/license" alt="License"></a>
-
-
----------
-# I’m archiving my ArangoDB PHP/Laravel packages
-Sorry folks, due to last year’s license changes ArangoDB made for their database it doesn’t make sense anymore for me to use the product, let alone develop, maintain and improve these packages.
-In the current day and age that is easier and cheaper than ever, but the new license is a massive roadblock to my own admittedly small side-projects. 
-I love working with ArangoDB, it’s a great project. But in the new situation someone will have to pick up the tab. I can’t justify investing my time in it. It’s my scarcest resource, so it has to pay off when I do. So, feel free to hire me to continue working on these drivers. Or fork them and make your own. Both options are completely fine 😊
-
-
-So long, and thanks for all the fish.
-Bas - Laravel Freelancer NL
----------
-
 
 [ArangoDB](https://www.arangodb.com) driver for [Laravel](https://laravel.com)  
 <sub>The unguent between the ArangoDB and Laravel</sub>
-</p>
+</p
+    
+
+---------
+# I’m archiving my ArangoDB PHP/Laravel packages
+
+Due to the license changes ArangoDB introduced last year, it no longer makes sense for me to continue using the product or to invest further time in developing, maintaining, and improving these packages.
+
+While building and running side projects is in many ways easier and more affordable than ever, the new license creates a significant barrier for my own projects.
+
+I’ve genuinely enjoyed working with ArangoDB, and I still believe it is an excellent product. However, under the current licensing model, I can no longer justify the time required to support these packages. Time is my most limited resource, and I need to allocate it where it makes sense professionally.
+
+As a result, I am archiving the following packages:
+
+- The Laravel driver: https://github.com/LaravelFreelancerNL/laravel-arangodb
+- The PHP client: https://github.com/LaravelFreelancerNL/arangodb-php-client
+- The AQL query builder: https://github.com/LaravelFreelancerNL/fluentaql
+
+If there is interest in continuing their development, you are welcome to fork them and maintain your own versions. Alternatively, if you would like to sponsor or hire me to continue maintaining them, please feel free to get in touch.
+
+Thank you to everyone who has used, supported, or contributed to these packages.
+
+So long, and thanks for all the fish.
+
+Bas  
+Laravel Freelancer NL
+---------
+
 
 The goal is to create a drop-in ArangoDB replacement for Laravel's database, migrations and model handling.
 
